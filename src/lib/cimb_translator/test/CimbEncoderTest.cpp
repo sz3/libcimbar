@@ -1,6 +1,6 @@
 #include "unittest.h"
 
-#include "CimbWriter.h"
+#include "CimbEncoder.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -8,9 +8,9 @@
 #include <string>
 #include <vector>
 
-TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
+TEST_CASE( "CimbEncoderTest/testSimple", "[unit]" )
 {
-	CimbWriter cw(4, 0);
+	CimbEncoder cw(4, 0);
 	cv::Mat res = cw.encode(14);
 
 	// need a way to validate res's contents better -- imagehash again?
@@ -20,9 +20,9 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 	cv::imwrite("/tmp/test_cimb_tile.png", res);
 }
 
-TEST_CASE( "CimbWriterTest/testColor", "[unit]" )
+TEST_CASE( "CimbEncoderTest/testColor", "[unit]" )
 {
-	CimbWriter cw(4, 3);
+	CimbEncoder cw(4, 3);
 	cv::Mat res = cw.encode(55);
 
 	// need a way to validate res's contents better -- imagehash again?

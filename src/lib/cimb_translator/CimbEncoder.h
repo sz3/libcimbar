@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-class CimbWriter
+class CimbEncoder
 {
 public:
-	CimbWriter(unsigned symbol_bits=4, unsigned color_bits=2);
+	CimbEncoder(unsigned symbol_bits=4, unsigned color_bits=2);
 
 	cv::Mat load_tile(std::string tile_dir, unsigned index);
 	bool load_tiles(std::string tile_dir);
