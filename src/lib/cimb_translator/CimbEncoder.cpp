@@ -49,7 +49,11 @@ cv::Mat CimbEncoder::load_tile(string tile_dir, unsigned index)
 		{
 			Vec3b c = tile.at<Vec3b>(y,x);
 			if (c == background)
+			{
+				// LIGHT == noop
+				tile.at<Vec3b>(y,x) = {0, 0, 0};
 				continue;
+			}
 			tile.at<Vec3b>(y,x) = color3;
 		}
 	return tile;

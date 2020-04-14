@@ -25,7 +25,7 @@ CimbWriter::CimbWriter(unsigned size)
 
 void CimbWriter::initialize(unsigned size)
 {
-	_image = cv::Mat(size, size, CV_8UC3, cv::Scalar(0xFF, 0xFF, 0xFF));
+	_image = cv::Mat(size, size, CV_8UC3, cv::Scalar(0, 0, 0)); //LIGHT == 0xFF
 
 	cv::Mat anchor = cv::imread(getAnchorPath());
 	paste(_image, anchor, 0, 0);
