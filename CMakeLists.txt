@@ -16,9 +16,12 @@ endif()
 set (PROJECTS
    #src/exe/cimbar
 
-   #src/lib/encoder
+   src/lib/bit_file
+   src/lib/cimb_translator
+   src/lib/encoder
    src/lib/extractor
-   #src/lib/util
+   src/lib/serialize
+   src/lib/util
 )
 
 include_directories(
