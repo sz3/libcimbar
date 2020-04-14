@@ -3,6 +3,8 @@
 #include "encoder/Encoder.h"
 #include "util/File.h"
 
+#include "mock/MockCimbWriter.h"
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -14,6 +16,7 @@ TEST_CASE( "EncoderTest/testDefault", "[unit]" )
 	File f("/tmp/test.txt");
 	f.write(input.data(), input.size());
 
-	Encoder enc(4, 2);
+	MockCimbWriter cw;
+	Encoder enc(cw, 4, 2);
 	enc.encode("/tmp/test.txt", "/tmp/doesntmatteryet.txt");
 }

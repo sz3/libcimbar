@@ -1,13 +1,15 @@
 #include "Encoder.h"
 
 #include "bit_file/bitreader.h"
+#include "cimb_translator/ICimbWriter.h"
 #include "util/File.h"
 
 #include <string>
 using std::string;
 
-Encoder::Encoder(unsigned bits_per_symbol, unsigned bits_per_color)
-    : _bitsPerSymbol(bits_per_symbol)
+Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color)
+    : _writer(writer)
+    , _bitsPerSymbol(bits_per_symbol)
     , _bitsPerColor(bits_per_color)
 {
 }
@@ -40,6 +42,7 @@ unsigned Encoder::encode(string filename, string output)
 		{
 			unsigned bits = br.read(bits_per_op);
 			std::cout << "read " << bits << std::endl;
+			_writer.write(bits, bits_per_op);
 		}
 	}
 }

@@ -8,37 +8,51 @@ public:
 	File(std::string filename, bool write=false)
 	{
 		_fp = fopen(filename.c_str(), write? "wb" : "rb");
-		_good = true;
 	}
 
 	unsigned read(char* buffer, unsigned bytes)
 	{
+		if (!good())
+			return 0;
+
 		unsigned res = fread(buffer, sizeof(char), bytes, _fp);
 		if (res != bytes)
-			_good = false;
+			close();
 		return res;
 	}
 
 	unsigned write(char* buffer, unsigned bytes)
 	{
+		if (!good())
+			return 0;
+
 		unsigned res = fwrite(buffer, sizeof(char), bytes, _fp);
 		if (res != bytes)
-			_good = false;
+			close();
 		return res;
 	}
 
 	~File()
 	{
+		close();
+	}
+
+	bool close()
+	{
 		if (_fp != NULL)
+		{
 			fclose(_fp);
+			_fp = NULL;
+			return true;
+		}
+		return false;
 	}
 
 	bool good() const
 	{
-		return _good;
+		return _fp != NULL;
 	}
 
 protected:
 	FILE* _fp;
-	bool _good;
 };
