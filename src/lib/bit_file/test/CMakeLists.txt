@@ -5,6 +5,7 @@ project(bit_file_test)
 set (SOURCES
 	test.cpp
 	bitreaderTest.cpp
+	bitwriterTest.cpp
 )
 
 include_directories(
