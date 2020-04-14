@@ -8,7 +8,7 @@
 class CimbWriter
 {
 public:
-	CimbWriter(unsigned tile_bits=4);
+	CimbWriter(unsigned symbol_bits=4, unsigned color_bits=2);
 
 	cv::Mat load_tile(std::string tile_dir, unsigned index);
 	bool load_tiles(std::string tile_dir);
@@ -18,4 +18,5 @@ public:
 protected:
 	std::vector<cv::Mat> _tiles;
 	unsigned _numSymbols;
+	unsigned _numColors;
 };
