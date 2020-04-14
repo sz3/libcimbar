@@ -42,7 +42,7 @@ unsigned Encoder::encode(string filename, string output)
 		{
 			unsigned bits = br.read(bits_per_op);
 			std::cout << "read " << bits << std::endl;
-			_writer.write(bits, bits_per_op);
+			_writer.write(bits);
 		}
 	}
 }

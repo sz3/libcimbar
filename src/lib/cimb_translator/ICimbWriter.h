@@ -5,5 +5,5 @@ class ICimbWriter
 public:
 	virtual ~ICimbWriter() {}
 
-	virtual bool write(unsigned bits, unsigned bits_per_op) = 0;
+	virtual bool write(unsigned bits) = 0;
 };

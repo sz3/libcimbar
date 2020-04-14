@@ -4,7 +4,9 @@ project(cimb_translator_test)
 
 set (SOURCES
 	test.cpp
+	CellPositionTest.cpp
 	CimbEncoderTest.cpp
+	CimbWriterTest.cpp
 )
 
 include_directories(

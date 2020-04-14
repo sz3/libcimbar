@@ -11,7 +11,7 @@ class MockCimbWriter : public ICimbWriter
 public:
 	MockCimbWriter() {}
 
-	bool write(unsigned bits, unsigned bits_per_op)
+	bool write(unsigned bits)
 	{
 		return true;
 	}

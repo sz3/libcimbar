@@ -10,5 +10,13 @@
 
 TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 {
-	assertEquals(false, true);
+	CimbWriter cw;
+
+	while (1)
+	{
+		if (!cw.write(0))
+			break;
+	}
+
+	cw.save("/tmp/howwedoin.png");
 }
