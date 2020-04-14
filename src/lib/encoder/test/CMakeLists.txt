@@ -5,6 +5,7 @@ project(encoder_test)
 set (SOURCES
 	test.cpp
 	EncoderTest.cpp
+	EncoderIntegrationTest.cpp
 )
 
 include_directories(
@@ -22,5 +23,12 @@ add_test(encoder_test encoder_test)
 
 target_link_libraries(encoder_test
 	encoder
+
+	cimb_translator
+
+	opencv_core
+	opencv_imgcodecs
+	opencv_imgproc
+	opencv_photo
 )
 

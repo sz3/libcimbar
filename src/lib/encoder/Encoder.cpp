@@ -45,4 +45,5 @@ unsigned Encoder::encode(string filename, string output)
 			_writer.write(bits);
 		}
 	}
+	_writer.save(output);
 }

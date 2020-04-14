@@ -18,5 +18,5 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 			break;
 	}
 
-	cw.save("/tmp/howwedoin.png");
+	//cw.save("/tmp/howwedoin.png");
 }
