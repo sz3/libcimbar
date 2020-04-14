@@ -8,12 +8,12 @@ Deskewer::Deskewer()
 {
 }
 
-bool Deskewer::deskew(std::string img, const Corners& corners)
+cv::Mat Deskewer::deskew(std::string img, const Corners& corners)
 {
 	return deskew(cv::imread(img), corners);
 }
 
-bool Deskewer::deskew(cv::Mat img, const Corners& corners)
+cv::Mat Deskewer::deskew(cv::Mat img, const Corners& corners)
 {
 	// getPerspectiveTransform
 	// warpPerspective
@@ -28,6 +28,10 @@ bool Deskewer::deskew(cv::Mat img, const Corners& corners)
 	cv::Mat output(_totalSize, _totalSize, img.type());
 
 	cv::warpPerspective(img, output, transform, output.size(), cv::INTER_LINEAR);
-	std::cout << output.size() << std::endl;
-	cv::imwrite("/tmp/rotated.jpg", output);
+	return output;
+}
+
+bool Deskewer::save(const cv::Mat& img, std::string path)
+{
+	cv::imwrite(path, img);
 }

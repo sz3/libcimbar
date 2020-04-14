@@ -11,8 +11,9 @@ class Deskewer
 public:
 	Deskewer();
 
-	bool deskew(std::string img, const Corners& corners);
-	bool deskew(cv::Mat img, const Corners& corners);
+	cv::Mat deskew(std::string img, const Corners& corners);
+	cv::Mat deskew(cv::Mat img, const Corners& corners);
+	bool save(const cv::Mat& img, std::string path);
 
 protected:
 	int _totalSize = 1024;
