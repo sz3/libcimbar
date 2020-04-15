@@ -2,6 +2,7 @@
 
 #include "average_hash.h"
 
+#include "cimb_translator/CimbCommon.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -11,16 +12,17 @@
 
 using std::string;
 
-namespace {
-	string getTilePath(unsigned symbol_bits, unsigned index)
-	{
-		return fmt::format("{}/bitmap/{}/{:02x}.png", LIBCIMBAR_PROJECT_ROOT, symbol_bits, index);
-	}
+TEST_CASE( "averageHashTest/testLight", "[unit]" )
+{
+	string dir = CimbCommon::getTileDir(4);
+	cv::Mat tile = CimbCommon::getTile(dir, 0, false);
+	assertEquals(0xfefcf8f0e0c08000, image_hash::average_hash(tile));
 }
 
-TEST_CASE( "averageHashTest/testSimple", "[unit]" )
+TEST_CASE( "averageHashTest/testDark", "[unit]" )
 {
-	cv::Mat tile = cv::imread(getTilePath(4, 0));
-	assertEquals(0xfefcf8f0e0c08000, image_hash::average_hash(tile));
+	string dir = CimbCommon::getTileDir(4);
+	cv::Mat tile = CimbCommon::getTile(dir, 0, true);
+	assertEquals(0x103070f1f3f7fff, image_hash::average_hash(tile));
 }
 

@@ -1,6 +1,6 @@
 #include "Decoder.h"
 
-#include "bit_file/bitreader.h"
+#include "bit_file/bitwriter.h"
 #include "util/File.h"
 
 #include <string>
@@ -29,11 +29,11 @@ unsigned Decoder::decode(string filename)
 	unsigned bits_per_op = 6;
 
 	File f(filename);
+	bitwriter bw;
 
-	char buffer[8192];
+	/*char buffer[8192];
 	while (f.good())
 	{
-		bitreader br(buffer, 8192);
-		unsigned bits = br.read(bits_per_op);
-	}
+		unsigned bits = bw.read();
+	}*/
 }

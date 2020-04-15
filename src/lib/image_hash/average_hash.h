@@ -37,4 +37,9 @@ namespace image_hash
 		}
 		return res.to_ullong();
 	}
+
+	uint64_t fuzzy_hash(const cv::Mat& img)
+	{
+		return 0;
+	}
 }
