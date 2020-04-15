@@ -7,6 +7,7 @@ set (SOURCES
 	CellPositionTest.cpp
 	CimbDecoderTest.cpp
 	CimbEncoderTest.cpp
+	CimbReaderTest.cpp
 	CimbWriterTest.cpp
 )
 

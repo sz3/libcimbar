@@ -6,6 +6,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <vector>
 
 namespace image_hash
 {
@@ -38,8 +39,9 @@ namespace image_hash
 		return res.to_ullong();
 	}
 
-	uint64_t fuzzy_hash(const cv::Mat& img)
+	std::vector<uint64_t> fuzzy_hash(const cv::Mat& img)
 	{
+		// return 9 uint64_ts, each representing an 8x8 section of the 9x9 img
 		return 0;
 	}
 }

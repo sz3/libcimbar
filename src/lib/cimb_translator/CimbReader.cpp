@@ -21,7 +21,7 @@ unsigned CimbReader::read()
 		return 0;
 
 	CellPosition::coordinate xy = _position.next();
-	cv::Rect crop(xy.first, xy.second, xy.first + cellSize, xy.second + cellSize);
+	cv::Rect crop(xy.first, xy.second, cellSize, cellSize);
 	cv::Mat cell = _image(crop);
 	return _decoder.decode(cell);
 }
