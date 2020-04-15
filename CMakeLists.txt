@@ -20,6 +20,7 @@ set (PROJECTS
    src/lib/cimb_translator
    src/lib/encoder
    src/lib/extractor
+   src/lib/image_hash
    src/lib/serialize
    src/lib/util
 )
