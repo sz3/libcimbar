@@ -6,10 +6,11 @@
 using std::string;
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
-    : _numSymbols(1 << symbol_bits)
+    : _symbolBits(symbol_bits)
+    , _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
 {
-	load_tiles(CimbCommon::getTileDir(symbol_bits));
+	load_tiles(CimbCommon::getTileDir(_symbolBits));
 }
 
 uint64_t CimbDecoder::get_tile_hash(string tile_dir, unsigned symbol)
@@ -44,12 +45,22 @@ unsigned CimbDecoder::get_best_symbol(uint64_t hash)
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell)
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell)
 {
 	uint64_t hash = image_hash::average_hash(cell);
-	unsigned bits = get_best_symbol(hash);
+	return get_best_symbol(hash);
+}
 
-	// add color info
+unsigned CimbDecoder::decode_color(const cv::Mat& cell)
+{
+	if (_numColors <= 1)
+		return 0;
 
+}
+
+unsigned CimbDecoder::decode(const cv::Mat& cell)
+{
+	unsigned bits = decode_symbol(cell);
+	//bits |= decode_color(cell) << _symbolBits;
 	return bits;
 }

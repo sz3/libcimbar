@@ -30,10 +30,7 @@ TEST_CASE( "CimbReaderTest/testSimple", "[unit]" )
 	unsigned bits2 = cr.read();
 	assertEquals(2, bits2);
 
-	while (1)
-	{
-		if (!cr.done())
-			cr.read();
-	}
+	while (!cr.done())
+		cr.read();
 	assertTrue(cr.done());
 }

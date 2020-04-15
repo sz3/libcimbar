@@ -42,6 +42,7 @@ namespace image_hash
 	std::vector<uint64_t> fuzzy_hash(const cv::Mat& img)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 9x9 img
-		return 0;
+		std::vector<uint64_t> hashes;
+		return hashes;
 	}
 }

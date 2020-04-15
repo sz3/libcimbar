@@ -12,6 +12,9 @@ public:
 	unsigned decode(const cv::Mat& cell);
 
 	unsigned get_best_symbol(uint64_t hash);
+	unsigned decode_symbol(const cv::Mat& cell);
+
+	unsigned decode_color(const cv::Mat& cell);
 
 protected:
 	uint64_t get_tile_hash(std::string tile_dir, unsigned symbol);
@@ -19,6 +22,7 @@ protected:
 
 protected:
 	std::vector<uint64_t> _tileHashes;
+	unsigned _symbolBits;
 	unsigned _numSymbols;
 	unsigned _numColors;
 };
