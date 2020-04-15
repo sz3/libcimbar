@@ -32,7 +32,6 @@ bool CimbEncoder::load_tiles(std::string tile_dir)
 
 const cv::Mat& CimbEncoder::encode(unsigned bits) const
 {
-	unsigned symbol = bits % _numSymbols;
-	unsigned color = bits / _numSymbols;
-	return _tiles[symbol];
+	bits = bits % _tiles.size();
+	return _tiles[bits];
 }
