@@ -28,7 +28,13 @@ TEST_CASE( "CimbReaderTest/testSimple", "[unit]" )
 	assertEquals(8, bits1);
 
 	unsigned bits2 = cr.read();
-	assertEquals(2, bits2);
+	assertEquals(50, bits2);
+
+	unsigned bits3 = cr.read();
+	assertEquals(4, bits3);
+
+	unsigned bits4 = cr.read();
+	assertEquals(47, bits4);
 
 	while (!cr.done())
 		cr.read();
