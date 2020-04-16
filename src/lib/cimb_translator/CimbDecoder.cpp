@@ -32,12 +32,12 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
 		_backgroundColor = (0, 0, 0);
 	else
 		_backgroundColor = (0xFF, 0xFF, 0xFF);
-	load_tiles(CimbCommon::getTileDir(_symbolBits));
+	load_tiles(cimbar::getTileDir(_symbolBits));
 }
 
 uint64_t CimbDecoder::get_tile_hash(string tile_dir, unsigned symbol)
 {
-	cv::Mat tile = CimbCommon::getTile(tile_dir, symbol);
+	cv::Mat tile = cimbar::getTile(tile_dir, symbol);
 	return image_hash::average_hash(tile);
 }
 
@@ -105,7 +105,7 @@ int CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char 
 
 	for (int i = 0; i < _numColors; ++i)
 	{
-		cv::Vec3b c = CimbCommon::getColor(i);
+		cv::Vec3b c = cimbar::getColor(i);
 		unsigned distance = check_color_distance(c, r, g, b);
 		if (distance < best_distance)
 		{

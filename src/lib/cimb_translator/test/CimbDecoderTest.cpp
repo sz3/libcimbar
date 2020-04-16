@@ -22,10 +22,10 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 {
 	CimbDecoder cd(4, 0);
 
-	string tile_dir = CimbCommon::getTileDir(4);
+	string tile_dir = cimbar::getTileDir(4);
 	for (int i = 0; i < 16; ++i)
 	{
-		cv::Mat tile = CimbCommon::getTile(tile_dir, i);
+		cv::Mat tile = cimbar::getTile(tile_dir, i);
 		unsigned res = cd.decode(tile);
 		assertEquals(i, res);
 	}
@@ -51,8 +51,8 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string tile_dir = CimbCommon::getTileDir(4);
-	cv::Mat tile = CimbCommon::getTile(tile_dir, 2, true, 2);
+	string tile_dir = cimbar::getTileDir(4);
+	cv::Mat tile = cimbar::getTile(tile_dir, 2, true, 2);
 	unsigned color = cd.decode_color(tile);
 	assertEquals(2, color);
 	unsigned res = cd.decode(tile);
@@ -63,11 +63,11 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string tile_dir = CimbCommon::getTileDir(4);
+	string tile_dir = cimbar::getTileDir(4);
 	for (int c = 0; c < 4; ++c)  // 2 color bits == 4 colors
 		for (int i = 0; i < 16; ++i)
 		{
-			cv::Mat tile = CimbCommon::getTile(tile_dir, i, true, c);
+			cv::Mat tile = cimbar::getTile(tile_dir, i, true, c);
 			DYNAMIC_SECTION( "testColor " << c << ":" << i )
 			{
 				unsigned color = cd.decode_color(tile);
