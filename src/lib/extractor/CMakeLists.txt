@@ -4,6 +4,10 @@ set(SOURCES
 	Corners.h
 	Deskewer.cpp
 	Deskewer.h
+	ScanState.cpp
+	ScanState.h
+	Scanner.cpp
+	Scanner.h
 )
 
 add_library(extractor STATIC ${SOURCES})

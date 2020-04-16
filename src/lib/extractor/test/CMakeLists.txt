@@ -6,6 +6,7 @@ set (SOURCES
 	test.cpp
 	CornersTest.cpp
 	DeskewerTest.cpp
+	ScanStateTest.cpp
 )
 
 include_directories(
