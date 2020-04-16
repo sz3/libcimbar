@@ -41,7 +41,6 @@ unsigned Encoder::encode(string filename, string output)
 		while (!br.empty())
 		{
 			unsigned bits = br.read(bits_per_op);
-			std::cout << "read " << bits << std::endl;
 			_writer.write(bits);
 		}
 	}

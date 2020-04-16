@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CellDrift.h"
 #include "CellPosition.h"
 #include "CimbDecoder.h"
 
@@ -18,5 +19,6 @@ public:
 protected:
 	cv::Mat _image;
 	CellPosition _position;
+	CellDrift<> _drift;
 	CimbDecoder _decoder;
 };

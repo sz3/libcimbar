@@ -4,7 +4,22 @@
 #include "image_hash/average_hash.h"
 
 #include <algorithm>
+#include <iostream>
 using std::string;
+
+namespace {
+	// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
+	unsigned countBitsSet(uint64_t v)
+	{
+		unsigned count = 0; // c accumulates the total bits set in v
+		while (v)
+		{
+			++count;
+			v &= (v - 1); // clear the least significant bit set
+		}
+		return count;
+	}
+}
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
@@ -34,28 +49,28 @@ bool CimbDecoder::load_tiles(std::string tile_dir)
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(uint64_t hash)
+unsigned CimbDecoder::get_best_symbol(uint64_t hash, unsigned& best_distance)
 {
-	unsigned min_distance = 1000;
+	best_distance = 1000;
 	unsigned best_fit = 0;
 	for (unsigned i = 0; i < _tileHashes.size(); ++i)
 	{
-		unsigned distance = hash xor _tileHashes[i];
-		if (distance < min_distance)
+		unsigned distance = countBitsSet(hash xor _tileHashes[i]);
+		if (distance < best_distance)
 		{
-			min_distance = distance;
+			best_distance = distance;
 			best_fit = i;
-			if (min_distance == 0)
+			if (best_distance == 0)
 				break;
 		}
 	}
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell)
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& distance)
 {
 	uint64_t hash = image_hash::average_hash(cell);
-	return get_best_symbol(hash);
+	return get_best_symbol(hash, distance);
 }
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
@@ -133,9 +148,16 @@ unsigned CimbDecoder::decode_color(const cv::Mat& cell)
 	return *std::max_element(counts.begin(), counts.end());
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell)
+unsigned CimbDecoder::decode(const cv::Mat& cell, unsigned& distance) // drift_offset ?
 {
-	unsigned bits = decode_symbol(cell);
+	unsigned bits = decode_symbol(cell, distance);
 	bits |= decode_color(cell) << _symbolBits;
 	return bits;
 }
+
+unsigned CimbDecoder::decode(const cv::Mat& cell)
+{
+	unsigned distance;
+	return decode(cell, distance);
+}
+

@@ -6,6 +6,7 @@ const unsigned cellSize = 8; // goes into settings?
 
 CimbReader::CimbReader(std::string filename)
     : _position(9, 112, 8)  // standard complaints about how this should be a config apply
+    , _drift()
     , _decoder(4, 2)
 {
 	load(filename);
@@ -22,14 +23,33 @@ unsigned CimbReader::read()
 	if (_position.done())
 		return 0;
 
-	CellDrift drift;
 	CellPosition::coordinate xy = _position.next();
-	xy.first += drift.x();
-	xy.second += drift.y();
+	xy.first += _drift.x();
+	xy.second += _drift.y();
 
-	cv::Rect crop(xy.first, xy.second, cellSize, cellSize);
-	cv::Mat cell = _image(crop);
-	return _decoder.decode(cell);
+	unsigned best_bits = 0;
+	unsigned best_distance = 10000;
+	std::pair<int, int> best_drift({0, 0});
+	for (std::pair<int, int> trial : _drift.driftPairs())
+	{
+		int x = xy.first + trial.first;
+		int y = xy.second + trial.second;
+		cv::Rect crop(x, y, cellSize, cellSize);
+		cv::Mat cell = _image(crop);
+
+		unsigned distance;
+		unsigned bits = _decoder.decode(cell, distance);
+		if (distance < best_distance)
+		{
+			best_bits = bits;
+			best_distance = distance;
+			best_drift = trial;
+			if (best_distance < 8)
+				break;
+		}
+	}
+	_drift.updateDrift(best_drift.first, best_drift.second);
+	return best_bits;
 }
 
 bool CimbReader::done() const
