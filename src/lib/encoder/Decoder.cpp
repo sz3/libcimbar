@@ -1,6 +1,7 @@
 #include "Decoder.h"
 
 #include "bit_file/bitwriter.h"
+#include "cimb_translator/CimbReader.h"
 #include "util/File.h"
 
 #include <string>
@@ -24,16 +25,23 @@ Decoder::Decoder()
  * */
 
 
-unsigned Decoder::decode(string filename)
+unsigned Decoder::decode(string filename, string output)
 {
 	unsigned bits_per_op = 6;
-
-	File f(filename);
+	CimbReader reader(filename);
 	bitwriter bw;
+	File f(output, true);
 
-	/*char buffer[8192];
-	while (f.good())
+	unsigned bytesWritten = 0;
+	while (!reader.done())
 	{
-		unsigned bits = bw.read();
-	}*/
+		unsigned bits = reader.read();
+		bw.write(bits, bits_per_op);
+		if (bw.shouldFlush())
+			bytesWritten += bw.flush(f);
+	}
+
+	// flush once more
+	bytesWritten += bw.flush(f);
+	return bytesWritten;
 }

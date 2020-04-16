@@ -4,6 +4,7 @@ project(encoder_test)
 
 set (SOURCES
 	test.cpp
+	DecoderTest.cpp
 	EncoderTest.cpp
 	EncoderIntegrationTest.cpp
 )

@@ -10,24 +10,24 @@ public:
 		_fp = fopen(filename.c_str(), write? "wb" : "rb");
 	}
 
-	unsigned read(char* buffer, unsigned bytes)
+	unsigned read(char* buffer, unsigned length)
 	{
 		if (!good())
 			return 0;
 
-		unsigned res = fread(buffer, sizeof(char), bytes, _fp);
-		if (res != bytes)
+		unsigned res = fread(buffer, sizeof(char), length, _fp);
+		if (res != length)
 			close();
 		return res;
 	}
 
-	unsigned write(char* buffer, unsigned bytes)
+	unsigned write(const char* buffer, unsigned length)
 	{
 		if (!good())
 			return 0;
 
-		unsigned res = fwrite(buffer, sizeof(char), bytes, _fp);
-		if (res != bytes)
+		unsigned res = fwrite(buffer, sizeof(char), length, _fp);
+		if (res != length)
 			close();
 		return res;
 	}

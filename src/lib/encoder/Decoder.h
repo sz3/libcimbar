@@ -5,9 +5,9 @@
 class Decoder
 {
 public:
-	Decoder(); // pass in handler interface
+	Decoder();
 
-	unsigned decode(std::string filename);
+	unsigned decode(std::string filename, std::string output);
 
 protected:
 };

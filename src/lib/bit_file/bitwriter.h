@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/File.h"
 #include <array>
 #include <iostream>
 
@@ -19,7 +20,7 @@ public:
 		if (shouldFlush())
 			return false;
 
-		unsigned char next = bit << (7 - _currentBit);
+		char next = bit << (7 - _currentBit);
 		_buffer[_currentByte] = _buffer[_currentByte] | next;
 		if (++_currentBit > 7)
 		{
@@ -40,6 +41,13 @@ public:
 		return true;
 	}
 
+	unsigned flush(File& f)
+	{
+		unsigned bytesWritten = f.write(buffer().data(), _currentByte);
+		clear();
+		return bytesWritten;
+	}
+
 	bool shouldFlush() const
 	{
 		return _currentByte == _capacity;
@@ -52,13 +60,13 @@ public:
 		_currentByte = 0;
 	}
 
-	const std::array<unsigned char, _capacity>& buffer() const
+	const std::array<char, _capacity>& buffer() const
 	{
 		return _buffer;
 	}
 
 protected:
-	std::array<unsigned char, _capacity> _buffer; // maybe don't use std::array?
+	std::array<char, _capacity> _buffer; // maybe don't use std::array?
 	unsigned _currentBit;
 	unsigned _currentByte;
 };
