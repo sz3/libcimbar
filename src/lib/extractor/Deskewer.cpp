@@ -4,7 +4,9 @@
 using cv::Point2f;
 using std::vector;
 
-Deskewer::Deskewer()
+Deskewer::Deskewer(unsigned total_size, unsigned anchor_size)
+    : _totalSize(total_size)
+    , _anchorSize(anchor_size)
 {
 }
 
@@ -13,11 +15,8 @@ cv::Mat Deskewer::deskew(std::string img, const Corners& corners)
 	return deskew(cv::imread(img), corners);
 }
 
-cv::Mat Deskewer::deskew(cv::Mat img, const Corners& corners)
+cv::Mat Deskewer::deskew(const cv::Mat& img, const Corners& corners)
 {
-	// getPerspectiveTransform
-	// warpPerspective
-
 	vector<Point2f> outputPoints;
 	outputPoints.push_back(Point2f(_anchorSize, _anchorSize));
 	outputPoints.push_back(Point2f(_totalSize - _anchorSize, _anchorSize));

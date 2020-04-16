@@ -9,13 +9,13 @@
 class Deskewer
 {
 public:
-	Deskewer();
+	Deskewer(unsigned total_size=1024, unsigned anchor_size=30);
 
 	cv::Mat deskew(std::string img, const Corners& corners);
-	cv::Mat deskew(cv::Mat img, const Corners& corners);
+	cv::Mat deskew(const cv::Mat& img, const Corners& corners);
 	bool save(const cv::Mat& img, std::string path);
 
 protected:
-	int _totalSize = 1024;
-	int _anchorSize = 30;
+	int _totalSize;
+	int _anchorSize;
 };
