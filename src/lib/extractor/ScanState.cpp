@@ -1,5 +1,7 @@
 #include "ScanState.h"
 
+#include "serialize/str_join.h"
+
 ScanState::ScanState() {}
 
 void ScanState::pop_state()
@@ -63,4 +65,7 @@ int ScanState::process(bool active, float leniency)
 	return NOOP;
 }
 
-
+std::string ScanState::str() const
+{
+	return turbo::str::join(_tally);
+}

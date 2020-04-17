@@ -1,0 +1,191 @@
+#include "Scanner.h"
+
+#include "ScanState.h"
+#include "serialize/format.h"
+
+Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
+    : _dark(dark)
+    , _skip(skip)
+{
+	_img = preprocess_image(img);
+}
+
+cv::Mat Scanner::preprocess_image(const cv::Mat& img)
+{
+	unsigned blurX = 17; // 2^N + 1 ... calculate from img?
+
+	cv::Mat temp, out;
+	cv::cvtColor(img, temp, CV_BGR2GRAY);
+	cv::GaussianBlur(temp, out, cv::Size(blurX, blurX), 0);
+
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
+	clahe->apply(out, temp);
+
+	cv::threshold(temp, out, 127, 255, cv::THRESH_BINARY);
+	return out;
+}
+
+bool Scanner::test_pixel(int x, int y) const
+{
+	uchar pixel = _img.at<uchar>(y, x);
+	if (_dark)
+		return pixel > 127;
+	else
+		return pixel < 127;
+}
+
+std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& candidates) const
+{
+	std::vector<Anchor> merged;
+	for (const Anchor& c : candidates)
+	{
+		bool foundMerge = false;
+		for (Anchor& m : merged)
+		{
+			if (::abs(m.xavg() - c.xavg()) < 50 and ::abs(m.yavg() - c.yavg()) < 50)
+			{
+				foundMerge = true;
+				m.merge(c);
+				break;
+			}
+		}
+		if (!foundMerge)
+			merged.push_back(c);
+	}
+	return merged;
+}
+
+void Scanner::scan_horizontal(std::vector<Anchor>& points, int y) const
+{
+	ScanState state;
+	for (int x = 0; x < _img.cols; ++x)
+	{
+		bool active = test_pixel(x, y);
+		int res = state.process(active);
+		if (res > 0)
+			points.push_back(Anchor(x-res, x-1, y, y));
+	}
+
+	// if the pattern is at the edge of the image
+	int res = state.process(false);
+	if (res > 0)
+	{
+		int x = _img.cols;
+		points.push_back(Anchor(x-res, x-1, y, y));
+	}
+}
+
+void Scanner::scan_vertical(std::vector<Anchor>& points, int x, int ystart, int yend) const
+{
+	if (ystart < 0)
+		ystart = 0;
+	if (yend < 0 or yend > _img.rows)
+		yend = _img.rows;
+
+	ScanState state;
+	for (int y = ystart; y < yend; ++y)
+	{
+		bool active = test_pixel(x, y);
+		int res = state.process(active);
+		if (res > 0)
+			points.push_back(Anchor(x, x, y-res, y-1));
+	}
+
+	// if the pattern is at the edge of the image
+	int res = state.process(false);
+	if (res > 0)
+	{
+		int y = yend;
+		points.push_back(Anchor(x, x, y-res, y-1));
+	}
+}
+
+void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const
+{
+	xend = std::min(xend, _img.cols);
+	yend = std::min(yend, _img.rows);
+
+	// if we're up against the top/left bounds, roll the scan forward to where we're inside the bounds
+	if (xstart < 0)
+	{
+		int offset = -xstart;
+		xstart += offset;
+		ystart += offset;
+	}
+	if (ystart < 0)
+	{
+		int offset = -ystart;
+		xstart += offset;
+		ystart += offset;
+	}
+
+	// do the scan
+	ScanState state;
+	for (int x = xstart, y = ystart; x < xend and y < yend; ++x, ++y)
+	{
+		bool active = test_pixel(x, y);
+		int res = state.process(active);
+		if (res > 0)
+			points.push_back(Anchor(x-res, x, y-res, y));
+	}
+
+	// if the pattern is at the edge of the image
+	int res = state.process(false);
+	if (res > 0)
+	{
+		int x = xend;
+		int y = yend;
+		points.push_back(Anchor(x-res, x, y-res, y));
+	}
+}
+
+std::vector<Anchor> Scanner::t1_scan_rows() const
+{
+	std::vector<Anchor> points;
+	for (int y = _skip; y < _img.rows; y += _skip)
+		scan_horizontal(points, y);
+
+	return deduplicate_candidates(points);
+}
+
+std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidates) const
+{
+	std::vector<Anchor> points;
+	for (const Anchor& p : candidates)
+	{
+		int ystart = p.y() - (3 * p.xrange());
+		int yend = p.ymax() + (3 * p.xrange());
+		scan_vertical(points, p.xavg(), ystart, yend);
+	}
+
+	return deduplicate_candidates(points);
+}
+
+std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candidates) const
+{
+	// confirm
+	std::vector<Anchor> points;
+	for (const Anchor& p : candidates)
+	{
+		int xstart = p.x() - (2 * p.yrange());
+		int xend = p.xmax() + (2 * p.yrange());
+		int ystart = p.y() - p.yrange();
+		int yend = p.ymax() + p.yrange();
+		scan_diagonal(points, xstart, xend, ystart, yend);
+	}
+	return deduplicate_candidates(points);
+}
+
+std::vector<Anchor> Scanner::scan()
+{
+	// scan horizontal
+	std::vector<Anchor> candidates = t1_scan_rows();
+
+	// for all horizontal results, scan vertical
+	candidates = t2_scan_columns(candidates);
+
+	// for all horizontal+vertical results, scan diagonal
+	candidates = t3_scan_diagonal(candidates);
+
+	return candidates;
+}

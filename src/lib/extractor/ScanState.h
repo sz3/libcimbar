@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <string>
 
 class ScanState
 {
@@ -11,6 +12,8 @@ public:
 	ScanState();
 
 	int process(bool active, float leniency=3.0);
+
+	std::string str() const;
 
 protected:
 	void pop_state();
