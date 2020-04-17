@@ -1,15 +1,16 @@
 #pragma once
 
 #include <iostream>
+#include <utility>
 
 class Anchor
 {
 public:
 	Anchor(int x, int xmax, int y, int ymax)
-		: _x(x)
-		, _xmax(xmax)
-		, _y(y)
-		, _ymax(ymax)
+	    : _x(x)
+	    , _xmax(xmax)
+	    , _y(y)
+	    , _ymax(ymax)
 	{}
 
 	void merge(const Anchor& other)
@@ -18,6 +19,11 @@ public:
 		_xmax = std::max(_xmax, other.xmax());
 		_y = std::min(_y, other.y());
 		_ymax = std::max(_ymax, other.ymax());
+	}
+
+	std::pair<int, int> center() const
+	{
+		return {xavg(), yavg()};
 	}
 
 	int x() const

@@ -20,6 +20,7 @@ public: // other interesting methods
 	std::vector<Anchor> t1_scan_rows() const;
 	std::vector<Anchor> t2_scan_columns(const std::vector<Anchor>& candidates) const;
 	std::vector<Anchor> t3_scan_diagonal(const std::vector<Anchor>& candidates) const;
+	bool sort_top_to_bottom(std::vector<Anchor>& points);
 
 protected: // internal member functions
 	bool test_pixel(int x, int y) const;

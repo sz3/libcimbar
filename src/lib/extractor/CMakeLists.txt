@@ -5,6 +5,8 @@ set(SOURCES
 	Corners.h
 	Deskewer.cpp
 	Deskewer.h
+	Extractor.cpp
+	Extractor.h
 	ScanState.cpp
 	ScanState.h
 	Scanner.cpp

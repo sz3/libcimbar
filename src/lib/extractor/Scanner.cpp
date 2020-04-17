@@ -176,6 +176,22 @@ std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candida
 	return deduplicate_candidates(points);
 }
 
+bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
+{
+	std::sort(candidates.begin(), candidates.end());
+	if (candidates.size() < 4)
+		return false;
+
+	const Anchor& topLeft = candidates.front();
+	std::vector<Anchor>::iterator p1_it = ++candidates.begin();
+	std::vector<Anchor>::iterator p2_it = ++std::vector<Anchor>::iterator(p1_it);
+	int p1_xoff = ::abs(p1_it->xavg() - topLeft.xavg());
+	int p2_xoff = ::abs(p2_it->xavg() - topLeft.xavg());
+	if (p2_xoff > p1_xoff)
+		std::iter_swap(p1_it, p2_it);
+	return true;
+}
+
 std::vector<Anchor> Scanner::scan()
 {
 	// scan horizontal
@@ -187,5 +203,6 @@ std::vector<Anchor> Scanner::scan()
 	// for all horizontal+vertical results, scan diagonal
 	candidates = t3_scan_diagonal(candidates);
 
+	sort_top_to_bottom(candidates);
 	return candidates;
 }

@@ -7,11 +7,11 @@ using point = std::tuple<int, int>;
 class Corners
 {
 public:
-	Corners(point top_left, point top_right, point bottom_right, point bottom_left)
+	Corners(point top_left, point top_right, point bottom_left, point bottom_right)
 	    : _top_left(top_left)
 	    , _top_right(top_right)
-	    , _bottom_right(bottom_right)
 	    , _bottom_left(bottom_left)
+	    , _bottom_right(bottom_right)
 	{
 	}
 
