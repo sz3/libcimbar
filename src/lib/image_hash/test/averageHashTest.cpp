@@ -26,3 +26,12 @@ TEST_CASE( "averageHashTest/testDark", "[unit]" )
 	assertEquals(0x103070f1f3f7fff, image_hash::average_hash(tile));
 }
 
+TEST_CASE( "averageHashTest/testResize", "[unit]" )
+{
+	string dir = cimbar::getTileDir(4);
+	cv::Mat tile = cimbar::getTile(dir, 0, true);
+
+	cv::Mat big;
+	cv::resize(tile, big, cv::Size(32, 32));
+	assertEquals(0x103070f1f3f7fff, image_hash::average_hash(big));
+}

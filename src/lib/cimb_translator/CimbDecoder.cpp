@@ -2,24 +2,11 @@
 
 #include "CimbCommon.h"
 #include "image_hash/average_hash.h"
+#include "image_hash/hamming_distance.h"
 
 #include <algorithm>
 #include <iostream>
 using std::string;
-
-namespace {
-	// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
-	unsigned countBitsSet(uint64_t v)
-	{
-		unsigned count = 0; // c accumulates the total bits set in v
-		while (v)
-		{
-			++count;
-			v &= (v - 1); // clear the least significant bit set
-		}
-		return count;
-	}
-}
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
@@ -55,7 +42,7 @@ unsigned CimbDecoder::get_best_symbol(uint64_t hash, unsigned& best_distance)
 	unsigned best_fit = 0;
 	for (unsigned i = 0; i < _tileHashes.size(); ++i)
 	{
-		unsigned distance = countBitsSet(hash xor _tileHashes[i]);
+		unsigned distance = image_hash::hamming_distance(hash, _tileHashes[i]);
 		if (distance < best_distance)
 		{
 			best_distance = distance;

@@ -105,7 +105,7 @@ void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 	xend = std::min(xend, _img.cols);
 	yend = std::min(yend, _img.rows);
 
-	// if we're up against the top/left bounds, roll the scan forward to where we're inside the bounds
+	// if we're up against the top/left bounds, roll the scan forward until we're inside the bounds
 	if (xstart < 0)
 	{
 		int offset = -xstart;
