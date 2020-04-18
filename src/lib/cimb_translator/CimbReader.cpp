@@ -5,17 +5,15 @@
 const unsigned cellSize = 8; // goes into settings?
 
 CimbReader::CimbReader(std::string filename)
-    : _position(9, 112, 8)  // standard complaints about how this should be a config apply
+    : CimbReader(cv::imread(filename))
+{}
+
+CimbReader::CimbReader(const cv::Mat& img)
+    : _image(img)
+    , _position(9, 112, 8)  // standard complaints about how this should be a config apply
     , _drift()
     , _decoder(4, 2)
 {
-	load(filename);
-}
-
-bool CimbReader::load(std::string filename)
-{
-	_image = cv::imread(filename);
-	return true;
 }
 
 unsigned CimbReader::read()

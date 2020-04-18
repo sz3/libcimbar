@@ -22,6 +22,12 @@ bool Extractor::extract(const cv::Mat& img, cv::Mat& out)
 	return true;
 }
 
+bool Extractor::extract(string read_path, cv::Mat& out)
+{
+	cv::Mat img = cv::imread(read_path);
+	return extract(img, out);
+}
+
 bool Extractor::extract(string read_path, string write_path)
 {
 	cv::Mat img = cv::imread(read_path);

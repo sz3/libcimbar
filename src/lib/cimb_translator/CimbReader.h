@@ -11,7 +11,7 @@ class CimbReader
 {
 public:
 	CimbReader(std::string filename);
-	bool load(std::string filename);
+	CimbReader(const cv::Mat& img);
 
 	unsigned read();
 	bool done() const;
