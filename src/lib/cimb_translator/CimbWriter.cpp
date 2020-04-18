@@ -1,9 +1,12 @@
 #include "CimbWriter.h"
 
 #include "CimbAssets.h"
+#include "Config.h"
 #include "serialize/format.h"
 #include <string>
 using std::string;
+
+using namespace cimbar;
 
 namespace {
 	cv::Mat getAnchor(bool dark)
@@ -19,7 +22,7 @@ namespace {
 }
 
 CimbWriter::CimbWriter(bool dark, unsigned size)
-    : _position(9, 112, 8)  // spacing, dimensions, offset... these will need to go in a config object... the stupid project root can go in there too
+    : _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _encoder()
 {
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);

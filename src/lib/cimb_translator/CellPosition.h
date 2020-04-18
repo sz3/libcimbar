@@ -56,7 +56,7 @@ public:
 	}
 
 public:
-	CellPosition(int spacing, int dimensions, int offset=0, int marker_size=6)
+	CellPosition(int spacing, int dimensions, int offset, int marker_size)
 	    : _positions(compute(spacing, dimensions, offset, marker_size))
 	{
 		reset();

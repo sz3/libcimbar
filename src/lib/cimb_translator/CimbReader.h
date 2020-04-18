@@ -18,6 +18,7 @@ public:
 
 protected:
 	cv::Mat _image;
+	unsigned _cellSize;
 	CellPosition _position;
 	CellDrift<> _drift;
 	CimbDecoder _decoder;

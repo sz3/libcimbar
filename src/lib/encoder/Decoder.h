@@ -6,7 +6,7 @@
 class Decoder
 {
 public:
-	Decoder(unsigned bits_per_op=6);
+	Decoder(unsigned bits_per_op=0);
 
 	unsigned decode(const cv::Mat& img, std::string output);
 	unsigned decode(std::string filename, std::string output);

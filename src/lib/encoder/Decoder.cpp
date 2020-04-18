@@ -2,6 +2,7 @@
 
 #include "bit_file/bitwriter.h"
 #include "cimb_translator/CimbReader.h"
+#include "cimb_translator/Config.h"
 #include "util/File.h"
 
 #include <string>
@@ -43,7 +44,7 @@ namespace {
 
 
 Decoder::Decoder(unsigned bits_per_op)
-    : _bits_per_op(bits_per_op)
+    : _bits_per_op(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
 {
 }
 

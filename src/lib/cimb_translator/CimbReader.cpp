@@ -1,8 +1,9 @@
 #include "CimbReader.h"
 
 #include "CellDrift.h"
+#include "Config.h"
 
-const unsigned cellSize = 8; // goes into settings?
+using namespace cimbar;
 
 CimbReader::CimbReader(std::string filename)
     : CimbReader(cv::imread(filename))
@@ -10,9 +11,10 @@ CimbReader::CimbReader(std::string filename)
 
 CimbReader::CimbReader(const cv::Mat& img)
     : _image(img)
-    , _position(9, 112, 8)  // standard complaints about how this should be a config apply
+    , _cellSize(Config::cell_size())
+    , _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _drift()
-    , _decoder(4, 2)
+    , _decoder(Config::symbol_bits(), Config::color_bits())
 {
 }
 
@@ -32,7 +34,7 @@ unsigned CimbReader::read()
 	{
 		int x = xy.first + trial.first;
 		int y = xy.second + trial.second;
-		cv::Rect crop(x, y, cellSize, cellSize);
+		cv::Rect crop(x, y, _cellSize, _cellSize);
 		cv::Mat cell = _image(crop);
 
 		unsigned distance;

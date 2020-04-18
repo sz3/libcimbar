@@ -14,6 +14,8 @@ set(SOURCES
 	CimbReader.h
 	CimbWriter.cpp
 	CimbWriter.h
+	Config.cpp
+	Config.h
 	ICimbWriter.h
 )
 
