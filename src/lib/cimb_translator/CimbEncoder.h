@@ -10,8 +10,8 @@ class CimbEncoder
 public:
 	CimbEncoder(unsigned symbol_bits=4, unsigned color_bits=2);
 
-	cv::Mat load_tile(std::string tile_dir, unsigned index);
-	bool load_tiles(std::string tile_dir);
+	cv::Mat load_tile(unsigned symbol_bits, unsigned index);
+	bool load_tiles(unsigned symbol_bits);
 
 	const cv::Mat& encode(unsigned bits) const;
 

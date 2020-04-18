@@ -19,20 +19,21 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
 		_backgroundColor = (0, 0, 0);
 	else
 		_backgroundColor = (0xFF, 0xFF, 0xFF);
-	load_tiles(cimbar::getTileDir(_symbolBits));
+
+	load_tiles();
 }
 
-uint64_t CimbDecoder::get_tile_hash(string tile_dir, unsigned symbol)
+uint64_t CimbDecoder::get_tile_hash(unsigned symbol)
 {
-	cv::Mat tile = cimbar::getTile(symbol, _dark);
+	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark);
 	return image_hash::average_hash(tile);
 }
 
-bool CimbDecoder::load_tiles(std::string tile_dir)
+bool CimbDecoder::load_tiles()
 {
 	unsigned numTiles = _numSymbols;
 	for (unsigned i = 0; i < numTiles; ++i)
-		_tileHashes.push_back(get_tile_hash(tile_dir, i));
+		_tileHashes.push_back(get_tile_hash(i));
 	return true;
 }
 

@@ -10,8 +10,11 @@
 
 namespace CimbAssets
 {
-	static inline cv::Mat load_img(std::string path)
+	static inline cv::Mat load_img(std::string path, const std::string& image_dir="")
 	{
+		if (image_dir != "")
+			return cv::imread(image_dir + "/" + path);
+
 		auto it = cimbar::bitmaps.find(path);
 		if (it == cimbar::bitmaps.end())
 			return cv::imread(path);

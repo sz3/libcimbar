@@ -9,9 +9,9 @@ namespace TestCimbar
 		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
 	}
 
-	static inline std::string getTileDir(unsigned symbol_bits)
+	static inline std::string getProjectDir()
 	{
-		return fmt::format("{}/bitmap/{}", LIBCIMBAR_PROJECT_ROOT, symbol_bits);
+		return std::string(LIBCIMBAR_PROJECT_ROOT);
 	}
 }
 
