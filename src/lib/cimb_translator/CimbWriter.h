@@ -8,8 +8,7 @@
 class CimbWriter : public ICimbWriter
 {
 public:
-	CimbWriter(unsigned size=1024);
-	void initialize(unsigned size);
+	CimbWriter(bool dark=true, unsigned size=1024);
 
 	bool write(unsigned bits);
 	bool save(std::string filename) const;

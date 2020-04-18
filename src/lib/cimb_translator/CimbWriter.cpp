@@ -1,13 +1,15 @@
 #include "CimbWriter.h"
 
+#include "CimbAssets.h"
 #include "serialize/format.h"
 #include <string>
 using std::string;
 
 namespace {
-	string getAnchorPath()
+	cv::Mat getAnchor(bool dark)
 	{
-		return fmt::format("{}/bitmap/anchor-dark.png", LIBCIMBAR_PROJECT_ROOT);
+		string name = dark? "anchor-dark" : "anchor-light";
+		return CimbAssets::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	void paste(cv::Mat& canvas, const cv::Mat& img, int x, int y)
@@ -16,18 +18,14 @@ namespace {
 	}
 }
 
-CimbWriter::CimbWriter(unsigned size)
+CimbWriter::CimbWriter(bool dark, unsigned size)
     : _position(9, 112, 8)  // spacing, dimensions, offset... these will need to go in a config object... the stupid project root can go in there too
     , _encoder()
 {
-	initialize(size); // may want to just fold this into the constructor?
-}
+	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
+	_image = cv::Mat(size, size, CV_8UC3, bgcolor);
 
-void CimbWriter::initialize(unsigned size)
-{
-	_image = cv::Mat(size, size, CV_8UC3, cv::Scalar(0, 0, 0)); //LIGHT == 0xFF
-
-	cv::Mat anchor = cv::imread(getAnchorPath());
+	cv::Mat anchor = getAnchor(dark);
 	paste(_image, anchor, 0, 0);
 	paste(_image, anchor, 0, size - anchor.cols);
 	paste(_image, anchor, size - anchor.rows, 0);
