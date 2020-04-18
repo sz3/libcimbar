@@ -11,13 +11,6 @@
 #include <vector>
 using std::string;
 
-namespace {
-	std::string get_sample(std::string filename)
-	{
-		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
-	}
-}
-
 TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 {
 	CimbDecoder cd(4, 0);
@@ -82,7 +75,7 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string sample_path = get_sample("mycell.png");
+	string sample_path = TestCimbar::getSample("mycell.png");
 	cv::Mat cell = cv::imread(sample_path);
 
 	unsigned distance;

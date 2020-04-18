@@ -18,7 +18,7 @@ cv::Mat CimbEncoder::load_tile(string tile_dir, unsigned index)
 {
 	unsigned symbol = index % _numSymbols;
 	unsigned color = index / _numSymbols;
-	return cimbar::getTile(tile_dir, symbol, true, color);
+	return cimbar::getTile(symbol, true, color);
 }
 
 // dir will need to be passed via env? Doesn't make sense to compile it in, and doesn't *really* make sense to use cwd

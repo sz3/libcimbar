@@ -24,7 +24,7 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
 
 uint64_t CimbDecoder::get_tile_hash(string tile_dir, unsigned symbol)
 {
-	cv::Mat tile = cimbar::getTile(tile_dir, symbol);
+	cv::Mat tile = cimbar::getTile(symbol, _dark);
 	return image_hash::average_hash(tile);
 }
 

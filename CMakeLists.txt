@@ -15,6 +15,7 @@ endif()
 
 set (PROJECTS
    #src/exe/cimbar
+   src/exe/build_image_assets
 
    src/lib/bit_file
    src/lib/cimb_translator

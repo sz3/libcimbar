@@ -1,6 +1,9 @@
 #pragma once
 
+#include <array>
 #include <cstdio>
+#include <iostream>
+#include <string>
 
 class File
 {
@@ -8,6 +11,20 @@ public:
 	File(std::string filename, bool write=false)
 	{
 		_fp = fopen(filename.c_str(), write? "wb" : "rb");
+	}
+
+	std::string read_all()
+	{
+		std::string res;
+		std::array<char, 8192> buffer;
+		while (1)
+		{
+			unsigned bytesRead = read(buffer.data(), buffer.size());
+			if (!bytesRead)
+				break;
+			res += std::string(buffer.data(), bytesRead);
+		}
+		return res;
 	}
 
 	unsigned read(char* buffer, unsigned length)
