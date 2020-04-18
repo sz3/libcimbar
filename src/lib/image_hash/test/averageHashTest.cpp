@@ -2,7 +2,7 @@
 
 #include "average_hash.h"
 
-#include "cimb_translator/CimbCommon.h"
+#include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>

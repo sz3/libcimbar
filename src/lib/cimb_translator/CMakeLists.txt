@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
 	bitmaps.h
+	CellDrift.cpp
 	CellDrift.h
+	CellPosition.cpp
 	CellPosition.h
-	CimbAssets.h
-	CimbCommon.h
 	CimbDecoder.cpp
 	CimbDecoder.h
 	CimbEncoder.cpp
@@ -14,6 +14,8 @@ set(SOURCES
 	CimbReader.h
 	CimbWriter.cpp
 	CimbWriter.h
+	Common.cpp
+	Common.h
 	Config.cpp
 	Config.h
 	ICimbWriter.h

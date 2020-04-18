@@ -1,6 +1,6 @@
 #include "CimbWriter.h"
 
-#include "CimbAssets.h"
+#include "Common.h"
 #include "Config.h"
 #include "serialize/format.h"
 #include <string>
@@ -12,7 +12,7 @@ namespace {
 	cv::Mat getAnchor(bool dark)
 	{
 		string name = dark? "anchor-dark" : "anchor-light";
-		return CimbAssets::load_img(fmt::format("bitmap/{}.png", name));
+		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	void paste(cv::Mat& canvas, const cv::Mat& img, int x, int y)

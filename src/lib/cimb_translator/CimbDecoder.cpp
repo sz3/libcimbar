@@ -1,6 +1,6 @@
 #include "CimbDecoder.h"
 
-#include "CimbCommon.h"
+#include "Common.h"
 #include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
 

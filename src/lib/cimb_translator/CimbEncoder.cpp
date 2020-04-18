@@ -1,6 +1,6 @@
 #include "CimbEncoder.h"
 
-#include "CimbCommon.h"
+#include "Common.h"
 #include "serialize/format.h"
 #include <cmath>
 #include <iostream>

@@ -2,7 +2,7 @@
 
 #include "CimbEncoder.h"
 
-#include "CimbCommon.h"
+#include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
