@@ -33,7 +33,7 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	candidates = sc.t3_scan_diagonal(candidates);
 	// order is arbitrary (but consistent)
 	assertEquals(
-	    "x=2342-2476,y=830-964 "
+	    "x=2343-2476,y=831-964 "
 	    "x=106-233,y=918-1045 "
 	    "x=270-379,y=2976-3085 "
 	    "x=2286-2400,y=3009-3123",
@@ -50,7 +50,7 @@ TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 	// order is top-left, top-right, bottom-left, bottom-right
 	assertEquals(
 	    "x=106-233,y=918-1045 "
-	    "x=2342-2476,y=830-964 "
+	    "x=2343-2476,y=831-964 "
 	    "x=270-379,y=2976-3085 "
 	    "x=2286-2400,y=3009-3123",
 	    turbo::str::join(candidates)
