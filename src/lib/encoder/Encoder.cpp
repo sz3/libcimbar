@@ -7,10 +7,16 @@
 #include <string>
 using std::string;
 
-Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color)
+
+static const unsigned bufferSize = 155;
+static const unsigned eccBytes = 10;
+
+
+Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
     : _writer(writer)
     , _bitsPerSymbol(bits_per_symbol)
     , _bitsPerColor(bits_per_color)
+    , _eccBytes(ecc_bytes) // this is used as a boolean flag until we adjust the reed solomon code to pass ecc bytes at runtime
 {
 }
 
@@ -30,18 +36,25 @@ Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_pe
 unsigned Encoder::encode(string filename, string output)
 {
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	unsigned readSize = 8192;  // should be a multiple of bits_per_op and 8
+	unsigned readSize = bufferSize - eccBytes;
 
-	char buffer[readSize];
+	//RS::ReedSolomon<bufferSize, 10> rs;
+	bitreader br;
+
+	char buffer[bufferSize] = {0};
+	char landing[bufferSize];
 	File f(filename);
 	while (f.good())
 	{
 		unsigned bytes = f.read(buffer, readSize);
-		bitreader br(buffer, bytes);
+		//rs.Encode(buffer, landing);
+
+		br.assign_new_buffer(buffer, bytes);
 		while (!br.empty())
 		{
 			unsigned bits = br.read(bits_per_op);
-			_writer.write(bits);
+			if (!br.partial())
+				_writer.write(bits);
 		}
 	}
 	_writer.save(output);
