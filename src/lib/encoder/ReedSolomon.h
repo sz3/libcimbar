@@ -20,17 +20,22 @@ public:
 		correct_reed_solomon_destroy(_rs);
 	}
 
-	size_t parity() const
+	unsigned parity() const
 	{
 		return _parityBytes;
 	}
 
-	ssize_t encode(const uint8_t* msg, size_t msg_length, uint8_t* encoded)
+	ssize_t encode(const char* msg, unsigned msg_length, char* encoded)
 	{
-		return correct_reed_solomon_encode(_rs, msg, msg_length, encoded);
+		return correct_reed_solomon_encode(_rs, reinterpret_cast<const uint8_t*>(msg), msg_length, reinterpret_cast<uint8_t*>(encoded));
+	}
+
+	ssize_t decode(const char* encoded, unsigned encoded_length, char* msg)
+	{
+		return correct_reed_solomon_decode(_rs, reinterpret_cast<const uint8_t*>(encoded), encoded_length, reinterpret_cast<uint8_t*>(msg));
 	}
 
 protected:
 	correct_reed_solomon* _rs;
-	size_t _parityBytes;
+	unsigned _parityBytes;
 };

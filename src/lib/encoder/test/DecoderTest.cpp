@@ -19,7 +19,7 @@ namespace {
 
 TEST_CASE( "DecoderTest/testDecode", "[unit]" )
 {
-	Decoder dec;
+	Decoder dec(0);
 	unsigned bytesDecoded = dec.decode(get_sample("4.png"), "/tmp/testDecode.txt");
 	assertEquals( 9300, bytesDecoded );
 
@@ -32,7 +32,7 @@ TEST_CASE( "DecoderTest/testDecode", "[unit]" )
 
 TEST_CASE( "DecoderTest/testDecodeMessy", "[unit]" )
 {
-	Decoder dec;
+	Decoder dec(0);
 	unsigned bytesDecoded = dec.decode(get_sample("4color1e.png"), "/tmp/testDecode2.txt");
 	assertEquals( 9300, bytesDecoded );
 }

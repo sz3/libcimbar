@@ -14,6 +14,7 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<std::string>())
 	    ("o,out", "Output file", cxxopts::value<std::string>())
+	    ("e,ecc", "ECC level (default: 10)", cxxopts::value<unsigned>())
 	    ("h,help", "Print usage")
 	;
 
@@ -26,13 +27,16 @@ int main(int argc, char** argv)
 
 	std::string infile = result["in"].as<std::string>();
 	std::string outfile = result["out"].as<std::string>();
+	unsigned ecc = 10;
+	if (result.count("ecc"))
+		ecc = result["ecc"].as<unsigned>();
 
 	Extractor ext;
 	cv::Mat img;
 	if (!ext.extract(infile, img))
 		return 1;
 
-	Decoder d;
+	Decoder d(ecc);
 	unsigned bytes = d.decode(img, outfile);
 	if (bytes == 0)
 		return 2;
