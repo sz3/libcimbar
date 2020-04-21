@@ -24,6 +24,8 @@ set (PROJECTS
    src/lib/image_hash
    src/lib/serialize
    src/lib/util
+
+   src/third_party_lib/libcorrect
 )
 
 include_directories(

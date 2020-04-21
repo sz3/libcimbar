@@ -27,6 +27,7 @@ target_link_libraries(encoder_test
 
 	cimb_translator
 
+	correct
 	opencv_core
 	opencv_imgcodecs
 	opencv_imgproc

@@ -5,8 +5,10 @@ set(SOURCES
 	Decoder.h
 	Encoder.cpp
 	Encoder.h
+	ReedSolomon.h
 )
 
 add_library(encoder STATIC ${SOURCES})
 
 add_subdirectory(test)
+

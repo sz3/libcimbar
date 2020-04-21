@@ -1,5 +1,6 @@
 #include "Encoder.h"
 
+#include "ReedSolomon.h"
 #include "bit_file/bitreader.h"
 #include "cimb_translator/ICimbWriter.h"
 #include "util/File.h"
@@ -9,7 +10,6 @@ using std::string;
 
 
 static const unsigned bufferSize = 155;
-static const unsigned eccBytes = 10;
 
 
 Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
@@ -36,18 +36,21 @@ Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_pe
 unsigned Encoder::encode(string filename, string output)
 {
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	unsigned readSize = bufferSize - eccBytes;
+	unsigned readSize = bufferSize - _eccBytes;
 
-	//RS::ReedSolomon<bufferSize, 10> rs;
+	ReedSolomon rs(_eccBytes);
 	bitreader br;
 
 	char buffer[bufferSize] = {0};
-	char landing[bufferSize];
 	File f(filename);
 	while (f.good())
 	{
 		unsigned bytes = f.read(buffer, readSize);
-		//rs.Encode(buffer, landing);
+		if (_eccBytes)
+		{
+			rs.encode(reinterpret_cast<uint8_t*>(buffer), bytes, reinterpret_cast<uint8_t*>(buffer));
+			bytes = bufferSize;
+		}
 
 		br.assign_new_buffer(buffer, bytes);
 		while (!br.empty())
