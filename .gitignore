@@ -1,6 +1,8 @@
 CMakeFiles/
+Testing/
 build/
 CMakeCache.txt
+CMakeLists.txt.user
 CTestTestfile.cmake
 Makefile
 cmake_install.cmake

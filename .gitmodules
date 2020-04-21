@@ -1,0 +1,3 @@
+[submodule "src/third_party_lib/libcorrect"]
+	path = src/third_party_lib/libcorrect
+	url = https://github.com/quiet/libcorrect.git

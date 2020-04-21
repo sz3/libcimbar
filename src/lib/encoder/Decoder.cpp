@@ -1,9 +1,9 @@
 #include "Decoder.h"
 
+#include "ReedSolomonFile.h"
 #include "bit_file/bitwriter.h"
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
-#include "util/File.h"
 
 #include <string>
 using std::string;
@@ -22,10 +22,10 @@ namespace {
 	 *        bw.flush()
 	 *
 	 * */
-	unsigned do_decode(CimbReader& reader, string output, unsigned bits_per_op)
+	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, string output, unsigned bits_per_op)
 	{
 		bitwriter bw;
-		File f(output, true);
+		ReedSolomonFile f(output, ecc_bytes, true);
 
 		unsigned bytesWritten = 0;
 		while (!reader.done())
@@ -43,19 +43,20 @@ namespace {
 }
 
 
-Decoder::Decoder(unsigned bits_per_op)
-    : _bits_per_op(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
+Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
+    : _eccBytes(ecc_bytes)
+    , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
 {
 }
 
 unsigned Decoder::decode(const cv::Mat& img, std::string output)
 {
 	CimbReader reader(img);
-	return do_decode(reader, output, _bits_per_op);
+	return do_decode(reader, _eccBytes, output, _bitsPerOp);
 }
 
 unsigned Decoder::decode(string filename, string output)
 {
 	CimbReader reader(filename);
-	return do_decode(reader, output, _bits_per_op);
+	return do_decode(reader, _eccBytes, output, _bitsPerOp);
 }

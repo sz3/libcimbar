@@ -38,7 +38,7 @@ public:
 		return res;
 	}
 
-	unsigned write(const char* buffer, unsigned length)
+	virtual unsigned write(const char* buffer, unsigned length)
 	{
 		if (!good())
 			return 0;
@@ -49,7 +49,7 @@ public:
 		return res;
 	}
 
-	~File()
+	virtual ~File()
 	{
 		close();
 	}

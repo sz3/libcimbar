@@ -19,6 +19,7 @@ target_link_libraries(cimbar
 	extractor
 -Wl,--end-group
 
+	correct
 	opencv_core
 	opencv_imgcodecs
 	opencv_imgproc
