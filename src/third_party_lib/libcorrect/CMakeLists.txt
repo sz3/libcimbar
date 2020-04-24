@@ -80,9 +80,9 @@ if(HAVE_SSE)
   target_compile_definitions(correct_static PUBLIC HAVE_SSE=1)
 endif()
 
-add_subdirectory(util)
-add_subdirectory(tests)
-add_subdirectory(tools)
+#add_subdirectory(util)
+#add_subdirectory(tests)
+#add_subdirectory(tools)
 # add_subdirectory(benchmarks)
 
 install(TARGETS correct correct_static
