@@ -1,0 +1,12 @@
+language: c
+matrix:
+    include:
+        - os: linux
+          dist: trusty
+        - os: osx
+script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make shim
+    - make check CTEST_OUTPUT_ON_FAILURE=TRUE
