@@ -24,7 +24,7 @@ namespace {
 	 * */
 	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, string output, unsigned bits_per_op)
 	{
-		bitwriter bw;
+		bitwriter<> bw;
 		ReedSolomonFile f(output, ecc_bytes, true);
 
 		unsigned bytesWritten = 0;

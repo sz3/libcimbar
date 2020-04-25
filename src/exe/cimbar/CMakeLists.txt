@@ -20,10 +20,7 @@ target_link_libraries(cimbar
 -Wl,--end-group
 
 	correct
-	opencv_core
-	opencv_imgcodecs
-	opencv_imgproc
-	opencv_photo
+	${OPENCV_LIBS}
 )
 
 

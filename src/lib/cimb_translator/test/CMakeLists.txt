@@ -28,9 +28,6 @@ add_test(cimb_translator_test cimb_translator_test)
 target_link_libraries(cimb_translator_test
 	cimb_translator
 
-	opencv_core
-	opencv_imgcodecs
-	opencv_imgproc
-	opencv_photo
+	${OPENCV_LIBS}
 )
 

@@ -15,4 +15,6 @@ set(SOURCES
 
 add_library(extractor STATIC ${SOURCES})
 
-add_subdirectory(test)
+if(NOT DEFINED DISABLE_TESTS)
+	add_subdirectory(test)
+endif()
