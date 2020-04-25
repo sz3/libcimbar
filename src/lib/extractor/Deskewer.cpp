@@ -32,5 +32,5 @@ cv::Mat Deskewer::deskew(const cv::Mat& img, const Corners& corners)
 
 bool Deskewer::save(const cv::Mat& img, std::string path)
 {
-	cv::imwrite(path, img);
+	return cv::imwrite(path, img);
 }
