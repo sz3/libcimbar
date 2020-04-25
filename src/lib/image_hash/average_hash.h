@@ -20,10 +20,10 @@ namespace image_hash
 		{
 			cv::Mat resized;
 			cv::resize(img, resized, cv::Size(8, 8));
-			cv::cvtColor(resized, gray, CV_BGR2GRAY);
+			cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
 		}
 		else
-			cv::cvtColor(img, gray, CV_BGR2GRAY);
+			cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
 
 		unsigned total = 0;
 		unsigned count = 64;

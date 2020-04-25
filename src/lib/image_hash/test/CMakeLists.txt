@@ -23,9 +23,6 @@ add_test(image_hash_test image_hash_test)
 target_link_libraries(image_hash_test
 	cimb_translator
 
-	opencv_core
-	opencv_imgcodecs
-	opencv_imgproc
-	opencv_photo
+	${OPENCV_LIBS}
 )
 

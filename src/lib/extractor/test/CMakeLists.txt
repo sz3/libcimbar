@@ -27,9 +27,6 @@ add_test(extractor_test extractor_test)
 target_link_libraries(extractor_test
 	extractor
 
-	opencv_core
-	opencv_imgcodecs
-	opencv_imgproc
-	opencv_photo
+	${OPENCV_LIBS}
 )
 

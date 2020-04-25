@@ -15,7 +15,7 @@ cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 	unsigned blurX = 17; // 2^N + 1 ... calculate from img?
 
 	cv::Mat temp, out;
-	cv::cvtColor(img, temp, CV_BGR2GRAY);
+	cv::cvtColor(img, temp, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(temp, out, cv::Size(blurX, blurX), 0);
 
 	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));

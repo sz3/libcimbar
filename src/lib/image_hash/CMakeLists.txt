@@ -7,4 +7,6 @@ set(SOURCES
 
 add_custom_target(image_hash SOURCES ${SOURCES})
 
-add_subdirectory(test)
+if(NOT DEFINED DISABLE_TESTS)
+	add_subdirectory(test)
+endif()

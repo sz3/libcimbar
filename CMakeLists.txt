@@ -13,6 +13,10 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	# -ffast-math
 endif()
 
+if(NOT DEFINED OPENCV_LIBS)
+	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
+endif()
+
 set (PROJECTS
    src/exe/cimbar
    src/exe/build_image_assets
