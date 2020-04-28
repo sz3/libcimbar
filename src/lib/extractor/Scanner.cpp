@@ -11,6 +11,19 @@ namespace {
 			return an1.size() > an2.size();
 		}
 	};
+
+	unsigned nextTwo(unsigned v)
+	{
+		// get next power of 2 + 1
+		v--;
+		v |= v >> 1;
+		v |= v >> 2;
+		v |= v >> 4;
+		v |= v >> 8;
+		v |= v >> 16;
+		v = ++v >> 1;
+		return v + 1;
+	}
 }
 
 Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
@@ -22,7 +35,7 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
-	unsigned unit = (unsigned)(std::min(img.rows, img.cols) * 0.05);
+	unsigned unit = nextTwo((unsigned)(std::min(img.rows, img.cols) * 0.05));
 
 	cv::Mat out;
 	if (img.channels() >= 3)
