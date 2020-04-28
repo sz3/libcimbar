@@ -1,11 +1,16 @@
 #pragma once
 
+#include <cmath>
 #include <iostream>
 #include <utility>
 
 class Anchor
 {
 public:
+	Anchor()
+	    : Anchor(0, 0, 0, 0)
+	{}
+
 	Anchor(int x, int xmax, int y, int ymax)
 	    : _x(x)
 	    , _xmax(xmax)
@@ -64,6 +69,11 @@ public:
 	int yrange() const
 	{
 		return ::abs(_y - _ymax) >> 1;
+	}
+
+	unsigned long long size() const
+	{
+		return std::pow(_x - _xmax, 2) + std::pow(_y - _ymax, 2);
 	}
 
 	bool operator<(const Anchor& rhs) const

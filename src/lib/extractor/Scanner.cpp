@@ -3,6 +3,16 @@
 #include "ScanState.h"
 #include "serialize/format.h"
 
+namespace {
+	struct size_sort
+	{
+		inline bool operator() (const Anchor& an1, const Anchor& an2)
+		{
+			return an1.size() > an2.size();
+		}
+	};
+}
+
 Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
     , _skip(skip)
@@ -12,19 +22,14 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
-	unsigned blurX = 17; // 2^N + 1 ... calculate from img?
+	unsigned unit = (unsigned)(std::min(img.rows, img.cols) * 0.05);
 
-	cv::Mat temp, out;
+	cv::Mat out;
 	if (img.channels() >= 3)
-		cv::cvtColor(img, temp, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
 	else
-		temp = img;
-	cv::GaussianBlur(temp, out, cv::Size(blurX, blurX), 0);
-
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
-	clahe->apply(out, temp);
-
-	cv::threshold(temp, out, 127, 255, cv::THRESH_BINARY);
+		out = img;
+	cv::adaptiveThreshold(out, out, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, unit, 0);
 	return out;
 }
 
@@ -55,7 +60,28 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 		if (!foundMerge)
 			merged.push_back(c);
 	}
+	filter_candidates(merged);
 	return merged;
+}
+
+void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
+{
+	// returns the best 4 candidates
+	if (candidates.size() <= 4)
+		return;
+
+	std::sort(candidates.begin(), candidates.end(), size_sort());
+	unsigned cutoff = 0;
+	for (int i = 0; i < 4; ++i)
+		cutoff += candidates[i].size();
+	cutoff /= 8; // avg / 2
+
+	int i = 0;
+	for (; i < candidates.size(); ++i)
+		if (candidates[i].size() < cutoff)
+			break;
+	if (i < candidates.size())
+		candidates.resize(i);
 }
 
 void Scanner::scan_horizontal(std::vector<Anchor>& points, int y) const

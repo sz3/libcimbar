@@ -16,6 +16,7 @@ public: // public interface
 public: // other interesting methods
 	static cv::Mat preprocess_image(const cv::Mat& img);
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
+	void filter_candidates(std::vector<Anchor>& candidates) const;
 
 	std::vector<Anchor> t1_scan_rows() const;
 	std::vector<Anchor> t2_scan_columns(const std::vector<Anchor>& candidates) const;
