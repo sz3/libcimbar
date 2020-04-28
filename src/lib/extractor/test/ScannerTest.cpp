@@ -31,6 +31,8 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	assertStringContains("x=323-323,y=2977-3085", turbo::str::join(candidates));
 
 	candidates = sc.t3_scan_diagonal(candidates);
+	sc.filter_candidates(candidates);
+
 	// ordered by size
 	assertEquals(
 	    "x=2342-2477,y=829-964 "

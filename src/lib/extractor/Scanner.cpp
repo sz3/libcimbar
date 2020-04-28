@@ -73,7 +73,6 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 		if (!foundMerge)
 			merged.push_back(c);
 	}
-	filter_candidates(merged);
 	return merged;
 }
 
@@ -245,6 +244,7 @@ std::vector<Anchor> Scanner::scan()
 	// for all horizontal+vertical results, scan diagonal
 	candidates = t3_scan_diagonal(candidates);
 
+	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
 	return candidates;
 }
