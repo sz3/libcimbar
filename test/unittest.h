@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "TestHelpers.h"
 
-#define assertMsg(expr,msg) {bool res = expr; if(!res) FAIL(msg); REQUIRE(res);}
+#define assertMsg(expr,msg) {bool _res_ = expr; if(!_res_) FAIL(msg); REQUIRE(_res_);}
 #define assertTrue(expr) REQUIRE(expr)
 #define assertFalse(expr) REQUIRE_FALSE(expr)
 #define assertEquals(x,y) REQUIRE((x) == (y))
