@@ -11,7 +11,7 @@ void ScanState::pop_state()
 	_tally.pop_front();
 }
 
-int ScanState::evaluate_state(float leniency)
+int ScanState::evaluate_state(float limit_low, float limit_high)
 {
 	if (_state != 6)
 		return NOOP;
@@ -25,8 +25,9 @@ int ScanState::evaluate_state(float leniency)
 	{
 		if (i == 3)
 			continue;
-		float ratio = center / _tally[i];
-		if (ratio < leniency or ratio > 6.0)
+		float ratio_min = center / (_tally[i] + 1);
+		float ratio_max = center / _tally[i];
+		if (ratio_max < limit_low or ratio_min > limit_high)
 			return NOOP;
 	}
 
@@ -36,7 +37,7 @@ int ScanState::evaluate_state(float leniency)
 	return size;
 }
 
-int ScanState::process(bool active, float leniency)
+int ScanState::process(bool active, float limit_low, float limit_high)
 {
 	bool isTransition = false;
 	bool even = _state == 0 or _state == 2 or _state == 4; // not 6
@@ -50,7 +51,7 @@ int ScanState::process(bool active, float leniency)
 		_tally.push_back(1);
 		if (_state == 6)
 		{
-			int res = evaluate_state(leniency);
+			int res = evaluate_state(limit_low, limit_high);
 			pop_state();
 			return res;
 		}

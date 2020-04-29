@@ -11,13 +11,13 @@ public:
 public:
 	ScanState();
 
-	int process(bool active, float leniency=3.0);
+	int process(bool active, float limit_low=3.0, float limit_high=6.0);
 
 	std::string str() const;
 
 protected:
 	void pop_state();
-	int evaluate_state(float leniency);
+	int evaluate_state(float limit_low, float limit_high);
 
 protected:
 	int _state = 0;

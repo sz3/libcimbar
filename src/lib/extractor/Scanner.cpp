@@ -21,8 +21,7 @@ namespace {
 		v |= v >> 4;
 		v |= v >> 8;
 		v |= v >> 16;
-		v = ++v >> 1;
-		return v + 1;
+		return v + 2;
 	}
 }
 
@@ -36,7 +35,6 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
 	unsigned unit = nextTwo((unsigned)(std::min(img.rows, img.cols) * 0.05));
-
 	cv::Mat out;
 	if (img.channels() >= 3)
 		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
@@ -185,8 +183,7 @@ std::vector<Anchor> Scanner::t1_scan_rows() const
 	std::vector<Anchor> points;
 	for (int y = _skip; y < _img.rows; y += _skip)
 		scan_horizontal(points, y);
-
-	return deduplicate_candidates(points);
+	return points;
 }
 
 std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidates) const
@@ -198,8 +195,7 @@ std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidat
 		int yend = p.ymax() + (3 * p.xrange());
 		scan_vertical(points, p.xavg(), ystart, yend);
 	}
-
-	return deduplicate_candidates(points);
+	return points;
 }
 
 std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candidates) const
