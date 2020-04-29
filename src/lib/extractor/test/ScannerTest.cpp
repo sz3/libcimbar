@@ -66,7 +66,7 @@ TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 
 TEST_CASE( "ScannerTest/testSmallSample.1", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("myimage70.png"));
+	cv::Mat img = cv::imread(get_sample("smol70.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -82,7 +82,7 @@ TEST_CASE( "ScannerTest/testSmallSample.1", "[unit]" )
 
 TEST_CASE( "ScannerTest/testSmallSample.2", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("myimage110.png"));
+	cv::Mat img = cv::imread(get_sample("smol110.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
