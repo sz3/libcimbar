@@ -34,13 +34,19 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
-	unsigned unit = nextTwo((unsigned)(std::min(img.rows, img.cols) * 0.05));
+	unsigned unit = nextTwo((unsigned)(std::min(img.rows, img.cols) * 0.002));
 	cv::Mat out;
 	if (img.channels() >= 3)
 		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
 	else
 		out = img;
-	cv::adaptiveThreshold(out, out, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, unit, 0);
+
+	cv::GaussianBlur(out, out, cv::Size(unit, unit), 0);
+
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
+	clahe->apply(out, out);
+
+	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY);
 	return out;
 }
 
