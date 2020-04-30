@@ -2,6 +2,7 @@
 
 #include "ScanState.h"
 #include "serialize/format.h"
+#include <algorithm>
 
 namespace {
 	struct size_sort
@@ -12,17 +13,17 @@ namespace {
 		}
 	};
 
-	unsigned nextTwo(unsigned v)
+	unsigned nextPowerOfTwoPlusOne(unsigned v)
 	{
 		// get next power of 2 + 1
+		// min 3
 		v--;
 		v |= v >> 1;
 		v |= v >> 2;
 		v |= v >> 4;
 		v |= v >> 8;
 		v |= v >> 16;
-		v = ++v >> 1;
-		return v + 1;
+		return std::max(3U, v + 2);
 	}
 }
 
@@ -35,14 +36,21 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
-	unsigned unit = nextTwo((unsigned)(std::min(img.rows, img.cols) * 0.05));
+	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
+	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
 
 	cv::Mat out;
 	if (img.channels() >= 3)
 		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
 	else
 		out = img;
-	cv::adaptiveThreshold(out, out, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, unit, 0);
+
+	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
+
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
+	clahe->apply(out, out);
+
+	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY);
 	return out;
 }
 
@@ -185,8 +193,7 @@ std::vector<Anchor> Scanner::t1_scan_rows() const
 	std::vector<Anchor> points;
 	for (int y = _skip; y < _img.rows; y += _skip)
 		scan_horizontal(points, y);
-
-	return deduplicate_candidates(points);
+	return points;
 }
 
 std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidates) const
@@ -198,8 +205,7 @@ std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidat
 		int yend = p.ymax() + (3 * p.xrange());
 		scan_vertical(points, p.xavg(), ystart, yend);
 	}
-
-	return deduplicate_candidates(points);
+	return points;
 }
 
 std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candidates) const
