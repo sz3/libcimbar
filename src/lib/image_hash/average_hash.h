@@ -22,6 +22,7 @@ namespace image_hash
 		unsigned count = 64;
 
 		//cv::Scalar myMatMean = cv::mean(gray);
+		//unsigned char avg = (unsigned char)myMatMean[0];
 
 		cv::MatIterator_<uchar> end = gray.end<uchar>();
 		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
@@ -32,7 +33,6 @@ namespace image_hash
 		unsigned i = 0;
 		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it, ++i)
 		{
-			total += *it;
 			if (*it > avg)
 				res.set(i);
 		}
