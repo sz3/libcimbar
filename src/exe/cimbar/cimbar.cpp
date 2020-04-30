@@ -15,6 +15,7 @@ int main(int argc, char** argv)
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<std::string>())
 	    ("o,out", "Output file", cxxopts::value<std::string>())
 	    ("e,ecc", "ECC level (default: 10)", cxxopts::value<unsigned>())
+	    ("no-deskew", "Skip the deskew step -- treat input image as pre-processed.", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
 
@@ -31,10 +32,15 @@ int main(int argc, char** argv)
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
-	Extractor ext;
 	cv::Mat img;
-	if (!ext.extract(infile, img))
-		return 1;
+	if (result.count("no-deskew"))
+		img = cv::imread(infile);
+	else
+	{
+		Extractor ext;
+		if (!ext.extract(infile, img))
+			return 1;
+	}
 
 	Decoder d(ecc);
 	unsigned bytes = d.decode(img, outfile);
