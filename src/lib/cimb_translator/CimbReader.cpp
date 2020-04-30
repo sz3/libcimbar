@@ -2,6 +2,7 @@
 
 #include "CellDrift.h"
 #include "Config.h"
+#include <opencv2/opencv.hpp>
 
 using namespace cimbar;
 
@@ -16,6 +17,7 @@ CimbReader::CimbReader(const cv::Mat& img)
     , _drift()
     , _decoder(Config::symbol_bits(), Config::color_bits())
 {
+	cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
 unsigned CimbReader::read()
@@ -35,10 +37,11 @@ unsigned CimbReader::read()
 		int x = xy.first + trial.first;
 		int y = xy.second + trial.second;
 		cv::Rect crop(x, y, _cellSize, _cellSize);
-		cv::Mat cell = _image(crop);
+		cv::Mat cell = _grayscale(crop);
+		cv::Mat color_cell = _image(crop);
 
 		unsigned distance;
-		unsigned bits = _decoder.decode(cell, distance);
+		unsigned bits = _decoder.decode(cell, color_cell, distance);
 		if (distance < best_distance)
 		{
 			best_bits = bits;

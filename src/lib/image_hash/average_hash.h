@@ -12,18 +12,11 @@ namespace image_hash
 {
 	inline uint64_t average_hash(const cv::Mat& img)
 	{
-		// plenty of room for optimization here...
-		// img is assumed to be 8x8 (the 64 bit bitset will explode if it's bigger), but we want to support 9x9 as well)
-		// but perhaps with a different function?
-		cv::Mat gray;
-		if (img.cols != 8 or img.rows != 8)
-		{
-			cv::Mat resized;
-			cv::resize(img, resized, cv::Size(8, 8));
-			cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
-		}
-		else
-			cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+		cv::Mat gray = img;
+		if (img.channels() != 1)
+			cv::cvtColor(gray, gray, cv::COLOR_BGR2GRAY);
+		if (gray.cols != 8 or gray.rows != 8)
+			cv::resize(gray, gray, cv::Size(8, 8));
 
 		unsigned total = 0;
 		unsigned count = 64;

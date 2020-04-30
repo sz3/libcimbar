@@ -9,8 +9,8 @@ class CimbDecoder
 public:
 	CimbDecoder(unsigned symbol_bits, unsigned color_bits);
 
-	unsigned decode(const cv::Mat& cell);
-	unsigned decode(const cv::Mat& cell, unsigned& distance);
+	unsigned decode(const cv::Mat& color_cell);
+	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& distance);
 
 	unsigned get_best_symbol(uint64_t hash, unsigned& best_distance);
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& distance);

@@ -106,7 +106,7 @@ int CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char 
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const cv::Mat& cell)
+unsigned CimbDecoder::decode_color(const cv::Mat& color_cell)
 {
 	if (_numColors <= 1)
 		return 0;
@@ -115,12 +115,12 @@ unsigned CimbDecoder::decode_color(const cv::Mat& cell)
 	counts.resize(_numColors, 0);
 
 	uchar r, g, b;
-	for (int i = 1; i < cell.rows-1; ++i) // ignore top and bottom rows
+	for (int i = 1; i < color_cell.rows-1; ++i) // ignore top and bottom rows
 	{
-		const unsigned char* pixel = cell.ptr<uchar>(i);
+		const unsigned char* pixel = color_cell.ptr<uchar>(i);
 		// ignore first and last column
 		++pixel; ++pixel; ++pixel;
-		for (int j = 1; j < cell.cols - 1; ++j)
+		for (int j = 1; j < color_cell.cols - 1; ++j)
 		{
 			b = *pixel++;
 			g = *pixel++;
@@ -136,16 +136,16 @@ unsigned CimbDecoder::decode_color(const cv::Mat& cell)
 	return *std::max_element(counts.begin(), counts.end());
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, unsigned& distance) // drift_offset ?
+unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& distance) // drift_offset ?
 {
 	unsigned bits = decode_symbol(cell, distance);
-	bits |= decode_color(cell) << _symbolBits;
+	bits |= decode_color(color_cell) << _symbolBits;
 	return bits;
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell)
+unsigned CimbDecoder::decode(const cv::Mat& color_cell)
 {
 	unsigned distance;
-	return decode(cell, distance);
+	return decode(color_cell, color_cell, distance);
 }
 
