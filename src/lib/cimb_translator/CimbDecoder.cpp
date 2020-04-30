@@ -12,14 +12,8 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
-    , _colorThreshold(80)
     , _dark(true)
 {
-	if (_dark)
-		_backgroundColor = (0, 0, 0);
-	else
-		_backgroundColor = (0xFF, 0xFF, 0xFF);
-
 	load_tiles();
 }
 
@@ -63,8 +57,6 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& distance)
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 {
-	if (c < _colorThreshold)
-		return (int)(c * adjust / 2);
 	return (int)(c * adjust);
 }
 
@@ -73,24 +65,19 @@ unsigned CimbDecoder::check_color_distance(cv::Vec3b c, unsigned char r, unsigne
 	return std::pow(c[2] - r, 2) + std::pow(c[1] - g, 2) + std::pow(c[0] - b, 2);
 }
 
-int CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
 {
-	if (_dark and r < _colorThreshold and g < _colorThreshold and b < _colorThreshold)
-		return -1;
-
 	unsigned char max = std::max(r, g);
 	max = std::max(max, b);
+	max = std::max(max, uchar(1));
 
 	float adjust = 255.0 / max;
 	r = fix_color(r, adjust);
 	g = fix_color(g, adjust);
 	b = fix_color(b, adjust);
 
-	int best_fit = -1;
-	unsigned best_distance = check_color_distance(_backgroundColor, r, g, b);
-	if (best_distance < 2500)
-		return best_fit;
-
+	int best_fit = 0;
+	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
 		cv::Vec3b c = cimbar::getColor(i);
@@ -111,29 +98,12 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell)
 	if (_numColors <= 1)
 		return 0;
 
-	std::vector<int> counts;
-	counts.resize(_numColors, 0);
-
-	uchar r, g, b;
-	for (int i = 1; i < color_cell.rows-1; ++i) // ignore top and bottom rows
-	{
-		const unsigned char* pixel = color_cell.ptr<uchar>(i);
-		// ignore first and last column
-		++pixel; ++pixel; ++pixel;
-		for (int j = 1; j < color_cell.cols - 1; ++j)
-		{
-			b = *pixel++;
-			g = *pixel++;
-			r = *pixel++;
-			int bestFit = get_best_color(r, g, b);
-			if (bestFit >= 0)
-			{
-				if (++counts[bestFit] > 5)
-					return bestFit;
-			}
-		}
-	}
-	return *std::max_element(counts.begin(), counts.end());
+	// limit dimensions to ignore outer row/col
+	// when we have the drift, that will factor into this calculation as well
+	cv::Rect crop(1, 1, color_cell.cols - 2, color_cell.rows - 2);
+	cv::Mat center = color_cell(crop);
+	cv::Scalar avgColor = cv::mean(center);
+	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& distance) // drift_offset ?
