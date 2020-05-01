@@ -38,7 +38,12 @@ unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsig
 	drift_offset = 0;
 	unsigned best_fit = 0;
 	unsigned best_distance = 1000;
-	for (unsigned d = 0; d < hashes.size(); ++d)
+	// there are 9 candidate hashes. Because we're greedy (see the `return`), we should iterate out from the center
+	// 4 == center.
+	// 5, 7, 3, 1 == sides.
+	// 8, 0, 2, 6 == corners.
+	for (unsigned d : {4, 5, 7, 3, 1, 8, 0, 2, 6})
+	{
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
 			unsigned distance = image_hash::hamming_distance(hashes[d], _tileHashes[i]);
@@ -48,9 +53,10 @@ unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsig
 				best_fit = i;
 				drift_offset = d;
 				if (best_distance < 8)
-					break;
+					return best_fit;
 			}
 		}
+	}
 	return best_fit;
 }
 
