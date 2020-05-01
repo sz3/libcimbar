@@ -18,6 +18,7 @@ public:
 
 protected:
 	cv::Mat _image;
+	cv::Mat _grayscale;
 	unsigned _cellSize;
 	CellPosition _position;
 	CellDrift _drift;

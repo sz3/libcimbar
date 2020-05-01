@@ -3,16 +3,13 @@
 #include <utility>
 
 CellDrift::CellDrift(int limit)
-	: _limit(limit)
+    : _limit(limit)
 {}
 
-const std::vector<std::pair<int, int>> CellDrift::driftPairs() const
-{
-	static std::vector<std::pair<int, int>> drift = {
-		{0, 0}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
-	};
-	return drift;
-}
+const std::vector<std::pair<int, int>> CellDrift::driftPairs = {
+    //{0, 0}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
+    {-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}
+};
 
 int CellDrift::x() const
 {

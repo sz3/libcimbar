@@ -1,8 +1,10 @@
 #include "CimbDecoder.h"
 
 #include "Common.h"
+#include "CellDrift.h"
 #include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
+#include "serialize/format.h"
 
 #include <algorithm>
 #include <iostream>
@@ -12,14 +14,8 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
-    , _colorThreshold(80)
     , _dark(true)
 {
-	if (_dark)
-		_backgroundColor = (0, 0, 0);
-	else
-		_backgroundColor = (0xFF, 0xFF, 0xFF);
-
 	load_tiles();
 }
 
@@ -37,34 +33,48 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(uint64_t hash, unsigned& best_distance)
+unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsigned& drift_offset)
 {
-	best_distance = 1000;
+	drift_offset = 0;
 	unsigned best_fit = 0;
-	for (unsigned i = 0; i < _tileHashes.size(); ++i)
+	unsigned best_distance = 1000;
+	// there are 9 candidate hashes. Because we're greedy (see the `return`), we should iterate out from the center
+	// 4 == center.
+	// 5, 7, 3, 1 == sides.
+	// 8, 0, 2, 6 == corners.
+	for (unsigned d : {4, 5, 7, 3, 1, 8, 0, 2, 6})
 	{
-		unsigned distance = image_hash::hamming_distance(hash, _tileHashes[i]);
-		if (distance < best_distance)
+		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
-			best_distance = distance;
-			best_fit = i;
-			if (best_distance == 0)
-				break;
+			unsigned distance = image_hash::hamming_distance(hashes[d], _tileHashes[i]);
+			if (distance < best_distance)
+			{
+				best_distance = distance;
+				best_fit = i;
+				drift_offset = d;
+				if (best_distance < 8)
+					return best_fit;
+			}
 		}
 	}
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& distance)
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 {
-	uint64_t hash = image_hash::average_hash(cell);
-	return get_best_symbol(hash, distance);
+	std::vector<uint64_t> hashes = image_hash::fuzzy_ahash(cell);
+	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
+	{
+		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Mat img = cell(crop);
+
+		hashes.push_back(image_hash::average_hash(img));
+	}*/
+	return get_best_symbol(hashes, drift_offset);
 }
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 {
-	if (c < _colorThreshold)
-		return (int)(c * adjust / 2);
 	return (int)(c * adjust);
 }
 
@@ -73,24 +83,19 @@ unsigned CimbDecoder::check_color_distance(cv::Vec3b c, unsigned char r, unsigne
 	return std::pow(c[2] - r, 2) + std::pow(c[1] - g, 2) + std::pow(c[0] - b, 2);
 }
 
-int CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
 {
-	if (_dark and r < _colorThreshold and g < _colorThreshold and b < _colorThreshold)
-		return -1;
-
 	unsigned char max = std::max(r, g);
 	max = std::max(max, b);
+	max = std::max(max, uchar(1));
 
 	float adjust = 255.0 / max;
 	r = fix_color(r, adjust);
 	g = fix_color(g, adjust);
 	b = fix_color(b, adjust);
 
-	int best_fit = -1;
-	unsigned best_distance = check_color_distance(_backgroundColor, r, g, b);
-	if (best_distance < 2500)
-		return best_fit;
-
+	int best_fit = 0;
+	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
 		cv::Vec3b c = cimbar::getColor(i);
@@ -106,46 +111,29 @@ int CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char 
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const cv::Mat& cell)
+unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<int, int>& drift)
 {
 	if (_numColors <= 1)
 		return 0;
 
-	std::vector<int> counts;
-	counts.resize(_numColors, 0);
-
-	uchar r, g, b;
-	for (int i = 1; i < cell.rows-1; ++i) // ignore top and bottom rows
-	{
-		const unsigned char* pixel = cell.ptr<uchar>(i);
-		// ignore first and last column
-		++pixel; ++pixel; ++pixel;
-		for (int j = 1; j < cell.cols - 1; ++j)
-		{
-			b = *pixel++;
-			g = *pixel++;
-			r = *pixel++;
-			int bestFit = get_best_color(r, g, b);
-			if (bestFit >= 0)
-			{
-				if (++counts[bestFit] > 5)
-					return bestFit;
-			}
-		}
-	}
-	return *std::max_element(counts.begin(), counts.end());
+	// limit dimensions to ignore outer row/col
+	// when we have the drift, that will factor into this calculation as well
+	cv::Rect crop(1 + drift.first, 1 + drift.second, color_cell.cols - 2, color_cell.rows - 2);
+	cv::Mat center = color_cell(crop);
+	cv::Scalar avgColor = cv::mean(center);
+	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, unsigned& distance) // drift_offset ?
+unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset)
 {
-	unsigned bits = decode_symbol(cell, distance);
-	bits |= decode_color(cell) << _symbolBits;
+	unsigned bits = decode_symbol(cell, drift_offset);
+	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
 	return bits;
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell)
+unsigned CimbDecoder::decode(const cv::Mat& color_cell)
 {
 	unsigned distance;
-	return decode(cell, distance);
+	return decode(color_cell, color_cell, distance);
 }
 

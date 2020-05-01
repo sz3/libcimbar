@@ -2,6 +2,7 @@
 
 #include "CellDrift.h"
 #include "Config.h"
+#include <opencv2/opencv.hpp>
 
 using namespace cimbar;
 
@@ -11,11 +12,12 @@ CimbReader::CimbReader(std::string filename)
 
 CimbReader::CimbReader(const cv::Mat& img)
     : _image(img)
-    , _cellSize(Config::cell_size())
+    , _cellSize(Config::cell_size() + 2)
     , _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _drift()
     , _decoder(Config::symbol_bits(), Config::color_bits())
 {
+	cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
 unsigned CimbReader::read()
@@ -27,29 +29,18 @@ unsigned CimbReader::read()
 	xy.first += _drift.x();
 	xy.second += _drift.y();
 
-	unsigned best_bits = 0;
-	unsigned best_distance = 10000;
-	std::pair<int, int> best_drift({0, 0});
-	for (std::pair<int, int> trial : _drift.driftPairs())
-	{
-		int x = xy.first + trial.first;
-		int y = xy.second + trial.second;
-		cv::Rect crop(x, y, _cellSize, _cellSize);
-		cv::Mat cell = _image(crop);
+	int x = xy.first;
+	int y = xy.second;
+	cv::Rect crop(x-1, y-1, _cellSize, _cellSize);
+	cv::Mat cell = _grayscale(crop);
+	cv::Mat color_cell = _image(crop);
 
-		unsigned distance;
-		unsigned bits = _decoder.decode(cell, distance);
-		if (distance < best_distance)
-		{
-			best_bits = bits;
-			best_distance = distance;
-			best_drift = trial;
-			if (best_distance < 8)
-				break;
-		}
-	}
+	unsigned drift_offset = 4;
+	unsigned bits = _decoder.decode(cell, color_cell, drift_offset);
+
+	std::pair<int, int> best_drift = _drift.driftPairs[drift_offset];
 	_drift.updateDrift(best_drift.first, best_drift.second);
-	return best_bits;
+	return bits;
 }
 
 bool CimbReader::done() const

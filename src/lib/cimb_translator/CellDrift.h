@@ -8,7 +8,7 @@ class CellDrift
 public:
 	CellDrift(int limit=2);
 
-	const std::vector<std::pair<int, int>> driftPairs() const;
+	static const std::vector<std::pair<int, int>> driftPairs;
 
 	int x() const;
 	int y() const;
