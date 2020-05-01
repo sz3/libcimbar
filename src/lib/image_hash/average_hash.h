@@ -12,7 +12,7 @@
 
 namespace image_hash
 {
-	inline uint64_t average_hash(const cv::Mat& img)
+	inline uint64_t average_hash(const cv::Mat& img, uchar threshold=0)
 	{
 		cv::Mat gray = img;
 		if (img.channels() != 1)
@@ -27,15 +27,18 @@ namespace image_hash
 		//unsigned char avg = (unsigned char)myMatMean[0];
 
 		cv::MatIterator_<uchar> end = gray.end<uchar>();
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			total += *it;
-		unsigned char avg = total / count;
+		if (threshold == 0)
+		{
+			for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
+				total += *it;
+			threshold = total / count;
+		}
 
 		std::bitset<64> res;
 		unsigned i = 0;
 		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it, ++i)
 		{
-			if (*it > avg)
+			if (*it > threshold)
 				res.set(i);
 		}
 		return res.to_ullong();
@@ -64,31 +67,30 @@ namespace image_hash
 		cv::MatIterator_<uchar> end = gray.end<uchar>();
 		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
 			total += *it;
-		unsigned char avg = total / count;
+		uchar threshold = total / count;
 
 		std::bitset<100> res;
 		unsigned i = 0;
 		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it, ++i)
 		{
-			if (*it > avg)
+			if (*it > threshold)
 				res.set(i);
 		}
 
-		// quick test {0, 0}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
-
 		bitset_extractor<100> be(res);
 		std::vector<uint64_t> hashes;
-		// middle
-		hashes.push_back(be.extract(11, 21, 31, 41, 51, 61, 71, 81));
-		hashes.push_back(be.extract(12, 22, 32, 42, 52, 62, 72, 82));
-		hashes.push_back(be.extract(21, 31, 41, 51, 61, 71, 81, 91));
-		hashes.push_back(be.extract(10, 20, 30, 40, 50, 60, 70, 80));
-		hashes.push_back(be.extract(1, 11, 21, 31, 41, 51, 61, 71));
-		// edges
+		// top row -- top left bit is the end bit. bottom right is 0.
 		hashes.push_back(be.extract(22, 32, 42, 52, 62, 72, 82, 92));
-		hashes.push_back(be.extract(0, 10, 20, 30, 40, 50, 60, 70));
-		hashes.push_back(be.extract(2, 12, 22, 32, 42, 52, 62, 72));
+		hashes.push_back(be.extract(21, 31, 41, 51, 61, 71, 81, 91));
 		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));
+		// middle row
+		hashes.push_back(be.extract(12, 22, 32, 42, 52, 62, 72, 82));
+		hashes.push_back(be.extract(11, 21, 31, 41, 51, 61, 71, 81));
+		hashes.push_back(be.extract(10, 20, 30, 40, 50, 60, 70, 80));
+		// bottom row
+		hashes.push_back(be.extract(2, 12, 22, 32, 42, 52, 62, 72));
+		hashes.push_back(be.extract(1, 11, 21, 31, 41, 51, 61, 71));
+		hashes.push_back(be.extract(0, 10, 20, 30, 40, 50, 60, 70));
 		return hashes;
 	}
 }

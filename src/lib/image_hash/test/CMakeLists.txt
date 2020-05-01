@@ -6,6 +6,7 @@ set (SOURCES
 	test.cpp
 	averageHashTest.cpp
 	bitsetExtractorTest.cpp
+	fuzzyAhashTest.cpp
 )
 
 include_directories(

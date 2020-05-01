@@ -98,5 +98,5 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 	unsigned drift_offset;
 	unsigned res = cd.decode_symbol(cell, drift_offset);
 	assertEquals(1, res);
-	assertEquals(7, drift_offset);
+	assertEquals(2, drift_offset);
 }
