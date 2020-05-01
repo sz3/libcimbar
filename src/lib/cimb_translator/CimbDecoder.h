@@ -12,7 +12,7 @@ public:
 	unsigned decode(const cv::Mat& color_cell);
 	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset);
 
-	unsigned get_best_symbol(const std::vector<uint64_t>& hashes, unsigned& best_distance);
+	unsigned get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& best_distance);
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset);
 
 	unsigned get_best_color(unsigned char r, unsigned char g, unsigned char b) const;

@@ -47,4 +47,5 @@ unsigned Encoder::encode(string filename, string output)
 		}
 	}
 	_writer.save(output);
+	return 0;
 }

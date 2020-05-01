@@ -6,9 +6,9 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <array>
 #include <bitset>
 #include <cstdint>
-#include <vector>
 
 namespace image_hash
 {
@@ -52,7 +52,7 @@ namespace image_hash
 	//  ... with each index corresponding to an 8 bit read?
 	//  ... this way, we could do compile time validation that the return value makes sense.
 	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline std::vector<uint64_t> fuzzy_ahash(const cv::Mat& img)
+	inline std::bitset<100> fuzzy_ahash(const cv::Mat& img)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
@@ -76,21 +76,26 @@ namespace image_hash
 			if (*it > threshold)
 				res.set(i);
 		}
+		return res;
+	}
 
-		bitset_extractor<100> be(res);
-		std::vector<uint64_t> hashes;
-		// top row -- top left bit is the end bit. bottom right is 0.
-		hashes.push_back(be.extract(22, 32, 42, 52, 62, 72, 82, 92));  // left
-		hashes.push_back(be.extract(21, 31, 41, 51, 61, 71, 81, 91));
-		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));  // right
-		// middle row
-		hashes.push_back(be.extract(12, 22, 32, 42, 52, 62, 72, 82));
-		hashes.push_back(be.extract(11, 21, 31, 41, 51, 61, 71, 81));
-		hashes.push_back(be.extract(10, 20, 30, 40, 50, 60, 70, 80));
-		// bottom row
-		hashes.push_back(be.extract(2, 12, 22, 32, 42, 52, 62, 72));
-		hashes.push_back(be.extract(1, 11, 21, 31, 41, 51, 61, 71));
-		hashes.push_back(be.extract(0, 10, 20, 30, 40, 50, 60, 70));
+	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const std::bitset<100> bits)
+	{
+		bitset_extractor<100> be(bits);
+		std::array<uint64_t, 9> hashes = {
+		    // top row -- top left bit is the end bit. bottom right is 0.
+		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left
+		    be.extract(21, 31, 41, 51, 61, 71, 81, 91),
+		    be.extract(20, 30, 40, 50, 60, 70, 80, 90),  // right
+		    // middle row
+		    be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+		    be.extract(11, 21, 31, 41, 51, 61, 71, 81),
+		    be.extract(10, 20, 30, 40, 50, 60, 70, 80),
+		    // bottom row
+		    be.extract(2, 12, 22, 32, 42, 52, 62, 72),
+		    be.extract(1, 11, 21, 31, 41, 51, 61, 71),
+		    be.extract(0, 10, 20, 30, 40, 50, 60, 70)
+		};
 		return hashes;
 	}
 }

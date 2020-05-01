@@ -28,7 +28,8 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 	}
 
 	// do the real work
-	std::vector<uint64_t> actual = image_hash::fuzzy_ahash(tile);
+	auto bits = image_hash::fuzzy_ahash(tile);
+	std::array<uint64_t,9> actual = image_hash::extract_fuzzy_ahash(bits);
 
 	for (int i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
