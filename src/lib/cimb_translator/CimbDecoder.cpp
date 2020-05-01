@@ -117,9 +117,8 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	if (_numColors <= 1)
 		return 0;
 
-	// limit dimensions to ignore outer row/col
-	// when we have the drift, that will factor into this calculation as well
-	cv::Rect crop(1 + drift.first, 1 + drift.second, color_cell.cols - 2, color_cell.rows - 2);
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	cv::Rect crop(2 + drift.first, 2 + drift.second, color_cell.cols - 4, color_cell.rows - 4);
 	cv::Mat center = color_cell(crop);
 	cv::Scalar avgColor = cv::mean(center);
 	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);

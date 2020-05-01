@@ -26,16 +26,13 @@ unsigned CimbReader::read()
 		return 0;
 
 	CellPosition::coordinate xy = _position.next();
-	xy.first += _drift.x();
-	xy.second += _drift.y();
-
-	int x = xy.first;
-	int y = xy.second;
+	int x = xy.first + _drift.x();
+	int y = xy.second + _drift.y();
 	cv::Rect crop(x-1, y-1, _cellSize, _cellSize);
 	cv::Mat cell = _grayscale(crop);
 	cv::Mat color_cell = _image(crop);
 
-	unsigned drift_offset = 4;
+	unsigned drift_offset = 0;
 	unsigned bits = _decoder.decode(cell, color_cell, drift_offset);
 
 	std::pair<int, int> best_drift = _drift.driftPairs[drift_offset];
