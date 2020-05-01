@@ -80,9 +80,9 @@ namespace image_hash
 		bitset_extractor<100> be(res);
 		std::vector<uint64_t> hashes;
 		// top row -- top left bit is the end bit. bottom right is 0.
-		hashes.push_back(be.extract(22, 32, 42, 52, 62, 72, 82, 92));
+		hashes.push_back(be.extract(22, 32, 42, 52, 62, 72, 82, 92));  // left
 		hashes.push_back(be.extract(21, 31, 41, 51, 61, 71, 81, 91));
-		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));
+		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));  // right
 		// middle row
 		hashes.push_back(be.extract(12, 22, 32, 42, 52, 62, 72, 82));
 		hashes.push_back(be.extract(11, 21, 31, 41, 51, 61, 71, 81));

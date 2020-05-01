@@ -56,14 +56,14 @@ unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsig
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 {
-	std::vector<uint64_t> hashes; // = image_hash::fuzzy_ahash(cell);
-	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
+	std::vector<uint64_t> hashes = image_hash::fuzzy_ahash(cell);
+	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = cell(crop);
 
 		hashes.push_back(image_hash::average_hash(img));
-	}
+	}*/
 	return get_best_symbol(hashes, drift_offset);
 }
 
