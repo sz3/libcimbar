@@ -1,5 +1,7 @@
 #pragma once
 
+#include "libpopcnt/libpopcnt.h"
+
 namespace image_hash
 {
 	// https://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
@@ -18,6 +20,6 @@ namespace image_hash
 	template <typename Integer>
 	inline unsigned hamming_distance(Integer a, Integer b)
 	{
-		return hamming_weight(a xor b);
+		return popcnt64(a xor b);
 	}
 }
