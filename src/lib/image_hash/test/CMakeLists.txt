@@ -5,6 +5,7 @@ project(image_hash_test)
 set (SOURCES
 	test.cpp
 	averageHashTest.cpp
+	bitsetExtractorTest.cpp
 )
 
 include_directories(
