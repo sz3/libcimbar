@@ -3,12 +3,12 @@
 #include <bitset>
 #include <iostream>
 
-template<size_t N>
+template<typename C>
 class bitset_extractor
 {
 public:
-	bitset_extractor(const std::bitset<N>& bits)
-		: _bits(bits)
+	bitset_extractor(const C& bits)
+	    : _bits(bits)
 	{}
 
 	template<typename... T>
@@ -22,10 +22,10 @@ public:
 	{
 		constexpr auto size = sizeof...(T);
 
-		uint64_t total = ((_bits << offset) >> (N - 8)).to_ullong() << (size << 3); // 3 == number of bits. 8 == 2^3.
+		uint64_t total = ((_bits << offset) >> (_bits.size() - 8)).to_ullong() << (size << 3); // 3 == number of bits. 8 == 2^3.
 		return total + extract(t...);
 	}
 
 protected:
-	std::bitset<N> _bits;
+	C _bits;
 };

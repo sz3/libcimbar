@@ -81,7 +81,7 @@ namespace image_hash
 
 	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const std::bitset<100> bits)
 	{
-		bitset_extractor<100> be(bits);
+		bitset_extractor be(bits);
 		std::array<uint64_t, 9> hashes = {
 		    // top row -- top left bit is the end bit. bottom right is 0.
 		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left

@@ -13,7 +13,7 @@ using std::string;
 TEST_CASE( "bitsetExtractorTest/testDefault", "[unit]" )
 {
 	std::bitset<32> bits(0x11d07e1f);
-	bitset_extractor<32> be(bits);
+	bitset_extractor be(bits);
 
 	assertEquals( 0x11d0, be.extract(0, 8) );
 	assertEquals( 0x7e1f, be.extract(16, 24) );
@@ -28,7 +28,7 @@ TEST_CASE( "bitsetExtractorTest/testLargerValue.1", "[unit]" )
 		if (i % 3 == 0)
 			bits.set(i);
 
-	bitset_extractor<81> be(bits);
+	bitset_extractor be(bits);
 	uint64_t res = be.extract(0, 9, 18, 27, 36, 45, 54, 63);
 	assertEquals( 0x2424242424242424, res );
 }
@@ -36,7 +36,7 @@ TEST_CASE( "bitsetExtractorTest/testLargerValue.1", "[unit]" )
 TEST_CASE( "bitsetExtractorTest/testLargerValue.2", "[unit]" )
 {
 	std::bitset<100> bits("1111111110111111110011111110001111110000111110000011110000001110000000110000000010000000000000000000");
-	bitset_extractor<100> be(bits);
+	bitset_extractor be(bits);
 	uint64_t res = be.extract(1, 11, 21, 31);
 	assertEquals( 0xfffefcf8, res );
 
