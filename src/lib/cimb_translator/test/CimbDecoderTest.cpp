@@ -19,6 +19,7 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 	for (int i = 0; i < 16; ++i)
 	{
 		cv::Mat tile = cimbar::getTile(4, i, true, 0, root);
+		cv::resize(tile, tile, cv::Size(10, 10));
 		unsigned res = cd.decode(tile);
 		assertEquals(i, res);
 	}
@@ -58,7 +59,9 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 
 	string root = TestCimbar::getProjectDir();
 	cv::Mat tile = cimbar::getTile(4, 2, true, 2, root);
-	unsigned color = cd.decode_color(tile);
+	cv::resize(tile, tile, cv::Size(10, 10));
+
+	unsigned color = cd.decode_color(tile, {0, 0});
 	assertEquals(2, color);
 	unsigned res = cd.decode(tile);
 	assertEquals(34, res);
@@ -73,9 +76,10 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 		for (int i = 0; i < 16; ++i)
 		{
 			cv::Mat tile = cimbar::getTile(4, i, true, c, root);
+			cv::resize(tile, tile, cv::Size(10, 10));
 			DYNAMIC_SECTION( "testColor " << c << ":" << i )
 			{
-				unsigned color = cd.decode_color(tile);
+				unsigned color = cd.decode_color(tile, {0, 0});
 				assertEquals(c, color);
 				unsigned res = cd.decode(tile);
 				assertEquals(i+16*c, res);
@@ -89,9 +93,10 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 
 	string sample_path = TestCimbar::getSample("mycell.png");
 	cv::Mat cell = cv::imread(sample_path);
+	cv::resize(cell, cell, cv::Size(10, 10));
 
-	unsigned distance;
-	unsigned res = cd.decode_symbol(cell, distance);
-	assertEquals(17, distance);
-	assertEquals(7, res);
+	unsigned drift_offset;
+	unsigned res = cd.decode_symbol(cell, drift_offset);
+	assertEquals(1, res);
+	assertEquals(7, drift_offset);
 }

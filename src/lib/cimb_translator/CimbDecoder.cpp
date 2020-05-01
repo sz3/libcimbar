@@ -1,8 +1,10 @@
 #include "CimbDecoder.h"
 
 #include "Common.h"
+#include "CellDrift.h"
 #include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
+#include "serialize/format.h"
 
 #include <algorithm>
 #include <iostream>
@@ -31,28 +33,38 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(uint64_t hash, unsigned& best_distance)
+unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsigned& drift_offset)
 {
-	best_distance = 1000;
+	drift_offset = 0;
 	unsigned best_fit = 0;
-	for (unsigned i = 0; i < _tileHashes.size(); ++i)
-	{
-		unsigned distance = image_hash::hamming_distance(hash, _tileHashes[i]);
-		if (distance < best_distance)
+	unsigned best_distance = 1000;
+	for (unsigned d = 0; d < hashes.size(); ++d)
+		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
-			best_distance = distance;
-			best_fit = i;
-			if (best_distance == 0)
-				break;
+			unsigned distance = image_hash::hamming_distance(hashes[d], _tileHashes[i]);
+			if (distance < best_distance)
+			{
+				best_distance = distance;
+				best_fit = i;
+				drift_offset = d;
+				if (best_distance < 8)
+					break;
+			}
 		}
-	}
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& distance)
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 {
-	uint64_t hash = image_hash::average_hash(cell);
-	return get_best_symbol(hash, distance);
+	std::vector<uint64_t> hashes; // = image_hash::fuzzy_ahash(cell);
+	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
+	{
+		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Mat img = cell(crop);
+
+		hashes.push_back(image_hash::average_hash(img));
+	}
+	return get_best_symbol(hashes, drift_offset);
 }
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
@@ -93,23 +105,23 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const cv::Mat& color_cell)
+unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<int, int>& drift)
 {
 	if (_numColors <= 1)
 		return 0;
 
 	// limit dimensions to ignore outer row/col
 	// when we have the drift, that will factor into this calculation as well
-	cv::Rect crop(1, 1, color_cell.cols - 2, color_cell.rows - 2);
+	cv::Rect crop(1 + drift.first, 1 + drift.second, color_cell.cols - 2, color_cell.rows - 2);
 	cv::Mat center = color_cell(crop);
 	cv::Scalar avgColor = cv::mean(center);
 	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& distance) // drift_offset ?
+unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset)
 {
-	unsigned bits = decode_symbol(cell, distance);
-	bits |= decode_color(color_cell) << _symbolBits;
+	unsigned bits = decode_symbol(cell, drift_offset);
+	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
 	return bits;
 }
 

@@ -10,13 +10,13 @@ public:
 	CimbDecoder(unsigned symbol_bits, unsigned color_bits);
 
 	unsigned decode(const cv::Mat& color_cell);
-	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& distance);
+	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset);
 
-	unsigned get_best_symbol(uint64_t hash, unsigned& best_distance);
-	unsigned decode_symbol(const cv::Mat& cell, unsigned& distance);
+	unsigned get_best_symbol(const std::vector<uint64_t>& hashes, unsigned& best_distance);
+	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset);
 
 	unsigned get_best_color(unsigned char r, unsigned char g, unsigned char b) const;
-	unsigned decode_color(const cv::Mat& cell);
+	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift);
 
 protected:
 	uint64_t get_tile_hash(unsigned symbol);

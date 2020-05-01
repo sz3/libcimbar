@@ -74,20 +74,21 @@ namespace image_hash
 				res.set(i);
 		}
 
+		// quick test {0, 0}, {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
+
 		bitset_extractor<100> be(res);
 		std::vector<uint64_t> hashes;
-		// top row
-		hashes.push_back(be.extract(0, 10, 20, 30, 40, 50, 60, 70));
-		hashes.push_back(be.extract(1, 11, 21, 31, 41, 51, 61, 71));
-		hashes.push_back(be.extract(2, 12, 22, 32, 42, 52, 62, 72));
-		// middle row
-		hashes.push_back(be.extract(10, 20, 30, 40, 50, 60, 70, 80));
+		// middle
 		hashes.push_back(be.extract(11, 21, 31, 41, 51, 61, 71, 81));
 		hashes.push_back(be.extract(12, 22, 32, 42, 52, 62, 72, 82));
-		// bottom row
-		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));
 		hashes.push_back(be.extract(21, 31, 41, 51, 61, 71, 81, 91));
+		hashes.push_back(be.extract(10, 20, 30, 40, 50, 60, 70, 80));
+		hashes.push_back(be.extract(1, 11, 21, 31, 41, 51, 61, 71));
+		// edges
 		hashes.push_back(be.extract(22, 32, 42, 52, 62, 72, 82, 92));
+		hashes.push_back(be.extract(0, 10, 20, 30, 40, 50, 60, 70));
+		hashes.push_back(be.extract(2, 12, 22, 32, 42, 52, 62, 72));
+		hashes.push_back(be.extract(20, 30, 40, 50, 60, 70, 80, 90));
 		return hashes;
 	}
 }
