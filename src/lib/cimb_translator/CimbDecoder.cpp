@@ -10,6 +10,37 @@
 #include <iostream>
 using std::string;
 
+namespace {
+	cv::Vec3b mean_color(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
+	{
+		cols = cols * img.channels();
+		ystart = ystart * img.channels();
+
+		unsigned blue = 0;
+		unsigned green = 0;
+		unsigned red = 0;
+		unsigned count = 0;
+
+		int i,j;
+		for( i = xstart; i < rows; ++i)
+		{
+			const uchar* p = img.ptr<uchar>(i);
+			for (j = ystart; j < cols; j+=3)
+			{
+				blue += p[j];
+				green += p[j+1];
+				red += p[j+2];
+				count += 1;
+			}
+		}
+
+		if (!count)
+			return cv::Vec3b(0, 0, 0);
+
+		return cv::Vec3b(blue/count, green/count, red/count);
+	}
+}
+
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
@@ -33,7 +64,7 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsigned& drift_offset)
+unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset)
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
@@ -62,7 +93,8 @@ unsigned CimbDecoder::get_best_symbol(const std::vector<uint64_t>& hashes, unsig
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 {
-	std::vector<uint64_t> hashes = image_hash::fuzzy_ahash(cell);
+	auto bits = image_hash::fuzzy_ahash(cell);
+	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
@@ -116,11 +148,8 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	if (_numColors <= 1)
 		return 0;
 
-	// limit dimensions to ignore outer row/col
-	// when we have the drift, that will factor into this calculation as well
-	cv::Rect crop(1 + drift.first, 1 + drift.second, color_cell.cols - 2, color_cell.rows - 2);
-	cv::Mat center = color_cell(crop);
-	cv::Scalar avgColor = cv::mean(center);
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	cv::Vec3b avgColor = mean_color(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4);
 	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
 }
 

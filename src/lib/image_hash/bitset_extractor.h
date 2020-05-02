@@ -8,7 +8,7 @@ class bitset_extractor
 {
 public:
 	bitset_extractor(const std::bitset<N>& bits)
-		: _bits(bits)
+	    : _bits(bits)
 	{}
 
 	template<typename... T>
