@@ -10,6 +10,43 @@
 #include <iostream>
 using std::string;
 
+namespace {
+	cv::Vec3b mean_color(const cv::Mat& img)
+	{
+		int rows = img.rows;
+		int cols = img.cols * img.channels();
+
+		if (img.isContinuous())
+		{
+			cols *= rows;
+			rows = 1;
+		}  // a hack!
+
+		unsigned blue = 0;
+		unsigned green = 0;
+		unsigned red = 0;
+		unsigned count = 0;
+
+		int i,j;
+		for( i = 0; i < img.rows; ++i)
+		{
+			const uchar* p = img.ptr<uchar>(i);
+			for (j = 0; j < cols; j+=3)
+			{
+				blue += p[j];
+				green += p[j+1];
+				red += p[j+2];
+				count += 1;
+			}
+		}
+
+		if (!count)
+			return cv::Vec3b(0, 0, 0);
+
+		return cv::Vec3b(blue/count, green/count, red/count);
+	}
+}
+
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
@@ -120,7 +157,7 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	cv::Rect crop(2 + drift.first, 2 + drift.second, color_cell.cols - 4, color_cell.rows - 4);
 	cv::Mat center = color_cell(crop);
-	cv::Scalar avgColor = cv::mean(center);
+	cv::Vec3b avgColor = mean_color(center);
 	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
 }
 
