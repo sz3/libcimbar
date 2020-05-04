@@ -8,10 +8,12 @@
 
 #include <algorithm>
 #include <iostream>
+#include <tuple>
+using std::get;
 using std::string;
 
 namespace {
-	cv::Vec3b mean_color(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
+	std::tuple<uchar,uchar,uchar> mean_color(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
 	{
 		cols = cols * img.channels();
 		ystart = ystart * img.channels();
@@ -25,7 +27,7 @@ namespace {
 		for( i = xstart; i < rows; ++i)
 		{
 			const uchar* p = img.ptr<uchar>(i);
-			for (j = ystart; j < cols; j+=3)
+			for (j = ystart; j < cols; j+=img.channels())
 			{
 				blue += p[j];
 				green += p[j+1];
@@ -35,9 +37,9 @@ namespace {
 		}
 
 		if (!count)
-			return cv::Vec3b(0, 0, 0);
+			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
 
-		return cv::Vec3b(blue/count, green/count, red/count);
+		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
 	}
 }
 
@@ -110,16 +112,14 @@ unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 	return (int)(c * adjust);
 }
 
-unsigned CimbDecoder::check_color_distance(cv::Vec3b c, unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
 {
-	return std::pow(c[2] - r, 2) + std::pow(c[1] - g, 2) + std::pow(c[0] - b, 2);
+	return std::pow(get<0>(c) - r, 2) + std::pow(get<1>(c) - g, 2) + std::pow(get<2>(c) - b, 2);
 }
 
 unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
 {
-	unsigned char max = std::max(r, g);
-	max = std::max(max, b);
-	max = std::max(max, uchar(1));
+	unsigned char max = std::max({r, g, b, uchar(1)});
 
 	float adjust = 255.0 / max;
 	r = fix_color(r, adjust);
@@ -130,7 +130,7 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
-		cv::Vec3b c = cimbar::getColor(i);
+		std::tuple<uchar,uchar,uchar> c = cimbar::getColor(i);
 		unsigned distance = check_color_distance(c, r, g, b);
 		if (distance < best_distance)
 		{
@@ -149,8 +149,9 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 		return 0;
 
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
-	cv::Vec3b avgColor = mean_color(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4);
-	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
+	uchar r,g,b;
+	std::tie(r, g, b) = mean_color(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4);
+	return get_best_color(r, g, b);
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset)
