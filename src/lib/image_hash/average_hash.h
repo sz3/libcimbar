@@ -53,15 +53,15 @@ namespace image_hash
 
 		uchar threshold = Cell(gray).mean_grayscale();
 
-		uint64_t res[2] = {0, 0};
+		intx::uint128 res(0);
 		int count = 0;
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
 			for (int j = 0; j < gray.cols; ++j, ++count)
-				res[count>63] |= (uint64_t)(p[j] > threshold) << (count&63);
+				res |= intx::uint128(p[j] > threshold) << count;
 		}
-		return intx::uint128({res[1], res[0]});
+		return res;
 	}
 
 	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const intx::uint128& bits)
