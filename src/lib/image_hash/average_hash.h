@@ -1,8 +1,7 @@
 #pragma once
 
-#include "serialize/format.h"
-
 #include "bit_extractor.h"
+#include "cimb_translator/Cell.h"
 
 #include "intx/int128.hpp"
 #include <opencv2/opencv.hpp>
@@ -21,23 +20,16 @@ namespace image_hash
 		if (gray.cols != 8 or gray.rows != 8)
 			cv::resize(gray, gray, cv::Size(8, 8));
 
-		unsigned total = 0;
-		unsigned count = 64;
-
-		//cv::Scalar myMatMean = cv::mean(gray);
-		//unsigned char avg = (unsigned char)myMatMean[0];
-
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
 		if (threshold == 0)
-		{
-			for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-				total += *it;
-			threshold = total / count;
-		}
+			threshold = Cell(gray).mean_grayscale();
 
 		uint64_t res = 0;
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			res = (res << 1) | (*it > threshold);
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j)
+				res = (res << 1) | (p[j] > threshold);
+		}
 		return res;
 	}
 
@@ -58,17 +50,15 @@ namespace image_hash
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 
-		unsigned total = 0;
-		unsigned count = 100;
-
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			total += *it;
-		uchar threshold = total / count;
+		uchar threshold = Cell(gray).mean_grayscale();
 
 		intx::uint128 res(0);
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			res = (res << 1) | (*it > threshold);
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j)
+				res = (res << 1) | (p[j] > threshold);
+		}
 		return res;
 	}
 

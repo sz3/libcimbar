@@ -1,6 +1,7 @@
 #include "CimbDecoder.h"
 
 #include "Common.h"
+#include "Cell.h"
 #include "CellDrift.h"
 #include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
@@ -13,7 +14,7 @@ using std::get;
 using std::string;
 
 namespace {
-	std::tuple<uchar,uchar,uchar> mean_color(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
+	std::tuple<uchar,uchar,uchar> mean_rgb(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
 	{
 		cols = cols * img.channels();
 		ystart = ystart * img.channels();
@@ -23,16 +24,14 @@ namespace {
 		unsigned red = 0;
 		unsigned count = 0;
 
-		int i,j;
-		for( i = xstart; i < rows; ++i)
+		for (int i = xstart; i < rows; ++i)
 		{
 			const uchar* p = img.ptr<uchar>(i);
-			for (j = ystart; j < cols; j+=img.channels())
+			for (int j = ystart; j < cols; j+=img.channels(), ++count)
 			{
 				blue += p[j];
 				green += p[j+1];
 				red += p[j+2];
-				count += 1;
 			}
 		}
 
@@ -150,7 +149,7 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	uchar r,g,b;
-	std::tie(r, g, b) = mean_color(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4);
+	std::tie(r, g, b) = Cell(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4).mean_rgb();
 	return get_best_color(r, g, b);
 }
 
