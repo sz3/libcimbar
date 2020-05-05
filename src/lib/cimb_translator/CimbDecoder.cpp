@@ -13,35 +13,6 @@
 using std::get;
 using std::string;
 
-namespace {
-	std::tuple<uchar,uchar,uchar> mean_rgb(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
-	{
-		cols = cols * img.channels();
-		ystart = ystart * img.channels();
-
-		unsigned blue = 0;
-		unsigned green = 0;
-		unsigned red = 0;
-		unsigned count = 0;
-
-		for (int i = xstart; i < rows; ++i)
-		{
-			const uchar* p = img.ptr<uchar>(i);
-			for (int j = ystart; j < cols; j+=img.channels(), ++count)
-			{
-				blue += p[j];
-				green += p[j+1];
-				red += p[j+2];
-			}
-		}
-
-		if (!count)
-			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
-
-		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
-	}
-}
-
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)

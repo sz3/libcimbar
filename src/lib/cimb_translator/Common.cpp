@@ -39,10 +39,10 @@ RGB getColor(unsigned index)
 	    RGB(0xFF, 0xFF, 0),
 	    RGB(0xFF, 0, 0xFF),
 	    RGB(0, 0xFF, 0),
-	    RGB(0, 0x7F, 0xFF),
-	    RGB(0xFF, 0x7F, 0),
+	    RGB(0xFF, 0x7F, 0),  // orange
+	    RGB(0, 0x7F, 0xFF),  // mid-blue
 	    RGB(0xFF, 0, 0),
-	    RGB(0x7F, 0, 0xFF),
+	    RGB(0x7F, 0, 0xFF),  // purple
 	};
 	return colors[index];
 }
