@@ -1,6 +1,7 @@
 #include "unittest.h"
 
-#include "bitset_extractor.h"
+#include "bit_extractor.h"
+#include "intx/int128.hpp"
 
 #include <bitset>
 #include <iostream>
@@ -10,10 +11,10 @@
 
 using std::string;
 
-TEST_CASE( "bitsetExtractorTest/testDefault", "[unit]" )
+TEST_CASE( "bitExtractorTest/testDefault", "[unit]" )
 {
-	std::bitset<32> bits(0x11d07e1f);
-	bitset_extractor<32> be(bits);
+	intx::uint128 bits = 0x11d07e1f;
+	bit_extractor<intx::uint128, 32> be(bits);
 
 	assertEquals( 0x11d0, be.extract(0, 8) );
 	assertEquals( 0x7e1f, be.extract(16, 24) );
@@ -21,22 +22,21 @@ TEST_CASE( "bitsetExtractorTest/testDefault", "[unit]" )
 	assertEquals( 0x1fd0, be.extract(24, 8) );
 }
 
-TEST_CASE( "bitsetExtractorTest/testLargerValue.1", "[unit]" )
+TEST_CASE( "bitExtractorTest/testLargerValue.1", "[unit]" )
 {
-	std::bitset<81> bits;
+	intx::uint128 bits(0);
 	for (int i = 0; i < 81; ++i)
-		if (i % 3 == 0)
-			bits.set(i);
+		bits = (bits << 1) | (i%3 == 0);
 
-	bitset_extractor<81> be(bits);
+	bit_extractor<intx::uint128, 81> be(bits);
 	uint64_t res = be.extract(0, 9, 18, 27, 36, 45, 54, 63);
-	assertEquals( 0x2424242424242424, res );
+	assertEquals( 0x9292929292929292, res );
 }
 
-TEST_CASE( "bitsetExtractorTest/testLargerValue.2", "[unit]" )
+TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 {
-	std::bitset<100> bits("1111111110111111110011111110001111110000111110000011110000001110000000110000000010000000000000000000");
-	bitset_extractor<100> be(bits);
+	intx::uint128 bits{0xFFBFCFE3FULL, 0xF83C0E030080000ULL};
+	bit_extractor<intx::uint128, 100> be(bits);
 	uint64_t res = be.extract(1, 11, 21, 31);
 	assertEquals( 0xfffefcf8, res );
 
@@ -52,3 +52,4 @@ TEST_CASE( "bitsetExtractorTest/testLargerValue.2", "[unit]" )
 	res = be.extract(22, 32, 42, 52, 62, 72, 82, 92);
 	assertEquals( 0xf8f0e0c080000000ULL, res );
 }
+

@@ -15,6 +15,8 @@ using std::vector;
 
 namespace cimbar {
 
+using RGB = std::tuple<uchar,uchar,uchar>;
+
 cv::Mat load_img(string path, const string& image_dir)
 {
 	if (image_dir != "")
@@ -29,17 +31,18 @@ cv::Mat load_img(string path, const string& image_dir)
 	return cv::imdecode(data, cv::IMREAD_COLOR);
 }
 
-cv::Vec3b getColor(unsigned index)
+RGB getColor(unsigned index)
 {
-	static const array<cv::Vec3b, 8> colors = {
-	    cv::Vec3b(0xFF, 0xFF, 0),  // these are stored as BGR, not RGB
-	    cv::Vec3b(0, 0xFF, 0xFF),  // feels bad man
-	    cv::Vec3b(0xFF, 0, 0xFF),
-	    cv::Vec3b(0, 0xFF, 0),
-	    cv::Vec3b(0xFF, 0x7F, 0),
-	    cv::Vec3b(0, 0x7F, 0xFF),
-	    cv::Vec3b(0, 0, 0xFF),
-	    cv::Vec3b(0xFF, 0, 0x7F),
+	// opencv uses BGR, but we don't have to conform to this tyranny
+	static const array<RGB, 8> colors = {
+	    RGB(0, 0xFF, 0xFF),
+	    RGB(0xFF, 0xFF, 0),
+	    RGB(0xFF, 0, 0xFF),
+	    RGB(0, 0xFF, 0),
+	    RGB(0xFF, 0x7F, 0),  // orange
+	    RGB(0, 0x7F, 0xFF),  // mid-blue
+	    RGB(0xFF, 0, 0),
+	    RGB(0x7F, 0, 0xFF),  // purple
 	};
 	return colors[index];
 }
@@ -51,7 +54,8 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned color
 	string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
 	cv::Mat tile = load_img(imgPath, image_dir);
 
-	cv::Vec3b color3 = getColor(color);
+	uchar r, g, b;
+	std::tie(r, g, b) = getColor(color);
 	cv::MatIterator_<cv::Vec3b> end = tile.end<cv::Vec3b>();
 	for (cv::MatIterator_<cv::Vec3b> it = tile.begin<cv::Vec3b>(); it != end; ++it)
 	{
@@ -62,7 +66,7 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned color
 				c = {0, 0, 0};
 			continue;
 		}
-		c = color3;
+		c = {b, g, r};
 	}
 	return tile;
 }

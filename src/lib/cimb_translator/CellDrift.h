@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <array>
 #include <utility>
 
 class CellDrift
@@ -8,7 +8,9 @@ class CellDrift
 public:
 	CellDrift(int limit=2);
 
-	static const std::vector<std::pair<int, int>> driftPairs;
+	inline static const std::array<std::pair<int, int>, 9> driftPairs = {{
+	    {-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}
+	}};
 
 	int x() const;
 	int y() const;

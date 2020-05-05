@@ -1,6 +1,7 @@
 #include "CimbDecoder.h"
 
 #include "Common.h"
+#include "Cell.h"
 #include "CellDrift.h"
 #include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
@@ -8,6 +9,8 @@
 
 #include <algorithm>
 #include <iostream>
+#include <tuple>
+using std::get;
 using std::string;
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
@@ -62,7 +65,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 {
-	std::bitset<100> bits = image_hash::fuzzy_ahash(cell);
+	auto bits = image_hash::fuzzy_ahash(cell);
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
@@ -79,16 +82,14 @@ unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 	return (int)(c * adjust);
 }
 
-unsigned CimbDecoder::check_color_distance(cv::Vec3b c, unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
 {
-	return std::pow(c[2] - r, 2) + std::pow(c[1] - g, 2) + std::pow(c[0] - b, 2);
+	return std::pow(get<0>(c) - r, 2) + std::pow(get<1>(c) - g, 2) + std::pow(get<2>(c) - b, 2);
 }
 
 unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
 {
-	unsigned char max = std::max(r, g);
-	max = std::max(max, b);
-	max = std::max(max, uchar(1));
+	unsigned char max = std::max({r, g, b, uchar(1)});
 
 	float adjust = 255.0 / max;
 	r = fix_color(r, adjust);
@@ -99,7 +100,7 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
-		cv::Vec3b c = cimbar::getColor(i);
+		std::tuple<uchar,uchar,uchar> c = cimbar::getColor(i);
 		unsigned distance = check_color_distance(c, r, g, b);
 		if (distance < best_distance)
 		{
@@ -117,12 +118,10 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	if (_numColors <= 1)
 		return 0;
 
-	// limit dimensions to ignore outer row/col
-	// when we have the drift, that will factor into this calculation as well
-	cv::Rect crop(1 + drift.first, 1 + drift.second, color_cell.cols - 2, color_cell.rows - 2);
-	cv::Mat center = color_cell(crop);
-	cv::Scalar avgColor = cv::mean(center);
-	return get_best_color(avgColor[2], avgColor[1], avgColor[0]);
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	uchar r,g,b;
+	std::tie(r, g, b) = Cell(color_cell, 2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4).mean_rgb();
+	return get_best_color(r, g, b);
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset)

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "serialize/format.h"
+#include "bit_extractor.h"
+#include "cimb_translator/Cell.h"
 
-#include "bitset_extractor.h"
-
+#include "intx/int128.hpp"
 #include <opencv2/opencv.hpp>
 
 #include <array>
@@ -20,28 +20,18 @@ namespace image_hash
 		if (gray.cols != 8 or gray.rows != 8)
 			cv::resize(gray, gray, cv::Size(8, 8));
 
-		unsigned total = 0;
-		unsigned count = 64;
-
-		//cv::Scalar myMatMean = cv::mean(gray);
-		//unsigned char avg = (unsigned char)myMatMean[0];
-
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
 		if (threshold == 0)
-		{
-			for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-				total += *it;
-			threshold = total / count;
-		}
+			threshold = Cell(gray).mean_grayscale();
 
-		std::bitset<64> res;
-		unsigned i = 0;
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it, ++i)
+		uint64_t res = 0;
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
 		{
-			if (*it > threshold)
-				res.set(i);
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j, ++count)
+				res |= (uint64_t)(p[j] > threshold) << count;
 		}
-		return res.to_ullong();
+		return res;
 	}
 
 	// need something like a bitset_extractor(), with an api like:
@@ -52,7 +42,7 @@ namespace image_hash
 	//  ... with each index corresponding to an 8 bit read?
 	//  ... this way, we could do compile time validation that the return value makes sense.
 	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline std::bitset<100> fuzzy_ahash(const cv::Mat& img)
+	inline intx::uint128 fuzzy_ahash(const cv::Mat& img)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
@@ -61,27 +51,22 @@ namespace image_hash
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 
-		unsigned total = 0;
-		unsigned count = 100;
+		uchar threshold = Cell(gray).mean_grayscale();
 
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			total += *it;
-		uchar threshold = total / count;
-
-		std::bitset<100> res;
-		unsigned i = 0;
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it, ++i)
+		intx::uint128 res(0);
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
 		{
-			if (*it > threshold)
-				res.set(i);
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j, ++count)
+				res |= intx::uint128(p[j] > threshold) << count;
 		}
 		return res;
 	}
 
-	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const std::bitset<100> bits)
+	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const intx::uint128& bits)
 	{
-		bitset_extractor<100> be(bits);
+		bit_extractor<intx::uint128, 100> be(bits);
 		std::array<uint64_t, 9> hashes = {
 		    // top row -- top left bit is the end bit. bottom right is 0.
 		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left

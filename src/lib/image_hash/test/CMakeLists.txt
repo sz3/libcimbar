@@ -5,7 +5,7 @@ project(image_hash_test)
 set (SOURCES
 	test.cpp
 	averageHashTest.cpp
-	bitsetExtractorTest.cpp
+	bitExtractorTest.cpp
 	fuzzyAhashTest.cpp
 )
 
