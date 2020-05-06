@@ -1,8 +1,7 @@
 #pragma once
 
-#include "serialize/format.h"
-
 #include "bit_extractor.h"
+#include "cimb_translator/Cell.h"
 
 #include "intx/int128.hpp"
 #include <opencv2/opencv.hpp>
@@ -21,23 +20,17 @@ namespace image_hash
 		if (gray.cols != 8 or gray.rows != 8)
 			cv::resize(gray, gray, cv::Size(8, 8));
 
-		unsigned total = 0;
-		unsigned count = 64;
-
-		//cv::Scalar myMatMean = cv::mean(gray);
-		//unsigned char avg = (unsigned char)myMatMean[0];
-
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
 		if (threshold == 0)
-		{
-			for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-				total += *it;
-			threshold = total / count;
-		}
+			threshold = Cell(gray).mean_grayscale();
 
 		uint64_t res = 0;
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			res = (res << 1) | (*it > threshold);
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j, ++count)
+				res |= (uint64_t)(p[j] > threshold) << count;
+		}
 		return res;
 	}
 
@@ -58,17 +51,16 @@ namespace image_hash
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 
-		unsigned total = 0;
-		unsigned count = 100;
-
-		cv::MatIterator_<uchar> end = gray.end<uchar>();
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			total += *it;
-		uchar threshold = total / count;
+		uchar threshold = Cell(gray).mean_grayscale();
 
 		intx::uint128 res(0);
-		for (cv::MatIterator_<uchar> it = gray.begin<uchar>(); it != end; ++it)
-			res = (res << 1) | (*it > threshold);
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; ++j, ++count)
+				res |= intx::uint128(p[j] > threshold) << count;
+		}
 		return res;
 	}
 
@@ -76,18 +68,18 @@ namespace image_hash
 	{
 		bit_extractor<intx::uint128, 100> be(bits);
 		std::array<uint64_t, 9> hashes = {
-		    // top row -- top left bit is highest order. Bottom right lowest.
-		    be.extract(0, 10, 20, 30, 40, 50, 60, 70),
-		    be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-		    be.extract(2, 12, 22, 32, 42, 52, 62, 72),
-		    // middle row
-		    be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-		    be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-		    be.extract(12, 22, 32, 42, 52, 62, 72, 82),
-		    // bottom row
-		    be.extract(20, 30, 40, 50, 60, 70, 80, 90),
+		    // top row -- top left bit is the end bit. bottom right is 0.
+		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left
 		    be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-		    be.extract(22, 32, 42, 52, 62, 72, 82, 92)
+		    be.extract(20, 30, 40, 50, 60, 70, 80, 90),  // right
+		    // middle row
+		    be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+		    be.extract(11, 21, 31, 41, 51, 61, 71, 81),
+		    be.extract(10, 20, 30, 40, 50, 60, 70, 80),
+		    // bottom row
+		    be.extract(2, 12, 22, 32, 42, 52, 62, 72),
+		    be.extract(1, 11, 21, 31, 41, 51, 61, 71),
+		    be.extract(0, 10, 20, 30, 40, 50, 60, 70)
 		};
 		return hashes;
 	}
