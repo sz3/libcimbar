@@ -1,7 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
-#include "concurrent/monitor.h"
+#include "monitor.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <atomic>
 #include <functional>
@@ -13,12 +13,14 @@ class thread_pool
 {
 public:
 	thread_pool(unsigned numThreads = std::thread::hardware_concurrency());
+	thread_pool(unsigned numThreads, unsigned producerLimit); // tries to limit size of queue
 	~thread_pool();
 
 	bool start();
 	void stop();
 
 	void execute(std::function<void()> fun);
+	bool try_execute(std::function<void()> fun);
 	size_t queued() const;
 
 protected:
@@ -35,8 +37,15 @@ protected:
 };
 
 inline thread_pool::thread_pool(unsigned numThreads)
-	: _running(0)
-	, _numThreads(numThreads)
+    : _running(0)
+    , _numThreads(numThreads)
+    , _queue()
+{
+}
+inline thread_pool::thread_pool(unsigned numThreads, unsigned producerLimit)
+    : _running(0)
+    , _numThreads(numThreads)
+    , _queue(1, 0, producerLimit)
 {
 }
 
@@ -72,6 +81,14 @@ inline void thread_pool::execute(std::function<void()> fun)
 {
 	_queue.enqueue(fun);
 	_notifyWork.notify_one();
+}
+
+inline bool thread_pool::try_execute(std::function<void()> fun)
+{
+	bool success = _queue.try_enqueue(fun);
+	if (success)
+		_notifyWork.notify_one();
+	return success;
 }
 
 inline size_t thread_pool::queued() const
