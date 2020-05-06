@@ -35,7 +35,7 @@ unsigned CimbReader::read()
 	unsigned drift_offset = 0;
 	unsigned bits = _decoder.decode(cell, color_cell, drift_offset);
 
-	std::pair<int, int> best_drift = _drift.driftPairs[drift_offset];
+	std::pair<int, int> best_drift = CellDrift::driftPairs[drift_offset];
 	_drift.updateDrift(best_drift.first, best_drift.second);
 	return bits;
 }

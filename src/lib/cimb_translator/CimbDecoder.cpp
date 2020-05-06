@@ -96,7 +96,7 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	g = fix_color(g, adjust);
 	b = fix_color(b, adjust);
 
-	int best_fit = 0;
+	unsigned best_fit = 0;
 	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
