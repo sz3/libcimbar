@@ -23,6 +23,7 @@ set (PROJECTS
 
    src/lib/bit_file
    src/lib/cimb_translator
+   src/lib/concurrent
    src/lib/encoder
    src/lib/extractor
    src/lib/image_hash
