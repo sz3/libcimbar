@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cimb_translator/CimbDecoder.h"
 #include <opencv2/opencv.hpp>
 #include <string>
 
@@ -14,4 +15,5 @@ public:
 protected:
 	unsigned _eccBytes;
 	unsigned _bitsPerOp;
+	CimbDecoder _decoder;
 };

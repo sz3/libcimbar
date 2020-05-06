@@ -7,6 +7,7 @@
 
 #include <string>
 using std::string;
+using namespace cimbar;
 
 
 namespace {
@@ -45,18 +46,19 @@ namespace {
 
 Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
     : _eccBytes(ecc_bytes)
-    , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
+    , _bitsPerOp(bits_per_op? bits_per_op : Config::bits_per_cell())
+    , _decoder(Config::symbol_bits(), Config::color_bits())
 {
 }
 
 unsigned Decoder::decode(const cv::Mat& img, std::string output)
 {
-	CimbReader reader(img);
+	CimbReader reader(img, _decoder);
 	return do_decode(reader, _eccBytes, output, _bitsPerOp);
 }
 
 unsigned Decoder::decode(string filename, string output)
 {
-	CimbReader reader(filename);
+	CimbReader reader(filename, _decoder);
 	return do_decode(reader, _eccBytes, output, _bitsPerOp);
 }
