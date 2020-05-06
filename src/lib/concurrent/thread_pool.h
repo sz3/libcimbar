@@ -18,6 +18,8 @@ public:
 
 	bool start();
 	void stop();
+	void pause();
+	void resume();
 
 	void execute(std::function<void()> fun);
 	bool try_execute(std::function<void()> fun);
@@ -27,7 +29,8 @@ protected:
 	void run();
 
 protected:
-	std::atomic<int> _running;
+	std::atomic<int> _running = 0;
+	std::atomic<bool> _pause = false;
 	unsigned _numThreads;
 	std::list<std::thread> _threads;
 
@@ -37,14 +40,12 @@ protected:
 };
 
 inline thread_pool::thread_pool(unsigned numThreads)
-    : _running(0)
-    , _numThreads(numThreads)
+    : _numThreads(numThreads)
     , _queue()
 {
 }
 inline thread_pool::thread_pool(unsigned numThreads, unsigned producerLimit)
-    : _running(0)
-    , _numThreads(numThreads)
+    : _numThreads(numThreads)
     , _queue(1, 0, producerLimit)
 {
 }
@@ -77,6 +78,17 @@ inline void thread_pool::stop()
 	_threads.clear();
 }
 
+inline void thread_pool::pause()
+{
+	_pause = true;
+}
+
+inline void thread_pool::resume()
+{
+	_pause = false;
+	_notifyWork.notify_all();
+}
+
 inline void thread_pool::execute(std::function<void()> fun)
 {
 	_queue.enqueue(fun);
@@ -100,15 +112,19 @@ inline void thread_pool::run()
 {
 	if (++_running == _numThreads)
 		_notifyRunning.signal_all();
-	while (_running > 0)
+	while (_running > 0 and !_pause)
 	{
 		_notifyWork.wait();
 		if (_running <= 0)
 			break;
 
 		std::function<void()> fun;
-		while (_queue.try_dequeue(fun))
+		while (!_pause and _queue.try_dequeue(fun))
+		{
+			if (_running <= 0)
+				break;
 			fun();
+		}
 	}
 }
 

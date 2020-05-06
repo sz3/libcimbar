@@ -63,3 +63,35 @@ TEST_CASE( "thread_poolTest/testTryExecute", "[unit]" )
 	assertEquals( 64, results.size() );
 }
 
+TEST_CASE( "thread_poolTest/testPause", "[unit]" )
+{
+	// uses try_execute
+	turbo::thread_pool threads(3, 1);
+	assertTrue( threads.start() );
+	threads.pause();
+
+	mutex myMutex;
+	std::vector<unsigned> results;
+
+	// fill up the queue
+	for (unsigned i = 0; i < 64; ++i)
+		assertTrue( threads.try_execute( [&, i] () { lock_guard<mutex> lock(myMutex); results.push_back(i); } ) );
+
+	// with nothing running, we can't schedule any more
+	for (unsigned i = 64; i < 70; ++i)
+		assertFalse( threads.try_execute( [&, i] () { lock_guard<mutex> lock(myMutex); results.push_back(i); } ) );
+
+	threads.resume();
+
+	monitor m;
+	threads.execute( [&m] () { m.signal_all(); } );
+	assertTrue( m.wait_for(2000) );
+
+	while (results.size() < 10)
+		std::cout << threads.queued() << std::endl;
+
+	std::sort(results.begin(), results.end());
+	assertStringContains( "0 1 2 3 4 5 6 7 8 9", turbo::str::join(results) );
+	assertEquals( 64, results.size() );
+}
+
