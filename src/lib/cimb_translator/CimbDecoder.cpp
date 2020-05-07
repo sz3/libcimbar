@@ -79,7 +79,7 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 {
-	return (int)(c * adjust);
+	return (uchar)(c * adjust);
 }
 
 unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
