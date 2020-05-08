@@ -12,14 +12,14 @@ template <size_t _packetSize>
 class FountainEncoder
 {
 public:
-	using buffer = std::array<char,_packetSize>;
+	using buffer = std::array<uint8_t,_packetSize>;
 	static bool init()
 	{
 		return WireHairInit::init();
 	}
 
 public:
-	FountainEncoder(const char* data, size_t length)
+	FountainEncoder(const uint8_t* data, size_t length)
 	    : _codec(wirehair_encoder_create(nullptr, data, length, _packetSize))
 	{
 	}

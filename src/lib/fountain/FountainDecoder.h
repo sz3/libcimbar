@@ -35,21 +35,22 @@ public:
 		return _codec != nullptr;
 	}
 
-	std::optional<std::vector<uint8_t>> decode(unsigned block_num, char* data, size_t length)
+	WirehairResult last_result() const
 	{
+		return _res;
+	}
 
-		WirehairResult res = wirehair_decode(_codec, block_num, data, length);
-		if (res != Wirehair_Success)
-		{
-			std::cout << "decode got res " << res << std::endl;
+	std::optional<std::vector<uint8_t>> decode(unsigned block_num, uint8_t* data, size_t length)
+	{
+		_res = wirehair_decode(_codec, block_num, data, length);
+		if (_res != Wirehair_Success)
 			return std::nullopt;
-		}
 
 		// or, we're theoretically done
 		std::vector<uint8_t> bytes;
-		bytes.reserve(_length);
-		res = wirehair_recover(_codec, bytes.data(), bytes.size());
-		if (res != Wirehair_Success)
+		bytes.resize(_length);
+		_res = wirehair_recover(_codec, bytes.data(), bytes.size());
+		if (_res != Wirehair_Success)
 			return std::nullopt; // :(
 
 		return bytes;
@@ -57,5 +58,6 @@ public:
 
 protected:
 	WirehairCodec _codec;
+	WirehairResult _res;
 	size_t _length;
 };
