@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 set(SOURCES
 	FountainDecoder.h
 	FountainEncoder.h
-	WirehairInit.h
+	FountainInit.h
 )
 
 add_custom_target(fountain SOURCES ${SOURCES})

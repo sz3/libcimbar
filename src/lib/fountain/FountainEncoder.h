@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WirehairInit.h"
+#include "FountainInit.h"
 #include "wirehair/wirehair.h"
 #include <array>
 #include <vector>
@@ -15,7 +15,7 @@ public:
 	using buffer = std::array<uint8_t,_packetSize>;
 	static bool init()
 	{
-		return WireHairInit::init();
+		return FountainInit::init();
 	}
 
 public:

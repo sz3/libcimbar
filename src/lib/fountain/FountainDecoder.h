@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WirehairInit.h"
+#include "FountainInit.h"
 #include "wirehair/wirehair.h"
 #include <array>
 #include <optional>
@@ -15,7 +15,7 @@ class FountainDecoder
 public:
 	static bool init()
 	{
-		return WireHairInit::init();
+		return FountainInit::init();
 	}
 
 public:

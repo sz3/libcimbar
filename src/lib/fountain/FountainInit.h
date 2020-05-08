@@ -2,7 +2,7 @@
 
 #include "wirehair/wirehair.h"
 
-namespace WireHairInit {
+namespace FountainInit {
 	static bool init()
 	{
 		static WirehairResult res = wirehair_init();
