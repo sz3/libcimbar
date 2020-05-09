@@ -1,6 +1,6 @@
 #include "Encoder.h"
 
-#include "ReedSolomonFile.h"
+#include "reed_solomon_stream.h"
 #include "bit_file/bitreader.h"
 #include "cimb_translator/ICimbWriter.h"
 
@@ -34,11 +34,14 @@ unsigned Encoder::encode(string filename, string output)
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
 
 	bitreader br;
-	ReedSolomonFile f(filename, _eccBytes);
-	while (f.good())
+	std::ifstream f(filename);
+	reed_solomon_stream rss(f, _eccBytes);
+	while (rss.good())
 	{
-		unsigned bytes = f.read();
-		br.assign_new_buffer(f.buffer(), bytes);
+		unsigned bytes = rss.readsome();
+		if (bytes == 0)
+			break;
+		br.assign_new_buffer(rss.buffer(), bytes);
 		while (!br.empty())
 		{
 			unsigned bits = br.read(bits_per_op);

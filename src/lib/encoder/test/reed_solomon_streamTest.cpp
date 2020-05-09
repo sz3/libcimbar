@@ -9,11 +9,6 @@
 #include <vector>
 using namespace std;
 
-std::stringstream& operator<<(std::stringstream& os, const ReedSolomon::BadChunk& chunk)
-{
-	os << string('\0', chunk.size);
-}
-
 namespace {
 	string exampleDecodedBlock()
 	{

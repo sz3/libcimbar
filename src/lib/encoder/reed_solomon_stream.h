@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ReedSolomon.h"
+#include <fstream>
+#include <sstream>
 #include <vector>
 
 template <typename STREAM>
@@ -11,10 +13,15 @@ public:
 
 public:
 	reed_solomon_stream(STREAM& stream, unsigned ecc)
-		: _stream(stream)
-		, _rs(ecc)
+	    : _stream(stream)
+	    , _rs(ecc)
 	{
 		_buffer.resize(buffer_size, 0);
+	}
+
+	bool good() const
+	{
+		return _stream.good();
 	}
 
 	ssize_t readsome(char* data=NULL, unsigned length=buffer_size)
@@ -56,3 +63,20 @@ protected:
 	STREAM& _stream;
 	ReedSolomon _rs;
 };
+
+inline std::ifstream& operator<<(std::ifstream& s, const ReedSolomon::BadChunk& chunk)
+{
+	return s;
+}
+
+inline std::ofstream& operator<<(std::ofstream& os, const ReedSolomon::BadChunk& chunk)
+{
+	os << std::string('\0', chunk.size);
+	return os;
+}
+
+inline std::stringstream& operator<<(std::stringstream& s, const ReedSolomon::BadChunk& chunk)
+{
+	s << std::string('\0', chunk.size);
+	return s;
+}
