@@ -6,7 +6,7 @@ set(SOURCES
 	Encoder.cpp
 	Encoder.h
 	ReedSolomon.h
-	ReedSolomonFile.h
+	reed_solomon_stream.h
 )
 
 add_library(encoder STATIC ${SOURCES})

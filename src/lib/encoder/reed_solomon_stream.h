@@ -24,6 +24,11 @@ public:
 		return _stream.good();
 	}
 
+	long tellp()
+	{
+		return _stream.tellp();
+	}
+
 	ssize_t readsome(char* data=NULL, unsigned length=buffer_size)
 	{
 		if (!data)

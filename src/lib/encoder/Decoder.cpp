@@ -1,10 +1,11 @@
 #include "Decoder.h"
 
-#include "ReedSolomonFile.h"
+#include "reed_solomon_stream.h"
 #include "bit_file/bitwriter.h"
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
 
+#include <fstream>
 #include <string>
 using std::string;
 using namespace cimbar;
@@ -26,7 +27,8 @@ namespace {
 	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, string output, unsigned bits_per_op)
 	{
 		bitwriter<> bw;
-		ReedSolomonFile f(output, ecc_bytes, true);
+		std::ofstream f(output);
+		reed_solomon_stream rss(f, ecc_bytes);
 
 		unsigned bytesWritten = 0;
 		while (!reader.done())
@@ -34,11 +36,11 @@ namespace {
 			unsigned bits = reader.read();
 			bw.write(bits, bits_per_op);
 			if (bw.shouldFlush())
-				bytesWritten += bw.flush(f);
+				bytesWritten = bw.flush(rss);
 		}
 
 		// flush once more
-		bytesWritten += bw.flush(f);
+		bytesWritten = bw.flush(rss);
 		return bytesWritten;
 	}
 }

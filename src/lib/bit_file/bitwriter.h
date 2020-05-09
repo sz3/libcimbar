@@ -41,11 +41,12 @@ public:
 		return true;
 	}
 
-	unsigned flush(File& f)
+	template <typename STREAM>
+	long flush(STREAM& f)
 	{
-		unsigned bytesWritten = f.write(buffer().data(), _currentByte);
+		f.write(buffer().data(), _currentByte);
 		clear();
-		return bytesWritten;
+		return f.tellp();
 	}
 
 	bool shouldFlush() const
