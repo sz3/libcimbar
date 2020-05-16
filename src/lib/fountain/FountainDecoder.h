@@ -9,7 +9,6 @@
 
 // will need to split large files
 
-template <size_t _packetSize>
 class FountainDecoder
 {
 public:
@@ -19,8 +18,8 @@ public:
 	}
 
 public:
-	FountainDecoder(size_t length)
-	    : _codec(wirehair_decoder_create(nullptr, length, _packetSize))
+	FountainDecoder(size_t length, size_t packet_size)
+	    : _codec(wirehair_decoder_create(nullptr, length, packet_size))
 	    , _length(length)
 	{
 	}

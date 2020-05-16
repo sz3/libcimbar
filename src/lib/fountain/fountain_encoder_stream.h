@@ -14,7 +14,7 @@ public:
 protected:
 	fountain_encoder_stream(std::string&& data)
 		: _data(data)
-		, _encoder((uint8_t*)_data.data(), _data.size())
+		, _encoder((uint8_t*)_data.data(), _data.size(), _packetSize)
 	{
 	}
 
@@ -45,9 +45,9 @@ public:
 
 	void encode_new_block()
 	{
-		size_t res = _encoder.encode(_block++, _buffer);
+		size_t res = _encoder.encode(_block++, _buffer.data(), _buffer.size());
 		if (res != _buffer.size())
-			_encoder.encode(_block++, _buffer); // try twice -- the last initial "packet" will be the wrong size
+			_encoder.encode(_block++, _buffer.data(), _buffer.size()); // try twice -- the last initial "packet" will be the wrong size
 		_buffIndex = 0;
 	}
 
@@ -76,8 +76,8 @@ public:
 
 protected:
 	std::string _data;
-	FountainEncoder<_packetSize> _encoder;
-	FountainEncoder<_packetSize>::buffer _buffer;
+	FountainEncoder _encoder;
+	std::array<uint8_t,_packetSize> _buffer;
 	unsigned _buffIndex = ~0U;
 	unsigned _block = 0;
 };
