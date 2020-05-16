@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FountainEncoder.h"
-#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -54,7 +53,7 @@ public:
 		unsigned char* data = _buffer.data() + _headerSize;
 		size_t res = _encoder.encode(_block++, data, block_size());
 		if (res != block_size())
-			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial "block" will be the wrong size
+			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
 		unsigned block = _block - 1;
 		_buffer.data()[0] = (block >> 16) & 0xFF;
@@ -74,13 +73,14 @@ public:
 
 			unsigned readLen = std::min(length, (unsigned)(_buffer.size() - _buffIndex));
 			if (!readLen)
-				return totalRead;
+				break;
 			totalRead += readLen;
 
 			uint8_t* first = _buffer.data() + _buffIndex;
 			std::copy(first, first + readLen, data);
 
 			length -= readLen;
+			data += readLen;
 			_buffIndex += readLen;
 		}
 		return totalRead;
