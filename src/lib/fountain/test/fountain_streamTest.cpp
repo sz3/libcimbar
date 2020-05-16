@@ -1,6 +1,8 @@
 #include "unittest.h"
 
-#include "fountain/fountain_encoder_stream.h"
+#include "fountain_encoder_stream.h"
+
+#include "FountainDecoder.h"
 #include "serialize/format.h"
 #include <iostream>
 #include <sstream>
@@ -29,7 +31,8 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 		assertEquals( res, buff.size() );
 	}
 
-	assertEquals( 12, fes.block_count() );
-	assertEquals( 12, fes.blocks_required() );
+	assertEquals( 171, fes.block_count() );
+	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 }
+

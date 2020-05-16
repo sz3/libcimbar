@@ -1,7 +1,7 @@
 #include "unittest.h"
 
-#include "fountain/FountainDecoder.h"
-#include "fountain/FountainEncoder.h"
+#include "FountainDecoder.h"
+#include "FountainEncoder.h"
 #include "serialize/format.h"
 #include <iostream>
 #include <sstream>
