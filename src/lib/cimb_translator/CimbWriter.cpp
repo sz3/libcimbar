@@ -53,11 +53,6 @@ bool CimbWriter::done() const
 	return _position.done();
 }
 
-bool CimbWriter::save(std::string filename) const
-{
-	return cv::imwrite(filename, _image);
-}
-
 cv::Mat CimbWriter::image() const
 {
 	return _image;

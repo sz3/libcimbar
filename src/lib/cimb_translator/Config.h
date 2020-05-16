@@ -10,6 +10,7 @@ namespace cimbar
 		unsigned color_bits();
 		unsigned symbol_bits();
 		unsigned bits_per_cell();
+		unsigned ecc_bytes();
 
 		unsigned image_size();
 		unsigned anchor_size();

@@ -13,7 +13,7 @@
 class Encoder
 {
 public:
-	Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes=15);
+	Encoder(unsigned bits_per_symbol=0, unsigned bits_per_color=0, unsigned ecc_bytes=15);
 
 	template <typename BSTREAM>
 	std::optional<cv::Mat> encode_next(BSTREAM& stream);
@@ -21,16 +21,14 @@ public:
 	unsigned encode(std::string filename, std::string output_prefix);
 
 protected:
-	ICimbWriter& _writer;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
 	unsigned _eccBytes;
 };
 
-inline Encoder::Encoder(ICimbWriter& writer, unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
-    : _writer(writer)
-    , _bitsPerSymbol(bits_per_symbol)
-    , _bitsPerColor(bits_per_color)
+inline Encoder::Encoder(unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
+    : _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
+    , _bitsPerColor(bits_per_color? bits_per_color : cimbar::Config::color_bits())
     , _eccBytes(ecc_bytes)
 {
 }

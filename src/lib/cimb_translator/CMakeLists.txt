@@ -19,7 +19,6 @@ set(SOURCES
 	Common.h
 	Config.cpp
 	Config.h
-	ICimbWriter.h
 )
 
 add_library(cimb_translator STATIC ${SOURCES})
