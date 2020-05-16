@@ -1,10 +1,8 @@
 #pragma once
 
 #include "FountainDecoder.h"
-#include <fstream>
 #include <iostream>
 #include <optional>
-#include <sstream>
 #include <string>
 
 template <unsigned _bufferSize=830>
@@ -33,7 +31,7 @@ public:
 	{
 		// if we're full
 		_buffIndex = 0;
-		unsigned blockId = ((unsigned)_buffer[0]) << 16 & (unsigned)(_buffer[1]) << 8 & _buffer[2];
+		unsigned blockId = ((unsigned)_buffer[0]) << 16 | (unsigned)(_buffer[1]) << 8 | _buffer[2];
 		return _decoder.decode(blockId, _buffer.data() + _headerSize, block_size());
 	}
 
@@ -55,9 +53,7 @@ public:
 
 			if (_buffIndex == _buffer.size())
 			{
-				std::cout << "we decodin" << std::endl;
 				auto res = decode();
-				std::cout << "we livin" << std::endl;
 				if (res)
 					return res;
 			}
