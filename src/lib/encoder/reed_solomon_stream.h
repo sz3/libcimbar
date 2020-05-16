@@ -30,12 +30,13 @@ public:
 		return _stream.tellp();
 	}
 
-	ssize_t readsome(char* data=NULL, unsigned length=buffer_size)
+	std::streamsize readsome(char* data=NULL, unsigned length=buffer_size)
 	{
 		if (!data)
 			data = _buffer.data();
 
-		ssize_t bytes = _stream.readsome(data, length - _rs.parity());
+		_stream.read(data, length - _rs.parity());
+		std::streamsize bytes = _stream.gcount();
 		if (bytes <= 0)
 		{
 			_good = false;
