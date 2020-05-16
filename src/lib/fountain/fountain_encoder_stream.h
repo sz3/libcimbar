@@ -10,12 +10,18 @@ class fountain_encoder_stream
 {
 public:
 	static const unsigned _packetSize = 826;
+	static const unsigned _headerSize = 3;
 
 protected:
 	fountain_encoder_stream(std::string&& data)
 		: _data(data)
-		, _encoder((uint8_t*)_data.data(), _data.size(), _packetSize)
+		, _encoder((uint8_t*)_data.data(), _data.size(), payload_size())
 	{
+	}
+
+	unsigned payload_size() const
+	{
+		return _packetSize - _headerSize;
 	}
 
 public:
@@ -40,14 +46,20 @@ public:
 
 	unsigned blocks_required() const
 	{
-		return (_data.size() / _packetSize) + 1;
+		return (_data.size() / payload_size()) + 1;
 	}
 
 	void encode_new_block()
 	{
-		size_t res = _encoder.encode(_block++, _buffer.data(), _buffer.size());
-		if (res != _buffer.size())
-			_encoder.encode(_block++, _buffer.data(), _buffer.size()); // try twice -- the last initial "packet" will be the wrong size
+		unsigned char* payload = _buffer.data() + _headerSize;
+		size_t res = _encoder.encode(_block++, payload, payload_size());
+		if (res != payload_size())
+			_encoder.encode(_block++, payload, payload_size()); // try twice -- the last initial "packet" will be the wrong size
+
+		unsigned block = _block - 1;
+		_buffer.data()[0] = (block >> 16) & 0xFF;
+		_buffer.data()[1] = (block >> 8) & 0xFF;
+		_buffer.data()[2] = block & 0xFF;
 		_buffIndex = 0;
 	}
 
