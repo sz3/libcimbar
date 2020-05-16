@@ -15,13 +15,14 @@ public:
 	reed_solomon_stream(STREAM& stream, unsigned ecc)
 	    : _stream(stream)
 	    , _rs(ecc)
+	    , _good(stream.good())
 	{
 		_buffer.resize(buffer_size, 0);
 	}
 
 	bool good() const
 	{
-		return _stream.good();
+		return _good and _stream.good();
 	}
 
 	long tellp()
@@ -33,9 +34,16 @@ public:
 	{
 		if (!data)
 			data = _buffer.data();
+
 		ssize_t bytes = _stream.readsome(data, length - _rs.parity());
-		if (!_rs.parity() or bytes <= 0)
+		if (bytes <= 0)
+		{
+			_good = false;
 			return bytes;
+		}
+		if (!_rs.parity())
+			return bytes;
+
 		// else
 		_rs.encode(data, bytes, data);
 		return buffer_size;
@@ -67,6 +75,7 @@ protected:
 	std::vector<char> _buffer;
 	STREAM& _stream;
 	ReedSolomon _rs;
+	bool _good;
 };
 
 inline std::ifstream& operator<<(std::ifstream& s, const ReedSolomon::BadChunk& chunk)

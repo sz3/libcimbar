@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 	std::string infile = result["in"].as<std::string>();
 	std::string outfile = result["out"].as<std::string>();
-	unsigned ecc = 10;
+	unsigned ecc = 15;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 

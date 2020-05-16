@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.10)
 set(SOURCES
 	Decoder.cpp
 	Decoder.h
-	Encoder.cpp
 	Encoder.h
 	ReedSolomon.h
 	reed_solomon_stream.h

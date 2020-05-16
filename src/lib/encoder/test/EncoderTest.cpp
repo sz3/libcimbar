@@ -18,5 +18,5 @@ TEST_CASE( "EncoderTest/testDefault", "[unit]" )
 
 	MockCimbWriter cw;
 	Encoder enc(cw, 4, 2);
-	enc.encode("/tmp/test.txt", "/tmp/doesntmatteryet.txt");
+	assertEquals( 2, enc.encode("/tmp/test.txt", "/tmp/doesntmatteryet.txt") );
 }
