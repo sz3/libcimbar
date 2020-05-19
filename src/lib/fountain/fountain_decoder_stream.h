@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FountainDecoder.h"
+#include "FountainMetadata.h"
 #include <iostream>
 #include <optional>
 #include <string>
@@ -17,8 +18,10 @@ public:
 	{
 	}
 
-	// static create
-	// from FountainHeader
+	static fountain_decoder_stream create(const FountainMetadata& md)
+	{
+		return fountain_decoder_stream(md.file_size());
+	}
 
 	unsigned block_size() const
 	{
