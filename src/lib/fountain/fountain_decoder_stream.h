@@ -5,7 +5,7 @@
 #include <optional>
 #include <string>
 
-template <unsigned _bufferSize=830>
+template <unsigned _bufferSize>  // 599
 class fountain_decoder_stream
 {
 public:
@@ -13,9 +13,12 @@ public:
 
 public:
 	fountain_decoder_stream(unsigned dataSize)
-		: _decoder(dataSize, block_size())
+	    : _decoder(dataSize, block_size())
 	{
 	}
+
+	// static create
+	// from FountainHeader
 
 	unsigned block_size() const
 	{

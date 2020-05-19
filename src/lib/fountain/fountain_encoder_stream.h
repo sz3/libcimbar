@@ -1,14 +1,15 @@
 #pragma once
 
 #include "FountainEncoder.h"
+#include "FountainMetadata.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 
+template <unsigned _bufferSize> // 599
 class fountain_encoder_stream
 {
 public:
-	static const unsigned _bufferSize = 830;
 	static const unsigned _headerSize = 3;
 
 protected:
@@ -46,6 +47,15 @@ public:
 	unsigned blocks_required() const
 	{
 		return (_data.size() / block_size()) + 1;
+	}
+
+	void encode_metadata_block(std::string name)
+	{
+		FountainMetadata md(_data.size(), name);
+		_buffIndex = _buffer.size() - md.md_size;
+
+		uint8_t* begin = _buffer.data() + _buffIndex;
+		std::copy(md.data.begin(), md.data.end(), begin);
 	}
 
 	void encode_new_block()

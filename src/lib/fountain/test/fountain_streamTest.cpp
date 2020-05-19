@@ -20,7 +20,7 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
@@ -49,8 +49,8 @@ TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 	stringstream input2;
 	input2 << input.str();
 
-	fountain_encoder_stream fes1 = fountain_encoder_stream::create(input);
-	fountain_encoder_stream fes2 = fountain_encoder_stream::create(input2);
+	fountain_encoder_stream fes1 = fountain_encoder_stream<830>::create(input);
+	fountain_encoder_stream fes2 = fountain_encoder_stream<830>::create(input2);
 
 	stringstream oneforty;
 	std::array<char, 140> buff1;
@@ -84,13 +84,13 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<> fds(input.str().size());
+	fountain_decoder_stream<830> fds(input.str().size());
 
 	std::array<char, 140> buff;
 	for (int i = 0; i < 1000; ++i)
@@ -123,13 +123,13 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<> fds(input.str().size());
+	fountain_decoder_stream<830> fds(input.str().size());
 
 	std::array<char, 830> buff; // one block per read/write
 	for (int i = 0; i < 1000; ++i)

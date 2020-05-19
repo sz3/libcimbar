@@ -6,6 +6,7 @@
 #include "cimb_translator/Config.h"
 #include "fountain/fountain_encoder_stream.h"
 #include "serialize/format.h"
+#include "serialize/str.h"
 
 #include <opencv2/opencv.hpp>
 #include <optional>
@@ -98,13 +99,20 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
-	fountain_encoder_stream fes = fountain_encoder_stream::create(f);
-	unsigned target = fes.blocks_required() * 2; // TODO: divide by number of blocks/frame
+	fountain_encoder_stream fes = fountain_encoder_stream<599>::create(f);
+	// 599 * 14 == 8386. With ecc = 15, we have 60 rs blocks * 140 bytes per block == 8400 bytes to work with. 14 are the header.
+	// it would be nice to make this saner
+	unsigned target = fes.blocks_required() * 2 / 14;
+
+	std::vector<std::string> splits = turbo::str::split(filename, '/');
+	std::string shortname = splits.size()? splits.back() : filename;
 
 	unsigned i = 0;
 	while (i < target)
 	{
-		// need to encode header at start of each frame... +make sure fountain chunks line up
+		// need to encode header at start of each frame...
+		fes.encode_metadata_block(shortname);
+
 		auto frame = encode_next(fes);
 		if (!frame)
 			break;

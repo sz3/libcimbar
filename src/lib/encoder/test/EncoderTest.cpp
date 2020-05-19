@@ -32,5 +32,5 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	f.write(input.data(), input.size());
 
 	Encoder enc(4, 2);
-	assertEquals( 40, enc.encode_fountain("/tmp/test.txt", "/tmp/forthefans.txt") );
+	assertEquals( 3, enc.encode_fountain("/tmp/test.txt", "/tmp/forthefans.txt") );
 }
