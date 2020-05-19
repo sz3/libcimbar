@@ -4,6 +4,7 @@
 #include "bit_file/bitreader.h"
 #include "cimb_translator/CimbWriter.h"
 #include "cimb_translator/Config.h"
+#include "fountain/fountain_encoder_stream.h"
 #include "serialize/format.h"
 
 #include <opencv2/opencv.hpp>
@@ -15,10 +16,11 @@ class Encoder
 public:
 	Encoder(unsigned bits_per_symbol=0, unsigned bits_per_color=0, unsigned ecc_bytes=15);
 
-	template <typename BSTREAM>
-	std::optional<cv::Mat> encode_next(BSTREAM& stream);
+	template <typename STREAM>
+	std::optional<cv::Mat> encode_next(STREAM& stream);
 
-	unsigned encode(std::string filename, std::string output_prefix);
+	unsigned encode(const std::string& filename, std::string output_prefix);
+	unsigned encode_fountain(const std::string& filename, std::string output_prefix);
 
 protected:
 	unsigned _bitsPerSymbol;
@@ -45,8 +47,8 @@ inline Encoder::Encoder(unsigned bits_per_symbol, unsigned bits_per_color, unsig
  *
  * */
 
-template <typename BSTREAM>
-inline std::optional<cv::Mat> Encoder::encode_next(BSTREAM& stream)
+template <typename STREAM>
+inline std::optional<cv::Mat> Encoder::encode_next(STREAM& stream)
 {
 	if (!stream.good())
 		return std::nullopt;
@@ -54,13 +56,14 @@ inline std::optional<cv::Mat> Encoder::encode_next(BSTREAM& stream)
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
 	CimbWriter writer;
 
+	reed_solomon_stream rss(stream, _eccBytes);
 	bitreader br;
-	while (stream.good())
+	while (rss.good())
 	{
-		unsigned bytes = stream.readsome();
+		unsigned bytes = rss.readsome();
 		if (bytes == 0)
 			break;
-		br.assign_new_buffer(stream.buffer(), bytes);
+		br.assign_new_buffer(rss.buffer(), bytes);
 		while (!br.empty())
 		{
 			unsigned bits = br.read(bits_per_op);
@@ -74,15 +77,14 @@ inline std::optional<cv::Mat> Encoder::encode_next(BSTREAM& stream)
 	return writer.image();
 }
 
-inline unsigned Encoder::encode(std::string filename, std::string output_prefix)
+inline unsigned Encoder::encode(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
-	reed_solomon_stream rss(f, _eccBytes);
 
-	int i = 0;
+	unsigned i = 0;
 	while (true)
 	{
-		auto frame = encode_next(rss);
+		auto frame = encode_next(f);
 		if (!frame)
 			break;
 
@@ -92,3 +94,25 @@ inline unsigned Encoder::encode(std::string filename, std::string output_prefix)
 	}
 	return i;
 }
+
+inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
+{
+	std::ifstream f(filename);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(f);
+	unsigned target = fes.blocks_required() * 2; // TODO: divide by number of blocks/frame
+
+	unsigned i = 0;
+	while (i < target)
+	{
+		// need to encode header at start of each frame... +make sure fountain chunks line up
+		auto frame = encode_next(fes);
+		if (!frame)
+			break;
+
+		std::string output = fmt::format("{}-{}.png", output_prefix, i);
+		cv::imwrite(output, *frame);
+		++i;
+	}
+	return i;
+}
+

@@ -13,8 +13,8 @@ public:
 
 protected:
 	fountain_encoder_stream(std::string&& data)
-		: _data(data)
-		, _encoder((uint8_t*)_data.data(), _data.size(), block_size())
+	    : _data(data)
+	    , _encoder((uint8_t*)_data.data(), _data.size(), block_size())
 	{
 	}
 
@@ -63,7 +63,7 @@ public:
 	}
 
 	// sometimes we want a new encoded batch, sometimes we just want our buffer
-	std::streamsize readsome(char* data, unsigned length)
+	fountain_encoder_stream& read(char* data, unsigned length)
 	{
 		std::streamsize totalRead = 0;
 		while (length > 0 and good())
@@ -83,13 +83,27 @@ public:
 			data += readLen;
 			_buffIndex += readLen;
 		}
-		return totalRead;
+		_lastRead = totalRead;
+		return *this;
+	}
+
+	std::streamsize readsome(char* data, unsigned length)
+	{
+		read(data, length);
+		return gcount();
+	}
+
+	std::streamsize gcount() const
+	{
+		return _lastRead;
 	}
 
 protected:
 	std::string _data;
 	FountainEncoder _encoder;
+
 	std::array<uint8_t,_bufferSize> _buffer;
 	unsigned _buffIndex = ~0U;
 	unsigned _block = 0;
+	std::streamsize _lastRead = 0;
 };
