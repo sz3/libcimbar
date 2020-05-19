@@ -17,19 +17,23 @@ if(NOT DEFINED OPENCV_LIBS)
 endif()
 
 set (PROJECTS
-   src/exe/cimbar
-   src/exe/cimbar_scan
-   src/exe/build_image_assets
+	src/exe/cimbar
+	src/exe/cimbar_scan
+	src/exe/build_image_assets
 
-   src/lib/bit_file
-   src/lib/cimb_translator
-   src/lib/encoder
-   src/lib/extractor
-   src/lib/image_hash
-   src/lib/serialize
-   src/lib/util
+	src/lib/bit_file
+	src/lib/cimb_translator
+	src/lib/encoder
+	src/lib/extractor
+	src/lib/image_hash
+	src/lib/serialize
+	src/lib/util
 
-   src/third_party_lib/libcorrect
+	src/third_party_lib/base91
+	src/third_party_lib/cxxopts
+	src/third_party_lib/intx
+	src/third_party_lib/libcorrect
+	src/third_party_lib/libpopcnt
 )
 
 include_directories(

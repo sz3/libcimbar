@@ -22,7 +22,7 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
 	load_tiles();
 }
 
-uint64_t CimbDecoder::get_tile_hash(unsigned symbol)
+uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
 {
 	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark);
 	return image_hash::average_hash(tile);
@@ -36,7 +36,7 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset)
+unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
@@ -63,7 +63,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset) const
 {
 	auto bits = image_hash::fuzzy_ahash(cell);
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
@@ -79,7 +79,7 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
 {
-	return (int)(c * adjust);
+	return (uchar)(c * adjust);
 }
 
 unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
@@ -96,7 +96,7 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	g = fix_color(g, adjust);
 	b = fix_color(b, adjust);
 
-	int best_fit = 0;
+	unsigned best_fit = 0;
 	unsigned best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
@@ -113,7 +113,7 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<int, int>& drift)
+unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<int, int>& drift) const
 {
 	if (_numColors <= 1)
 		return 0;
@@ -124,14 +124,14 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	return get_best_color(r, g, b);
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset)
+unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset) const
 {
 	unsigned bits = decode_symbol(cell, drift_offset);
 	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
 	return bits;
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& color_cell)
+unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
 {
 	unsigned distance;
 	return decode(color_cell, color_cell, distance);

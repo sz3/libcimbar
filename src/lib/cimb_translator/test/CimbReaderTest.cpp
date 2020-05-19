@@ -2,6 +2,7 @@
 
 #include "CimbReader.h"
 
+#include "cimb_translator/CimbDecoder.h"
 #include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
 
@@ -21,7 +22,8 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
 	string sample_path = get_sample("4.png");
 
-	CimbReader cr(sample_path);
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample_path, decoder);
 
 	// read
 	unsigned bits1 = cr.read();
@@ -45,7 +47,8 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
 	string sample_path = get_sample("4color1e.png");
 
-	CimbReader cr(sample_path);
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample_path, decoder);
 
 	std::vector<unsigned> expected = {
 	    8, 50, 4, 47, 29, 23, 13, 50, 11, 54, 9, 41, 27, 34, 61, 48, 30, 23, 17, 40, 27, 54, 56, 51, 2
