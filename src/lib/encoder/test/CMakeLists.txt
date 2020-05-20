@@ -23,7 +23,6 @@ add_executable (
 add_test(encoder_test encoder_test)
 
 target_link_libraries(encoder_test
-	encoder
 
 	cimb_translator
 

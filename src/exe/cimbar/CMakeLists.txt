@@ -15,7 +15,6 @@ target_link_libraries(cimbar
 
 -Wl,--start-group
 	cimb_translator
-	encoder
 	extractor
 -Wl,--end-group
 
