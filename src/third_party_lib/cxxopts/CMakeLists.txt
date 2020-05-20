@@ -4,5 +4,5 @@ set(SOURCES
 	cxxopts.hpp
 )
 
-add_custom_target(cxxopts SOURCES ${SOURCES})
+add_library(cxxopts INTERFACE)
 

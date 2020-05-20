@@ -10,7 +10,7 @@ set(SOURCES
 	fountain_encoder_stream.h
 )
 
-add_custom_target(fountain SOURCES ${SOURCES})
+add_library(fountain INTERFACE)
 
 if(NOT DEFINED DISABLE_TESTS)
 	add_subdirectory(test)

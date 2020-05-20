@@ -4,5 +4,5 @@ set(SOURCES
 	int128.hpp
 )
 
-add_custom_target(intx SOURCES ${SOURCES})
+add_library(intx INTERFACE)
 

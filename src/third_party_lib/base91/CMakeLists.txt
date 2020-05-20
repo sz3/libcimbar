@@ -4,5 +4,5 @@ set(SOURCES
 	base.hpp
 )
 
-add_custom_target(base91 SOURCES ${SOURCES})
+add_library(base91 INTERFACE)
 
