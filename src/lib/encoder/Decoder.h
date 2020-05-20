@@ -20,7 +20,7 @@ public:
 
 protected:
 	template <typename STREAM>
-	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, STREAM& ostream, unsigned bits_per_op);
+	unsigned do_decode(CimbReader& reader, STREAM& ostream);
 
 protected:
 	unsigned _eccBytes;
@@ -48,17 +48,18 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
  *
  * */
 template <typename STREAM>
-inline unsigned Decoder::do_decode(CimbReader& reader, unsigned ecc_bytes, STREAM& ostream, unsigned bits_per_op)
+inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	bitwriter<> bw;
+	// reed_solomon_stream::buffer_size*6 ... probably need partial flushes to make bits line up with rss...
+	bitwriter<930> bw;
 	std::stringstream buff;
-	reed_solomon_stream rss(buff, ecc_bytes);
+	reed_solomon_stream rss(buff, _eccBytes);
 
 	unsigned bytesWritten = 0;
 	while (!reader.done())
 	{
 		unsigned bits = reader.read();
-		bw.write(bits, bits_per_op);
+		bw.write(bits, _bitsPerOp);
 		if (bw.shouldFlush())
 			bytesWritten = bw.flush(rss);
 	}
@@ -81,12 +82,12 @@ template <typename STREAM>
 inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream)
 {
 	CimbReader reader(img, _decoder);
-	return do_decode(reader, _eccBytes, ostream, _bitsPerOp);
+	return do_decode(reader, ostream);
 }
 
 inline unsigned Decoder::decode(std::string filename, std::string output)
 {
 	CimbReader reader(filename, _decoder);
 	std::ofstream f(output);
-	return do_decode(reader, _eccBytes, f, _bitsPerOp);
+	return do_decode(reader, f);
 }

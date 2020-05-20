@@ -52,6 +52,8 @@ public:
 
 	reed_solomon_stream& write(const char* data, unsigned length)
 	{
+		// length should be a multiple of buffer_size
+		// we might implement some "leftovers" functionality, e.g. storing how many bytes were unprocessed
 		if (!_rs.parity())
 		{
 			_stream.write(data, length);
@@ -59,11 +61,17 @@ public:
 		}
 
 		// else
-		ssize_t bytes = _rs.decode(data, length, _buffer.data());
-		if (bytes <= 0)
-			_stream << ReedSolomon::BadChunk(buffer_size);
-		else
-			_stream.write(_buffer.data(), bytes);
+		while (length >= buffer_size)
+		{
+			ssize_t bytes = _rs.decode(data, buffer_size, _buffer.data());
+			if (bytes <= 0)
+				_stream << ReedSolomon::BadChunk(buffer_size);
+			else
+				_stream.write(_buffer.data(), bytes);
+
+			length -= buffer_size;
+			data += buffer_size;
+		}
 		return *this;
 	}
 

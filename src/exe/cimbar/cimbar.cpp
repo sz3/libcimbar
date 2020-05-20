@@ -1,6 +1,7 @@
 
 #include "encoder/Decoder.h"
 #include "extractor/Extractor.h"
+#include "fountain/FountainInit.h"
 #include "fountain/fountain_decoder_sink.h"
 
 #include "cxxopts/cxxopts.hpp"
@@ -39,7 +40,7 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory", cxxopts::value<string>())
-	    ("e,ecc", "ECC level (default: 10)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 15)", cxxopts::value<unsigned>())
 	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as pre-processed.", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
@@ -64,6 +65,7 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
+		FountainInit::init();
 		fountain_decoder_sink<599> sink(outfile);
 		return decode(infiles, sink, d, no_deskew);
 	}

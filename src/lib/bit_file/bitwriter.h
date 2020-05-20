@@ -5,7 +5,7 @@
 #include <iostream>
 
 // write bits -> buffer
-template <unsigned _capacity=2520>
+template <unsigned _capacity=930>
 class bitwriter
 {
 public:
