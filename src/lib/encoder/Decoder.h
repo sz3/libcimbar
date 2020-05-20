@@ -13,11 +13,14 @@ class Decoder
 public:
 	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0);
 
-	unsigned decode(const cv::Mat& img, std::string output);
+	template <typename STREAM>
+	unsigned decode(const cv::Mat& img, STREAM& ostream);
+
 	unsigned decode(std::string filename, std::string output);
 
 protected:
-	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, std::string output, unsigned bits_per_op);
+	template <typename STREAM>
+	unsigned do_decode(CimbReader& reader, unsigned ecc_bytes, STREAM& ostream, unsigned bits_per_op);
 
 protected:
 	unsigned _eccBytes;
@@ -44,11 +47,12 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
  *        bw.flush()
  *
  * */
-inline unsigned Decoder::do_decode(CimbReader& reader, unsigned ecc_bytes, std::string output, unsigned bits_per_op)
+template <typename STREAM>
+inline unsigned Decoder::do_decode(CimbReader& reader, unsigned ecc_bytes, STREAM& ostream, unsigned bits_per_op)
 {
 	bitwriter<> bw;
-	std::ofstream f(output);
-	reed_solomon_stream rss(f, ecc_bytes);
+	std::stringstream buff;
+	reed_solomon_stream rss(buff, ecc_bytes);
 
 	unsigned bytesWritten = 0;
 	while (!reader.done())
@@ -61,6 +65,9 @@ inline unsigned Decoder::do_decode(CimbReader& reader, unsigned ecc_bytes, std::
 
 	// flush once more
 	bytesWritten = bw.flush(rss);
+
+	// make the buffer we pass to ostream contiguous
+	ostream << buff.str();
 	return bytesWritten;
 }
 
@@ -70,14 +77,16 @@ inline unsigned Decoder::do_decode(CimbReader& reader, unsigned ecc_bytes, std::
 // then we'd direct the stringstream to our sink
 // which would either be a filestream, or a multi-channel fountain sink
 
-inline unsigned Decoder::decode(const cv::Mat& img, std::string output)
+template <typename STREAM>
+inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream)
 {
 	CimbReader reader(img, _decoder);
-	return do_decode(reader, _eccBytes, output, _bitsPerOp);
+	return do_decode(reader, _eccBytes, ostream, _bitsPerOp);
 }
 
 inline unsigned Decoder::decode(std::string filename, std::string output)
 {
 	CimbReader reader(filename, _decoder);
-	return do_decode(reader, _eccBytes, output, _bitsPerOp);
+	std::ofstream f(output);
+	return do_decode(reader, _eccBytes, f, _bitsPerOp);
 }

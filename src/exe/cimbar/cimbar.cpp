@@ -43,7 +43,8 @@ int main(int argc, char** argv)
 	}
 
 	Decoder d(ecc);
-	unsigned bytes = d.decode(img, outfile);
+	std::ofstream f(outfile);
+	unsigned bytes = d.decode(img, f);
 	if (bytes == 0)
 		return 2;
 	return 0;
