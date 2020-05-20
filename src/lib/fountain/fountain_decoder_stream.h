@@ -28,6 +28,11 @@ public:
 		return _bufferSize - _headerSize;
 	}
 
+	size_t data_size() const
+	{
+		return _decoder.length();
+	}
+
 	bool good() const
 	{
 		return _decoder.good();

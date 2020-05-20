@@ -5,6 +5,7 @@ project(fountain_test)
 set (SOURCES
 	test.cpp
 	FountainEncodingTest.cpp
+	fountain_sinkTest.cpp
 	fountain_streamTest.cpp
 )
 

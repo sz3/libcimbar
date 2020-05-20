@@ -29,6 +29,11 @@ public:
 		wirehair_free(_codec);
 	}
 
+	size_t length() const
+	{
+		return _length;
+	}
+
 	bool good() const
 	{
 		return _codec != nullptr;

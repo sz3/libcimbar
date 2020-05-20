@@ -30,13 +30,14 @@ struct FountainMetadata
 	uint32_t file_size() const
 	{
 		uint32_t res = data[3];
-		res |= (uint32_t)data[2] << 8;
-		res |= (uint32_t)data[1] << 16;
-		res |= (uint32_t)data[0] << 24;
+		res |= ((uint32_t)data[2] << 8);
+		res |= ((uint32_t)data[1] << 16);
+		res |= ((uint32_t)data[0] << 24);
+		return res;
 	}
 
 	std::string name() const
 	{
-		return std::string(data[4], data[md_size]);
+		return std::string(data.data()+4, data.data()+md_size);
 	}
 };

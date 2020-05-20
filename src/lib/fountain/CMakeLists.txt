@@ -5,6 +5,7 @@ set(SOURCES
 	FountainEncoder.h
 	FountainInit.h
 	FountainMetadata.h
+	fountain_decoder_sink.h
 	fountain_decoder_stream.h
 	fountain_encoder_stream.h
 )
