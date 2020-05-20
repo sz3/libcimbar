@@ -17,7 +17,7 @@ class fountain_decoder_sink
 {
 public:
 	fountain_decoder_sink(std::string data_dir)
-		: _dataDir(data_dir)
+	    : _dataDir(data_dir)
 	{
 	}
 
@@ -81,6 +81,12 @@ public:
 		if (store(md.name(), *finished))
 			mark_done(md.name(), md.file_size());
 		return true;
+	}
+
+	fountain_decoder_sink& operator<<(const std::string& buffer)
+	{
+		decode_frame(buffer.data(), buffer.size());
+		return *this;
 	}
 
 protected:

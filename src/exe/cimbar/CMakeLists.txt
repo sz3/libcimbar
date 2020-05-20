@@ -19,6 +19,7 @@ target_link_libraries(cimbar
 -Wl,--end-group
 
 	correct
+	wirehair
 	${OPENCV_LIBS}
 )
 
