@@ -9,6 +9,13 @@ Extractor::Extractor()
 {
 }
 
+bool Extractor::sharpen(cv::Mat& out)
+{
+	static const cv::Mat kernel = (cv::Mat_<char>(3,3) <<  -1, -1, -1, -1, 9, -1, -1, -1, -1);
+	cv::filter2D(out, out, -1, kernel);
+	return true;
+}
+
 bool Extractor::extract(const cv::Mat& img, cv::Mat& out)
 {
 	Scanner scanner(img);
@@ -19,6 +26,9 @@ bool Extractor::extract(const cv::Mat& img, cv::Mat& out)
 	Corners corners(points[0].center(), points[1].center(), points[2].center(), points[3].center());
 	Deskewer de;
 	out = de.deskew(img, corners);
+
+	if (img.cols < out.cols or img.rows < out.rows)
+		sharpen(out);
 	return true;
 }
 
