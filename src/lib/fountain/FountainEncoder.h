@@ -40,10 +40,7 @@ public:
 		uint32_t written = 0;
 		WirehairResult res = wirehair_encode(_codec, block_num, buff, size, &written);
 		if (res != Wirehair_Success)
-		{
-			std::cout << "wirehair_encode failed: " << res << std::endl;
 			return 0;
-		}
 		return written;
 	}
 
