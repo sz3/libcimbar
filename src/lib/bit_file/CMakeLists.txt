@@ -5,7 +5,7 @@ set(SOURCES
 	bitwriter.h
 )
 
-add_custom_target(bit_file SOURCES ${SOURCES})
+add_library(bit_file INTERFACE)
 
 if(NOT DEFINED DISABLE_TESTS)
 	add_subdirectory(test)

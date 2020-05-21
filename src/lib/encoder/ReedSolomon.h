@@ -1,7 +1,7 @@
 #pragma once
 
 extern "C" {
-	#include "libcorrect/include/correct.h"
+    #include "libcorrect/include/correct.h"
 }
 
 // a wrapper for libcorrect's correct_reed_solomon_encode()
@@ -9,10 +9,20 @@ extern "C" {
 class ReedSolomon
 {
 public:
-	ReedSolomon(size_t parity_bytes)
-		: _parityBytes(parity_bytes)
+	struct BadChunk
 	{
-		_rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_ccsds, 1, 1, _parityBytes);
+		unsigned size;
+
+		BadChunk(unsigned size)
+		    : size(size)
+		{}
+	};
+
+public:
+	ReedSolomon(size_t parity_bytes)
+	    : _parityBytes(parity_bytes)
+	{
+		_rs = correct_reed_solomon_create(correct_rs_primitive_polynomial_8_7_2_1_0, 1, 1, _parityBytes);
 	}
 
 	~ReedSolomon()

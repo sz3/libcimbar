@@ -6,7 +6,7 @@ set (SOURCES
 	test.cpp
 	DecoderTest.cpp
 	EncoderTest.cpp
-	EncoderIntegrationTest.cpp
+	reed_solomon_streamTest.cpp
 )
 
 include_directories(
@@ -23,11 +23,11 @@ add_executable (
 add_test(encoder_test encoder_test)
 
 target_link_libraries(encoder_test
-	encoder
 
 	cimb_translator
 
 	correct
+	wirehair
 	${OPENCV_LIBS}
 )
 

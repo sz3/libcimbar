@@ -6,7 +6,7 @@ set(SOURCES
 	hamming_distance.h
 )
 
-add_custom_target(image_hash SOURCES ${SOURCES})
+add_library(image_hash INTERFACE)
 
 if(NOT DEFINED DISABLE_TESTS)
 	add_subdirectory(test)

@@ -5,7 +5,7 @@
 #include <iostream>
 
 // write bits -> buffer
-template <unsigned _capacity=2520>
+template <unsigned _capacity=930>
 class bitwriter
 {
 public:
@@ -41,11 +41,12 @@ public:
 		return true;
 	}
 
-	unsigned flush(File& f)
+	template <typename STREAM>
+	long flush(STREAM& f)
 	{
-		unsigned bytesWritten = f.write(buffer().data(), _currentByte);
+		f.write(buffer().data(), _currentByte);
 		clear();
-		return bytesWritten;
+		return f.tellp();
 	}
 
 	bool shouldFlush() const
