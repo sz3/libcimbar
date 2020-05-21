@@ -8,8 +8,6 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic -std=c++17")
-	# -ftime-report
-	# -ffast-math
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
@@ -25,6 +23,7 @@ set (PROJECTS
 	src/lib/cimb_translator
 	src/lib/encoder
 	src/lib/extractor
+	src/lib/fountain
 	src/lib/image_hash
 	src/lib/serialize
 	src/lib/util
@@ -34,6 +33,7 @@ set (PROJECTS
 	src/third_party_lib/intx
 	src/third_party_lib/libcorrect
 	src/third_party_lib/libpopcnt
+	src/third_party_lib/wirehair
 )
 
 include_directories(

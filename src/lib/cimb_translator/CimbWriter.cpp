@@ -23,7 +23,7 @@ namespace {
 
 CimbWriter::CimbWriter(bool dark, unsigned size)
     : _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
-    , _encoder()
+    , _encoder(Config::symbol_bits(), Config::color_bits())
 {
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
 	_image = cv::Mat(size, size, CV_8UC3, bgcolor);
@@ -39,7 +39,7 @@ bool CimbWriter::write(unsigned bits)
 {
 	// check with _encoder for tile, then place it in template according to mapping
 	// mapping will track current index/location?
-	if (_position.done())
+	if (done())
 		return false;
 
 	CellPosition::coordinate xy = _position.next();
@@ -48,7 +48,12 @@ bool CimbWriter::write(unsigned bits)
 	return true;
 }
 
-bool CimbWriter::save(std::string filename) const
+bool CimbWriter::done() const
 {
-	return cv::imwrite(filename, _image);
+	return _position.done();
+}
+
+cv::Mat CimbWriter::image() const
+{
+	return _image;
 }

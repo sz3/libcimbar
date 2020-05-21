@@ -22,6 +22,11 @@ unsigned Config::bits_per_cell()
 	return color_bits() + symbol_bits();
 }
 
+unsigned Config::ecc_bytes()
+{
+	return 15;
+}
+
 unsigned Config::image_size()
 {
 	return 1024;

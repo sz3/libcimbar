@@ -4,5 +4,5 @@ set(SOURCES
 	libpopcnt.h
 )
 
-add_custom_target(libpopcnt SOURCES ${SOURCES})
+add_library(libpopcnt INTERFACE)
 
