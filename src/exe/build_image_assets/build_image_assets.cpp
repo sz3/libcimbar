@@ -57,7 +57,7 @@ int main(int argc, char** argv)
 
 	std::ofstream out("bitmaps.h");
 	out << "namespace cimbar {" << std::endl;
-	out << "const std::map<std::string, std::string> bitmaps = {" << std::endl;
+	out << "static const std::map<std::string, std::string> bitmaps = {" << std::endl;
 
 	map<string, string> blobs = getFileBlobs(bitmapDir);
 	for (auto const& [key, val] : blobs)
