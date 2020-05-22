@@ -15,6 +15,18 @@ namespace {
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
+	cv::Mat getHorizontalGuide(bool dark)
+	{
+		string name = dark? "guide-horizontal-dark" : "guide-horizontal-light";
+		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+	}
+
+	cv::Mat getVerticalGuide(bool dark)
+	{
+		string name = dark? "guide-vertical-dark" : "guide-vertical-light";
+		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+	}
+
 	void paste(cv::Mat& canvas, const cv::Mat& img, int x, int y)
 	{
 		img.copyTo(canvas(cv::Rect(x, y, img.cols, img.rows)));
@@ -33,6 +45,16 @@ CimbWriter::CimbWriter(bool dark, unsigned size)
 	paste(_image, anchor, 0, size - anchor.cols);
 	paste(_image, anchor, size - anchor.rows, 0);
 	paste(_image, anchor, size - anchor.rows, size - anchor.cols);
+
+	cv::Mat hg = getHorizontalGuide(dark);
+	paste(_image, hg, (size/2) - (hg.cols/2), 2);
+	paste(_image, hg, (size/2) - (hg.cols/2), size-4);
+	paste(_image, hg, (size/2) - (hg.cols/2) - hg.cols, size-4);
+	paste(_image, hg, (size/2) - (hg.cols/2) + hg.cols, size-4);
+
+	cv::Mat vg = getVerticalGuide(dark);
+	paste(_image, vg, 2, (size/2) - (vg.rows/2));
+	paste(_image, vg, size-4, (size/2) - (vg.rows/2));
 }
 
 bool CimbWriter::write(unsigned bits)

@@ -17,5 +17,7 @@ static const std::map<std::string, std::string> bitmaps = {
 {"bitmap/4/0e.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA3bCw`Xax4{yRBFBtj'rv[~o1$V9V00!ori]C`cWu}ig3?XdNJN=G)aFTa6`(;M=/$t_h,2[nkN),bvw{-$eAAA6yQMFGPe=hnB)"},
 {"bitmap/4/0f.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA,bCw`Xaxh;yR3DBtV)p*P~)hAqLKv/~5YPfv72qB?zhG$1Mc]ZMl8-|1Vp:dg]_qWW37LAS}`KMR/LOVPb@}ZCAAC'nHpwZ9)'&F)"},
 {"bitmap/anchor-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAAk_AAAA.FMAAAkUJ/IKAAdZ=J.!wCC'\vBAVBWBP%tvNAAAskCw`Xg#A$mr2Dmu1X~4C*~sns0GV]=CYS#olfs)j'~4i8n5Rja=Ytlm5slR:K~%Re)(F-S:Diz*Xqr{NUwa{;Bk?S-GK)OSFpFE@:M:iVE7===wt=CmK]BRxEZ3j6H)OSFpv1YC7.S:DiHJwU*aNu{pf_E{\r~v.?Qi*aNuRIC?`8EzH`I@Qi*aNuRIC?%|Z:Y$Z4U!g~lh1lJAAAuW&wUY6eit&F)"},
+{"bitmap/guide-horizontal-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAA6yBAC'5FMAAAR9S,$BAAdZ=J.!wCC'\vBAVBWBP%tvNAAA$YCw`XJ0Cy\~B'B'di~haCJlf^Vxa4CAmy4B|;F4_RBAAA9ZNoBz[uhNI)"},
+{"bitmap/guide-vertical-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAA:CAAAA]FMAAAs8KD,IAAdZ=J.!wCC'\vBAVBWBP%tvNAAAFZCw`XJ0Cy\~B'B'0tVE[hHB~hpx+RJ,pVZA|;DV-vzcLWKBAABtnHpwZ9)'&F)"},
 };
 }
