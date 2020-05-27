@@ -6,14 +6,25 @@
 
 using namespace cimbar;
 
-CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder)
+namespace {
+	void preprocessSymbolGrid(cv::Mat& img)
+	{
+		static const cv::Mat kernel = (cv::Mat_<char>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
+		cv::filter2D(img, img, -1, kernel);
+	}
+}
+
+CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool should_preprocess)
     : _image(img)
     , _cellSize(Config::cell_size() + 2)
     , _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _drift()
     , _decoder(decoder)
 {
-	cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
+	_grayscale = _image;
+	if (should_preprocess)
+		preprocessSymbolGrid(_grayscale);
+	cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
 unsigned CimbReader::read()

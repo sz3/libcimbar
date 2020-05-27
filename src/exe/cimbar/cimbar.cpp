@@ -16,17 +16,21 @@ int decode(const vector<string>& infiles, STREAM& ostream, Decoder& d, bool no_d
 {
 	for (const string& inf : infiles)
 	{
+		bool shouldPreprocess = false;
 		cv::Mat img;
 		if (no_deskew)
 			img = cv::imread(inf);
 		else
 		{
 			Extractor ext;
-			if (!ext.extract(inf, img))
+			int res = ext.extract(inf, img);
+			if (!res)
 				return 1;
+			else if (res == Extractor::NEEDS_SHARPEN)
+				shouldPreprocess = true;
 		}
 
-		unsigned bytes = d.decode(img, ostream);
+		unsigned bytes = d.decode(img, ostream, shouldPreprocess);
 		if (bytes == 0)
 			return 2;
 	}

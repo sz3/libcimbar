@@ -14,7 +14,7 @@ public:
 	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0);
 
 	template <typename STREAM>
-	unsigned decode(const cv::Mat& img, STREAM& ostream);
+	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
 
 	unsigned decode(std::string filename, std::string output);
 
@@ -79,9 +79,9 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 // which would either be a filestream, or a multi-channel fountain sink
 
 template <typename STREAM>
-inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream)
+inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess)
 {
-	CimbReader reader(img, _decoder);
+	CimbReader reader(img, _decoder, should_preprocess);
 	return do_decode(reader, ostream);
 }
 
@@ -89,5 +89,5 @@ inline unsigned Decoder::decode(std::string filename, std::string output)
 {
 	cv::Mat img = cv::imread(filename);
 	std::ofstream f(output);
-	return decode(img, f);
+	return decode(img, f, false);
 }
