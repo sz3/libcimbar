@@ -6,6 +6,8 @@
 
 namespace cimbar
 {
+	using RGB = std::tuple<uchar,uchar,uchar>;
+
 	cv::Mat load_img(std::string path, const std::string& image_dir="");
 
 	colorutil::Lab convertColor(uchar r, uchar g, uchar b);

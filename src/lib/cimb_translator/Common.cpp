@@ -15,9 +15,20 @@ using std::array;
 using std::string;
 using std::vector;
 
-namespace cimbar {
+namespace {
+	array<colorutil::Lab, 8> _convertAllColors()
+	{
+		array<colorutil::Lab, 8> colors;
+		for (int i = 0; i < colors.size(); ++i)
+		{
+			cimbar::RGB rgb = cimbar::getColor(i);
+			colors[i] = cimbar::convertColor(std::get<0>(rgb), std::get<1>(rgb), std::get<2>(rgb));
+		}
+		return colors;
+	}
+}
 
-using RGB = std::tuple<uchar,uchar,uchar>;
+namespace cimbar {
 
 cv::Mat load_img(string path, const string& image_dir)
 {
@@ -40,11 +51,6 @@ colorutil::Lab convertColor(uchar r, uchar g, uchar b)
 	return colorutil::convert_XYZ_to_Lab(xyz);
 }
 
-colorutil::Lab convertColor(const RGB& rgb)
-{
-	return convertColor(std::get<0>(rgb), std::get<1>(rgb), std::get<2>(rgb));
-}
-
 RGB getColor(unsigned index)
 {
 	// opencv uses BGR, but we don't have to conform to this tyranny
@@ -63,16 +69,7 @@ RGB getColor(unsigned index)
 
 colorutil::Lab getLabColor(unsigned index)
 {
-	static const array<colorutil::Lab, 8> colors = {
-	    convertColor(getColor(0)),
-	    convertColor(getColor(1)),
-	    convertColor(getColor(2)),
-	    convertColor(getColor(3)),
-	    convertColor(getColor(4)),
-	    convertColor(getColor(5)),
-	    convertColor(getColor(6)),
-	    convertColor(getColor(7))
-	};
+	static const array<colorutil::Lab, 8> colors = _convertAllColors();
 	return colors[index];
 }
 
