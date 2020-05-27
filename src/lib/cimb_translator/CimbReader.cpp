@@ -6,10 +6,6 @@
 
 using namespace cimbar;
 
-CimbReader::CimbReader(std::string filename, const CimbDecoder& decoder)
-    : CimbReader(cv::imread(filename), decoder)
-{}
-
 CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder)
     : _image(img)
     , _cellSize(Config::cell_size() + 2)

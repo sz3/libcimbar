@@ -87,7 +87,7 @@ inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream)
 
 inline unsigned Decoder::decode(std::string filename, std::string output)
 {
-	CimbReader reader(filename, _decoder);
+	cv::Mat img = cv::imread(filename);
 	std::ofstream f(output);
-	return do_decode(reader, f);
+	return decode(img, f);
 }

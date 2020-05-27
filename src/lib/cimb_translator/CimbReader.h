@@ -10,7 +10,6 @@
 class CimbReader
 {
 public:
-	CimbReader(std::string filename, const CimbDecoder& decoder);
 	CimbReader(const cv::Mat& img, const CimbDecoder& decoder);
 
 	unsigned read();
