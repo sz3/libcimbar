@@ -9,7 +9,7 @@ using namespace cimbar;
 namespace {
 	void preprocessSymbolGrid(cv::Mat& img)
 	{
-		static const cv::Mat kernel = (cv::Mat_<char>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
+		static const cv::Mat kernel = (cv::Mat_<float>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
 		cv::filter2D(img, img, -1, kernel);
 	}
 }
