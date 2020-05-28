@@ -7,15 +7,15 @@ class Cell
 {
 public:
 	Cell(const cv::Mat& img)
-		: Cell(img, 0, 0, img.cols, img.rows)
+	    : Cell(img, 0, 0, img.cols, img.rows)
 	{}
 
 	Cell(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
-		: _img(img)
-		, _xstart(xstart)
-		, _ystart(ystart)
-		, _cols(cols)
-		, _rows(rows)
+	    : _img(img)
+	    , _xstart(xstart)
+	    , _ystart(ystart)
+	    , _cols(cols)
+	    , _rows(rows)
 	{}
 
 	std::tuple<uchar,uchar,uchar> mean_rgb()

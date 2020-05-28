@@ -21,10 +21,14 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool shou
     , _drift()
     , _decoder(decoder)
 {
-	_grayscale = _image;
 	if (should_preprocess)
+	{
+		_grayscale = img.clone();
 		preprocessSymbolGrid(_grayscale);
-	cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
+	}
+	else
+		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
 unsigned CimbReader::read()
