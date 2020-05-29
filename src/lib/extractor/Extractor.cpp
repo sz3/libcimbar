@@ -20,7 +20,7 @@ int Extractor::extract(const cv::Mat& img, cv::Mat& out)
 	Deskewer de;
 	out = de.deskew(img, corners);
 
-	if (img.cols < out.cols or img.rows < out.rows)  // arguably, this check could/should use Corner distance instead of img.cols/rows
+	if ( !corners.is_granular_scale(de.total_size()) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }

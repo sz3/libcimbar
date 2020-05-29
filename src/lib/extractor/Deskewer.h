@@ -10,6 +10,7 @@ class Deskewer
 {
 public:
 	Deskewer(unsigned total_size=1024, unsigned anchor_size=30);
+	int total_size() const;
 
 	cv::Mat deskew(std::string img, const Corners& corners);
 	cv::Mat deskew(const cv::Mat& img, const Corners& corners);

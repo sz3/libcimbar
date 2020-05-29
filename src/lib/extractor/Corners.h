@@ -45,6 +45,25 @@ public:
 		return points;
 	}
 
+	bool is_granular_scale(unsigned min_size) const
+	{
+		// if any of our edges are < min_size, return false -- this means we'll be upscaling when we run a deskew.
+		return (
+		        check_scaling(_top_left, _top_right, min_size) and
+		        check_scaling(_top_right, _bottom_right, min_size) and
+		        check_scaling(_bottom_right, _bottom_left, min_size) and
+		        check_scaling(_bottom_left, _top_left, min_size)
+		);
+	}
+
+protected:
+	bool check_scaling(const point& a, const point& b, unsigned min_size) const
+	{
+		auto [x1, y1] = a;
+		auto [x2, y2] = b;
+		return abs(x1 - x2) > min_size or abs(y1 - y2) > min_size;
+	}
+
 protected:
 	point _top_left;
 	point _top_right;
