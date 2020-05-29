@@ -10,5 +10,6 @@
 #define assertStringsEqual(x,y) REQUIRE(std::string(x) == std::string(y))
 #define assertStringContains(x,y) assertMsg(std::string(y).find(x) != std::string::npos, std::string(y) + " did not contain " + std::string(x))
 #define assertInRange(x,y,z) REQUIRE(x <= y); REQUIRE(y <= z)
+#define assertAlmostEquals(x,y) assertInRange(x-1,y,x+1)
 #define assertNull(expr) REQUIRE(expr == (void*)NULL)
 #define assertNotNull(expr) REQUIRE(expr != (void*)NULL)
