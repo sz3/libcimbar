@@ -102,3 +102,13 @@ TEST_CASE( "ScannerTest/testSmallSample.2", "[unit]" )
 	    turbo::str::join(candidates)
 	);
 }
+
+TEST_CASE( "ScannerTest/testSmallSample.3", "[unit]" )
+{
+	cv::Mat img = cv::imread(get_sample("4color-cam-140.jpg"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates = sc.scan();
+	// order is top-left, top-right, bottom-left, bottom-right
+	assertEquals("33+-25,124+-25 819+-23,132+-25 111+-17,827+-17 747+-18,839+-16", turbo::str::join(candidates));
+}

@@ -35,5 +35,6 @@ protected:
 	cv::Mat _img;
 	bool _dark;
 	int _skip;
+	int _mergeCutoff;
 };
 

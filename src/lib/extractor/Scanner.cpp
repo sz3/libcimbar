@@ -30,6 +30,7 @@ namespace {
 Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
     , _skip(skip)
+    , _mergeCutoff(img.cols / 34)
 {
 	_img = preprocess_image(img);
 }
@@ -71,7 +72,7 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 		bool foundMerge = false;
 		for (Anchor& m : merged)
 		{
-			if (::abs(m.xavg() - c.xavg()) < 50 and ::abs(m.yavg() - c.yavg()) < 50)
+			if (m.within_merge_distance(c, _mergeCutoff))
 			{
 				foundMerge = true;
 				m.merge(c);
@@ -239,18 +240,24 @@ std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidat
 	std::vector<Anchor> points;
 	for (const Anchor& p : candidates)
 	{
-		std::vector<Anchor> scratch;
+		std::vector<Anchor> confirms;
 		int xstart = p.x() - p.xrange();
 		int xend = p.xmax() + p.xrange();
-		if (!scan_horizontal(scratch, p.yavg(), xstart, xend))
+		if (!scan_horizontal(confirms, p.yavg(), xstart, xend))
 			continue;
 
 		int ystart = p.y() - p.yrange();
 		int yend = p.ymax() + p.yrange();
-		if (!scan_vertical(scratch, p.xavg(), ystart, yend))
+		if (!scan_vertical(confirms, p.xavg(), ystart, yend))
 			continue;
 
-		points.push_back(p);
+		Anchor merged(p);
+		for (const Anchor& co : confirms)
+		{
+			if (co.within_merge_distance(p, _mergeCutoff))
+				merged.merge(co);
+		}
+		points.push_back(merged);
 	}
 	return deduplicate_candidates(points);
 }
