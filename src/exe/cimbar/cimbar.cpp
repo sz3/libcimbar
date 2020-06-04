@@ -1,5 +1,6 @@
 
 #include "encoder/Decoder.h"
+#include "encoder/Encoder.h"
 #include "extractor/Extractor.h"
 #include "fountain/FountainInit.h"
 #include "fountain/fountain_decoder_sink.h"
@@ -44,8 +45,9 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory", cxxopts::value<string>())
-	    ("e,ecc", "ECC level (default: 15)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 30)", cxxopts::value<unsigned>())
 	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
+	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
 	    ("force-preprocess", "Force the sharpen/preprocessing filter to run on the input image.", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
@@ -59,24 +61,40 @@ int main(int argc, char** argv)
 	}
 
 	vector<string> infiles = result["in"].as<vector<string>>();
-	string outfile = result["out"].as<string>();
+	string outpath = result["out"].as<string>();
 
-	bool no_deskew = result.count("no-deskew");
-	bool force_preprocess = result.count("force-preprocess");
+	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = 15;
+	unsigned ecc = 30;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
+
+	if (encode)
+	{
+		Encoder en(ecc);
+		for (const string& f : infiles)
+		{
+			if (fountain)
+				en.encode_fountain(f, outpath);
+			else
+				en.encode(f, outpath);
+		}
+		return 0;
+	}
+
+	// else, decode
+	bool no_deskew = result.count("no-deskew");
+	bool force_preprocess = result.count("force-preprocess");
 	Decoder d(ecc);
 
 	if (fountain)
 	{
 		FountainInit::init();
-		fountain_decoder_sink<599> sink(outfile);
+		fountain_decoder_sink<599> sink(outpath);
 		return decode(infiles, sink, d, no_deskew, force_preprocess);
 	}
 
 	// else
-	std::ofstream f(outfile);
+	std::ofstream f(outpath);
 	return decode(infiles, f, d, no_deskew, force_preprocess);
 }

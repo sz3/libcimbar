@@ -12,7 +12,7 @@
 class Decoder
 {
 public:
-	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0, bool interleave=true);
+	Decoder(unsigned ecc_bytes=30, unsigned bits_per_op=0, bool interleave=true);
 
 	template <typename STREAM>
 	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);

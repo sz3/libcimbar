@@ -15,7 +15,7 @@
 class Encoder
 {
 public:
-	Encoder(unsigned bits_per_symbol=0, unsigned bits_per_color=0, unsigned ecc_bytes=15);
+	Encoder(unsigned ecc_bytes=30, unsigned bits_per_symbol=0, unsigned bits_per_color=0);
 
 	template <typename STREAM>
 	std::optional<cv::Mat> encode_next(STREAM& stream);
@@ -24,15 +24,15 @@ public:
 	unsigned encode_fountain(const std::string& filename, std::string output_prefix);
 
 protected:
+	unsigned _eccBytes;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
-	unsigned _eccBytes;
 };
 
-inline Encoder::Encoder(unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
-    : _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
+inline Encoder::Encoder(unsigned ecc_bytes, unsigned bits_per_symbol, unsigned bits_per_color)
+    : _eccBytes(ecc_bytes)
+    , _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
     , _bitsPerColor(bits_per_color? bits_per_color : cimbar::Config::color_bits())
-    , _eccBytes(ecc_bytes)
 {
 }
 
