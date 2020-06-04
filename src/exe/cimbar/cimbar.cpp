@@ -69,6 +69,9 @@ int main(int argc, char** argv)
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
+	if (fountain)
+		FountainInit::init();
+
 	if (encode)
 	{
 		Encoder en(ecc);
@@ -89,8 +92,7 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		FountainInit::init();
-		fountain_decoder_sink<599> sink(outpath);
+		fountain_decoder_sink<394> sink(outpath);
 		return decode(infiles, sink, d, no_deskew, force_preprocess);
 	}
 
