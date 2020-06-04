@@ -5,13 +5,14 @@
 #include "cimb_translator/CimbDecoder.h"
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
+#include "cimb_translator/Interleave.h"
 #include <opencv2/opencv.hpp>
 #include <string>
 
 class Decoder
 {
 public:
-	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0);
+	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0, bool interleave=true);
 
 	template <typename STREAM>
 	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
@@ -25,12 +26,14 @@ protected:
 protected:
 	unsigned _eccBytes;
 	unsigned _bitsPerOp;
+	unsigned _interleaveBlocks;
 	CimbDecoder _decoder;
 };
 
-inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
+inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleave)
     : _eccBytes(ecc_bytes)
     , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
+    , _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
     , _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits())
 {
 }
@@ -56,8 +59,10 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	reed_solomon_stream rss(buff, _eccBytes);
 
 	unsigned bytesWritten = 0;
-	while (!reader.done())
+	for (unsigned i : Interleave::interleave_indices(reader.num_reads(), _interleaveBlocks))
 	{
+		if (reader.done())
+			break;
 		unsigned bits = reader.read();
 		bw.write(bits, _bitsPerOp);
 		if (bw.shouldFlush())

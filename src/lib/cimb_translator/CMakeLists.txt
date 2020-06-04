@@ -19,6 +19,7 @@ set(SOURCES
 	Common.h
 	Config.cpp
 	Config.h
+	Interleave.h
 )
 
 add_library(cimb_translator STATIC ${SOURCES})

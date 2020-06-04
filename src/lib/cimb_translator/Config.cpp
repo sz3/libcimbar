@@ -57,4 +57,9 @@ unsigned Config::corner_padding()
 	return 6;
 }
 
+unsigned Config::interleave_blocks()
+{
+	return 155;
+}
+
 }
