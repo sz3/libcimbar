@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ReedSolomon.h"
+#include "encoder/aligned_stream.h"
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -25,7 +26,7 @@ public:
 		return _good and _stream.good();
 	}
 
-	long tellp()
+	long tellp() const
 	{
 		return _stream.tellp();
 	}
@@ -101,5 +102,12 @@ inline std::ofstream& operator<<(std::ofstream& os, const ReedSolomon::BadChunk&
 inline std::stringstream& operator<<(std::stringstream& s, const ReedSolomon::BadChunk& chunk)
 {
 	s << std::string('\0', chunk.size);
+	return s;
+}
+
+template <typename STREAM>
+inline aligned_stream<STREAM>& operator<<(aligned_stream<STREAM>& s, const ReedSolomon::BadChunk& chunk)
+{
+	s.mark_bad_chunk(chunk.size);
 	return s;
 }
