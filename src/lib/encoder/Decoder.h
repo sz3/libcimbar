@@ -18,6 +18,9 @@ public:
 	template <typename STREAM>
 	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
 
+	template <typename STREAM>
+	unsigned decode_fountain(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
+
 	unsigned decode(std::string filename, std::string output);
 
 protected:
@@ -54,12 +57,7 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleav
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	// reed_solomon_stream::buffer_size*6 ... probably need partial flushes to make bits line up with rss...
 	bitbuffer<> bb;
-	std::stringstream buff;
-	reed_solomon_stream rss(buff, _eccBytes);
-
-	unsigned bytesWritten = 0;
 	for (unsigned i : Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks))
 	{
 		if (reader.done())
@@ -69,12 +67,8 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		bb.write(bits, index, _bitsPerOp);
 	}
 
-	// flush to decoder
-	bytesWritten = bb.flush(rss);
-
-	// make the buffer we pass to ostream contiguous
-	ostream << buff.str();
-	return bytesWritten;
+	reed_solomon_stream rss(ostream, _eccBytes);
+	return bb.flush(rss);
 }
 
 // seems like we want to take a file or img, and have an output sink
@@ -88,6 +82,19 @@ inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream, bool should
 {
 	CimbReader reader(img, _decoder, should_preprocess);
 	return do_decode(reader, ostream);
+}
+
+template <typename FOUNTAINSTREAM>
+inline unsigned Decoder::decode_fountain(const cv::Mat& img, FOUNTAINSTREAM& ostream, bool should_preprocess)
+{
+	CimbReader reader(img, _decoder, should_preprocess);
+
+	std::stringstream buff;
+	aligned_stream aligner(buff, ostream.chunk_size(), ostream.md_size());
+	unsigned res = do_decode(reader, aligner);
+	if (res)
+		ostream << buff.str(); // make the buffer contiguous
+	return res;
 }
 
 inline unsigned Decoder::decode(std::string filename, std::string output)

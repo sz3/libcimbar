@@ -21,6 +21,16 @@ public:
 	{
 	}
 
+	unsigned chunk_size() const
+	{
+		return _bufferSize;
+	}
+
+	unsigned md_size() const
+	{
+		return FountainMetadata::md_size;
+	}
+
 	bool store(const std::string& name, const std::vector<uint8_t>& data)
 	{
 		std::string file_path = fmt::format("{}/{}", _dataDir, name);
@@ -54,15 +64,15 @@ public:
 
 	bool decode_frame(const char* data, unsigned size)
 	{
-		if (size < FountainMetadata::md_size)
+		if (size < md_size())
 			return false;
 
 		FountainMetadata md(data, size);
 		if (!md.file_size())
 			return false;
 
-		data += FountainMetadata::md_size;
-		size -= FountainMetadata::md_size;
+		data += md_size();
+		size -= md_size();
 
 		// check if already done
 		if (is_done(md.name(), md.file_size()))

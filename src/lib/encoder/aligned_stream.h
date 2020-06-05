@@ -16,6 +16,11 @@ public:
 	{
 	}
 
+	bool good() const
+	{
+		return _stream.good();
+	}
+
 	long tellp() const
 	{
 		return _stream.tellp();

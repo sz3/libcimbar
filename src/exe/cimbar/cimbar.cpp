@@ -7,13 +7,13 @@
 
 #include "cxxopts/cxxopts.hpp"
 
+#include <functional>
 #include <string>
 #include <vector>
 using std::string;
 using std::vector;
 
-template <typename STREAM>
-int decode(const vector<string>& infiles, STREAM& ostream, Decoder& d, bool no_deskew, bool force_preprocess)
+int decode(const vector<string>& infiles, std::function<int(cv::Mat, bool)>& decode, bool no_deskew, bool force_preprocess)
 {
 	for (const string& inf : infiles)
 	{
@@ -31,7 +31,7 @@ int decode(const vector<string>& infiles, STREAM& ostream, Decoder& d, bool no_d
 				shouldPreprocess = true;
 		}
 
-		unsigned bytes = d.decode(img, ostream, shouldPreprocess);
+		int bytes = decode(img, shouldPreprocess);
 		if (bytes == 0)
 			return 2;
 	}
@@ -93,10 +93,16 @@ int main(int argc, char** argv)
 	if (fountain)
 	{
 		fountain_decoder_sink<394> sink(outpath);
-		return decode(infiles, sink, d, no_deskew, force_preprocess);
+		std::function<int(cv::Mat,bool)> fun = [&sink, &d] (cv::Mat m, bool pre) {
+			return d.decode_fountain(m, sink, pre);
+		};
+		return decode(infiles, fun, no_deskew, force_preprocess);
 	}
 
 	// else
 	std::ofstream f(outpath);
-	return decode(infiles, f, d, no_deskew, force_preprocess);
+	std::function<int(cv::Mat,bool)> fun = [&f, &d] (cv::Mat m, bool pre) {
+		return d.decode(m, f, pre);
+	};
+	return decode(infiles, fun, no_deskew, force_preprocess);
 }
