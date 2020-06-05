@@ -4,6 +4,7 @@ project(bit_file_test)
 
 set (SOURCES
 	test.cpp
+	bitbufferTest.cpp
 	bitreaderTest.cpp
 	bitwriterTest.cpp
 )
