@@ -29,6 +29,18 @@ namespace Interleave
 		return indices;
 	}
 
+	inline std::vector<unsigned> interleave_reverse(unsigned size, int num_chunks)
+	{
+		std::vector<unsigned> indices = interleave_indices(size, num_chunks);
+		std::vector<unsigned> inverted(indices.size(), 0);
+		for (unsigned src = 0; src < indices.size(); ++src)
+		{
+			unsigned dst = indices[src];
+			inverted[dst] = src;
+		}
+		return inverted;
+	}
+
 	template <typename PT>
 	inline std::vector<PT> interleave(const std::vector<PT>& positions, int num_chunks)
 	{

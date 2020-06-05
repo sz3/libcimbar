@@ -65,11 +65,11 @@ public:
 		_buffer.resize(6 * _size_hint, 0);
 	}
 
-	const std::vector<unsigned char>& buffer() const
+	const std::vector<char>& buffer() const
 	{
 		return _buffer;
 	}
 
 protected:
-	std::vector<unsigned char> _buffer;
+	std::vector<char> _buffer;
 };

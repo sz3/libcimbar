@@ -1,11 +1,12 @@
 #pragma once
 
 #include "reed_solomon_stream.h"
-#include "bit_file/bitwriter.h"
+#include "bit_file/bitbuffer.h"
 #include "cimb_translator/CimbDecoder.h"
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
 #include "cimb_translator/Interleave.h"
+
 #include <opencv2/opencv.hpp>
 #include <string>
 
@@ -54,23 +55,22 @@ template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	// reed_solomon_stream::buffer_size*6 ... probably need partial flushes to make bits line up with rss...
-	bitwriter<930> bw;
+	bitbuffer<> bb;
 	std::stringstream buff;
 	reed_solomon_stream rss(buff, _eccBytes);
 
 	unsigned bytesWritten = 0;
-	for (unsigned i : Interleave::interleave_indices(reader.num_reads(), _interleaveBlocks))
+	for (unsigned i : Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks))
 	{
 		if (reader.done())
 			break;
 		unsigned bits = reader.read();
-		bw.write(bits, _bitsPerOp);
-		if (bw.shouldFlush())
-			bytesWritten = bw.flush(rss);
+		unsigned index = i * _bitsPerOp;
+		bb.write(bits, index, _bitsPerOp);
 	}
 
-	// flush once more
-	bytesWritten = bw.flush(rss);
+	// flush to decoder
+	bytesWritten = bb.flush(rss);
 
 	// make the buffer we pass to ostream contiguous
 	ostream << buff.str();
