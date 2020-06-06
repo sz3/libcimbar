@@ -13,7 +13,7 @@ namespace {
 	string exampleDecodedBlock()
 	{
 		string ex = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
-			    "012345678901234567890123456789012345678901234567890123456789";
+		        "012345678901234567890123456789012345678901234567890123456789";
 		return ex;
 	}
 
@@ -49,5 +49,18 @@ TEST_CASE( "reed_solomon_streamTest/testDecodeOnce", "[unit]" )
 	string actual = outs.str();
 	assertEquals( 140, actual.size() );
 	assertEquals( exampleDecodedBlock(), actual );
+}
+
+TEST_CASE( "reed_solomon_streamTest/testDecodeBad", "[unit]" )
+{
+	stringstream outs;
+	reed_solomon_stream<stringstream> rss(outs, 15);
+
+	string encoded = string(155, 'f');
+	rss.write(encoded.data(), encoded.size());
+
+	string actual = outs.str();
+	assertEquals( 140, actual.size() );
+	assertEquals( string(140, '\0'), actual );
 }
 

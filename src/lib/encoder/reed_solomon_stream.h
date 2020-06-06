@@ -66,7 +66,7 @@ public:
 		{
 			ssize_t bytes = _rs.decode(data, buffer_size, _buffer.data());
 			if (bytes <= 0)
-				_stream << ReedSolomon::BadChunk(buffer_size);
+				_stream << ReedSolomon::BadChunk(buffer_size - _rs.parity());
 			else
 				_stream.write(_buffer.data(), bytes);
 
@@ -95,13 +95,14 @@ inline std::ifstream& operator<<(std::ifstream& s, const ReedSolomon::BadChunk& 
 
 inline std::ofstream& operator<<(std::ofstream& os, const ReedSolomon::BadChunk& chunk)
 {
-	os << std::string('\0', chunk.size);
+	os << std::string(chunk.size, '\0');
 	return os;
 }
 
 inline std::stringstream& operator<<(std::stringstream& s, const ReedSolomon::BadChunk& chunk)
 {
-	s << std::string('\0', chunk.size);
+	std::string temp(chunk.size, '\0');
+	s.write(temp.data(), temp.size());
 	return s;
 }
 
