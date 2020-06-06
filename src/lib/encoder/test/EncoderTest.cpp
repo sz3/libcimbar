@@ -19,7 +19,7 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 	File f("/tmp/test.txt");
 	f.write(input.data(), input.size());
 
-	Encoder enc(30, 4, 2);
+	Encoder enc(40, 4, 2);
 	assertEquals( 2, enc.encode("/tmp/test.txt", "/tmp/doesntmatteryet.txt") );
 }
 
@@ -31,6 +31,6 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	File f("/tmp/test.txt");
 	f.write(input.data(), input.size());
 
-	Encoder enc(30, 4, 2);
+	Encoder enc(40, 4, 2);
 	assertEquals( 4, enc.encode_fountain("/tmp/test.txt", "/tmp/forthefans.txt") );
 }

@@ -6,7 +6,6 @@ set (SOURCES
 	test.cpp
 	bitbufferTest.cpp
 	bitreaderTest.cpp
-	bitwriterTest.cpp
 )
 
 include_directories(

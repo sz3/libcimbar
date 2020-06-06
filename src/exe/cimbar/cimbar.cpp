@@ -8,6 +8,7 @@
 #include "cxxopts/cxxopts.hpp"
 
 #include <functional>
+#include <iostream>
 #include <string>
 #include <vector>
 using std::string;
@@ -15,6 +16,7 @@ using std::vector;
 
 int decode(const vector<string>& infiles, std::function<int(cv::Mat, bool)>& decode, bool no_deskew, bool force_preprocess)
 {
+	int err = 0;
 	for (const string& inf : infiles)
 	{
 		bool shouldPreprocess = force_preprocess;
@@ -26,16 +28,19 @@ int decode(const vector<string>& infiles, std::function<int(cv::Mat, bool)>& dec
 			Extractor ext;
 			int res = ext.extract(inf, img);
 			if (!res)
-				return 1;
+			{
+				err |= 1;
+				continue;
+			}
 			else if (res == Extractor::NEEDS_SHARPEN)
 				shouldPreprocess = true;
 		}
 
 		int bytes = decode(img, shouldPreprocess);
-		if (bytes == 0)
-			return 2;
+		if (!bytes)
+			err |= 2;
 	}
-	return 0;
+	return err;
 }
 
 int main(int argc, char** argv)
@@ -45,7 +50,7 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory", cxxopts::value<string>())
-	    ("e,ecc", "ECC level (default: 30)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 40)", cxxopts::value<unsigned>())
 	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
@@ -65,7 +70,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = 30;
+	unsigned ecc = 40;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
@@ -92,7 +97,7 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		fountain_decoder_sink<394> sink(outpath);
+		fountain_decoder_sink<626> sink(outpath);
 		std::function<int(cv::Mat,bool)> fun = [&sink, &d] (cv::Mat m, bool pre) {
 			return d.decode_fountain(m, sink, pre);
 		};

@@ -24,7 +24,7 @@ unsigned Config::bits_per_cell()
 
 unsigned Config::ecc_bytes()
 {
-	return 15;
+	return 40;
 }
 
 unsigned Config::image_size()

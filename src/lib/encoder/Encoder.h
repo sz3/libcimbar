@@ -15,7 +15,7 @@
 class Encoder
 {
 public:
-	Encoder(unsigned ecc_bytes=30, unsigned bits_per_symbol=0, unsigned bits_per_color=0);
+	Encoder(unsigned ecc_bytes=40, unsigned bits_per_symbol=0, unsigned bits_per_color=0);
 
 	template <typename STREAM>
 	std::optional<cv::Mat> encode_next(STREAM& stream);
@@ -99,10 +99,10 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
-	fountain_encoder_stream fes = fountain_encoder_stream<394>::create(f);
-	// 394 * 19 == 7486. With ecc = 30, we have 60 rs blocks * 125 bytes per block == 7500 bytes to work with. 14 are the header.
+	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(f);
+	// 626 * 11 == 6886. With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
 	// it would be nice to make this saner
-	unsigned target = fes.blocks_required() * 2 / 19;
+	unsigned target = fes.blocks_required() * 2 / 11;
 
 	std::vector<std::string> splits = turbo::str::split(filename, '/');
 	std::string shortname = splits.size()? splits.back() : filename;

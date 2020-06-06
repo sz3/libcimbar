@@ -13,7 +13,7 @@
 class Decoder
 {
 public:
-	Decoder(unsigned ecc_bytes=30, unsigned bits_per_op=0, bool interleave=true);
+	Decoder(unsigned ecc_bytes=40, unsigned bits_per_op=0, bool interleave=true);
 
 	template <typename STREAM>
 	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
@@ -92,8 +92,8 @@ inline unsigned Decoder::decode_fountain(const cv::Mat& img, FOUNTAINSTREAM& ost
 	std::stringstream buff;
 	aligned_stream aligner(buff, ostream.chunk_size(), ostream.md_size());
 	unsigned res = do_decode(reader, aligner);
-	if (res)
-		ostream << buff.str(); // make the buffer contiguous
+
+	ostream << buff.str(); // make the buffer contiguous
 	return res;
 }
 
