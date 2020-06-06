@@ -7,18 +7,19 @@ class aligned_stream
 {
 public:
 	aligned_stream(STREAM& stream, unsigned align_increment, unsigned align_offset)
-		: _stream(stream)
-		, _buffer(align_increment, 0)
-		, _offset(0)
-		, _alignOffset(align_offset)
-		, _alignIncrement(align_increment)
-		, _badChunk(false)
+	    : _stream(stream)
+	    , _buffer(align_increment, 0)
+	    , _offset(0)
+	    , _alignOffset(align_offset)
+	    , _alignIncrement(align_increment)
+	    , _badChunk(false)
+	    , _good(true)
 	{
 	}
 
 	bool good() const
 	{
-		return _stream.good();
+		return _good and _stream.good();
 	}
 
 	long tellp() const
@@ -33,6 +34,9 @@ public:
 	// if we get a bad chunk, discard buffer, and mark buffer as dirty?
 	aligned_stream& write(const char* data, unsigned length)
 	{
+		if (!good())
+			return *this;
+
 		// also have the header to contend with
 		while (length > 0)
 		{
@@ -82,6 +86,8 @@ public:
 	void mark_bad_chunk(unsigned len)
 	{
 		_badChunk = true;
+		if (_offset < _alignOffset)
+			_good = false;
 		_offset += len;
 		_offset = _offset % _alignIncrement;
 	}
@@ -101,5 +107,6 @@ protected:
 	unsigned _alignOffset;
 	unsigned _alignIncrement;
 	bool _badChunk;
+	bool _good;
 };
 
