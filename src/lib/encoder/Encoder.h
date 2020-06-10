@@ -100,7 +100,11 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, std::strin
 {
 	std::ifstream f(filename);
 	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(f);
-	// 626 * 11 == 6886. With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
+	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
+	// 626 * 11 == 6886.
+	// or 313 * 22 == 6886? Smaller may be better, given we need full chunks to make progress
+	// for 7 bits + 40 ecc, we'd have 70 blocks == 8050 bytes. -> 8036 of data.
+	//  could use any of 164, 196, 287, 574
 	// it would be nice to make this saner
 	unsigned target = fes.blocks_required() * 2 / 11;
 
