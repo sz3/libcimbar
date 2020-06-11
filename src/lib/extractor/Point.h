@@ -2,12 +2,14 @@
 
 #include <climits>
 #include <cmath>
+#include <ostream>
 #include <utility>
 
-class point : private std::pair<int, int>
+template <typename V>
+class point : private std::pair<V, V>
 {
 protected:
-	typedef std::pair<int, int> base_pair;
+	typedef std::pair<V, V> base_pair;
 
 public:
 	static inline const point NONE()
@@ -17,12 +19,12 @@ public:
 
 	using base_pair::pair;
 
-	int x() const
+	V x() const
 	{
 		return this->first;
 	}
 
-	int y() const
+	V y() const
 	{
 		return this->second;
 	}
@@ -60,8 +62,34 @@ public:
 		return *this;
 	}
 
-	int distance(const point& rhs) const
+	V distance(const point& rhs) const
 	{
 		return std::pow(rhs.x() - x(), 2) + std::pow(rhs.y() - y(), 2);
 	}
+
+	point<double> to_float() const
+	{
+		return point<double>(x(), y());
+	}
+
+	point<int> to_int() const
+	{
+		return point<int>(x(), y());
+	}
 };
+
+inline std::ostream& operator<<(std::ostream& outstream, const point<int>& p)
+{
+	if (p == point<int>::NONE())
+		outstream << "NONE";
+	else
+		outstream << p.x() << "," << p.y();
+	return outstream;
+}
+
+inline std::ostream& operator<<(std::ostream& outstream, const point<double>& p)
+{
+	outstream << p.x() << "," << p.y();
+	return outstream;
+}
+

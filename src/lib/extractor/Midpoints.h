@@ -6,7 +6,7 @@
 class Midpoints
 {
 public:
-	Midpoints(const std::vector<point>& points)
+	Midpoints(const std::vector<point<int>>& points)
 		: _points(points)
 	{
 	}
@@ -16,26 +16,26 @@ public:
 		return _points.size() < 4;
 	}
 
-	const point& top() const
+	const point<int>& top() const
 	{
 		return _points[0];
 	}
 
-	const point& bottom() const
+	const point<int>& bottom() const
 	{
 		return _points[1];
 	}
 
-	const point& left() const
+	const point<int>& left() const
 	{
 		return _points[2];
 	}
 
-	const point& right() const
+	const point<int>& right() const
 	{
 		return _points[3];
 	}
 
 protected:
-	std::vector<point> _points;
+	std::vector<point<int>> _points;
 };

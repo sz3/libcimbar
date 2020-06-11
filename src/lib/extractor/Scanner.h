@@ -13,7 +13,7 @@ public: // public interface
 	Scanner(const cv::Mat& img, bool dark=true, int skip=17);
 
 	std::vector<Anchor> scan();
-	std::vector<point> scan_edges(const Corners& corners);
+	std::vector<point<int>> scan_edges(const Corners& corners);
 
 public: // other interesting methods
 	static cv::Mat preprocess_image(const cv::Mat& img);
@@ -34,8 +34,8 @@ protected: // internal member functions
 	void scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
 	// edge detection
-	bool chase_edge(const point& start, const std::pair<double, double>& unit) const;
-	bool find_edge(point& e, const point& u, const point& v, point mid) const;
+	bool chase_edge(const point<int>& start, const std::pair<double, double>& unit) const;
+	bool find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<int> mid) const;
 
 protected:
 	cv::Mat _img;

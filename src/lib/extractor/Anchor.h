@@ -27,7 +27,7 @@ public:
 		_ymax = std::max(_ymax, other.ymax());
 	}
 
-	point center() const
+	point<int> center() const
 	{
 		return {xavg(), yavg()};
 	}

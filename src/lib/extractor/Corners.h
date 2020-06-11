@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Anchor.h"
 #include "Point.h"
 #include <opencv2/opencv.hpp>
 #include <tuple>
@@ -7,7 +8,12 @@
 class Corners
 {
 public:
-	Corners(point top_left, point top_right, point bottom_left, point bottom_right)
+	Corners(const std::vector<Anchor>& anchors)
+	    : Corners(anchors[0].center(), anchors[1].center(), anchors[2].center(), anchors[3].center())
+	{
+	}
+
+	Corners(point<int> top_left, point<int> top_right, point<int> bottom_left, point<int> bottom_right)
 	    : _top_left(top_left)
 	    , _top_right(top_right)
 	    , _bottom_left(bottom_left)
@@ -15,22 +21,22 @@ public:
 	{
 	}
 
-	const point& top_left() const
+	const point<int>& top_left() const
 	{
 		return _top_left;
 	}
 
-	const point& top_right() const
+	const point<int>& top_right() const
 	{
 		return _top_right;
 	}
 
-	const point& bottom_right() const
+	const point<int>& bottom_right() const
 	{
 		return _bottom_right;
 	}
 
-	const point& bottom_left() const
+	const point<int>& bottom_left() const
 	{
 		return _bottom_left;
 	}
@@ -46,8 +52,8 @@ public:
 	}
 
 protected:
-	point _top_left;
-	point _top_right;
-	point _bottom_right;
-	point _bottom_left;
+	point<int> _top_left;
+	point<int> _top_right;
+	point<int> _bottom_right;
+	point<int> _bottom_left;
 };

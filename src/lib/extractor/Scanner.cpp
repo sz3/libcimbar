@@ -302,7 +302,7 @@ std::vector<Anchor> Scanner::scan()
 	return candidates;
 }
 
-bool Scanner::chase_edge(const point& start, const std::pair<double, double>& unit) const
+bool Scanner::chase_edge(const point<int>& start, const std::pair<double, double>& unit) const
 {
 	// test 4 points. If we get 2/4, success
 	int success = 0;
@@ -316,19 +316,19 @@ bool Scanner::chase_edge(const point& start, const std::pair<double, double>& un
 	return success >= 2;
 }
 
-bool Scanner::find_edge(point& e, const point& u, const point& v, point mid) const
+bool Scanner::find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<int> mid) const
 {
-	point distance_v = v - u;
+	point<int> distance_v = v - u;
 	std::pair<double, double> distance_unit = {distance_v.x() / 512.0, distance_v.y() / 512.0};
-	point out_v = {distance_v.y() / 64, distance_v.x() / -64};
-	point in_v = {-out_v.x(), -out_v.y()};
+	point<int> out_v = {distance_v.y() / 64, distance_v.x() / -64};
+	point<int> in_v = {-out_v.x(), -out_v.y()};
 
-	if (mid == point::NONE())
+	if (mid == point<int>::NONE())
 		mid = u + (distance_v / 2);
-	point mid_point_anchor_adjust = out_v * (_anchorSize / 16.0);
+	point<int> mid_point_anchor_adjust = out_v * (_anchorSize / 16.0);
 	mid += mid_point_anchor_adjust;
 
-	for (const point& check : {out_v, in_v})
+	for (const point<int>& check : {out_v, in_v})
 	{
 		double max_check = std::max(abs(check.x()), abs(check.y()));
 		std::pair<double, double> unit = {check.x() / max_check, check.y() / max_check};
@@ -362,14 +362,14 @@ bool Scanner::find_edge(point& e, const point& u, const point& v, point mid) con
 }
 
 
-std::vector<point> Scanner::scan_edges(const Corners& corners)
+std::vector<point<int>> Scanner::scan_edges(const Corners& corners)
 {
-	std::vector<point> edges;
+	std::vector<point<int>> edges;
 	Midpoints mps = Geometry::calculate_midpoints(corners);
 	if (!mps)
 		return edges;
 
-	point eg;
+	point<int> eg;
 	if (find_edge(eg, corners.top_left(), corners.top_right(), mps.top()))
 		edges.push_back(eg);
 	if (find_edge(eg, corners.top_right(), corners.bottom_right(), mps.right()))
