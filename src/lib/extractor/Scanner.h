@@ -2,6 +2,7 @@
 
 #include "Anchor.h"
 #include "Corners.h"
+#include "Point.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
@@ -12,6 +13,7 @@ public: // public interface
 	Scanner(const cv::Mat& img, bool dark=true, int skip=17);
 
 	std::vector<Anchor> scan();
+	std::vector<point> scan_edges(const Corners& corners);
 
 public: // other interesting methods
 	static cv::Mat preprocess_image(const cv::Mat& img);
@@ -31,10 +33,15 @@ protected: // internal member functions
 	bool scan_vertical(std::vector<Anchor>& points, int x, int xmax=-1, int ystart=-1, int yend=-1) const;
 	void scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
+	// edge detection
+	bool chase_edge(const point& start, const std::pair<double, double>& unit) const;
+	bool find_edge(point& e, const point& u, const point& v, point mid) const;
+
 protected:
 	cv::Mat _img;
 	bool _dark;
 	int _skip;
 	int _mergeCutoff;
+	int _anchorSize;
 };
 

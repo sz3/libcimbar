@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Point.h"
 #include <opencv2/opencv.hpp>
 #include <tuple>
-using point = std::tuple<int, int>;
 
 class Corners
 {
@@ -38,10 +38,10 @@ public:
 	std::vector<cv::Point2f> all() const
 	{
 		std::vector<cv::Point2f> points;
-		points.push_back(cv::Point2f(std::get<0>(_top_left), std::get<1>(_top_left)));
-		points.push_back(cv::Point2f(std::get<0>(_top_right), std::get<1>(_top_right)));
-		points.push_back(cv::Point2f(std::get<0>(_bottom_left), std::get<1>(_bottom_left)));
-		points.push_back(cv::Point2f(std::get<0>(_bottom_right), std::get<1>(_bottom_right)));
+		points.push_back(cv::Point2f(_top_left.x(), _top_left.y()));
+		points.push_back(cv::Point2f(_top_right.x(), _top_right.y()));
+		points.push_back(cv::Point2f(_bottom_left.x(), _bottom_left.y()));
+		points.push_back(cv::Point2f(_bottom_right.x(), _bottom_right.y()));
 		return points;
 	}
 

@@ -5,8 +5,12 @@ set(SOURCES
 	Corners.h
 	Deskewer.cpp
 	Deskewer.h
+	EdgeScanState.h
 	Extractor.cpp
 	Extractor.h
+	Geometry.h
+	Midpoints.h
+	Point.h
 	ScanState.cpp
 	ScanState.h
 	Scanner.cpp

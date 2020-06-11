@@ -1,5 +1,8 @@
 #include "Scanner.h"
 
+#include "Corners.h"
+#include "EdgeScanState.h"
+#include "Geometry.h"
 #include "ScanState.h"
 #include "serialize/format.h"
 #include <algorithm>
@@ -31,6 +34,7 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
     , _skip(skip)
     , _mergeCutoff(img.cols / 30)
+    , _anchorSize(30)
 {
 	_img = preprocess_image(img);
 }
@@ -296,4 +300,84 @@ std::vector<Anchor> Scanner::scan()
 	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
 	return candidates;
+}
+
+bool Scanner::chase_edge(const point& start, const std::pair<double, double>& unit) const
+{
+	// test 4 points. If we get 2/4, success
+	int success = 0;
+	for (int i : {-2, -1, 1, 2})
+	{
+		int x = start.x() + (int)(unit.first * i);
+		int y = start.y() + (int)(unit.second * i);
+		if (test_pixel(x, y))
+			++success;
+	}
+	return success >= 2;
+}
+
+bool Scanner::find_edge(point& e, const point& u, const point& v, point mid) const
+{
+	point distance_v = v - u;
+	std::pair<double, double> distance_unit = {distance_v.x() / 512.0, distance_v.y() / 512.0};
+	point out_v = {distance_v.y() / 64, distance_v.x() / -64};
+	point in_v = {-out_v.x(), -out_v.y()};
+
+	if (mid == point::NONE())
+		mid = u + (distance_v / 2);
+	point mid_point_anchor_adjust = out_v * (_anchorSize / 16.0);
+	mid += mid_point_anchor_adjust;
+
+	for (const point& check : {out_v, in_v})
+	{
+		double max_check = std::max(abs(check.x()), abs(check.y()));
+		std::pair<double, double> unit = {check.x() / max_check, check.y() / max_check};
+
+		EdgeScanState state;
+		double i = 0, j = 0;
+		while (abs(i) <= abs(check.x()) and abs(j) <= abs(check.y()))
+		{
+			int x = mid.x() + i;
+			int y = mid.y() + j;
+			if (x < 0 or x >= _img.cols or y < 0 or y >= _img.rows)
+			{
+				i += unit.first;
+				j += unit.second;
+				continue;
+			}
+			bool active = test_pixel(x, y);
+			int size = state.process(active);
+			if (size > 0)
+			{
+				e = {x - (unit.first * size / 2), y - (unit.second * size / 2)};
+				if (chase_edge(e, distance_unit))
+					return true;
+			}
+			i += unit.first;
+			j += unit.second;
+		}
+	}
+
+	return false;
+}
+
+
+std::vector<point> Scanner::scan_edges(const Corners& corners)
+{
+	std::vector<point> edges;
+	Midpoints mps = Geometry::calculate_midpoints(corners);
+	if (!mps)
+		return edges;
+
+	point eg;
+	if (find_edge(eg, corners.top_left(), corners.top_right(), mps.top()))
+		edges.push_back(eg);
+	if (find_edge(eg, corners.top_right(), corners.bottom_right(), mps.right()))
+		edges.push_back(eg);
+	if (find_edge(eg, corners.bottom_right(), corners.bottom_left(), mps.bottom()))
+		edges.push_back(eg);
+	if (find_edge(eg, corners.bottom_left(), corners.top_left(), mps.left()))
+		edges.push_back(eg);
+
+	return edges;
 }
