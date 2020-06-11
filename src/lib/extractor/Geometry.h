@@ -25,7 +25,7 @@ namespace Geometry
 
 		double D = ay * bx - ax * by;
 		if (fabs(D) < 1e-8)
-			return std::nullopt;
+		    return std::nullopt;
 
 		double Dx = adet * bx - ax * bdet;
 		double Dy = ay * bdet - adet * by;
@@ -34,7 +34,7 @@ namespace Geometry
 
 	inline Midpoints calculate_midpoints(const Corners& sq)
 	{
-		std::vector<point<int>> mids;
+		std::vector<floating_point> mids;
 		using line = std::pair<floating_point, floating_point>;
 
 		line cross1 = {sq.top_left().to_float(), sq.bottom_right().to_float()};
@@ -60,27 +60,27 @@ namespace Geometry
 		// there are some corner cases that need to be handled here...
 		auto tmid = line_intersection(top, vertical);
 		if (!tmid)
-			mids.push_back(point<int>::NONE());
+			mids.push_back(point<double>::NONE());
 		else
-			mids.push_back(tmid->to_int());
+			mids.push_back(*tmid);
 
 		auto bmid = line_intersection(bottom, vertical);
 		if (!bmid)
-			mids.push_back(point<int>::NONE());
+			mids.push_back(point<double>::NONE());
 		else
-			mids.push_back(bmid->to_int());
+			mids.push_back(*bmid);
 
 		auto lmid = line_intersection(left, horizontal);
 		if (!lmid)
-			mids.push_back(point<int>::NONE());
+			mids.push_back(point<double>::NONE());
 		else
-			mids.push_back(lmid->to_int());
+			mids.push_back(*lmid);
 
 		auto rmid = line_intersection(right, horizontal);
 		if (!rmid)
-			mids.push_back(point<int>::NONE());
+			mids.push_back(point<double>::NONE());
 		else
-			mids.push_back(rmid->to_int());
+			mids.push_back(*rmid);
 
 		return mids;
 	}

@@ -12,12 +12,8 @@ protected:
 	typedef std::pair<V, V> base_pair;
 
 public:
-	static inline const point NONE()
-	{
-		return {INT_MIN, INT_MIN};
-	}
-
 	using base_pair::pair;
+	static inline const point NONE();
 
 	V x() const
 	{
@@ -34,7 +30,6 @@ public:
 		return this->first == rhs.first and this->second == rhs.second;
 	}
 
-
 	point operator+(const point& rhs) const
 	{
 		return {x() + rhs.x(), y() + rhs.y()};
@@ -45,12 +40,22 @@ public:
 		return {x() - rhs.x(), y() - rhs.y()};
 	}
 
-	point operator/(double div) const
+	point operator+(V scalar) const
+	{
+		return {x() + scalar, y() + scalar};
+	}
+
+	point operator-(V scalar) const
+	{
+		return {x() - scalar, y() - scalar};
+	}
+
+	point operator/(V div) const
 	{
 		return {x() / div, y() / div};
 	}
 
-	point operator*(double scalar) const
+	point operator*(V scalar) const
 	{
 		return {x() * scalar, y() * scalar};
 	}
@@ -78,18 +83,25 @@ public:
 	}
 };
 
-inline std::ostream& operator<<(std::ostream& outstream, const point<int>& p)
+template <>
+inline const point<int> point<int>::NONE()
 {
-	if (p == point<int>::NONE())
+	return {INT_MIN, INT_MIN};
+}
+
+template <>
+inline const point<double> point<double>::NONE()
+{
+	return {std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
+}
+
+template <typename V>
+inline std::ostream& operator<<(std::ostream& outstream, const point<V>& p)
+{
+	if (p == point<V>::NONE())
 		outstream << "NONE";
 	else
 		outstream << p.x() << "," << p.y();
-	return outstream;
-}
-
-inline std::ostream& operator<<(std::ostream& outstream, const point<double>& p)
-{
-	outstream << p.x() << "," << p.y();
 	return outstream;
 }
 

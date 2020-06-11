@@ -34,8 +34,8 @@ protected: // internal member functions
 	void scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
 	// edge detection
-	bool chase_edge(const point<int>& start, const std::pair<double, double>& unit) const;
-	bool find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<int> mid) const;
+	bool chase_edge(const point<double>& start, const point<double>& unit) const;
+	bool find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<double> mid) const;
 
 protected:
 	cv::Mat _img;

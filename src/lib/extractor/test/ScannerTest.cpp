@@ -83,6 +83,7 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 
 	Corners cs(candidates);
 	std::vector<point<int>> edges = sc.scan_edges(cs);
-	assertEquals( "446,151 846,548 472,906 90,567", turbo::str::join(edges) );
+	// (444, 152), (846, 548), (472, 906), (91, 569)
+	assertEquals( "445,151 847,549 472,906 90,569", turbo::str::join(edges) );
 }
 
