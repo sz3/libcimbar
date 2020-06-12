@@ -9,6 +9,7 @@ set (SOURCES
 	ExtractorTest.cpp
 	ScanStateTest.cpp
 	ScannerTest.cpp
+	SimpleCameraCalibrationTest.cpp
 )
 
 include_directories(

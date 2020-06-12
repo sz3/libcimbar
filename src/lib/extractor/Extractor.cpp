@@ -16,7 +16,7 @@ int Extractor::extract(const cv::Mat& img, cv::Mat& out)
 	if (points.size() < 4)
 		return FAILURE;
 
-	Corners corners(points[0].center(), points[1].center(), points[2].center(), points[3].center());
+	Corners corners(points);
 	Deskewer de;
 	out = de.deskew(img, corners);
 

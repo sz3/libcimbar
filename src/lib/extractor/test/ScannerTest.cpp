@@ -3,6 +3,7 @@
 #include "Scanner.h"
 
 #include "Corners.h"
+#include "Midpoints.h"
 #include "Point.h"
 #include "serialize/str_join.h"
 #include <iostream>
@@ -82,8 +83,12 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 	);
 
 	Corners cs(candidates);
-	std::vector<point<int>> edges = sc.scan_edges(cs);
+	Midpoints mp;
+	std::vector<point<int>> edges = sc.scan_edges(cs, mp);
 	// (444, 152), (846, 548), (472, 906), (91, 569)
 	assertEquals( "445,151 847,549 472,906 90,569", turbo::str::join(edges) );
+
+	// check "expected" midpoints as well.
+	assertEquals( "446.662,174.366 823.277,548.729 472.746,887.052 111.503,567.53", turbo::str::join(mp.points()) );
 }
 

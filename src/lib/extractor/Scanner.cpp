@@ -39,6 +39,11 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
 	_img = preprocess_image(img);
 }
 
+int Scanner::anchor_size() const
+{
+	return _anchorSize;
+}
+
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 {
 	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
@@ -316,7 +321,7 @@ bool Scanner::chase_edge(const point<double>& start, const point<double>& unit) 
 	return success >= 2;
 }
 
-bool Scanner::find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<double> mid) const
+point<int> Scanner::find_edge(const point<int>& u, const point<int>& v, point<double> mid) const
 {
 	// should probably use more floats!
 	point<double> distance_v = v.to_float() - u.to_float();
@@ -325,7 +330,7 @@ bool Scanner::find_edge(point<int>& e, const point<int>& u, const point<int>& v,
 	point<double> in_v = {-out_v.x(), -out_v.y()};
 
 	if (mid == point<double>::NONE())
-		mid = u.to_float() + (distance_v / 2);
+		mid = u.to_float() + (distance_v / 2.0);
 	point<double> mid_point_anchor_adjust = out_v * (_anchorSize / 16.0);
 	mid += mid_point_anchor_adjust;
 
@@ -352,35 +357,26 @@ bool Scanner::find_edge(point<int>& e, const point<int>& u, const point<int>& v,
 			{
 				point<double> edge = {x - (unit.x() * size / 2), y - (unit.y() * size / 2)};
 				if (chase_edge(edge, distance_unit))
-				{
-					e = edge.to_int();
-					return true;
-				}
+					return edge.to_int();
 			}
 			i += unit.x();
 			j += unit.y();
 		}
 	}
 
-	return false;
+	return point<int>::NONE();
 }
 
-std::vector<point<int>> Scanner::scan_edges(const Corners& corners)
+std::vector<point<int>> Scanner::scan_edges(const Corners& corners, Midpoints& mps) const
 {
 	std::vector<point<int>> edges;
-	Midpoints mps = Geometry::calculate_midpoints(corners);
+	mps = Geometry::calculate_midpoints(corners);
 	if (!mps)
 		return edges;
 
-	point<int> eg;
-	if (find_edge(eg, corners.top_left(), corners.top_right(), mps.top()))
-		edges.push_back(eg);
-	if (find_edge(eg, corners.top_right(), corners.bottom_right(), mps.right()))
-		edges.push_back(eg);
-	if (find_edge(eg, corners.bottom_right(), corners.bottom_left(), mps.bottom()))
-		edges.push_back(eg);
-	if (find_edge(eg, corners.bottom_left(), corners.top_left(), mps.left()))
-		edges.push_back(eg);
-
+	edges.push_back( find_edge(corners.top_left(), corners.top_right(), mps.top()) );
+	edges.push_back( find_edge(corners.top_right(), corners.bottom_right(), mps.right()) );
+	edges.push_back( find_edge(corners.bottom_right(), corners.bottom_left(), mps.bottom()) );
+	edges.push_back( find_edge(corners.bottom_left(), corners.top_left(), mps.left()) );
 	return edges;
 }

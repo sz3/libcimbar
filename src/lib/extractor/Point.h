@@ -25,6 +25,11 @@ public:
 		return this->second;
 	}
 
+	operator bool() const
+	{
+		return *this != NONE();
+	}
+
 	bool operator==(const point& rhs) const
 	{
 		return this->first == rhs.first and this->second == rhs.second;
@@ -67,7 +72,7 @@ public:
 		return *this;
 	}
 
-	V distance(const point& rhs) const
+	V squared_distance(const point& rhs) const
 	{
 		return std::pow(rhs.x() - x(), 2) + std::pow(rhs.y() - y(), 2);
 	}

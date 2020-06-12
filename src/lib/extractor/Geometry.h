@@ -11,7 +11,7 @@ namespace Geometry
 {
 	using floating_point = point<double>;
 
-	inline std::optional<floating_point> line_intersection(const std::pair<floating_point, floating_point>& lineA, const std::pair<floating_point, floating_point>& lineB)
+	inline floating_point line_intersection(const std::pair<floating_point, floating_point>& lineA, const std::pair<floating_point, floating_point>& lineB)
 	{
 		auto compute = [] (const floating_point& p, const floating_point& q) {
 			double xdiff = q.x() - p.x();
@@ -25,7 +25,7 @@ namespace Geometry
 
 		double D = ay * bx - ax * by;
 		if (fabs(D) < 1e-8)
-		    return std::nullopt;
+		    return floating_point::NONE();
 
 		double Dx = adet * bx - ax * bdet;
 		double Dy = ay * bdet - adet * by;
@@ -48,39 +48,27 @@ namespace Geometry
 		auto leftRightInf = line_intersection(right, left);
 		if (!leftRightInf)
 			return mids;
-		line vertical = {*center, *leftRightInf};
+		line vertical = {center, leftRightInf};
 
 		line top = {sq.top_left().to_float(), sq.top_right().to_float()};
 		line bottom = {sq.bottom_left().to_float(), sq.bottom_right().to_float()};
 		auto topBottomInf = line_intersection(top, bottom);
 		if (!topBottomInf)
 			return mids;
-		line horizontal = {*center, *topBottomInf};
+		line horizontal = {center, topBottomInf};
 
 		// there are some corner cases that need to be handled here...
 		auto tmid = line_intersection(top, vertical);
-		if (!tmid)
-			mids.push_back(point<double>::NONE());
-		else
-			mids.push_back(*tmid);
-
-		auto bmid = line_intersection(bottom, vertical);
-		if (!bmid)
-			mids.push_back(point<double>::NONE());
-		else
-			mids.push_back(*bmid);
-
-		auto lmid = line_intersection(left, horizontal);
-		if (!lmid)
-			mids.push_back(point<double>::NONE());
-		else
-			mids.push_back(*lmid);
+		mids.push_back(tmid);
 
 		auto rmid = line_intersection(right, horizontal);
-		if (!rmid)
-			mids.push_back(point<double>::NONE());
-		else
-			mids.push_back(*rmid);
+		mids.push_back(rmid);
+
+		auto bmid = line_intersection(bottom, vertical);
+		mids.push_back(bmid);
+
+		auto lmid = line_intersection(left, horizontal);
+		mids.push_back(lmid);
 
 		return mids;
 	}

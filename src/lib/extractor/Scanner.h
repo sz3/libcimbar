@@ -1,19 +1,23 @@
 #pragma once
 
 #include "Anchor.h"
-#include "Corners.h"
 #include "Point.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
 
+class Corners;
+class Midpoints;
+
 class Scanner
 {
 public: // public interface
 	Scanner(const cv::Mat& img, bool dark=true, int skip=17);
+	int anchor_size() const;
 
 	std::vector<Anchor> scan();
-	std::vector<point<int>> scan_edges(const Corners& corners);
+	std::vector<point<int>> scan_edges(const Corners& corners, Midpoints& mps) const;
+
 
 public: // other interesting methods
 	static cv::Mat preprocess_image(const cv::Mat& img);
@@ -35,7 +39,7 @@ protected: // internal member functions
 
 	// edge detection
 	bool chase_edge(const point<double>& start, const point<double>& unit) const;
-	bool find_edge(point<int>& e, const point<int>& u, const point<int>& v, point<double> mid) const;
+	point<int> find_edge(const point<int>& u, const point<int>& v, point<double> mid) const;
 
 protected:
 	cv::Mat _img;
