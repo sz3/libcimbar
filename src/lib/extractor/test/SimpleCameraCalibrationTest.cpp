@@ -9,16 +9,9 @@
 #include <string>
 #include <vector>
 
-namespace {
-	std::string get_sample(std::string filename)
-	{
-		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
-	}
-}
-
 TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("4color-ecc40-fountain.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4color-ecc40-fountain.jpg"));
 
 
 	SimpleCameraCalibration scc;

@@ -10,16 +10,10 @@
 #include <string>
 #include <vector>
 
-namespace {
-	std::string get_sample(std::string filename)
-	{
-		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
-	}
-}
 
 TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("4color-ecc40-fountain.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4color-ecc40-fountain.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.t1_scan_rows();
@@ -53,7 +47,7 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 
 TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("4color-ecc40-fountain.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4color-ecc40-fountain.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -69,7 +63,7 @@ TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 
 TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 {
-	cv::Mat img = cv::imread(get_sample("4color-ecc40-fountain.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4color-ecc40-fountain.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();

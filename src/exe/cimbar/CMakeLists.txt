@@ -13,10 +13,8 @@ add_executable (
 
 target_link_libraries(cimbar
 
--Wl,--start-group
 	cimb_translator
 	extractor
--Wl,--end-group
 
 	correct
 	wirehair

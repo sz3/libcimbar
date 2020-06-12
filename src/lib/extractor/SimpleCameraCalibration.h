@@ -7,6 +7,7 @@
 class Corners;
 class Midpoints;
 
+// implements CAMERA_CALIBRATOR
 class SimpleCameraCalibration
 {
 public:
