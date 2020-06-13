@@ -12,7 +12,7 @@ public:
 
 	int process(bool active)
 	{
-		bool is_transition = _state == 0 and active or _state == 1 and !active;
+		bool is_transition = (_state == 0 and active) or (_state == 1 and !active);
 		if (is_transition)
 		{
 			_state += 1;
