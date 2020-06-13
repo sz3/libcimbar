@@ -27,7 +27,7 @@ public:
 				return false;
 		}
 
-		cv::remap(img, out, _map1, _map2, cv::INTER_LINEAR);
+		cv::remap(img, out, _map1, _map2, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 		return true;
 	}
 
