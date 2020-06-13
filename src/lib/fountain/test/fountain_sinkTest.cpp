@@ -23,17 +23,15 @@ namespace {
 		return input;
 	}
 
-	string createFrame(string name, unsigned size)
+	string createFrame(fountain_encoder_stream<626>& fes, string name)
 	{
-		stringstream input = dummyContents(size);
-		fountain_encoder_stream fes = fountain_encoder_stream<599>::create(input);
 		fes.encode_metadata_block(name);
 
 		stringstream ss;
-		std::array<char, 140> buff;
+		std::array<char, 115> buff;
 
-		// for a 8400 byte frame, 140*60 does the trick
-		// 599*14 + 14 byte md block
+		// for a 6900 byte frame, 115*60 does the trick
+		// 626*11 + 14 byte md block
 		for (int i = 0; i < 60; ++i)
 		{
 			unsigned res = fes.readsome(buff.data(), buff.size());
@@ -42,15 +40,22 @@ namespace {
 		}
 		return ss.str();
 	}
+
+	string createFrame(string name, unsigned size)
+	{
+		stringstream input = dummyContents(size);
+		fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+		return createFrame(fes, name);
+	}
 }
 
 TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 {
 	FountainInit::init();
 
-	fountain_decoder_sink<599> sink("/tmp");
+	fountain_decoder_sink<626> sink("/tmp");
 	string iframe = createFrame("theBeginning", 1200);
-	assertEquals( 8400, iframe.size() );
+	assertEquals( 6900, iframe.size() );
 
 	FountainMetadata md(iframe.data(), iframe.size());
 	assertEquals( 1200, md.file_size() );
@@ -76,4 +81,38 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 	assertEquals( 1200, contents.size() );
 	contents = File("/tmp/another").read_all();
 	assertEquals( 1600, contents.size() );
+}
+
+TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
+{
+	FountainInit::init();
+
+	fountain_decoder_sink<626> sink("/tmp");
+
+	stringstream input = dummyContents(20000);
+	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+
+	string expectedName = "pog.py";
+	std::array<uint8_t,10> nameBuff = {0};
+	std::copy(expectedName.begin(), expectedName.end(), nameBuff.data());
+	expectedName = string(nameBuff.begin(), nameBuff.end());
+
+	for (int i = 0; i < 4; ++i)
+	{
+		string iframe = createFrame(fes, "pog.py");
+		assertEquals( 6900, iframe.size() );
+
+		FountainMetadata md(iframe.data(), iframe.size());
+		assertEquals( 20000, md.file_size() );
+		assertEquals( expectedName, md.name() );
+
+		assertMsg( ((i == 2) == sink.decode_frame(iframe.data(), iframe.size())), fmt::format("failed {}", i) );
+		assertMsg( ((i >= 2) == sink.is_done(expectedName, 20000)), fmt::format("failed {}", i) );
+	}
+
+	assertEquals( 0, sink.num_streams() );
+	assertEquals( 1, sink.num_done() );
+
+	string contents = File("/tmp/testMultip").read_all();
+	assertEquals( 20000, contents.size() );
 }
