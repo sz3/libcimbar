@@ -30,8 +30,7 @@ int decode(const vector<string>& infiles, std::function<int(cv::Mat, bool)>& dec
 			// we don't fail outright, but we'll probably fail the decode :(
 			if (!no_undistort)
 			{
-				cv::Mat temp = img.clone(); // not clear why we have to do this
-				if (!und.undistort(temp, img))
+				if (!und.undistort(img, img))
 					err |= 1;
 			}
 
