@@ -10,6 +10,11 @@ Deskewer::Deskewer(unsigned total_size, unsigned anchor_size)
 {
 }
 
+int Deskewer::total_size() const
+{
+	return _totalSize;
+}
+
 cv::Mat Deskewer::deskew(std::string img, const Corners& corners)
 {
 	return deskew(cv::imread(img), corners);
