@@ -44,6 +44,7 @@ namespace {
 
 		double rat = distance(observed.to_float(), expected) / distance(start, end);
 		ratios.push_back(rat);
+		return true;
 	}
 
 }

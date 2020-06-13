@@ -3,6 +3,7 @@
 #include <climits>
 #include <cmath>
 #include <ostream>
+#include <sstream>
 #include <utility>
 
 template <typename V>
@@ -12,7 +13,7 @@ protected:
 	typedef std::pair<V, V> base_pair;
 
 public:
-	using base_pair::pair;
+	using base_pair::base_pair;
 	static inline const point NONE();
 
 	V x() const
@@ -85,6 +86,13 @@ public:
 	point<int> to_int() const
 	{
 		return point<int>(x(), y());
+	}
+
+	std::string str() const
+	{
+		std::stringstream ss;
+		ss << *this;
+		return ss.str();
 	}
 };
 
