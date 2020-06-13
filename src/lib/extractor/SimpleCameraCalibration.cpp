@@ -68,7 +68,14 @@ double SimpleCameraCalibration::calculate_distortion_factor(const Corners& corne
 	for (double& r : ratios)
 		total += r;
 
-	return _targetRatio - (total / ratios.size());
+	double smallest = _targetRatio - (total / ratios.size());
+	for (double& r : ratios)
+	{
+		double dist = _targetRatio - r;
+		if (fabs(dist) < fabs(smallest))
+			smallest = dist;
+	}
+	return smallest;
 }
 
 DistortionParameters SimpleCameraCalibration::scan(const cv::Mat& img)
