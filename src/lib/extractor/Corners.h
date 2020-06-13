@@ -63,11 +63,9 @@ public:
 	}
 
 protected:
-	bool check_scaling(const point& a, const point& b, unsigned min_size) const
+	bool check_scaling(const point<int>& a, const point<int>& b, unsigned min_size) const
 	{
-		auto [x1, y1] = a;
-		auto [x2, y2] = b;
-		return abs(x1 - x2) > min_size or abs(y1 - y2) > min_size;
+		return abs(a.x() - b.x()) > min_size or abs(a.y() - b.y()) > min_size;
 	}
 
 protected:
