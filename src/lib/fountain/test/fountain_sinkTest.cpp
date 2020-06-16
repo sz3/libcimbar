@@ -92,14 +92,10 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
 
-	string expectedName = "pog.py";
-	std::array<uint8_t,10> nameBuff = {0};
-	std::copy(expectedName.begin(), expectedName.end(), nameBuff.data());
-	expectedName = string(nameBuff.begin(), nameBuff.end());
-
+	string expectedName = "testMultip";
 	for (int i = 0; i < 4; ++i)
 	{
-		string iframe = createFrame(fes, "pog.py");
+		string iframe = createFrame(fes, "testMultipart");
 		assertEquals( 6900, iframe.size() );
 
 		FountainMetadata md(iframe.data(), iframe.size());
@@ -115,4 +111,36 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 
 	string contents = File("/tmp/testMultip").read_all();
 	assertEquals( 20000, contents.size() );
+}
+
+TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
+{
+	// this is the current test case for what is either a wirehair bug or "undefined behavior"
+	// tl;dr -- if you give it the same frame (under certain circumstances), you get a seg fault
+
+	FountainInit::init();
+
+	fountain_decoder_sink<626> sink("/tmp");
+
+	stringstream input = dummyContents(20000);
+	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+
+	string expectedName = "pog.py";
+	std::array<uint8_t,10> nameBuff = {0};
+	std::copy(expectedName.begin(), expectedName.end(), nameBuff.data());
+	expectedName = string(nameBuff.begin(), nameBuff.end());
+
+	string iframe = createFrame(fes, "pog.py");
+	assertEquals( 6900, iframe.size() );
+
+	FountainMetadata md(iframe.data(), iframe.size());
+	assertEquals( 20000, md.file_size() );
+	assertEquals( expectedName, md.name() );
+
+	// don't crash!
+	for (int i = 0; i < 40; ++i)
+		assertFalse( sink.decode_frame(iframe.data(), iframe.size()) );
+
+	assertEquals( 1, sink.num_streams() );
+	assertEquals( 0, sink.num_done() );
 }

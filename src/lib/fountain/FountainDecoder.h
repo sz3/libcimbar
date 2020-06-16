@@ -4,6 +4,7 @@
 #include "wirehair/wirehair.h"
 #include <array>
 #include <optional>
+#include <set>
 #include <vector>
 #include <iostream>
 
@@ -46,6 +47,10 @@ public:
 
 	std::optional<std::vector<uint8_t>> decode(unsigned block_num, uint8_t* data, size_t length)
 	{
+		auto pear = _seenBlocks.insert(block_num);
+		if (!pear.second)
+			return std::nullopt;
+
 		_res = wirehair_decode(_codec, block_num, data, length);
 		if (_res != Wirehair_Success)
 			return std::nullopt;
@@ -64,4 +69,5 @@ protected:
 	WirehairCodec _codec;
 	WirehairResult _res;
 	size_t _length;
+	std::set<unsigned> _seenBlocks; // giving wirehair_decode the same block too many times can make it very, very upset
 };
