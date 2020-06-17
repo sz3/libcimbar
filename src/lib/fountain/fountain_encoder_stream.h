@@ -10,7 +10,7 @@ template <unsigned _bufferSize> // 599
 class fountain_encoder_stream
 {
 public:
-	static const unsigned _headerSize = 3;
+	static const unsigned _headerSize = 2;
 
 protected:
 	fountain_encoder_stream(std::string&& data)
@@ -66,9 +66,8 @@ public:
 			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
 		unsigned block = _block - 1;
-		_buffer.data()[0] = (block >> 16) & 0xFF;
-		_buffer.data()[1] = (block >> 8) & 0xFF;
-		_buffer.data()[2] = block & 0xFF;
+		_buffer.data()[0] = (block >> 8) & 0xFF;
+		_buffer.data()[1] = block & 0xFF;
 		_buffIndex = 0;
 	}
 

@@ -115,9 +115,8 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 
 TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 {
-	// this is the current test case for what is either a wirehair bug or "undefined behavior"
-	// tl;dr -- if you give it the same frame (under certain circumstances), you get a seg fault
-
+	// if you give wirehair the same frame (under certain circumstances), you get a seg fault
+	// sometimes it's fine. The docs say "don't do it", so FountainDecoder acts as the bouncer.
 	FountainInit::init();
 
 	fountain_decoder_sink<626> sink("/tmp");

@@ -10,7 +10,7 @@ template <unsigned _bufferSize>  // 599
 class fountain_decoder_stream
 {
 public:
-	static const unsigned _headerSize = 3;
+	static const unsigned _headerSize = 2;
 
 public:
 	fountain_decoder_stream(unsigned dataSize)
@@ -42,7 +42,7 @@ public:
 	{
 		// if we're full
 		_buffIndex = 0;
-		unsigned blockId = ((unsigned)_buffer[0]) << 16 | (unsigned)(_buffer[1]) << 8 | _buffer[2];
+		unsigned blockId = (unsigned)(_buffer[0]) << 8 | _buffer[1];
 		return _decoder.decode(blockId, _buffer.data() + _headerSize, block_size());
 	}
 
