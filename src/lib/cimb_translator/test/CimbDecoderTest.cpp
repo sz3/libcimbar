@@ -36,7 +36,7 @@ TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
 	assertEquals(3, cd.get_best_color(0, 255, 0));
 
 	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
-	assertEquals(3, cd.get_best_color(0, 0, 0));
+	assertEquals(0, cd.get_best_color(0, 0, 0));
 	assertEquals(0, cd.get_best_color(70, 70, 70));
 
 	// these we can use!

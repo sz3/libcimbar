@@ -6,13 +6,16 @@
 class Extractor
 {
 public:
+	static constexpr int FAILURE = 0;
+	static constexpr int SUCCESS = 1;
+	static constexpr int NEEDS_SHARPEN = 2;
+
+public:
 	Extractor();
 
-	bool sharpen(cv::Mat& out);
-
-	bool extract(const cv::Mat& img, cv::Mat& out);
-	bool extract(std::string read_path, cv::Mat& out);
-	bool extract(std::string read_path, std::string write_path);
+	int extract(const cv::Mat& img, cv::Mat& out);
+	int extract(std::string read_path, cv::Mat& out);
+	int extract(std::string read_path, std::string write_path);
 
 protected:
 };

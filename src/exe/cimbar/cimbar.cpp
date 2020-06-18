@@ -12,21 +12,25 @@ using std::string;
 using std::vector;
 
 template <typename STREAM>
-int decode(const vector<string>& infiles, STREAM& ostream, Decoder& d, bool no_deskew)
+int decode(const vector<string>& infiles, STREAM& ostream, Decoder& d, bool no_deskew, bool force_preprocess)
 {
 	for (const string& inf : infiles)
 	{
+		bool shouldPreprocess = force_preprocess;
 		cv::Mat img;
 		if (no_deskew)
 			img = cv::imread(inf);
 		else
 		{
 			Extractor ext;
-			if (!ext.extract(inf, img))
+			int res = ext.extract(inf, img);
+			if (!res)
 				return 1;
+			else if (res == Extractor::NEEDS_SHARPEN)
+				shouldPreprocess = true;
 		}
 
-		unsigned bytes = d.decode(img, ostream);
+		unsigned bytes = d.decode(img, ostream, shouldPreprocess);
 		if (bytes == 0)
 			return 2;
 	}
@@ -42,7 +46,8 @@ int main(int argc, char** argv)
 	    ("o,out", "Output file or directory", cxxopts::value<string>())
 	    ("e,ecc", "ECC level (default: 15)", cxxopts::value<unsigned>())
 	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
-	    ("no-deskew", "Skip the deskew step -- treat input image as pre-processed.", cxxopts::value<bool>())
+	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
+	    ("force-preprocess", "Force the sharpen/preprocessing filter to run on the input image.", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
 
@@ -57,6 +62,7 @@ int main(int argc, char** argv)
 	string outfile = result["out"].as<string>();
 
 	bool no_deskew = result.count("no-deskew");
+	bool force_preprocess = result.count("force-preprocess");
 	bool fountain = result.count("fountain");
 	unsigned ecc = 15;
 	if (result.count("ecc"))
@@ -67,10 +73,10 @@ int main(int argc, char** argv)
 	{
 		FountainInit::init();
 		fountain_decoder_sink<599> sink(outfile);
-		return decode(infiles, sink, d, no_deskew);
+		return decode(infiles, sink, d, no_deskew, force_preprocess);
 	}
 
 	// else
 	std::ofstream f(outfile);
-	return decode(infiles, f, d, no_deskew);
+	return decode(infiles, f, d, no_deskew, force_preprocess);
 }

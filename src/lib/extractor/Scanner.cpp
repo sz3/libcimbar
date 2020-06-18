@@ -30,6 +30,7 @@ namespace {
 Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
     , _skip(skip)
+    , _mergeCutoff(img.cols / 30)
 {
 	_img = preprocess_image(img);
 }
@@ -71,7 +72,7 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 		bool foundMerge = false;
 		for (Anchor& m : merged)
 		{
-			if (::abs(m.xavg() - c.xavg()) < 50 and ::abs(m.yavg() - c.yavg()) < 50)
+			if (m.within_merge_distance(c, _mergeCutoff))
 			{
 				foundMerge = true;
 				m.merge(c);
@@ -104,10 +105,16 @@ void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 		candidates.resize(i);
 }
 
-void Scanner::scan_horizontal(std::vector<Anchor>& points, int y) const
+bool Scanner::scan_horizontal(std::vector<Anchor>& points, int y, int xstart, int xend) const
 {
+	if (xstart < 0)
+		xstart = 0;
+	if (xend < 0 or xend > _img.cols)
+		xend = _img.cols;
+
+	unsigned initCount = points.size();
 	ScanState state;
-	for (int x = 0; x < _img.cols; ++x)
+	for (int x = xstart; x < xend; ++x)
 	{
 		bool active = test_pixel(x, y);
 		int res = state.process(active);
@@ -115,38 +122,45 @@ void Scanner::scan_horizontal(std::vector<Anchor>& points, int y) const
 			points.push_back(Anchor(x-res, x-1, y, y));
 	}
 
-	// if the pattern is at the edge of the image
+	// if the pattern is at the edge of the range
 	int res = state.process(false);
 	if (res > 0)
 	{
-		int x = _img.cols;
+		int x = xend;
 		points.push_back(Anchor(x-res, x-1, y, y));
 	}
+	return initCount != points.size();
 }
 
-void Scanner::scan_vertical(std::vector<Anchor>& points, int x, int ystart, int yend) const
+bool Scanner::scan_vertical(std::vector<Anchor>& points, int x, int xmax, int ystart, int yend) const
 {
+	if (xmax < 0)
+		xmax = x;
+	int xavg = (x + xmax) / 2;
+
 	if (ystart < 0)
 		ystart = 0;
 	if (yend < 0 or yend > _img.rows)
 		yend = _img.rows;
 
+	unsigned initCount = points.size();
 	ScanState state;
 	for (int y = ystart; y < yend; ++y)
 	{
-		bool active = test_pixel(x, y);
+		bool active = test_pixel(xavg, y);
 		int res = state.process(active);
 		if (res > 0)
-			points.push_back(Anchor(x, x, y-res, y-1));
+			points.push_back(Anchor(x, xmax, y-res, y-1));
 	}
 
-	// if the pattern is at the edge of the image
+	// if the pattern is at the edge of the range
 	int res = state.process(false);
 	if (res > 0)
 	{
 		int y = yend;
-		points.push_back(Anchor(x, x, y-res, y-1));
+		points.push_back(Anchor(x, xmax, y-res, y-1));
 	}
+	return initCount != points.size();
 }
 
 void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const
@@ -170,7 +184,8 @@ void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 
 	// do the scan
 	ScanState state;
-	for (int x = xstart, y = ystart; x < xend and y < yend; ++x, ++y)
+	int x = xstart, y = ystart;
+	for (; x < xend and y < yend; ++x, ++y)
 	{
 		bool active = test_pixel(x, y);
 		int res = state.process(active);
@@ -178,14 +193,10 @@ void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 			points.push_back(Anchor(x-res, x, y-res, y));
 	}
 
-	// if the pattern is at the edge of the image
+	// if the pattern is at the edge of the range
 	int res = state.process(false);
 	if (res > 0)
-	{
-		int x = xend;
-		int y = yend;
 		points.push_back(Anchor(x-res, x, y-res, y));
-	}
 }
 
 std::vector<Anchor> Scanner::t1_scan_rows() const
@@ -203,22 +214,51 @@ std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidat
 	{
 		int ystart = p.y() - (3 * p.xrange());
 		int yend = p.ymax() + (3 * p.xrange());
-		scan_vertical(points, p.xavg(), ystart, yend);
+		scan_vertical(points, p.x(), p.xmax(), ystart, yend);
 	}
 	return points;
 }
 
 std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candidates) const
 {
-	// confirm
 	std::vector<Anchor> points;
 	for (const Anchor& p : candidates)
 	{
-		int xstart = p.x() - (2 * p.yrange());
-		int xend = p.xmax() + (2 * p.yrange());
+		int xstart = p.xavg() - (2 * p.yrange());
+		int xend = p.xavg() + (2 * p.yrange());
 		int ystart = p.y() - p.yrange();
 		int yend = p.ymax() + p.yrange();
 		scan_diagonal(points, xstart, xend, ystart, yend);
+	}
+	return points;
+}
+
+std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidates) const
+{
+	// because we have a lot of weird crap going on in the center of the image,
+	// do one more scan of our (theoretical) anchor points.
+	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
+	std::vector<Anchor> points;
+	for (const Anchor& p : candidates)
+	{
+		std::vector<Anchor> confirms;
+		int xstart = p.x() - p.xrange();
+		int xend = p.xmax() + p.xrange();
+		if (!scan_horizontal(confirms, p.yavg(), xstart, xend))
+			continue;
+
+		int ystart = p.y() - p.yrange();
+		int yend = p.ymax() + p.yrange();
+		if (!scan_vertical(confirms, p.xavg(), p.xavg(), ystart, yend))
+			continue;
+
+		Anchor merged(p);
+		for (const Anchor& co : confirms)
+		{
+			if (co.within_merge_distance(p, _mergeCutoff))
+				merged.merge(co);
+		}
+		points.push_back(merged);
 	}
 	return deduplicate_candidates(points);
 }
@@ -249,6 +289,9 @@ std::vector<Anchor> Scanner::scan()
 
 	// for all horizontal+vertical results, scan diagonal
 	candidates = t3_scan_diagonal(candidates);
+
+	// for all horizontal+vertical+diagonal results, do one more sanity check
+	candidates = t4_confirm_scan(candidates);
 
 	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);

@@ -16,7 +16,7 @@ CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, 
 		112 * 8
 	*/
 	positions_list res;
-	int offset_y = offset + 1;
+	int offset_y = offset;
 	int marker_offset_x = spacing * marker_size;
 	int top_width = dimensions - marker_size - marker_size;
 	int top_cells = top_width * marker_size;
@@ -50,7 +50,7 @@ CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, 
 }
 
 CellPosition::CellPosition(int spacing, int dimensions, int offset, int marker_size)
-	: _positions(compute(spacing, dimensions, offset, marker_size))
+    : _positions(compute(spacing, dimensions, offset, marker_size))
 {
 	reset();
 }

@@ -31,11 +31,17 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 
 	candidates = sc.t2_scan_columns(candidates);
 	assertStringContains("x=170-170,y=915-1047", turbo::str::join(candidates));
-	assertStringContains("x=2408-2408,y=826-96", turbo::str::join(candidates));
+	assertStringContains("x=2408-2408,y=826-967", turbo::str::join(candidates));
 	assertStringContains("x=2343-2343,y=3010-3122", turbo::str::join(candidates));
 	assertStringContains("x=325-325,y=2977-3084", turbo::str::join(candidates));
 
 	candidates = sc.t3_scan_diagonal(candidates);
+	assertStringContains("x=106-234,y=917-1045", turbo::str::join(candidates));
+	assertStringContains("x=2342-2476,y=830-964", turbo::str::join(candidates));
+	assertStringContains("x=2285-2399,y=3009-3123", turbo::str::join(candidates));
+	assertStringContains("x=268-378,y=2976-3086", turbo::str::join(candidates));
+
+	candidates = sc.t4_confirm_scan(candidates);
 	sc.filter_candidates(candidates);
 
 	// ordered by size
@@ -95,4 +101,24 @@ TEST_CASE( "ScannerTest/testSmallSample.2", "[unit]" )
 	    "x=904-941,y=888-925",
 	    turbo::str::join(candidates)
 	);
+}
+
+TEST_CASE( "ScannerTest/testSmallSample.3", "[unit]" )
+{
+	cv::Mat img = cv::imread(get_sample("4color-cam-140.jpg"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates = sc.scan();
+	// order is top-left, top-right, bottom-left, bottom-right
+	assertEquals("33+-25,124+-25 819+-23,132+-25 111+-17,827+-17 747+-18,839+-16", turbo::str::join(candidates));
+}
+
+TEST_CASE( "ScannerTest/testSmallSample.4", "[unit]" )
+{
+	cv::Mat img = cv::imread(get_sample("4color-cam-200.png"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates = sc.scan();
+	// order is top-left, top-right, bottom-left, bottom-right
+	assertEquals("37+-25,103+-25 822+-22,117+-25 113+-17,810+-17 746+-18,823+-16", turbo::str::join(candidates));
 }

@@ -12,18 +12,19 @@
 using std::string;
 
 namespace {
-	std::string get_sample(std::string filename)
+	cv::Mat get_sample(std::string filename)
 	{
-		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
+		string sample_path = std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
+		return cv::imread(sample_path);
 	}
 }
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	string sample_path = get_sample("4.png");
+	cv::Mat sample = get_sample("4.png");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample_path, decoder);
+	CimbReader cr(sample, decoder);
 
 	// read
 	unsigned bits1 = cr.read();
@@ -45,10 +46,10 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	string sample_path = get_sample("4color1e.png");
+	cv::Mat sample = get_sample("4color1e.png");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample_path, decoder);
+	CimbReader cr(sample, decoder);
 
 	std::vector<unsigned> expected = {
 	    8, 50, 4, 47, 29, 23, 13, 50, 11, 54, 9, 41, 27, 34, 61, 48, 30, 23, 17, 40, 27, 54, 56, 51, 2

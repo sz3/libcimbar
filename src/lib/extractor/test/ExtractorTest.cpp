@@ -5,18 +5,18 @@
 #include <string>
 #include <vector>
 
-namespace
-{
-	std::string get_sample(std::string filename)
-	{
-		return std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
-	}
-}
-
 TEST_CASE( "ExtractorTest/testExtract", "[unit]" )
 {
 	Extractor ext;
-	ext.extract(get_sample("4color1.jpg"), "/tmp/testExtract.1.jpg");
+	ext.extract(TestCimbar::getSample("4color1.jpg"), "/tmp/testExtract.1.jpg");
+
+	// standard image similarity testing questions apply
+}
+
+TEST_CASE( "ExtractorTest/testExtractUpscale", "[unit]" )
+{
+	Extractor ext;
+	ext.extract(TestCimbar::getSample("4color-cam-140.jpg"), "/tmp/testExtract.2.jpg");
 
 	// standard image similarity testing questions apply
 }

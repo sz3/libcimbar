@@ -4,6 +4,7 @@ project(cimb_translator_test)
 
 set (SOURCES
 	test.cpp
+	CellTest.cpp
 	CellDriftTest.cpp
 	CellPositionTest.cpp
 	CimbDecoderTest.cpp

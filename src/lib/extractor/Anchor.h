@@ -43,12 +43,12 @@ public:
 
 	int xavg() const
 	{
-		return (_x + _xmax) >> 1;
+		return (_x + _xmax) / 2;
 	}
 
 	int xrange() const
 	{
-		return ::abs(_x - _xmax) >> 1;
+		return ::abs(_x - _xmax) / 2;
 	}
 
 	int y() const
@@ -63,17 +63,22 @@ public:
 
 	int yavg() const
 	{
-		return (_y + _ymax) >> 1;
+		return (_y + _ymax) / 2;
 	}
 
 	int yrange() const
 	{
-		return ::abs(_y - _ymax) >> 1;
+		return ::abs(_y - _ymax) / 2;
 	}
 
 	unsigned long long size() const
 	{
 		return std::pow(_x - _xmax, 2) + std::pow(_y - _ymax, 2);
+	}
+
+	bool within_merge_distance(const Anchor& rhs, int distance) const
+	{
+		return (::abs(xavg() - rhs.xavg()) < distance) and (::abs(yavg() - rhs.yavg()) < distance);
 	}
 
 	bool operator<(const Anchor& rhs) const
@@ -92,6 +97,6 @@ protected:
 
 inline std::ostream& operator<<(std::ostream& outstream, const Anchor& anchor)
 {
-	outstream << "x=" << anchor.x() << "-" << anchor.xmax() << ",y=" << anchor.y() << "-" << anchor.ymax();
+	outstream << anchor.xavg() << "+-" << anchor.xrange() << "," << anchor.yavg() << "+-" << anchor.yrange();
 	return outstream;
 }

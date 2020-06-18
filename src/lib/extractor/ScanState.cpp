@@ -26,7 +26,7 @@ int ScanState::evaluate_state(float limit_low, float limit_high)
 		if (i == 3)
 			continue;
 		float ratio_min = center / (_tally[i] + 1);
-		float ratio_max = center / _tally[i];
+		float ratio_max = center / std::max(1, _tally[i] - 1);
 		if (ratio_max < limit_low or ratio_min > limit_high)
 			return NOOP;
 	}

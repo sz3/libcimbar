@@ -14,7 +14,7 @@ TEST_CASE( "CellPositionTest/testSimple", "[unit]" )
 	assertFalse( cells.done() );
 	CellPosition::coordinate xy = cells.next();
 	assertEquals(62, xy.first);
-	assertEquals(9, xy.second);
+	assertEquals(8, xy.second);
 
 	unsigned count = 1;
 	while (!cells.done())
