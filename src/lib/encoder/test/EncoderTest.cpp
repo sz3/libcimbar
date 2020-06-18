@@ -2,35 +2,57 @@
 
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
-#include "util/File.h"
+#include "image_hash/average_hash.h"
+#include "serialize/format.h"
+#include "util/MakeTempDirectory.h"
 
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-namespace {
-	//void makeTempFile(string
-}
 
 TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 {
-	std::string input = "Hello world";
-	File f("/tmp/test.txt");
-	f.write(input.data(), input.size());
+	MakeTempDirectory tempdir;
+
+	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
+	std::string outPrefix = tempdir.path() / "encoder.vanilla";
 
 	Encoder enc(40, 4, 2);
-	assertEquals( 2, enc.encode("/tmp/test.txt", "/tmp/doesntmatteryet.txt") );
+	assertEquals( 3, enc.encode(inputFile, outPrefix) );
+
+	std::vector<uint64_t> hashes = {0xd5ddd11402691bc3, 0x52d3e4c604f094d1, 0x3070703051306};
+	for (int i = 0; i < 3; ++i)
+	{
+		DYNAMIC_SECTION( "are we correct? : " << i )
+		{
+			std::string path = fmt::format("{}-{}.png", outPrefix, i);
+			cv::Mat img = cv::imread(path);
+			assertEquals( hashes[i], image_hash::average_hash(img) );
+		}
+	}
 }
 
 TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 {
 	FountainInit::init();
+	MakeTempDirectory tempdir;
 
-	std::string input = "Hello world";
-	File f("/tmp/test.txt");
-	f.write(input.data(), input.size());
+	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
+	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
 	Encoder enc(40, 4, 2);
-	assertEquals( 4, enc.encode_fountain("/tmp/test.txt", "/tmp/forthefans.txt") );
+	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix) );
+
+	std::vector<uint64_t> hashes = {0x52b755f3a0330131, 0xd19d40a780e193b1, 0x6335f5b3c47a4891, 0x1791f7e212f58545};
+	for (int i = 0; i < 4; ++i)
+	{
+		DYNAMIC_SECTION( "are we correct? : " << i )
+		{
+			std::string path = fmt::format("{}-{}.png", outPrefix, i);
+			cv::Mat img = cv::imread(path);
+			assertEquals( hashes[i], image_hash::average_hash(img) );
+		}
+	}
 }
