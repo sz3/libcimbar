@@ -1,20 +1,25 @@
 #pragma once
 
 #include "reed_solomon_stream.h"
-#include "bit_file/bitwriter.h"
+#include "bit_file/bitbuffer.h"
 #include "cimb_translator/CimbDecoder.h"
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
+#include "cimb_translator/Interleave.h"
+
 #include <opencv2/opencv.hpp>
 #include <string>
 
 class Decoder
 {
 public:
-	Decoder(unsigned ecc_bytes=15, unsigned bits_per_op=0);
+	Decoder(unsigned ecc_bytes=40, unsigned bits_per_op=0, bool interleave=true);
 
 	template <typename STREAM>
 	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
+
+	template <typename STREAM>
+	unsigned decode_fountain(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
 
 	unsigned decode(std::string filename, std::string output);
 
@@ -25,12 +30,14 @@ protected:
 protected:
 	unsigned _eccBytes;
 	unsigned _bitsPerOp;
+	unsigned _interleaveBlocks;
 	CimbDecoder _decoder;
 };
 
-inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
+inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleave)
     : _eccBytes(ecc_bytes)
     , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
+    , _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
     , _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits())
 {
 }
@@ -50,26 +57,18 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op)
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	// reed_solomon_stream::buffer_size*6 ... probably need partial flushes to make bits line up with rss...
-	bitwriter<930> bw;
-	std::stringstream buff;
-	reed_solomon_stream rss(buff, _eccBytes);
-
-	unsigned bytesWritten = 0;
-	while (!reader.done())
+	bitbuffer<> bb;
+	for (unsigned i : Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks))
 	{
+		if (reader.done())
+			break;
 		unsigned bits = reader.read();
-		bw.write(bits, _bitsPerOp);
-		if (bw.shouldFlush())
-			bytesWritten = bw.flush(rss);
+		unsigned index = i * _bitsPerOp;
+		bb.write(bits, index, _bitsPerOp);
 	}
 
-	// flush once more
-	bytesWritten = bw.flush(rss);
-
-	// make the buffer we pass to ostream contiguous
-	ostream << buff.str();
-	return bytesWritten;
+	reed_solomon_stream rss(ostream, _eccBytes);
+	return bb.flush(rss);
 }
 
 // seems like we want to take a file or img, and have an output sink
@@ -83,6 +82,19 @@ inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream, bool should
 {
 	CimbReader reader(img, _decoder, should_preprocess);
 	return do_decode(reader, ostream);
+}
+
+template <typename FOUNTAINSTREAM>
+inline unsigned Decoder::decode_fountain(const cv::Mat& img, FOUNTAINSTREAM& ostream, bool should_preprocess)
+{
+	CimbReader reader(img, _decoder, should_preprocess);
+
+	std::stringstream buff;
+	aligned_stream aligner(buff, ostream.chunk_size(), ostream.md_size());
+	unsigned res = do_decode(reader, aligner);
+
+	ostream << buff.str(); // make the buffer contiguous
+	return res;
 }
 
 inline unsigned Decoder::decode(std::string filename, std::string output)

@@ -15,6 +15,8 @@ public:
 	unsigned read();
 	bool done() const;
 
+	unsigned num_reads() const;
+
 protected:
 	cv::Mat _image;
 	cv::Mat _grayscale;

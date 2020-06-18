@@ -24,7 +24,7 @@ unsigned Config::bits_per_cell()
 
 unsigned Config::ecc_bytes()
 {
-	return 15;
+	return 40;
 }
 
 unsigned Config::image_size()
@@ -55,6 +55,11 @@ unsigned Config::num_cells()
 unsigned Config::corner_padding()
 {
 	return 6;
+}
+
+unsigned Config::interleave_blocks()
+{
+	return 155;
 }
 
 }

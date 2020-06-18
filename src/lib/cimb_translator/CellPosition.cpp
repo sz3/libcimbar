@@ -1,9 +1,10 @@
 #include "CellPosition.h"
+#include "Interleave.h"
 
 #include <vector>
 #include <utility>
 
-CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, int offset, int marker_size)
+CellPosition::positions_list CellPosition::compute_linear(int spacing, int dimensions, int offset, int marker_size)
 {
 	/*
 	 * ex: if dimensions == 128, and marker_size == 8:
@@ -49,10 +50,23 @@ CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, 
 	return res;
 }
 
-CellPosition::CellPosition(int spacing, int dimensions, int offset, int marker_size)
-    : _positions(compute(spacing, dimensions, offset, marker_size))
+CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
+{
+	CellPosition::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
+	if (interleave_blocks)
+		return Interleave::interleave(pos, interleave_blocks);
+	return pos;
+}
+
+CellPosition::CellPosition(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
+    : _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks))
 {
 	reset();
+}
+
+size_t CellPosition::count() const
+{
+	return _positions.size();
 }
 
 void CellPosition::reset()

@@ -15,7 +15,7 @@
 class Encoder
 {
 public:
-	Encoder(unsigned bits_per_symbol=0, unsigned bits_per_color=0, unsigned ecc_bytes=15);
+	Encoder(unsigned ecc_bytes=40, unsigned bits_per_symbol=0, unsigned bits_per_color=0);
 
 	template <typename STREAM>
 	std::optional<cv::Mat> encode_next(STREAM& stream);
@@ -24,15 +24,15 @@ public:
 	unsigned encode_fountain(const std::string& filename, std::string output_prefix);
 
 protected:
+	unsigned _eccBytes;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
-	unsigned _eccBytes;
 };
 
-inline Encoder::Encoder(unsigned bits_per_symbol, unsigned bits_per_color, unsigned ecc_bytes)
-    : _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
+inline Encoder::Encoder(unsigned ecc_bytes, unsigned bits_per_symbol, unsigned bits_per_color)
+    : _eccBytes(ecc_bytes)
+    , _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
     , _bitsPerColor(bits_per_color? bits_per_color : cimbar::Config::color_bits())
-    , _eccBytes(ecc_bytes)
 {
 }
 
@@ -99,10 +99,14 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
-	fountain_encoder_stream fes = fountain_encoder_stream<599>::create(f);
-	// 599 * 14 == 8386. With ecc = 15, we have 60 rs blocks * 140 bytes per block == 8400 bytes to work with. 14 are the header.
+	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(f);
+	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
+	// 626 * 11 == 6886.
+	// or 313 * 22 == 6886? Smaller may be better, given we need full chunks to make progress
+	// for 7 bits + 40 ecc, we'd have 70 blocks == 8050 bytes. -> 8036 of data.
+	//  could use any of 164, 196, 287, 574
 	// it would be nice to make this saner
-	unsigned target = fes.blocks_required() * 2 / 14;
+	unsigned target = fes.blocks_required() * 2 / 11;
 
 	std::vector<std::string> splits = turbo::str::split(filename, '/');
 	std::string shortname = splits.size()? splits.back() : filename;

@@ -38,6 +38,40 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 	assertTrue( fes.good() );
 }
 
+TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
+{
+	FountainInit::init();
+
+	stringstream input;
+	for (int i = 0; i < 1000; ++i)
+		input << "0123456789";
+
+	fountain_encoder_stream fes = fountain_encoder_stream<636>::create(input);
+
+	assertEquals( 0, fes.block_count() );
+	assertEquals( 16, fes.blocks_required() );
+	assertTrue( fes.good() );
+
+	std::array<char, 636> buff;
+	for (int i = 0; i < 20; ++i)
+	{
+		unsigned res = fes.readsome(buff.data(), buff.size());
+		assertEquals( res, buff.size() );
+
+		assertEquals( 0, buff[0] );
+		assertEquals( 0, buff[1] );
+
+		if (i+1 >= fes.blocks_required())
+			assertEquals( i+1, buff[2] );
+		else
+			assertEquals( i, buff[2] );
+	}
+
+	assertEquals( 21, fes.block_count() );
+	assertEquals( 16, fes.blocks_required() );
+	assertTrue( fes.good() );
+}
+
 TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 {
 	FountainInit::init();

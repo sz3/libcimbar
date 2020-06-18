@@ -11,6 +11,7 @@ set (SOURCES
 	CimbEncoderTest.cpp
 	CimbReaderTest.cpp
 	CimbWriterTest.cpp
+	InterleaveTest.cpp
 )
 
 include_directories(

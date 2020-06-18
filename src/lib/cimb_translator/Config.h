@@ -19,5 +19,6 @@ namespace cimbar
 		unsigned cell_spacing();
 		unsigned num_cells();
 		unsigned corner_padding();
+		unsigned interleave_blocks();
 	}
 }

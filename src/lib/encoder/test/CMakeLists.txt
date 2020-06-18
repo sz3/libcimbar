@@ -6,6 +6,7 @@ set (SOURCES
 	test.cpp
 	DecoderTest.cpp
 	EncoderTest.cpp
+	aligned_streamTest.cpp
 	reed_solomon_streamTest.cpp
 )
 
