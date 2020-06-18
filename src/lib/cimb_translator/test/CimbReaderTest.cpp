@@ -18,18 +18,16 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
 
+	std::vector<unsigned> expected = {
+	    0, 10, 61, 30, 22, 6, 29, 8, 26, 19, 1, 30, 20, 8, 0, 30, 8, 27, 9, 8, 4, 14, 27, 57, 12
+	};
+
 	// read
-	unsigned bits1 = cr.read();
-	assertEquals(0, bits1);
-
-	unsigned bits2 = cr.read();
-	assertEquals(10, bits2);
-
-	unsigned bits3 = cr.read();
-	assertEquals(61, bits3);
-
-	unsigned bits4 = cr.read();
-	assertEquals(30, bits4);
+	for (unsigned val : expected)
+	{
+		unsigned bits = cr.read();
+		assertEquals(val, bits);
+	}
 
 	while (!cr.done())
 		cr.read();
@@ -38,14 +36,14 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color1e.png");
+	string sample_path = TestCimbar::getSample("4c-f1-e.jpg");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
 
 	std::vector<unsigned> expected = {
-	    8, 50, 4, 47, 29, 23, 13, 50, 11, 54, 9, 41, 27, 34, 61, 48, 30, 23, 17, 40, 27, 54, 56, 51, 2
+	    0, 10, 61, 30, 22, 6, 29, 8, 26, 19, 1, 30, 20, 8, 0, 30, 8, 27, 9, 8, 4, 14, 27, 57, 12
 	};
 
 	// read
