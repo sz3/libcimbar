@@ -9,6 +9,8 @@ set (SOURCES
 	ExtractorTest.cpp
 	ScanStateTest.cpp
 	ScannerTest.cpp
+	SimpleCameraCalibrationTest.cpp
+	UndistortTest.cpp
 )
 
 include_directories(
@@ -28,5 +30,6 @@ target_link_libraries(extractor_test
 	extractor
 
 	${OPENCV_LIBS}
+	${CPPFILESYSTEM}
 )
 

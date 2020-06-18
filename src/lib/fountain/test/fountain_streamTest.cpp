@@ -59,12 +59,11 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 		assertEquals( res, buff.size() );
 
 		assertEquals( 0, buff[0] );
-		assertEquals( 0, buff[1] );
 
 		if (i+1 >= fes.blocks_required())
-			assertEquals( i+1, buff[2] );
+			assertEquals( i+1, buff[1] );
 		else
-			assertEquals( i, buff[2] );
+			assertEquals( i, buff[1] );
 	}
 
 	assertEquals( 21, fes.block_count() );
@@ -143,11 +142,14 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 			assertMsg((bool)output, "couldn't decode :(");
 	}
 
+	assertEquals( 828, fds.block_size() );
+	assertEquals( 10000, fds.data_size() );
+	assertTrue( fds.good() );
+
 	assertEquals( 15, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 }
-
 
 TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 {
@@ -182,9 +184,13 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 			assertMsg((bool)output, "couldn't decode :(");
 	}
 
+	assertEquals( 828, fds.block_size() );
+	assertEquals( 10000, fds.data_size() );
+	assertTrue( fds.good() );
+
 	assertEquals( 14, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
-}
 
+}
 

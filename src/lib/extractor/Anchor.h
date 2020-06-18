@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Point.h"
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -26,7 +27,7 @@ public:
 		_ymax = std::max(_ymax, other.ymax());
 	}
 
-	std::pair<int, int> center() const
+	point<int> center() const
 	{
 		return {xavg(), yavg()};
 	}

@@ -1,5 +1,8 @@
 #include "Scanner.h"
 
+#include "Corners.h"
+#include "EdgeScanState.h"
+#include "Geometry.h"
 #include "ScanState.h"
 #include "serialize/format.h"
 #include <algorithm>
@@ -31,8 +34,14 @@ Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
     , _skip(skip)
     , _mergeCutoff(img.cols / 30)
+    , _anchorSize(30)
 {
 	_img = preprocess_image(img);
+}
+
+int Scanner::anchor_size() const
+{
+	return _anchorSize;
 }
 
 cv::Mat Scanner::preprocess_image(const cv::Mat& img)
@@ -296,4 +305,78 @@ std::vector<Anchor> Scanner::scan()
 	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
 	return candidates;
+}
+
+bool Scanner::chase_edge(const point<double>& start, const point<double>& unit) const
+{
+	// test 4 points. If we get 2/4, success
+	int success = 0;
+	for (int i : {-2, -1, 1, 2})
+	{
+		int x = start.x() + (unit.x() * i);
+		int y = start.y() + (unit.y() * i);
+		if (test_pixel(x, y))
+			++success;
+	}
+	return success >= 2;
+}
+
+point<int> Scanner::find_edge(const point<int>& u, const point<int>& v, point<double> mid) const
+{
+	// should probably use more floats!
+	point<double> distance_v = v.to_float() - u.to_float();
+	point<double> distance_unit = distance_v / 512.0;
+	point<double> out_v = {distance_v.y() / 64, distance_v.x() / -64};
+	point<double> in_v = {-out_v.x(), -out_v.y()};
+
+	if (mid == point<double>::NONE())
+		mid = u.to_float() + (distance_v / 2.0);
+	point<double> mid_point_anchor_adjust = out_v * (_anchorSize / 16.0);
+	mid += mid_point_anchor_adjust;
+
+	for (const point<double>& check : {out_v, in_v})
+	{
+		double max_check = std::max(abs(check.x()), abs(check.y()));
+		point<double> unit = check / max_check;
+
+		EdgeScanState state;
+		double i = 0, j = 0;
+		while (abs(i) <= abs(check.x()) and abs(j) <= abs(check.y()))
+		{
+			double x = mid.x() + i;
+			double y = mid.y() + j;
+			if (x < 0 or x >= _img.cols or y < 0 or y >= _img.rows)
+			{
+				i += unit.x();
+				j += unit.y();
+				continue;
+			}
+			bool active = test_pixel(x, y);
+			int size = state.process(active);
+			if (size > 0)
+			{
+				point<double> edge = {x - (unit.x() * size / 2), y - (unit.y() * size / 2)};
+				if (chase_edge(edge, distance_unit))
+					return edge.to_int();
+			}
+			i += unit.x();
+			j += unit.y();
+		}
+	}
+
+	return point<int>::NONE();
+}
+
+std::vector<point<int>> Scanner::scan_edges(const Corners& corners, Midpoints& mps) const
+{
+	std::vector<point<int>> edges;
+	mps = Geometry::calculate_midpoints(corners);
+	if (!mps)
+		return edges;
+
+	edges.push_back( find_edge(corners.top_left(), corners.top_right(), mps.top()) );
+	edges.push_back( find_edge(corners.top_right(), corners.bottom_right(), mps.right()) );
+	edges.push_back( find_edge(corners.bottom_right(), corners.bottom_left(), mps.bottom()) );
+	edges.push_back( find_edge(corners.bottom_left(), corners.top_left(), mps.left()) );
+	return edges;
 }
