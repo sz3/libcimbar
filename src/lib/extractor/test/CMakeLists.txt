@@ -30,5 +30,6 @@ target_link_libraries(extractor_test
 	extractor
 
 	${OPENCV_LIBS}
+	${CPPFILESYSTEM}
 )
 

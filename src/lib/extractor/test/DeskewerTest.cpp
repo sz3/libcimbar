@@ -1,7 +1,7 @@
 #include "unittest.h"
 
 #include "Deskewer.h"
-
+#include "image_hash/average_hash.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,8 +14,6 @@ TEST_CASE( "DeskewerTest/testSimple", "[unit]" )
 	cv::Mat actual = de.deskew(TestCimbar::getSample("4color1.jpg"), corners);
 	assertEquals(cv::Size(1024, 1024), actual.size());
 
-	// TODO: we'll want to do some verification that the transform worked correctly (perhaps with an imagehash??)
-	// but for now, this is fine
-	de.save(actual, "/tmp/foo.png");
+	assertEquals( 0x434caa959f7e56c7, image_hash::average_hash(actual) );
 }
 

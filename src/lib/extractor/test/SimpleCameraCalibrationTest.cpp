@@ -11,7 +11,7 @@
 
 TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("4color-ecc40-fountain.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
 
 
 	SimpleCameraCalibration scc;
@@ -23,8 +23,8 @@ TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 	std::stringstream dis;
 	dis << dp.distortion;
 
-	assertEquals( "[240, 0, 480;\n"
-	              " 0, 320, 640;\n"
+	assertEquals( "[270, 0, 540;\n"
+	              " 0, 405, 810;\n"
 	              " 0, 0, 1]", cam.str() );
-	assertEquals( "[-0.002561135546020082, 0, 0, 0]", dis.str() );
+	assertEquals( "[-0.002913485439157776, 0, 0, 0]", dis.str() );
 }
