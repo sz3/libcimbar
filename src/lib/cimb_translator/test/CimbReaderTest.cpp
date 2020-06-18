@@ -3,7 +3,6 @@
 #include "CimbReader.h"
 
 #include "cimb_translator/CimbDecoder.h"
-#include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -11,33 +10,26 @@
 #include <vector>
 using std::string;
 
-namespace {
-	cv::Mat get_sample(std::string filename)
-	{
-		string sample_path = std::string(LIBCIMBAR_PROJECT_ROOT) + "/samples/" + filename;
-		return cv::imread(sample_path);
-	}
-}
-
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	cv::Mat sample = get_sample("4.png");
+	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
 
 	// read
 	unsigned bits1 = cr.read();
-	assertEquals(8, bits1);
+	assertEquals(0, bits1);
 
 	unsigned bits2 = cr.read();
-	assertEquals(50, bits2);
+	assertEquals(10, bits2);
 
 	unsigned bits3 = cr.read();
-	assertEquals(4, bits3);
+	assertEquals(61, bits3);
 
 	unsigned bits4 = cr.read();
-	assertEquals(47, bits4);
+	assertEquals(30, bits4);
 
 	while (!cr.done())
 		cr.read();
@@ -46,7 +38,8 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	cv::Mat sample = get_sample("4color1e.png");
+	string sample_path = TestCimbar::getSample("4color1e.png");
+	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
