@@ -9,6 +9,7 @@
 #include "serialize/str.h"
 
 #include <opencv2/opencv.hpp>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -22,6 +23,7 @@ public:
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
 	unsigned encode_fountain(const std::string& filename, std::string output_prefix);
+	unsigned encode_fountain(const std::string& filename, const std::function<void(const cv::Mat&, unsigned)>& on_frame);
 
 protected:
 	unsigned _eccBytes;
@@ -96,7 +98,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
+inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<void(const cv::Mat&, unsigned)>& on_frame)
 {
 	std::ifstream f(filename);
 	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(f);
@@ -121,10 +123,17 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, std::strin
 		if (!frame)
 			break;
 
-		std::string output = fmt::format("{}-{}.png", output_prefix, i);
-		cv::imwrite(output, *frame);
+		on_frame(*frame, i);
 		++i;
 	}
 	return i;
 }
 
+inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
+{
+	std::function<void(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
+		std::string output = fmt::format("{}-{}.png", output_prefix, i);
+		cv::imwrite(output, frame);
+	};
+	return encode_fountain(filename, fun);
+}
