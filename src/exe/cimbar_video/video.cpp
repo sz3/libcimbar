@@ -44,18 +44,23 @@ int main(int argc, char** argv)
 
 	FountainInit::init();
 
-	// we currently run until the user kills the parent program. Would be nice to base it off the opencv child window somehow?
 	bool dark = true;
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
 	cv::Mat windowImg = cv::Mat(1080, 1080, CV_8UC3, bgcolor);
-	auto draw = [windowImg, delay] (const cv::Mat& frame, unsigned) {
+
+	bool running = true;
+	auto draw = [windowImg, delay, &running] (const cv::Mat& frame, unsigned i) {
+		if (i > 0 and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
+			return running = false;
+
 		frame.copyTo(windowImg(cv::Rect(28, 28, frame.cols, frame.rows)));
 		cv::imshow("image", windowImg);
 		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
+		return true;
 	};
 
 	Encoder en(ecc);
-	while (true)
+	while (running)
 		for (const string& f : infiles)
 			en.encode_fountain(f, draw);
 	return 0;
