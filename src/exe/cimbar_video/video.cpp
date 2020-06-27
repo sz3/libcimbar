@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("e,ecc", "ECC level (default: 40)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 64)", cxxopts::value<unsigned>())
 	    ("f,fps", "Target FPS (default: 30)", cxxopts::value<unsigned>())
 	    ("h,help", "Print usage")
 	;
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
-	unsigned ecc = 40;
+	unsigned ecc = 64;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
@@ -49,10 +49,12 @@ int main(int argc, char** argv)
 	cv::Mat windowImg = cv::Mat(1080, 1080, CV_8UC3, bgcolor);
 
 	bool running = true;
-	auto draw = [windowImg, delay, &running] (const cv::Mat& frame, unsigned i) {
-		if (i > 0 and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
+	bool start = true;
+	auto draw = [windowImg, delay, &running, &start] (const cv::Mat& frame, unsigned) {
+		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
 			return running = false;
 
+		start = false;
 		frame.copyTo(windowImg(cv::Rect(28, 28, frame.cols, frame.rows)));
 		cv::imshow("image", windowImg);
 		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
