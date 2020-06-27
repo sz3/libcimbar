@@ -60,7 +60,7 @@ cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
 	clahe->apply(out, out);
 
-	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY);
+	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY); // do we actually need this?
 	return out;
 }
 
@@ -81,7 +81,7 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 		bool foundMerge = false;
 		for (Anchor& m : merged)
 		{
-			if (m.within_merge_distance(c, _mergeCutoff))
+			if (m.is_mergeable(c, _mergeCutoff))
 			{
 				foundMerge = true;
 				m.merge(c);
@@ -264,7 +264,7 @@ std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidat
 		Anchor merged(p);
 		for (const Anchor& co : confirms)
 		{
-			if (co.within_merge_distance(p, _mergeCutoff))
+			if (co.is_mergeable(p, _mergeCutoff))
 				merged.merge(co);
 		}
 		points.push_back(merged);

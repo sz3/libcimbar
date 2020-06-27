@@ -77,9 +77,18 @@ public:
 		return std::pow(_x - _xmax, 2) + std::pow(_y - _ymax, 2);
 	}
 
-	bool within_merge_distance(const Anchor& rhs, int distance) const
+	int max_range() const
 	{
-		return (::abs(xavg() - rhs.xavg()) < distance) and (::abs(yavg() - rhs.yavg()) < distance);
+		return std::max(::abs(_x - _xmax), ::abs(_y - _ymax));
+	}
+
+	bool is_mergeable(const Anchor& rhs, int max_distance) const
+	{
+		if (::abs(xavg() - rhs.xavg()) > max_distance or ::abs(yavg() - rhs.yavg()) > max_distance)
+			return false;
+
+		int ratio = (rhs.max_range() * 10 / max_range());
+		return ratio > 6 and ratio < 17; // rhs within 60% of our size
 	}
 
 	bool operator<(const Anchor& rhs) const
