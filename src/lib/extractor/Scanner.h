@@ -12,7 +12,7 @@ class Midpoints;
 class Scanner
 {
 public: // public interface
-	Scanner(const cv::Mat& img, bool dark=true, int skip=17);
+	Scanner(const cv::Mat& img, bool dark=true, int skip=0);
 	int anchor_size() const;
 
 	std::vector<Anchor> scan();
@@ -35,7 +35,7 @@ protected: // internal member functions
 
 	bool scan_horizontal(std::vector<Anchor>& points, int y, int xstart=-1, int xend=-1) const;
 	bool scan_vertical(std::vector<Anchor>& points, int x, int xmax=-1, int ystart=-1, int yend=-1) const;
-	void scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
+	bool scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
 	// edge detection
 	bool chase_edge(const point<double>& start, const point<double>& unit) const;

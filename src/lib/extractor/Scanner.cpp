@@ -32,7 +32,7 @@ namespace {
 
 Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
     : _dark(dark)
-    , _skip(skip)
+    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
     , _mergeCutoff(img.cols / 30)
     , _anchorSize(30)
 {
@@ -110,6 +110,8 @@ void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 	for (; i < candidates.size(); ++i)
 		if (candidates[i].size() < cutoff)
 			break;
+	if (i > 4)
+		i = 4;
 	if (i < candidates.size())
 		candidates.resize(i);
 }
@@ -159,7 +161,7 @@ bool Scanner::scan_vertical(std::vector<Anchor>& points, int x, int xmax, int ys
 		bool active = test_pixel(xavg, y);
 		int res = state.process(active);
 		if (res > 0)
-			points.push_back(Anchor(x, xmax, y-res, y-1));
+			points.push_back(Anchor(xavg, xavg, y-res, y-1));
 	}
 
 	// if the pattern is at the edge of the range
@@ -172,7 +174,7 @@ bool Scanner::scan_vertical(std::vector<Anchor>& points, int x, int xmax, int ys
 	return initCount != points.size();
 }
 
-void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const
+bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const
 {
 	xend = std::min(xend, _img.cols);
 	yend = std::min(yend, _img.rows);
@@ -192,6 +194,7 @@ void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 	}
 
 	// do the scan
+	unsigned initCount = points.size();
 	ScanState state;
 	int x = xstart, y = ystart;
 	for (; x < xend and y < yend; ++x, ++y)
@@ -199,13 +202,15 @@ void Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 		bool active = test_pixel(x, y);
 		int res = state.process(active);
 		if (res > 0)
-			points.push_back(Anchor(x-res, x, y-res, y));
+			points.push_back(Anchor(x-res, x-1, y-res, y-1));
 	}
 
 	// if the pattern is at the edge of the range
 	int res = state.process(false);
 	if (res > 0)
-		points.push_back(Anchor(x-res, x, y-res, y));
+		points.push_back(Anchor(x-res, x-1, y-res, y-1));
+
+	return initCount != points.size();
 }
 
 std::vector<Anchor> Scanner::t1_scan_rows() const
@@ -233,11 +238,21 @@ std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candida
 	std::vector<Anchor> points;
 	for (const Anchor& p : candidates)
 	{
+		std::vector<Anchor> confirms;
 		int xstart = p.xavg() - (2 * p.yrange());
 		int xend = p.xavg() + (2 * p.yrange());
 		int ystart = p.y() - p.yrange();
 		int yend = p.ymax() + p.yrange();
-		scan_diagonal(points, xstart, xend, ystart, yend);
+		if (!scan_diagonal(confirms, xstart, xend, ystart, yend))
+			continue;
+
+		Anchor merged(p);
+		for (const Anchor& co : confirms)
+		{
+			if (co.is_mergeable(p, _mergeCutoff))
+				merged.merge(co);
+		}
+		points.push_back(merged);
 	}
 	return points;
 }
