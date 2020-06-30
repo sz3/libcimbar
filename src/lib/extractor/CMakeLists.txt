@@ -12,7 +12,6 @@ set(SOURCES
 	Geometry.h
 	Midpoints.h
 	Point.h
-	ScanState.cpp
 	ScanState.h
 	Scanner.cpp
 	Scanner.h
