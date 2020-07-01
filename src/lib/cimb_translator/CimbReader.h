@@ -1,8 +1,7 @@
 #pragma once
 
-#include "CellDrift.h"
-#include "CellPosition.h"
 #include "CimbDecoder.h"
+#include "LinearDecodePositions.h"
 
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -21,7 +20,6 @@ protected:
 	cv::Mat _image;
 	cv::Mat _grayscale;
 	unsigned _cellSize;
-	CellPosition _position;
-	CellDrift _drift;
+	LinearDecodePositions _positions;
 	const CimbDecoder& _decoder;
 };

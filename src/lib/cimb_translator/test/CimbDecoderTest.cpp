@@ -100,7 +100,9 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 	cv::resize(cell, cell, cv::Size(10, 10));
 
 	unsigned drift_offset;
-	unsigned res = cd.decode_symbol(cell, drift_offset);
+	unsigned best_distance;
+	unsigned res = cd.decode_symbol(cell, drift_offset, best_distance);
 	assertEquals(4, res);
 	assertEquals(2, drift_offset);
+	assertEquals(16, best_distance);
 }

@@ -1,7 +1,12 @@
 #include "CellDrift.h"
 
-CellDrift::CellDrift(int limit)
-    : _limit(limit)
+namespace {
+	const int _limit = 2;
+}
+
+CellDrift::CellDrift(int x, int y)
+    : _x(x)
+    , _y(y)
 {}
 
 int CellDrift::x() const

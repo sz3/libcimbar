@@ -1,10 +1,10 @@
-#include "CellPosition.h"
+#include "CellPositions.h"
 #include "Interleave.h"
 
 #include <vector>
 #include <utility>
 
-CellPosition::positions_list CellPosition::compute_linear(int spacing, int dimensions, int offset, int marker_size)
+CellPositions::positions_list CellPositions::compute_linear(int spacing, int dimensions, int offset, int marker_size)
 {
 	/*
 	 * ex: if dimensions == 128, and marker_size == 8:
@@ -50,41 +50,41 @@ CellPosition::positions_list CellPosition::compute_linear(int spacing, int dimen
 	return res;
 }
 
-CellPosition::positions_list CellPosition::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
+CellPositions::positions_list CellPositions::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
 {
-	CellPosition::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
+	CellPositions::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
 	if (interleave_blocks)
 		return Interleave::interleave(pos, interleave_blocks);
 	return pos;
 }
 
-CellPosition::CellPosition(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
+CellPositions::CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
     : _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks))
 {
 	reset();
 }
 
-unsigned CellPosition::index() const
+unsigned CellPositions::index() const
 {
 	return _index;
 }
 
-size_t CellPosition::count() const
+size_t CellPositions::count() const
 {
 	return _positions.size();
 }
 
-void CellPosition::reset()
+void CellPositions::reset()
 {
 	_index = 0;
 }
 
-bool CellPosition::done() const
+bool CellPositions::done() const
 {
 	return _index >= _positions.size();
 }
 
-const CellPosition::coordinate& CellPosition::next()
+const CellPositions::coordinate& CellPositions::next()
 {
 	return _positions[_index++];
 }

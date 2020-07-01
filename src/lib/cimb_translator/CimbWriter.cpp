@@ -34,7 +34,7 @@ namespace {
 }
 
 CimbWriter::CimbWriter(bool dark, unsigned size)
-    : _position(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding(), Config::interleave_blocks())
+    : _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding(), Config::interleave_blocks())
     , _encoder(Config::symbol_bits(), Config::color_bits())
 {
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
@@ -64,7 +64,7 @@ bool CimbWriter::write(unsigned bits)
 	if (done())
 		return false;
 
-	CellPosition::coordinate xy = _position.next();
+	CellPositions::coordinate xy = _positions.next();
 	cv::Mat cell = _encoder.encode(bits);
 	paste(_image, cell, xy.first, xy.second);
 	return true;
@@ -72,7 +72,7 @@ bool CimbWriter::write(unsigned bits)
 
 bool CimbWriter::done() const
 {
-	return _position.done();
+	return _positions.done();
 }
 
 cv::Mat CimbWriter::image() const

@@ -5,8 +5,8 @@ set(SOURCES
 	Cell.h
 	CellDrift.cpp
 	CellDrift.h
-	CellPosition.cpp
-	CellPosition.h
+	CellPositions.cpp
+	CellPositions.h
 	CimbDecoder.cpp
 	CimbDecoder.h
 	CimbEncoder.cpp
@@ -20,6 +20,8 @@ set(SOURCES
 	Config.cpp
 	Config.h
 	Interleave.h
+	LinearDecodePositions.cpp
+	LinearDecodePositions.h
 )
 
 add_library(cimb_translator STATIC ${SOURCES})

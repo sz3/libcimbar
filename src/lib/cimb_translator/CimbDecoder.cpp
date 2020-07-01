@@ -37,11 +37,11 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset) const
+unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset, unsigned& best_distance) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
-	unsigned best_distance = 1000;
+	best_distance = 1000;
 	// there are 9 candidate hashes. Because we're greedy (see the `return`), we should iterate out from the center
 	// 4 == center.
 	// 5, 7, 3, 1 == sides.
@@ -64,7 +64,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset) const
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
 	auto bits = image_hash::fuzzy_ahash(cell);
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
@@ -75,7 +75,7 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset)
 
 		hashes.push_back(image_hash::average_hash(img));
 	}*/
-	return get_best_symbol(hashes, drift_offset);
+	return get_best_symbol(hashes, drift_offset, best_distance);
 }
 
 unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
@@ -126,16 +126,17 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	return get_best_color(r, g, b);
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset) const
+unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	unsigned bits = decode_symbol(cell, drift_offset);
+	unsigned bits = decode_symbol(cell, drift_offset, best_distance);
 	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
 	return bits;
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
 {
+	unsigned drift_offset;
 	unsigned distance;
-	return decode(color_cell, color_cell, distance);
+	return decode(color_cell, color_cell, drift_offset, distance);
 }
 

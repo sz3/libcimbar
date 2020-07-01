@@ -6,12 +6,13 @@ set (SOURCES
 	test.cpp
 	CellTest.cpp
 	CellDriftTest.cpp
-	CellPositionTest.cpp
+	CellPositionsTest.cpp
 	CimbDecoderTest.cpp
 	CimbEncoderTest.cpp
 	CimbReaderTest.cpp
 	CimbWriterTest.cpp
 	InterleaveTest.cpp
+	LinearDecodePositionsTest.cpp
 )
 
 include_directories(
