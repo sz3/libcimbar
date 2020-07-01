@@ -64,6 +64,11 @@ CellPosition::CellPosition(int spacing, int dimensions, int offset, int marker_s
 	reset();
 }
 
+unsigned CellPosition::index() const
+{
+	return _index;
+}
+
 size_t CellPosition::count() const
 {
 	return _positions.size();

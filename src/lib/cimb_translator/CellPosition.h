@@ -15,6 +15,7 @@ public:
 public:
 	CellPosition(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
 
+	unsigned index() const;
 	size_t count() const;
 	void reset();
 	bool done() const;

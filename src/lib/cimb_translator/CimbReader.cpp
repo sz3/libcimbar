@@ -31,7 +31,7 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool shou
 		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
-unsigned CimbReader::read()
+unsigned CimbReader::read(unsigned& bits)
 {
 	if (_position.done())
 		return 0;
@@ -44,11 +44,11 @@ unsigned CimbReader::read()
 	cv::Mat color_cell = _image(crop);
 
 	unsigned drift_offset = 0;
-	unsigned bits = _decoder.decode(cell, color_cell, drift_offset);
+	bits = _decoder.decode(cell, color_cell, drift_offset);
 
 	std::pair<int, int> best_drift = CellDrift::driftPairs[drift_offset];
 	_drift.updateDrift(best_drift.first, best_drift.second);
-	return bits;
+	return _position.index()-1;
 }
 
 bool CimbReader::done() const

@@ -25,12 +25,14 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	// read
 	for (unsigned val : expected)
 	{
-		unsigned bits = cr.read();
+		unsigned bits;
+		cr.read(bits);
 		assertEquals(val, bits);
 	}
 
+	unsigned bits;
 	while (!cr.done())
-		cr.read();
+		cr.read(bits);
 	assertTrue(cr.done());
 }
 
@@ -49,11 +51,13 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 	// read
 	for (unsigned val : expected)
 	{
-		unsigned bits = cr.read();
+		unsigned bits;
+		cr.read(bits);
 		assertEquals(val, bits);
 	}
 
+	unsigned bits;
 	while (!cr.done())
-		cr.read();
+		cr.read(bits);
 	assertTrue(cr.done());
 }
