@@ -21,6 +21,8 @@ public:
 	bool done() const;
 	const coordinate& next();
 
+	const positions_list& positions() const;
+
 protected:
 	unsigned _index;
 	positions_list _positions;

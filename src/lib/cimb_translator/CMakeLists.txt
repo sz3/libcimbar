@@ -20,7 +20,6 @@ set(SOURCES
 	Config.cpp
 	Config.h
 	Interleave.h
-	LinearDecodePositions.cpp
 	LinearDecodePositions.h
 )
 

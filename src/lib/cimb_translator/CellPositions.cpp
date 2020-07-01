@@ -1,9 +1,6 @@
 #include "CellPositions.h"
 #include "Interleave.h"
 
-#include <vector>
-#include <utility>
-
 CellPositions::positions_list CellPositions::compute_linear(int spacing, int dimensions, int offset, int marker_size)
 {
 	/*
@@ -89,3 +86,7 @@ const CellPositions::coordinate& CellPositions::next()
 	return _positions[_index++];
 }
 
+const CellPositions::positions_list& CellPositions::positions() const
+{
+	return _positions;
+}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CimbDecoder.h"
-#include "LinearDecodePositions.h"
+#include "FloodDecodePositions.h"
 
 #include <opencv2/opencv.hpp>
 #include <string>
@@ -20,6 +20,6 @@ protected:
 	cv::Mat _image;
 	cv::Mat _grayscale;
 	unsigned _cellSize;
-	LinearDecodePositions _positions;
+	FloodDecodePositions _positions;
 	const CimbDecoder& _decoder;
 };
