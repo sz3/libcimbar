@@ -113,8 +113,6 @@ inline cv::Mat Scanner::preprocess_image(const cv::Mat& img)
 
 	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
 	clahe->apply(out, out);
-
-	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY); // do we actually need this?
 	return out;
 }
 
