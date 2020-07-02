@@ -13,7 +13,6 @@ set(SOURCES
 	Midpoints.h
 	Point.h
 	ScanState.h
-	Scanner.cpp
 	Scanner.h
 	SimpleCameraCalibration.cpp
 	SimpleCameraCalibration.h

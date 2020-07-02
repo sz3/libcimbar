@@ -40,6 +40,6 @@ TEST_CASE( "ExtractorTest/testExtractUpscale", "[unit]" )
 	ext.extract(TestCimbar::getSample("4color-cam-140.jpg"), imgPath);
 
 	cv::Mat out = cv::imread(imgPath);
-	assertEquals( 0x444c3f98ded8f5c, image_hash::average_hash(out) );
+	assertEquals( 0x44cc7f88ded8e5c, image_hash::average_hash(out) );
 }
 
