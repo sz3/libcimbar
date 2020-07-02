@@ -39,6 +39,8 @@ protected: // internal member functions
 	bool scan_vertical(std::vector<Anchor>& points, int x, int xmax=-1, int ystart=-1, int yend=-1) const;
 	bool scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
+	void on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const;
+
 	// edge detection
 	bool chase_edge(const point<double>& start, const point<double>& unit) const;
 	point<int> find_edge(const point<int>& u, const point<int>& v, point<double> mid) const;

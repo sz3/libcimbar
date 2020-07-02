@@ -303,21 +303,29 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
 	return true;
 }
 
+void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const
+{
+	for (const Anchor& c : candidates)
+		if (c.is_mergeable(found, _mergeCutoff))
+			return;
+
+	t2_scan_column(found, [&] (const Anchor& p) {
+		t3_scan_diagonal(p, [&] (const Anchor& p) {
+			t4_confirm_scan(p, [&] (const Anchor& p) {
+				candidates.push_back(p);
+			});
+		});
+	});
+}
+
 std::vector<Anchor> Scanner::scan()
 {
 	// scan horizontal
 	std::vector<Anchor> candidates;
-	t1_scan_rows([&, &candidates] (const Anchor& p) {
-		t2_scan_column(p, [&, &candidates] (const Anchor& p) {
-			t3_scan_diagonal(p, [&, &candidates] (const Anchor& p) {
-				t4_confirm_scan(p, [&, &candidates] (const Anchor& p) {
-					candidates.push_back(p);
-				});
-			});
-		});
+	t1_scan_rows([&] (const Anchor& p) {
+		on_t1_scan(p, candidates);
 	});
 
-	candidates = deduplicate_candidates(candidates);
 	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
 	return candidates;

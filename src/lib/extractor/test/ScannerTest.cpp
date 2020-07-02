@@ -109,7 +109,7 @@ TEST_CASE( "ScannerTest/testExampleScan.4", "[unit]" )
 	// order is top-left, top-right, bottom-left, bottom-right
 
 	assertEquals(
-	    "216+-30,64+-29 1155+-25,89+-25 242+-28,1021+-26 1151+-24,973+-24",
+	    "215+-29,64+-29 1155+-25,89+-25 242+-28,1021+-26 1151+-24,973+-24",
 	    turbo::str::join(candidates)
 	);
 }
