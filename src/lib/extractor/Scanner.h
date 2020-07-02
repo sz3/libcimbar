@@ -3,6 +3,7 @@
 #include "Anchor.h"
 #include "Point.h"
 #include <opencv2/opencv.hpp>
+#include <functional>
 #include <iostream>
 #include <vector>
 
@@ -24,10 +25,11 @@ public: // other interesting methods
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
 	void filter_candidates(std::vector<Anchor>& candidates) const;
 
-	std::vector<Anchor> t1_scan_rows() const;
-	std::vector<Anchor> t2_scan_columns(const std::vector<Anchor>& candidates) const;
-	std::vector<Anchor> t3_scan_diagonal(const std::vector<Anchor>& candidates) const;
-	std::vector<Anchor> t4_confirm_scan(const std::vector<Anchor>& candidates) const;
+	void t1_scan_rows(std::function<void(const Anchor&)> fun) const;
+	void t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+
 	bool sort_top_to_bottom(std::vector<Anchor>& points);
 
 protected: // internal member functions

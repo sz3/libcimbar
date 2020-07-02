@@ -11,31 +11,42 @@
 #include <vector>
 
 
+
+
 TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 {
 	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
 	Scanner sc(img);
 
-	std::vector<Anchor> candidates = sc.t1_scan_rows();
+	std::vector<Anchor> candidates;
+	sc.t1_scan_rows([&candidates] (const Anchor& p) { candidates.push_back(p); });
 	std::string res = turbo::str::join(candidates);
 	assertStringContains("51+-26,288+-0", res);
 	assertStringContains("992+-27,288+-0", res);
 	assertStringContains("85+-24,1188+-0", res);
 	assertStringContains("959+-25,1188+-0", res);
 
-	candidates = sc.t2_scan_columns(candidates);
-	assertStringContains("51+-0,286+-28", turbo::str::join(candidates));
-	assertStringContains("992+-0,283+-28", turbo::str::join(candidates));
-	assertStringContains("85+-0,1188+-24", turbo::str::join(candidates));
-	assertStringContains("959+-0,1196+-24", turbo::str::join(candidates));
+	std::vector<Anchor> c2;
+	for (const Anchor& c : candidates)
+		sc.t2_scan_column(c, [&c2] (const Anchor& p) { c2.push_back(p); });
+	assertStringContains("51+-0,286+-28", turbo::str::join(c2));
+	assertStringContains("992+-0,283+-28", turbo::str::join(c2));
+	assertStringContains("85+-0,1188+-24", turbo::str::join(c2));
+	assertStringContains("959+-0,1196+-24", turbo::str::join(c2));
 
-	candidates = sc.t3_scan_diagonal(candidates);
-	assertStringContains("51+-27,286+-28", turbo::str::join(candidates));
-	assertStringContains("992+-26,283+-28", turbo::str::join(candidates));
-	assertStringContains("85+-24,1188+-24", turbo::str::join(candidates));
-	assertStringContains("958+-23,1196+-24", turbo::str::join(candidates));
+	std::vector<Anchor> c3;
+	for (const Anchor& c : c2)
+		sc.t3_scan_diagonal(c, [&c3] (const Anchor& p) { c3.push_back(p); });
+	assertStringContains("51+-27,286+-28", turbo::str::join(c3));
+	assertStringContains("992+-26,283+-28", turbo::str::join(c3));
+	assertStringContains("85+-24,1188+-24", turbo::str::join(c3));
+	assertStringContains("958+-23,1196+-24", turbo::str::join(c3));
 
-	candidates = sc.t4_confirm_scan(candidates);
+	std::vector<Anchor> c4;
+	for (const Anchor& c : c3)
+		sc.t4_confirm_scan(c, [&c4] (const Anchor& p) { c4.push_back(p); });
+
+	candidates = sc.deduplicate_candidates(c4);
 	sc.filter_candidates(candidates);
 
 	// ordered by size
