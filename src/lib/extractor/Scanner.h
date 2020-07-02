@@ -27,10 +27,17 @@ public: // other interesting methods
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
 	void filter_candidates(std::vector<Anchor>& candidates) const;
 
-	void t1_scan_rows(std::function<void(const Anchor&)> fun) const;
-	void t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
-	void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
-	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	template <typename TF>  // ex: std::function<void(const Anchor&)>
+	void t1_scan_rows(TF&& fun) const;
+
+	template <typename TF>
+	void t2_scan_column(const Anchor& hint, TF&& fun) const;
+
+	template <typename TF>
+	void t3_scan_diagonal(const Anchor& hint, TF&& fun) const;
+
+	template <typename TF>
+	void t4_confirm_scan(const Anchor& hint, TF&& fun) const;
 
 	bool sort_top_to_bottom(std::vector<Anchor>& points);
 
@@ -260,7 +267,8 @@ inline bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int 
 	return initCount != points.size();
 }
 
-inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun) const
+template <typename TF>
+inline void Scanner::t1_scan_rows(TF&& fun) const
 {
 	std::vector<Anchor> points;
 	for (int y = _skip; y < _img.rows; y += _skip)
@@ -269,7 +277,8 @@ inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun) const
 		fun(p);
 }
 
-inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+template <typename TF>
+inline void Scanner::t2_scan_column(const Anchor& hint, TF&& fun) const
 {
 	std::vector<Anchor> points;
 	int ystart = hint.y() - (3 * hint.xrange());
@@ -280,7 +289,8 @@ inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const
 		fun(p);
 }
 
-inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+template <typename TF>
+inline void Scanner::t3_scan_diagonal(const Anchor& hint, TF&& fun) const
 {
 	std::vector<Anchor> confirms;
 	int xstart = hint.xavg() - (2 * hint.yrange());
@@ -304,7 +314,8 @@ inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(con
 		fun(merged);
 }
 
-inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+template <typename TF>
+inline void Scanner::t4_confirm_scan(const Anchor& hint, TF&& fun) const
 {
 	// because we have a lot of weird crap going on in the center of the image,
 	// do one more scan of our (theoretical) anchor points.
