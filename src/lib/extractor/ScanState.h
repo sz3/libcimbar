@@ -1,6 +1,5 @@
 #pragma once
 
-#include "serialize/str_join.h"
 #include <deque>
 #include <string>
 
@@ -13,8 +12,6 @@ public:
 	ScanState();
 
 	int process(bool active, float limit_low=3.0, float limit_high=6.0);
-
-	std::string str() const;
 
 protected:
 	void pop_state();
@@ -88,9 +85,4 @@ inline int ScanState::process(bool active, float limit_low, float limit_high)
 	if (!active and (_state == 2 or _state == 4))
 		_tally.back() += 1;
 	return NOOP;
-}
-
-inline std::string ScanState::str() const
-{
-	return turbo::str::join(_tally);
 }

@@ -41,8 +41,8 @@ protected:
 };
 
 inline FloodDecodePositions::FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size)
-	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
-	, _cellFinder(_positions, dimensions, marker_size)
+    : _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
+    , _cellFinder(_positions, dimensions, marker_size)
 {
 	reset();
 }
@@ -75,8 +75,10 @@ inline FloodDecodePositions::iter FloodDecodePositions::next()
 		auto [i, drift, _] = _heap.top();
 		_heap.pop();
 		if (_remaining.erase(i))
-			return {i, _positions[i], drift};
+		    return {i, _positions[i], drift};
 	}
+
+	return {0, {0, 0}, CellDrift()};
 }
 
 inline int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance)
