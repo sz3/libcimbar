@@ -15,11 +15,11 @@ class Decoder
 public:
 	Decoder(unsigned ecc_bytes=40, unsigned bits_per_op=0, bool interleave=true);
 
-	template <typename STREAM>
-	unsigned decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
+	template <typename MAT, typename STREAM>
+	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false);
 
-	template <typename STREAM>
-	unsigned decode_fountain(const cv::Mat& img, STREAM& ostream, bool should_preprocess=false);
+	template <typename MAT, typename STREAM>
+	unsigned decode_fountain(const MAT& img, STREAM& ostream, bool should_preprocess=false);
 
 	unsigned decode(std::string filename, std::string output);
 
@@ -79,15 +79,15 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 // then we'd direct the stringstream to our sink
 // which would either be a filestream, or a multi-channel fountain sink
 
-template <typename STREAM>
-inline unsigned Decoder::decode(const cv::Mat& img, STREAM& ostream, bool should_preprocess)
+template <typename MAT, typename STREAM>
+inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess)
 {
 	CimbReader reader(img, _decoder, should_preprocess);
 	return do_decode(reader, ostream);
 }
 
-template <typename FOUNTAINSTREAM>
-inline unsigned Decoder::decode_fountain(const cv::Mat& img, FOUNTAINSTREAM& ostream, bool should_preprocess)
+template <typename MAT, typename FOUNTAINSTREAM>
+inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess)
 {
 	CimbReader reader(img, _decoder, should_preprocess);
 

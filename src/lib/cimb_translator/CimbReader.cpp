@@ -7,10 +7,29 @@
 using namespace cimbar;
 
 namespace {
+	cv::Mat kernel()
+	{
+		static const cv::Mat k = (cv::Mat_<float>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
+		return k;
+	}
+
 	void preprocessSymbolGrid(cv::Mat& img)
 	{
-		static const cv::Mat kernel = (cv::Mat_<float>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
-		cv::filter2D(img, img, -1, kernel);
+		cv::filter2D(img, img, -1, kernel());
+	}
+
+	cv::UMat umat_kernel()
+	{
+		cv::Mat kern = kernel();
+		cv::UMat k;
+		kern.copyTo(k);
+		return k;
+	}
+
+	void preprocessSymbolGrid(cv::UMat& img)
+	{
+		static const cv::UMat uk = umat_kernel();
+		cv::filter2D(img, img, -1, uk);
 	}
 }
 
@@ -25,6 +44,23 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool shou
 		_grayscale = img.clone();
 		preprocessSymbolGrid(_grayscale);
 		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
+	}
+	else
+		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
+}
+
+CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool should_preprocess)
+    : _image(img.getMat(cv::ACCESS_READ))
+    , _cellSize(Config::cell_size() + 2)
+    , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
+    , _decoder(decoder)
+{
+	if (should_preprocess)
+	{
+		cv::UMat temp = img.clone();
+		preprocessSymbolGrid(temp);
+		cv::cvtColor(temp, temp, cv::COLOR_BGR2GRAY);
+		_grayscale = temp.getMat(cv::ACCESS_READ).clone();
 	}
 	else
 		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
