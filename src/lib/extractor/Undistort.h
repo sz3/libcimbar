@@ -14,12 +14,14 @@ public:
 		set_distortion_params(width, height, params);
 	}
 
-	static DistortionParameters get_distortion_parameters(const cv::Mat& img)
+	template <typename MAT>
+	static DistortionParameters get_distortion_parameters(const MAT& img)
 	{
 		return CAMERA_CALIBRATOR().scan(img);
 	}
 
-	bool undistort(const cv::Mat& img, cv::Mat& out)
+	template <typename MAT>
+	bool undistort(const MAT& img, MAT& out)
 	{
 		if (!_params)
 		{
