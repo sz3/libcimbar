@@ -18,17 +18,9 @@ namespace {
 		cv::filter2D(img, img, -1, kernel());
 	}
 
-	cv::UMat umat_kernel()
-	{
-		cv::Mat kern = kernel();
-		cv::UMat k;
-		kern.copyTo(k);
-		return k;
-	}
-
 	void preprocessSymbolGrid(cv::UMat& img)
 	{
-		static const cv::UMat uk = umat_kernel();
+		static const cv::UMat uk = kernel().getUMat(cv::ACCESS_READ);
 		cv::filter2D(img, img, -1, uk);
 	}
 }
