@@ -17,24 +17,6 @@ namespace {
 	};
 }
 
-Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
-    : _dark(dark)
-    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
-    , _mergeCutoff(img.cols / 30)
-    , _anchorSize(30)
-{
-	_img = preprocess_image(img);
-}
-
-Scanner::Scanner(const cv::UMat& img, bool dark, int skip)
-    : _dark(dark)
-    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
-    , _mergeCutoff(img.cols / 30)
-    , _anchorSize(30)
-{
-	_img = preprocess_image(img).getMat(cv::ACCESS_READ).clone();
-}
-
 int Scanner::anchor_size() const
 {
 	return _anchorSize;

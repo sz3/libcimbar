@@ -11,19 +11,24 @@ class Midpoints;
 
 class Scanner
 {
-public: // public interface
-	Scanner(const cv::Mat& img, bool dark=true, int skip=0);
-	Scanner(const cv::UMat& img, bool dark=true, int skip=0);
-	int anchor_size() const;
+public: // public inline methods
+	template <typename MAT>
+	Scanner(const MAT& img, bool dark=true, int skip=0);
 
+	template <typename MAT>
+	static cv::Mat preprocess_threshold(const MAT& img);
+
+	template <typename MAT>
+	static cv::Mat preprocess_image(const MAT& img);
+
+	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
+
+	// rest of public interface
 	std::vector<Anchor> scan();
 	std::vector<point<int>> scan_edges(const Corners& corners, Midpoints& mps) const;
-
+	int anchor_size() const;
 
 public: // other interesting methods
-	template <typename MAT>
-	static MAT preprocess_image(const MAT& img);
-
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
 	void filter_candidates(std::vector<Anchor>& candidates) const;
 
@@ -32,9 +37,6 @@ public: // other interesting methods
 	std::vector<Anchor> t3_scan_diagonal(const std::vector<Anchor>& candidates) const;
 	std::vector<Anchor> t4_confirm_scan(const std::vector<Anchor>& candidates) const;
 	bool sort_top_to_bottom(std::vector<Anchor>& points);
-
-public: // helpers
-	static unsigned nextPowerOfTwoPlusOne(unsigned v);
 
 protected: // internal member functions
 	bool test_pixel(int x, int y) const;
@@ -68,8 +70,28 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 	return std::max(3U, v + 2);
 }
 
+// specialization for CPU -- use CLAHE
+template <>
+inline cv::Mat Scanner::preprocess_threshold(const cv::Mat& img)
+{
+	cv::Mat res;
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
+	clahe->apply(img, res);
+
+	cv::threshold(res, res, 127, 255, cv::THRESH_BINARY);
+	return res;
+}
+
 template <typename MAT>
-inline MAT Scanner::preprocess_image(const MAT& img)
+inline cv::Mat Scanner::preprocess_threshold(const MAT& img)
+{
+	cv::Mat res;
+	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 65, 0);
+	return res;
+}
+
+template <typename MAT>
+inline cv::Mat Scanner::preprocess_image(const MAT& img)
 {
 	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
 	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
@@ -81,10 +103,15 @@ inline MAT Scanner::preprocess_image(const MAT& img)
 		out = img.clone();
 
 	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
+	return preprocess_threshold(out);
+}
 
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
-	clahe->apply(out, out);
-
-	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY); // do we actually need this?
-	return out;
+template <typename MAT>
+inline Scanner::Scanner(const MAT& img, bool dark, int skip)
+    : _dark(dark)
+    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
+    , _mergeCutoff(img.cols / 30)
+    , _anchorSize(30)
+{
+	_img = preprocess_image(img);
 }
