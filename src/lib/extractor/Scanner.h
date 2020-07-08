@@ -78,7 +78,7 @@ inline MAT Scanner::preprocess_image(const MAT& img)
 	if (img.channels() >= 3)
 		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
 	else
-		out = img;
+		out = img.clone();
 
 	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
 
