@@ -23,8 +23,7 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 	for (const string& inf : infiles)
 	{
 		bool shouldPreprocess = force_preprocess;
-		cv::UMat img;
-		cv::imread(inf).copyTo(img);
+		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		if (!no_deskew)
 		{
 			// attempt undistort
