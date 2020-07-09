@@ -13,15 +13,10 @@ namespace {
 		return k;
 	}
 
-	void preprocessSymbolGrid(cv::Mat& img)
+	template <typename MAT>
+	void preprocessSymbolGrid(const MAT& img, cv::Mat& out)
 	{
-		cv::filter2D(img, img, -1, kernel());
-	}
-
-	void preprocessSymbolGrid(cv::UMat& img)
-	{
-		static const cv::UMat uk = kernel().getUMat(cv::ACCESS_READ);
-		cv::filter2D(img, img, -1, uk);
+		cv::filter2D(img, out, -1, kernel());
 	}
 }
 
@@ -33,8 +28,7 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool shou
 {
 	if (should_preprocess)
 	{
-		_grayscale = img.clone();
-		preprocessSymbolGrid(_grayscale);
+		preprocessSymbolGrid(img, _grayscale);
 		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
 	}
 	else
@@ -49,13 +43,11 @@ CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool sho
 {
 	if (should_preprocess)
 	{
-		cv::UMat temp = img.clone();
-		preprocessSymbolGrid(temp);
-		cv::cvtColor(temp, temp, cv::COLOR_BGR2GRAY);
-		_grayscale = temp.getMat(cv::ACCESS_READ).clone();
+		preprocessSymbolGrid(img, _grayscale);
+		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
 	}
 	else
-		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(img, _grayscale, cv::COLOR_BGR2GRAY);
 }
 
 unsigned CimbReader::read(unsigned& bits)
