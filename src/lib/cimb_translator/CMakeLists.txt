@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
 	bitmaps.h
+	AdjacentCellFinder.h
 	Cell.h
 	CellDrift.cpp
 	CellDrift.h
@@ -19,6 +20,7 @@ set(SOURCES
 	Common.h
 	Config.cpp
 	Config.h
+	FloodDecodePositions.h
 	Interleave.h
 	LinearDecodePositions.h
 )

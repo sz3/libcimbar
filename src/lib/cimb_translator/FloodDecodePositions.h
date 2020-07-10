@@ -60,7 +60,12 @@ inline void FloodDecodePositions::reset()
 		_remaining.insert(i);
 
 	// seed
+	int smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size()) - 1;
+	int lastElem = _positions.size()-1;
 	_heap.push({0, CellDrift(), 0});
+	_heap.push({smallRowLen, CellDrift(), 0});
+	_heap.push({lastElem, CellDrift(), 0});
+	_heap.push({lastElem-smallRowLen, CellDrift(), 0});
 }
 
 inline bool FloodDecodePositions::done() const

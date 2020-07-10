@@ -7,9 +7,9 @@ class AdjacentCellFinder
 {
 public:
 	AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size)
-		: _positions(positions)
-		, _markerSize(marker_size)
-		, _dimensions(dimensions)
+	    : _positions(positions)
+	    , _markerSize(marker_size)
+	    , _dimensions(dimensions)
 	{
 		int midDimensions = dimensions - marker_size - marker_size;
 		int midCells = dimensions * midDimensions;
@@ -21,9 +21,19 @@ public:
 	std::array<int, 4> find(int index)
 	{
 		std::array<int,4> adj = {
-			right(index), left(index), bottom(index), top(index)
+		    right(index), left(index), bottom(index), top(index)
 		};
 		return adj;
+	}
+
+	int dimensions() const
+	{
+		return _dimensions;
+	}
+
+	int marker_size() const
+	{
+		return _markerSize;
 	}
 
 protected:
@@ -68,6 +78,8 @@ protected:
 
 		if (next >= _positions.size())
 			return -1;
+		if (_positions[next].first != _positions[index].first)  // near anchor
+			return -1;
 		return next;
 	}
 
@@ -81,6 +93,8 @@ protected:
 			next += _markerSize;
 
 		if (next < 0)
+			return -1;
+		if (_positions[next].first != _positions[index].first)  // near anchor
 			return -1;
 		return next;
 	}
