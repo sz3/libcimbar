@@ -1,7 +1,7 @@
 #include "unittest.h"
 
 #include "Interleave.h"
-#include "CellPosition.h"
+#include "CellPositions.h"
 #include "serialize/str_join.h"
 
 #include <iostream>
@@ -40,7 +40,7 @@ TEST_CASE( "InterleaveTest/testReverse", "[unit]" )
 
 TEST_CASE( "InterleaveTest/testCellPositions", "[unit]" )
 {
-	std::vector<unsigned> indices = Interleave::interleave_reverse(CellPosition::compute_linear(9, 112, 8, 6).size(), 155);
+	std::vector<unsigned> indices = Interleave::interleave_reverse(CellPositions::compute_linear(9, 112, 8, 6).size(), 155);
 	assertEquals( 12400, indices.size() );
 	assertEquals( 0, indices[0] );
 	assertEquals( 80, indices[1] );

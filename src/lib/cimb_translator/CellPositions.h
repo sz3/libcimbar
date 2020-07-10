@@ -3,7 +3,7 @@
 #include <vector>
 #include <utility>
 
-class CellPosition
+class CellPositions
 {
 public:
 	using coordinate = std::pair<int, int>;
@@ -13,12 +13,15 @@ public:
 	static positions_list compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
 
 public:
-	CellPosition(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
+	CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
 
+	unsigned index() const;
 	size_t count() const;
 	void reset();
 	bool done() const;
 	const coordinate& next();
+
+	const positions_list& positions() const;
 
 protected:
 	unsigned _index;

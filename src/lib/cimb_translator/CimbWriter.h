@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CellPosition.h"
+#include "CellPositions.h"
 #include "CimbEncoder.h"
 
 class CimbWriter
@@ -15,6 +15,6 @@ public:
 
 protected:
 	cv::Mat _image;
-	CellPosition _position;
+	CellPositions _positions;
 	CimbEncoder _encoder;
 };

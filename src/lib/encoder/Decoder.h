@@ -58,13 +58,15 @@ template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer<> bb;
-	for (unsigned i : Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks))
+	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks);
+	while (!reader.done())
 	{
-		if (reader.done())
-			break;
-		unsigned bits = reader.read();
-		unsigned index = i * _bitsPerOp;
-		bb.write(bits, index, _bitsPerOp);
+		// reader should probably be in charge of the cell index (i) calculation
+		// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
+		unsigned bits = 0;
+		unsigned i = reader.read(bits);
+		unsigned bitPos = interleaveLookup[i] * _bitsPerOp;
+		bb.write(bits, bitPos, _bitsPerOp);
 	}
 
 	reed_solomon_stream rss(ostream, _eccBytes);

@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
 	bitmaps.h
+	AdjacentCellFinder.h
 	Cell.h
 	CellDrift.cpp
 	CellDrift.h
-	CellPosition.cpp
-	CellPosition.h
+	CellPositions.cpp
+	CellPositions.h
 	CimbDecoder.cpp
 	CimbDecoder.h
 	CimbEncoder.cpp
@@ -19,7 +20,9 @@ set(SOURCES
 	Common.h
 	Config.cpp
 	Config.h
+	FloodDecodePositions.h
 	Interleave.h
+	LinearDecodePositions.h
 )
 
 add_library(cimb_translator STATIC ${SOURCES})

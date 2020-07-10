@@ -11,10 +11,10 @@ public:
 	CimbDecoder(unsigned symbol_bits, unsigned color_bits);
 
 	unsigned decode(const cv::Mat& color_cell) const;
-	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset) const;
+	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
 
-	unsigned get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& best_distance) const;
-	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset) const;
+	unsigned get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset, unsigned& best_distance) const;
+	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(unsigned char r, unsigned char g, unsigned char b) const;
 	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
