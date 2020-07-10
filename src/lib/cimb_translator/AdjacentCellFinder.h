@@ -26,6 +26,16 @@ public:
 		return adj;
 	}
 
+	int dimensions() const
+	{
+		return _dimensions;
+	}
+
+	int marker_size() const
+	{
+		return _markerSize;
+	}
+
 protected:
 	int in_row_with_margin(int index) const
 	{
