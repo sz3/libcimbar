@@ -11,14 +11,15 @@ class FloodDecodePositions
 {
 public:
 	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift>;
-	using decode_instructions = std::tuple<unsigned, CellDrift, unsigned>;
+	using decode_instructions = std::pair<CellDrift, unsigned>; // drift, best_prio
+	using decode_prio = std::tuple<unsigned, unsigned>; // index, prio
 
-	class InstructionsCompare
+	class PrioCompare
 	{
 	public:
-		bool operator()(const decode_instructions& a, const decode_instructions& b) const
+		bool operator()(const decode_prio& a, const decode_prio& b) const
 		{
-			return std::get<2>(a) > std::get<2>(b);
+			return std::get<1>(a) > std::get<1>(b);
 		}
 	};
 
@@ -35,8 +36,9 @@ public:
 protected:
 	unsigned _index;
 	unsigned _count;
-	std::priority_queue<decode_instructions, std::vector<decode_instructions>, InstructionsCompare> _heap;
+	std::priority_queue<decode_prio, std::vector<decode_prio>, PrioCompare> _heap;
 	std::vector<bool> _remaining;
+	std::vector<decode_instructions> _instructions;
 	CellPositions::positions_list _positions;
 	AdjacentCellFinder _cellFinder;
 };

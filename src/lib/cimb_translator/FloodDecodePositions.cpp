@@ -18,15 +18,18 @@ void FloodDecodePositions::reset()
 	_count = 0;
 	_remaining.clear();
 	for (int i = 0; i < _positions.size(); ++i)
+	{
 		_remaining.push_back(true);
+		_instructions.push_back({CellDrift(), ~0UL});
+	}
 
 	// seed
 	int smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size()) - 1;
 	int lastElem = _positions.size()-1;
-	_heap.push({0, CellDrift(), 0});
-	_heap.push({smallRowLen, CellDrift(), 0});
-	_heap.push({lastElem, CellDrift(), 0});
-	_heap.push({lastElem-smallRowLen, CellDrift(), 0});
+	_heap.push({0, 0});
+	_heap.push({smallRowLen, 0});
+	_heap.push({lastElem, 0});
+	_heap.push({lastElem-smallRowLen, 0});
 }
 
 bool FloodDecodePositions::done() const
@@ -38,7 +41,7 @@ FloodDecodePositions::iter FloodDecodePositions::next()
 {
 	while (!_heap.empty())
 	{
-		auto [i, drift, _] = _heap.top();
+		auto [i, _] = _heap.top();
 		_heap.pop();
 
 		std::vector<bool>::reference needsDecode = _remaining[i];
@@ -47,6 +50,7 @@ FloodDecodePositions::iter FloodDecodePositions::next()
 
 		needsDecode = false;
 		++_count;
+		auto [drift, __] = _instructions[i];
 		return {i, _positions[i], drift};
 	}
 
@@ -60,7 +64,11 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 	{
 		if (next < 0 or !_remaining[next])
 			continue;
-		_heap.push({next, drift, error_distance});
+		decode_instructions& di = _instructions[next];
+		if (di.second <= error_distance)
+			continue;
+		di = {drift, error_distance};
+		_heap.push({next, error_distance});
 	}
 	return 0;
 }
