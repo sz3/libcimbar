@@ -80,5 +80,5 @@ bool CimbReader::done() const
 
 unsigned CimbReader::num_reads() const
 {
-	return _positions.count();
+	return _positions.size();
 }

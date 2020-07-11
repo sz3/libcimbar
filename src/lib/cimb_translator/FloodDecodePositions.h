@@ -25,7 +25,7 @@ public:
 public:
 	FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size);
 
-	size_t count() const;
+	size_t size() const;
 	void reset();
 
 	bool done() const;
@@ -34,8 +34,10 @@ public:
 
 protected:
 	unsigned _index;
+	unsigned _count;
 	std::priority_queue<decode_instructions, std::vector<decode_instructions>, InstructionsCompare> _heap;
-	std::set<unsigned> _remaining;
+	std::vector<bool> _remaining;
 	CellPositions::positions_list _positions;
 	AdjacentCellFinder _cellFinder;
 };
+
