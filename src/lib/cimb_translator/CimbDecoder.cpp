@@ -13,6 +13,13 @@
 using std::get;
 using std::string;
 
+namespace {
+	unsigned squared_difference(uchar a, uchar b)
+	{
+		return std::pow(a - b, 2);
+	}
+}
+
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
@@ -65,7 +72,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	auto bits = image_hash::fuzzy_ahash(cell);
+	auto bits = image_hash::fuzzy_ahash(cell); //, 0xFF);
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
@@ -85,7 +92,7 @@ unsigned char CimbDecoder::fix_color(unsigned char c, float adjustUp, unsigned c
 
 unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
 {
-	return std::pow(get<0>(c) - r, 2) + std::pow(get<1>(c) - g, 2) + std::pow(get<2>(c) - b, 2);
+	return squared_difference(get<0>(c), r) + squared_difference(get<1>(c), g) + squared_difference(get<2>(c), b);
 }
 
 unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const

@@ -42,7 +42,7 @@ namespace image_hash
 	//  ... with each index corresponding to an 8 bit read?
 	//  ... this way, we could do compile time validation that the return value makes sense.
 	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline intx::uint128 fuzzy_ahash(const cv::Mat& img)
+	inline intx::uint128 fuzzy_ahash(const cv::Mat& img, uchar threshold=0)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
@@ -51,7 +51,8 @@ namespace image_hash
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 
-		uchar threshold = Cell(gray).mean_grayscale();
+		if (threshold == 0)
+			threshold = Cell(gray).mean_grayscale();
 
 		intx::uint128 res(0);
 		int count = 0;
