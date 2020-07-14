@@ -34,6 +34,31 @@ namespace image_hash
 		return res;
 	}
 
+	inline intx::uint128 special_case_fuzzy_ahash(const cv::Mat& gray)
+	{
+		// if the Mat is already 10x10 and threshold'd to (0, 0xFF), we can do some things...
+		static std::array<uint8_t, 2> lookup1 = {0, 2};
+		static std::array<uint8_t, 2> lookup2 = {0, 4};
+		static std::array<uint8_t, 2> lookup3 = {0, 8};
+		static std::array<uint8_t, 2> lookup4 = {0, 16};
+
+		intx::uint128 res(0);
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; j+=5, count+=5)
+			{
+				const uint64_t* hax = reinterpret_cast<const uint64_t*>(p+j);
+				uint64_t mval = (*hax) & 0x101010101ULL;
+				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
+				uint8_t val = cv[0] | lookup1[cv[1]] | lookup2[cv[2]] | lookup3[cv[3]] | lookup4[cv[4]];
+				res |= intx::uint128(val) << count;
+			}
+		}
+		return res;
+	}
+
 	// need something like a bitset_extractor(), with an api like:
 	// bits.extract(0, 8,  9, 17,  18, 26,  27, 35,  36, 44,  45, 53,  54, 62,  63, 71)
 	//  ... probably using template magic. For our purposes, we need >= 8 pairs of bit indices, which will sum to a total of 64 bits
@@ -53,6 +78,8 @@ namespace image_hash
 
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
+		else if (threshold == 0xFF)
+			return special_case_fuzzy_ahash(gray);
 
 		intx::uint128 res(0);
 		int count = 0;
