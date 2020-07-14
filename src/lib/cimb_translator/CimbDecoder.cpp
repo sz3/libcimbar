@@ -18,6 +18,12 @@ namespace {
 	{
 		return std::pow(a - b, 2);
 	}
+
+	uchar fix_single_color(uchar c, float adjustUp, uchar down)
+	{
+		c -= down;
+		return (uchar)(c * adjustUp);
+	}
 }
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
@@ -72,7 +78,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	auto bits = image_hash::fuzzy_ahash(cell); //, 0xFF);
+	auto bits = image_hash::fuzzy_ahash(cell); //, 0xFF); // this will become a param/class var if it works
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
@@ -84,18 +90,21 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset,
 	return get_best_symbol(hashes, drift_offset, best_distance);
 }
 
-unsigned char CimbDecoder::fix_color(unsigned char c, float adjustUp, unsigned char down) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
 {
-	c -= down;
-	return (uchar)(c * adjustUp);
+	return {
+		fix_single_color(std::get<0>(c), adjustUp, down),
+		fix_single_color(std::get<1>(c), adjustUp, down),
+		fix_single_color(std::get<2>(c), adjustUp, down)
+	};
 }
 
-unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b) const
 {
-	return squared_difference(get<0>(c), r) + squared_difference(get<1>(c), g) + squared_difference(get<2>(c), b);
+	return squared_difference(get<0>(a), get<0>(b)) + squared_difference(get<1>(a), get<1>(b)) + squared_difference(get<2>(a), get<2>(b));
 }
 
-unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
+unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 {
 	unsigned char max = std::max({r, g, b});
 	unsigned char min = std::min({r, g, b});
@@ -103,16 +112,14 @@ unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned 
 	if (max > min)
 		adjust /= (max - min);
 
-	r = fix_color(r, adjust, min);
-	g = fix_color(g, adjust, min);
-	b = fix_color(b, adjust, min);
+	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
 	unsigned best_fit = 0;
 	double best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
-		std::tuple<uchar,uchar,uchar> c = cimbar::getColor(i);
-		unsigned distance = check_color_distance(c, r, g, b);
+		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i);
+		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
 		{
 			best_fit = i;
