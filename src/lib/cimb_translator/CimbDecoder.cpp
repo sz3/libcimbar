@@ -78,7 +78,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	auto bits = image_hash::fuzzy_ahash(cell); //, 0xFF); // this will become a param/class var if it works
+	auto bits = image_hash::fuzzy_ahash(cell, 0xFE); // this will become a param/class var if it works
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{

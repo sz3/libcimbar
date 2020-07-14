@@ -34,8 +34,7 @@ inline MAT Deskewer::deskew(const MAT& img, const Corners& corners)
 	outputPoints.push_back(cv::Point2f(_totalSize - _anchorSize, _totalSize - _anchorSize));
 
 	MAT output(_totalSize, _totalSize, img.type());
-	MAT transform;
-	cv::getPerspectiveTransform(corners.all(), outputPoints).copyTo(transform);
+	cv::Mat transform = cv::getPerspectiveTransform(corners.all(), outputPoints);
 
 	cv::warpPerspective(img, output, transform, output.size(), cv::INTER_LINEAR);
 	return output;
