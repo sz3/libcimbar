@@ -26,5 +26,5 @@ TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 	assertEquals( "[270, 0, 540;\n"
 	              " 0, 405, 810;\n"
 	              " 0, 0, 1]", cam.str() );
-	assertEquals( "[-0.002599077037483976, 0, 0, 0]", dis.str() );
+	assertEquals( "[-0.002274736793091679, 0, 0, 0]", dis.str() );
 }
