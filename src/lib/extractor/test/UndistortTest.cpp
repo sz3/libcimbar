@@ -17,7 +17,7 @@ TEST_CASE( "UndistortTest/testUndistort", "[unit]" )
 	Undistort<SimpleCameraCalibration> und;
 	assertTrue( und.undistort(img, out) );
 
-	assertEquals( 0xe377f7ec100, image_hash::average_hash(out) );
+	assertEquals( 0xc377d7ea500, image_hash::average_hash(out) );
 }
 
 TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
@@ -31,5 +31,5 @@ TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 	Extractor ex;
 	assertTrue( ex.extract(out, out) );
 
-	assertEquals( 0x40189db276bfb200, image_hash::average_hash(out) );
+	assertEquals( 0x40189db677bfb200, image_hash::average_hash(out) );
 }

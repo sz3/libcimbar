@@ -11,21 +11,22 @@ class FloodDecodePositions
 {
 public:
 	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift>;
-	using decode_instructions = std::tuple<unsigned, CellDrift, unsigned>;
+	using decode_instructions = std::pair<CellDrift, unsigned>; // drift, best_prio
+	using decode_prio = std::tuple<unsigned, unsigned>; // index, prio
 
-	class InstructionsCompare
+	class PrioCompare
 	{
 	public:
-		bool operator()(const decode_instructions& a, const decode_instructions& b) const
+		bool operator()(const decode_prio& a, const decode_prio& b) const
 		{
-			return std::get<2>(a) > std::get<2>(b);
+			return std::get<1>(a) > std::get<1>(b);
 		}
 	};
 
 public:
 	FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size);
 
-	size_t count() const;
+	size_t size() const;
 	void reset();
 
 	bool done() const;
@@ -34,68 +35,11 @@ public:
 
 protected:
 	unsigned _index;
-	std::priority_queue<decode_instructions, std::vector<decode_instructions>, InstructionsCompare> _heap;
-	std::set<unsigned> _remaining;
+	unsigned _count;
+	std::priority_queue<decode_prio, std::vector<decode_prio>, PrioCompare> _heap;
+	std::vector<bool> _remaining;
+	std::vector<decode_instructions> _instructions;
 	CellPositions::positions_list _positions;
 	AdjacentCellFinder _cellFinder;
 };
 
-inline FloodDecodePositions::FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size)
-    : _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
-    , _cellFinder(_positions, dimensions, marker_size)
-{
-	reset();
-}
-
-inline size_t FloodDecodePositions::count() const
-{
-	return _positions.size();
-}
-
-inline void FloodDecodePositions::reset()
-{
-	_index = 0;
-	_remaining.clear();
-	for (int i = 0; i < _positions.size(); ++i)
-		_remaining.insert(i);
-
-	// seed
-	int smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size()) - 1;
-	int lastElem = _positions.size()-1;
-	_heap.push({0, CellDrift(), 0});
-	_heap.push({smallRowLen, CellDrift(), 0});
-	_heap.push({lastElem, CellDrift(), 0});
-	_heap.push({lastElem-smallRowLen, CellDrift(), 0});
-}
-
-inline bool FloodDecodePositions::done() const
-{
-	return _remaining.empty();
-}
-
-inline FloodDecodePositions::iter FloodDecodePositions::next()
-{
-	while (!_heap.empty())
-	{
-		auto [i, drift, _] = _heap.top();
-		_heap.pop();
-		if (_remaining.erase(i))
-		    return {i, _positions[i], drift};
-	}
-
-	return {0, {0, 0}, CellDrift()};
-}
-
-inline int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance)
-{
-	std::array<int,4> adj = _cellFinder.find(index);
-	for (int next : adj)
-	{
-		if (next < 0)
-			continue;
-		if (_remaining.find(next) == _remaining.end())
-			continue;
-		_heap.push({next, drift, error_distance});
-	}
-	return 0;
-}

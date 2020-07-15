@@ -87,8 +87,10 @@ inline cv::Mat Scanner::threshold_clahe(const MAT& img)
 template <typename MAT>
 inline cv::Mat Scanner::threshold_fast(const MAT& img)
 {
+	unsigned unit = std::min(img.cols, img.rows);
+	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
 	cv::Mat res;
-	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 65, 0);
+	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, 0);
 	return res;
 }
 

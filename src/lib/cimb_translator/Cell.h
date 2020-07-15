@@ -15,10 +15,10 @@ public:
 		if (_img.channels() < 3)
 			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
 
-		unsigned blue = 0;
-		unsigned green = 0;
-		unsigned red = 0;
-		unsigned count = 0;
+		uint16_t blue = 0;
+		uint16_t green = 0;
+		uint16_t red = 0;
+		uint16_t count = 0;
 
 		int yend = _img.rows * _img.channels();
 		for (int i = 0; i < _img.cols; ++i)
@@ -43,8 +43,8 @@ public:
 		if (_img.channels() > 1)
 			return 0;
 
-		unsigned total = 0;
-		unsigned count = 0;
+		uint16_t total = 0;
+		uint16_t count = 0;
 
 		for (int i = 0; i < _img.cols; ++i)
 		{

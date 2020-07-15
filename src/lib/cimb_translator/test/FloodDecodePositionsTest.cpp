@@ -3,6 +3,7 @@
 #include "FloodDecodePositions.h"
 
 #include <iostream>
+#include <set>
 #include <string>
 #include <vector>
 

@@ -34,6 +34,31 @@ namespace image_hash
 		return res;
 	}
 
+	inline intx::uint128 special_case_fuzzy_ahash(const cv::Mat& gray)
+	{
+		// if the Mat is already 10x10 and threshold'd to (0, 0xFF), we can do some things...
+		static std::array<uint8_t, 2> lookup1 = {0, 2};
+		static std::array<uint8_t, 2> lookup2 = {0, 4};
+		static std::array<uint8_t, 2> lookup3 = {0, 8};
+		static std::array<uint8_t, 2> lookup4 = {0, 16};
+
+		intx::uint128 res(0);
+		int count = 0;
+		for (int i = 0; i < gray.rows; ++i)
+		{
+			const uchar* p = gray.ptr<uchar>(i);
+			for (int j = 0; j < gray.cols; j+=5, count+=5)
+			{
+				const uint64_t* hax = reinterpret_cast<const uint64_t*>(p+j);
+				uint64_t mval = (*hax) & 0x101010101ULL;
+				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
+				uint8_t val = cv[0] | lookup1[cv[1]] | lookup2[cv[2]] | lookup3[cv[3]] | lookup4[cv[4]];
+				res |= intx::uint128(val) << count;
+			}
+		}
+		return res;
+	}
+
 	// need something like a bitset_extractor(), with an api like:
 	// bits.extract(0, 8,  9, 17,  18, 26,  27, 35,  36, 44,  45, 53,  54, 62,  63, 71)
 	//  ... probably using template magic. For our purposes, we need >= 8 pairs of bit indices, which will sum to a total of 64 bits
@@ -42,7 +67,7 @@ namespace image_hash
 	//  ... with each index corresponding to an 8 bit read?
 	//  ... this way, we could do compile time validation that the return value makes sense.
 	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline intx::uint128 fuzzy_ahash(const cv::Mat& img)
+	inline intx::uint128 fuzzy_ahash(const cv::Mat& img, uchar threshold=0)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
@@ -51,7 +76,10 @@ namespace image_hash
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 
-		uchar threshold = Cell(gray).mean_grayscale();
+		if (threshold == 0)
+			threshold = Cell(gray).mean_grayscale();
+		else if (threshold == 0xFF)
+			return special_case_fuzzy_ahash(gray);
 
 		intx::uint128 res(0);
 		int count = 0;

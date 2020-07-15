@@ -32,7 +32,8 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool shou
 		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
 	}
 	else
-		cv::cvtColor(_image, _grayscale, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(img, _grayscale, cv::COLOR_BGR2GRAY);
+	cv::adaptiveThreshold(_grayscale, _grayscale, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
 }
 
 CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool should_preprocess)
@@ -41,13 +42,14 @@ CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool sho
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
 {
-	if (should_preprocess)
+	if (should_preprocess) // rename to needs_sharpen?
 	{
 		preprocessSymbolGrid(img, _grayscale);
 		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
 	}
 	else
 		cv::cvtColor(img, _grayscale, cv::COLOR_BGR2GRAY);
+	cv::adaptiveThreshold(_grayscale, _grayscale, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
 }
 
 unsigned CimbReader::read(unsigned& bits)
@@ -80,5 +82,5 @@ bool CimbReader::done() const
 
 unsigned CimbReader::num_reads() const
 {
-	return _positions.count();
+	return _positions.size();
 }
