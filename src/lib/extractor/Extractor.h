@@ -14,6 +14,7 @@ public:
 	Extractor();
 
 	int extract(const cv::Mat& img, cv::Mat& out);
+	int extract(const cv::UMat& img, cv::UMat& out);
 	int extract(std::string read_path, cv::Mat& out);
 	int extract(std::string read_path, std::string write_path);
 

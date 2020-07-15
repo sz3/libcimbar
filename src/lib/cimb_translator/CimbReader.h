@@ -10,6 +10,7 @@ class CimbReader
 {
 public:
 	CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool should_preprocess=false);
+	CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool should_preprocess=false);
 
 	unsigned read(unsigned& bits);
 	bool done() const;

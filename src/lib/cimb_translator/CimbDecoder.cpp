@@ -7,7 +7,6 @@
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
-#include "color-util/CIE76.hpp"
 #include <algorithm>
 #include <iostream>
 #include <tuple>
@@ -78,32 +77,35 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset,
 	return get_best_symbol(hashes, drift_offset, best_distance);
 }
 
-unsigned char CimbDecoder::fix_color(unsigned char c, float adjust) const
+unsigned char CimbDecoder::fix_color(unsigned char c, float adjustUp, unsigned char down) const
 {
-	return (uchar)(c * adjust);
+	c -= down;
+	return (uchar)(c * adjustUp);
 }
 
-double CimbDecoder::check_color_distance(const colorutil::Lab& target_color, const colorutil::Lab& c) const
+unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> c, unsigned char r, unsigned char g, unsigned char b) const
 {
-	return colorutil::calculate_CIE76(target_color, c);
+	return std::pow(get<0>(c) - r, 2) + std::pow(get<1>(c) - g, 2) + std::pow(get<2>(c) - b, 2);
 }
 
 unsigned CimbDecoder::get_best_color(unsigned char r, unsigned char g, unsigned char b) const
 {
-	unsigned char max = std::max({r, g, b, uchar(1)});
+	unsigned char max = std::max({r, g, b});
+	unsigned char min = std::min({r, g, b});
+	float adjust = 255.0;
+	if (max > min)
+		adjust /= (max - min);
 
-	float adjust = 255.0 / max;
-	r = fix_color(r, adjust);
-	g = fix_color(g, adjust);
-	b = fix_color(b, adjust);
-	colorutil::Lab c = cimbar::convertColor(r, g, b);
+	r = fix_color(r, adjust, min);
+	g = fix_color(g, adjust, min);
+	b = fix_color(b, adjust, min);
 
 	unsigned best_fit = 0;
 	double best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
-		colorutil::Lab target_color = cimbar::getLabColor(i);
-		double distance = check_color_distance(target_color, c);
+		std::tuple<uchar,uchar,uchar> c = cimbar::getColor(i);
+		unsigned distance = check_color_distance(c, r, g, b);
 		if (distance < best_distance)
 		{
 			best_fit = i;

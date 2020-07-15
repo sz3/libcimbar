@@ -11,16 +11,27 @@ class Midpoints;
 
 class Scanner
 {
-public: // public interface
-	Scanner(const cv::Mat& img, bool dark=true, int skip=0);
-	int anchor_size() const;
+public: // public inline methods
+	template <typename MAT>
+	Scanner(const MAT& img, bool dark=true, int skip=0);
 
+	template <typename MAT>
+	static cv::Mat threshold_clahe(const MAT& img);
+
+	template <typename MAT>
+	static cv::Mat threshold_fast(const MAT& img);
+
+	template <typename MAT>
+	static cv::Mat preprocess_image(const MAT& img, bool quick=true);
+
+	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
+
+	// rest of public interface
 	std::vector<Anchor> scan();
 	std::vector<point<int>> scan_edges(const Corners& corners, Midpoints& mps) const;
-
+	int anchor_size() const;
 
 public: // other interesting methods
-	static cv::Mat preprocess_image(const cv::Mat& img);
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
 	void filter_candidates(std::vector<Anchor>& candidates) const;
 
@@ -49,3 +60,63 @@ protected:
 	int _anchorSize;
 };
 
+inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
+{
+	// get next power of 2 + 1
+	// min 3
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	return std::max(3U, v + 2);
+}
+
+template <typename MAT>
+inline cv::Mat Scanner::threshold_clahe(const MAT& img)
+{
+	cv::Mat res;
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
+	clahe->apply(img, res);
+
+	cv::threshold(res, res, 127, 255, cv::THRESH_BINARY);
+	return res;
+}
+
+template <typename MAT>
+inline cv::Mat Scanner::threshold_fast(const MAT& img)
+{
+	cv::Mat res;
+	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 65, 0);
+	return res;
+}
+
+template <typename MAT>
+inline cv::Mat Scanner::preprocess_image(const MAT& img, bool quick)
+{
+	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
+	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
+
+	MAT out;
+	if (img.channels() >= 3)
+		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
+	else
+		out = img.clone();
+
+	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
+	if (quick)
+		return threshold_fast(out);
+	else
+		return threshold_clahe(out);
+}
+
+template <typename MAT>
+inline Scanner::Scanner(const MAT& img, bool dark, int skip)
+    : _dark(dark)
+    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
+    , _mergeCutoff(img.cols / 30)
+    , _anchorSize(30)
+{
+	_img = preprocess_image(img);
+}

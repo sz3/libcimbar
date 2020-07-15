@@ -16,14 +16,14 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, std::function<int(cv::Mat, bool)>& decode, bool no_deskew, bool no_undistort, bool force_preprocess)
+int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool no_undistort, bool force_preprocess)
 {
 	int err = 0;
 	Undistort<SimpleCameraCalibration> und;
 	for (const string& inf : infiles)
 	{
 		bool shouldPreprocess = force_preprocess;
-		cv::Mat img = cv::imread(inf);
+		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		if (!no_deskew)
 		{
 			// attempt undistort
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = 40;
+	unsigned ecc = 64;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
@@ -108,8 +108,8 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		fountain_decoder_sink<626> sink(outpath);
-		std::function<int(cv::Mat,bool)> fun = [&sink, &d] (cv::Mat m, bool pre) {
+		fountain_decoder_sink<389> sink(outpath);
+		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
 			return d.decode_fountain(m, sink, pre);
 		};
 		return decode(infiles, fun, no_deskew, no_undistort, force_preprocess);
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
 	// else
 	std::ofstream f(outpath);
-	std::function<int(cv::Mat,bool)> fun = [&f, &d] (cv::Mat m, bool pre) {
+	std::function<int(cv::UMat,bool)> fun = [&f, &d] (cv::UMat m, bool pre) {
 		return d.decode(m, f, pre);
 	};
 	return decode(infiles, fun, no_deskew, no_undistort, force_preprocess);

@@ -1,10 +1,5 @@
 #include "SimpleCameraCalibration.h"
 
-#include "Corners.h"
-#include "Midpoints.h"
-#include "Point.h"
-#include "Scanner.h"
-
 using std::vector;
 
 namespace {
@@ -22,17 +17,6 @@ namespace {
 		point<int> omid = {size / 2, anchor_size};
 		return distance(o4, omid) / distance(o0, o1);
 	}
-
-	DistortionParameters naive_radial_undistort(int width, int height, double distortion_factor)
-	{
-		// we're treating distortion_factor as being close to k1
-		DistortionParameters dp;
-
-		dp.camera = (cv::Mat1d(3, 3) << width/4, 0, width/2, 0, height/4, height/2, 0, 0, 1);
-		dp.distortion = (cv::Mat1d(1, 4) << distortion_factor, 0, 0, 0);
-		return dp;
-	}
-
 
 	bool get_distortion_factor(vector<double>& ratios, const point<int>& observed, const point<double>& expected, const point<int>& start, const point<int>& end)
 	{
@@ -79,19 +63,3 @@ double SimpleCameraCalibration::calculate_distortion_factor(const Corners& corne
 	return smallest;
 }
 
-DistortionParameters SimpleCameraCalibration::scan(const cv::Mat& img)
-{
-	Scanner scanner(img);
-	std::vector<Anchor> anchors = scanner.scan();
-	if (anchors.size() < 4)
-		return {};
-
-	Corners corners(anchors);
-	Midpoints mps;
-	std::vector<point<int>> edges = scanner.scan_edges(corners, mps);
-	if (edges.size() < 4)
-		return {};
-
-	double distortion_factor = calculate_distortion_factor(corners, mps, edges);
-	return naive_radial_undistort(img.cols, img.rows, distortion_factor);
-}

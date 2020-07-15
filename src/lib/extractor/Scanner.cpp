@@ -15,53 +15,11 @@ namespace {
 			return an1.size() > an2.size();
 		}
 	};
-
-	unsigned nextPowerOfTwoPlusOne(unsigned v)
-	{
-		// get next power of 2 + 1
-		// min 3
-		v--;
-		v |= v >> 1;
-		v |= v >> 2;
-		v |= v >> 4;
-		v |= v >> 8;
-		v |= v >> 16;
-		return std::max(3U, v + 2);
-	}
-}
-
-Scanner::Scanner(const cv::Mat& img, bool dark, int skip)
-    : _dark(dark)
-    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
-    , _mergeCutoff(img.cols / 30)
-    , _anchorSize(30)
-{
-	_img = preprocess_image(img);
 }
 
 int Scanner::anchor_size() const
 {
 	return _anchorSize;
-}
-
-cv::Mat Scanner::preprocess_image(const cv::Mat& img)
-{
-	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
-	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
-
-	cv::Mat out;
-	if (img.channels() >= 3)
-		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
-	else
-		out = img;
-
-	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
-
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
-	clahe->apply(out, out);
-
-	cv::threshold(out, out, 127, 255, cv::THRESH_BINARY); // do we actually need this?
-	return out;
 }
 
 bool Scanner::test_pixel(int x, int y) const
