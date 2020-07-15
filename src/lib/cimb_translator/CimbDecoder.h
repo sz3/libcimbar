@@ -7,7 +7,7 @@
 class CimbDecoder
 {
 public:
-	CimbDecoder(unsigned symbol_bits, unsigned color_bits);
+	CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark=true, uchar ahashThreshold=0);
 
 	unsigned decode(const cv::Mat& color_cell) const;
 	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
@@ -31,4 +31,5 @@ protected:
 	unsigned _numSymbols;
 	unsigned _numColors;
 	bool _dark;
+	uchar _ahashThreshold;
 };

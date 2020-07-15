@@ -28,6 +28,31 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 	}
 }
 
+TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
+{
+	// in practice, it can be useful to decode preprocessed symbol tiles
+	// the "0xFF" flag is passed to the average_hash function, which uses it to
+	// (1) skip computing the mean cell (threshold) value
+	// (2) compute the hash faster (exploiting that it's all 0s or all 1s)
+	// But in this test, we just want to see it get the right answer.
+	CimbDecoder cd(4, 0, true, 0xFF);
+
+	string root = TestCimbar::getProjectDir();
+	for (int i = 0; i < 16; ++i)
+	{
+		cv::Mat tile = cimbar::getTile(4, i, true, 0, root);
+		cv::Mat tenxten(10, 10, tile.type());
+		tile.copyTo(tenxten(cv::Rect(cv::Point(0, 0), tile.size())));
+
+		// grayscale and threshold, since that's what average_hash needs
+		cv::cvtColor(tenxten, tenxten, cv::COLOR_BGR2GRAY);
+		cv::adaptiveThreshold(tenxten, tenxten, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
+
+		unsigned res = cd.decode(tenxten);
+		assertEquals(i, res);
+	}
+}
+
 TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
@@ -39,8 +64,8 @@ TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
 	assertEquals(3, cd.get_best_color(0, 255, 0));
 
 	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
-	assertEquals(0, cd.get_best_color(0, 0, 0));
-	assertEquals(0, cd.get_best_color(70, 70, 70));
+	assertEquals(3, cd.get_best_color(0, 0, 0));
+	assertEquals(3, cd.get_best_color(70, 70, 70));
 
 	// these we can use!
 	assertEquals(3, cd.get_best_color(20, 200, 20));

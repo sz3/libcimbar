@@ -26,11 +26,12 @@ namespace {
 	}
 }
 
-CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits)
+CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
     : _symbolBits(symbol_bits)
     , _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
-    , _dark(true)
+    , _dark(dark)
+    , _ahashThreshold(ahashThreshold)
 {
 	load_tiles();
 }
@@ -78,7 +79,7 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	auto bits = image_hash::fuzzy_ahash(cell, 0xFF); // this will become a param/class var if it works
+	auto bits = image_hash::fuzzy_ahash(cell, _ahashThreshold);
 	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
 	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
