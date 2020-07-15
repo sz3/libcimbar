@@ -10,6 +10,7 @@ public:
 	    : _img(img)
 	{}
 
+	template <uint16_t _count>
 	std::tuple<uchar,uchar,uchar> mean_rgb()
 	{
 		if (_img.channels() < 3)
@@ -18,13 +19,12 @@ public:
 		uint16_t blue = 0;
 		uint16_t green = 0;
 		uint16_t red = 0;
-		uint16_t count = 0;
 
 		int yend = _img.rows * _img.channels();
 		for (int i = 0; i < _img.cols; ++i)
 		{
 			const uchar* p = _img.ptr<uchar>(i);
-			for (int j = 0; j < yend; j+=_img.channels(), ++count)
+			for (int j = 0; j < yend; j+=_img.channels())
 			{
 				blue += p[j];
 				green += p[j+1];
@@ -32,10 +32,7 @@ public:
 			}
 		}
 
-		if (!count)
-			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
-
-		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
+		return std::tuple<uchar,uchar,uchar>(red/_count, green/_count, blue/_count);
 	}
 
 	uchar mean_grayscale()

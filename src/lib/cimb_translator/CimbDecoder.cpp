@@ -138,7 +138,7 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	cv::Rect crop(2+drift.first, 2+drift.second, color_cell.cols-4, color_cell.rows-4);
 	cv::Mat center = color_cell(crop);
 	uchar r,g,b;
-	std::tie(r, g, b) = Cell(center).mean_rgb();
+	std::tie(r, g, b) = Cell(center).mean_rgb<36>();
 	return get_best_color(r, g, b);
 }
 

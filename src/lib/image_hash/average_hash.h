@@ -97,17 +97,17 @@ namespace image_hash
 		bit_extractor<intx::uint128, 100> be(bits);
 		std::array<uint64_t, 9> hashes = {
 		    // top row -- top left bit is the end bit. bottom right is 0.
-		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left
-		    be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-		    be.extract(20, 30, 40, 50, 60, 70, 80, 90),  // right
+		    be.extract64(22, 32, 42, 52, 62, 72, 82, 92),  // left
+		    be.extract64(21, 31, 41, 51, 61, 71, 81, 91),
+		    be.extract64(20, 30, 40, 50, 60, 70, 80, 90),  // right
 		    // middle row
-		    be.extract(12, 22, 32, 42, 52, 62, 72, 82),
-		    be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-		    be.extract(10, 20, 30, 40, 50, 60, 70, 80),
+		    be.extract64(12, 22, 32, 42, 52, 62, 72, 82),
+		    be.extract64(11, 21, 31, 41, 51, 61, 71, 81),
+		    be.extract64(10, 20, 30, 40, 50, 60, 70, 80),
 		    // bottom row
-		    be.extract(2, 12, 22, 32, 42, 52, 62, 72),
-		    be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-		    be.extract(0, 10, 20, 30, 40, 50, 60, 70)
+		    be.extract64(2, 12, 22, 32, 42, 52, 62, 72),
+		    be.extract64(1, 11, 21, 31, 41, 51, 61, 71),
+		    be.extract64(0, 10, 20, 30, 40, 50, 60, 70)
 		};
 		return hashes;
 	}

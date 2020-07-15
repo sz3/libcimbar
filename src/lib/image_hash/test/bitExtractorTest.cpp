@@ -29,7 +29,7 @@ TEST_CASE( "bitExtractorTest/testLargerValue.1", "[unit]" )
 		bits = (bits << 1) | (i%3 == 0);
 
 	bit_extractor<intx::uint128, 81> be(bits);
-	uint64_t res = be.extract(0, 9, 18, 27, 36, 45, 54, 63);
+	uint64_t res = be.extract64(0, 9, 18, 27, 36, 45, 54, 63);
 	assertEquals( 0x9292929292929292, res );
 }
 
@@ -37,19 +37,19 @@ TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 {
 	intx::uint128 bits{0xFFBFCFE3FULL, 0xF83C0E030080000ULL};
 	bit_extractor<intx::uint128, 100> be(bits);
-	uint64_t res = be.extract(1, 11, 21, 31);
+	uint64_t res = be.extract64(1, 11, 21, 31);
 	assertEquals( 0xfffefcf8, res );
 
 	res = be.extract(41, 51, 61, 71);
 	assertEquals( 0xf0e0c080, res );
 
-	res = be.extract(1, 11, 21, 31, 41, 51, 61, 71);
+	res = be.extract64(1, 11, 21, 31, 41, 51, 61, 71);
 	assertEquals( 0xfffefcf8f0e0c080ULL, res );
 
 	res = be.extract(22, 32, 42, 52);
 	assertEquals( 0xf8f0e0c0, res );
 
-	res = be.extract(22, 32, 42, 52, 62, 72, 82, 92);
+	res = be.extract64(22, 32, 42, 52, 62, 72, 82, 92);
 	assertEquals( 0xf8f0e0c080000000ULL, res );
 }
 

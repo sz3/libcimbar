@@ -25,6 +25,31 @@ public:
 		return total | extract(t...);
 	}
 
+	template<typename... T>
+	void extract64_internal(uint64_t& total)
+	{
+		return;
+	}
+
+	// need to compile-time detect/use endianness if this is going to be useful
+	template<typename... T>
+	void extract64_internal(uint64_t& total, unsigned bit_offset, const T&... t)
+	{
+		constexpr auto byte_offset = sizeof...(T);
+
+		uint8_t* loc = reinterpret_cast<uint8_t*>(&total) + byte_offset;
+		*loc = (uint8_t)(_bits >> (N - bit_offset - 8));
+		extract64_internal(total, t...);
+	}
+
+	template<typename... T>
+	uint64_t extract64(const T&... t)
+	{
+		uint64_t total = 0;
+		extract64_internal(total, t...);
+		return total;
+	}
+
 protected:
 	C _bits;
 };

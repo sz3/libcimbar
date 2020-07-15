@@ -17,7 +17,7 @@ TEST_CASE( "CellTest/testRgbEquivalence", "[unit]" )
 
 	cv::Scalar expectedColor = cv::mean(cell);
 
-	auto [r, g, b] = Cell(cell).mean_rgb();
+	auto [r, g, b] = Cell(cell).mean_rgb<100>();
 
 	DYNAMIC_SECTION( "r" )
 	{
