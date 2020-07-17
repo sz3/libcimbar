@@ -18,6 +18,8 @@ public:
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;
 	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
 
+	bool expects_binary_threshold() const;
+
 protected:
 	uint64_t get_tile_hash(unsigned symbol) const;
 	bool load_tiles();

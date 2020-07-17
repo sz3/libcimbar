@@ -157,3 +157,7 @@ unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
 	return decode(color_cell, color_cell, drift_offset, distance);
 }
 
+bool CimbDecoder::expects_binary_threshold() const
+{
+	return _ahashThreshold >= 0xFE;
+}
