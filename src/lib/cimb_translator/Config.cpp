@@ -7,6 +7,11 @@ bool Config::dark()
 	return true;
 }
 
+bool Config::gpu_opt()
+{
+	return false;
+}
+
 unsigned Config::color_bits()
 {
 	return 2;

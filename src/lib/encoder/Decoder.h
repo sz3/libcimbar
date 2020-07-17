@@ -38,7 +38,7 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleav
     : _eccBytes(ecc_bytes)
     , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
     , _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
-    , _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits(), cimbar::Config::dark(), 0xFF)
+    , _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits(), cimbar::Config::dark(), cimbar::Config::gpu_opt()? 0xFF : 0)
 {
 }
 
