@@ -21,5 +21,8 @@ namespace cimbar
 		unsigned num_cells();
 		unsigned corner_padding();
 		unsigned interleave_blocks();
+
+		unsigned fountain_chunk_size(unsigned ecc);
+		unsigned fountain_chunks_per_frame();
 	}
 }
