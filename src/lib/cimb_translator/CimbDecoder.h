@@ -1,5 +1,6 @@
 #pragma once
 
+#include "image_hash/ahash_result.h"
 #include <opencv2/opencv.hpp>
 #include <cstdint>
 #include <string>
@@ -12,7 +13,7 @@ public:
 	unsigned decode(const cv::Mat& color_cell) const;
 	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
 
-	unsigned get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset, unsigned& best_distance) const;
+	unsigned get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const;
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;

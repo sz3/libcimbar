@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
+	ahash_result.h
 	average_hash.h
 	bit_extractor.h
 	hamming_distance.h
