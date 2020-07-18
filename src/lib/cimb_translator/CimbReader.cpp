@@ -32,7 +32,7 @@ namespace {
 			cv::cvtColor(img, symbols, cv::COLOR_BGR2GRAY);
 
 		if (needs_threshold)
-			cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
+			cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 5, 0);
 		return symbols;
 	}
 }
