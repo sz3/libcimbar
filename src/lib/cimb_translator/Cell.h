@@ -7,6 +7,9 @@
 class Cell
 {
 public:
+	static const bool SKIP = true;
+
+public:
 	Cell(const cv::Mat& img)
 	    : _img(img)
 	{}
@@ -20,7 +23,7 @@ public:
 	{}
 
 	// it would be nice to use a cropped cv::Mat to get the contiguous memory pointer...
-	std::tuple<uchar,uchar,uchar> mean_rgb_continuous()
+	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip)
 	{
 		uint16_t blue = 0;
 		uint16_t green = 0;
@@ -30,9 +33,13 @@ public:
 		int channels = _img.channels();
 		int index = (_ystart * _img.cols) + _xstart;
 		const uchar* p = _img.ptr<uchar>(0) + (index * channels);
-		int toNextCol = channels * (_img.rows - _rows);
 
-		for (int i = 0; i < _cols; ++i)
+		int increment = 1 + skip;
+		int toNextCol = channels * (_img.rows - _rows);
+		if (skip)
+			toNextCol += channels * _img.rows;
+
+		for (int i = 0; i < _cols; i+=increment)
 		{
 			for (int j = 0; j < _rows; ++j, ++count)
 			{
@@ -50,21 +57,22 @@ public:
 		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
 	}
 
-	std::tuple<uchar,uchar,uchar> mean_rgb()
+	std::tuple<uchar,uchar,uchar> mean_rgb(bool skip=false)
 	{
 		int channels = _img.channels();
 		if (channels < 3)
 			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
 		if (_img.isContinuous() and _cols > 0)
-			return mean_rgb_continuous();
+			return mean_rgb_continuous(skip);
 
 		uint16_t blue = 0;
 		uint16_t green = 0;
 		uint16_t red = 0;
 		uint16_t count = 0;
 
+		int increment = 1 + skip;
 		int yend = _img.rows * _img.channels();
-		for (int i = 0; i < _img.cols; ++i)
+		for (int i = 0; i < _img.cols; i+=increment)
 		{
 			const uchar* p = _img.ptr<uchar>(i);
 			for (int j = 0; j < yend; j+=_img.channels(), ++count)
