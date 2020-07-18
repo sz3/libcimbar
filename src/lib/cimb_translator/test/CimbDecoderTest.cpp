@@ -22,7 +22,7 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 	{
 		cv::Mat tile = cimbar::getTile(4, i, true, 0, root);
 		cv::Mat tenxten(10, 10, tile.type());
-		tile.copyTo(tenxten(cv::Rect(cv::Point(0, 0), tile.size())));
+		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 		unsigned res = cd.decode(tenxten);
 		assertEquals(i, res);
 	}
@@ -42,7 +42,7 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 	{
 		cv::Mat tile = cimbar::getTile(4, i, true, 0, root);
 		cv::Mat tenxten(10, 10, tile.type());
-		tile.copyTo(tenxten(cv::Rect(cv::Point(0, 0), tile.size())));
+		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 		// grayscale and threshold, since that's what average_hash needs
 		cv::cvtColor(tenxten, tenxten, cv::COLOR_BGR2GRAY);

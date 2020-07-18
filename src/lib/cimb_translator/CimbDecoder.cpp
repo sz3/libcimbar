@@ -50,25 +50,26 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
 	best_distance = 1000;
-	// there are 9 candidate hashes. Because we're greedy (see the `return`), we should iterate out from the center
+	// ahash_result will give us either 5 or 9 candidate hashes -- depending on whether we want to ignore the corners or not.
+	// Because we're greedy (see the `return`), we will iterate out from the center
 	// 4 == center.
 	// 5, 7, 3, 1 == sides.
 	// 8, 0, 2, 6 == corners.
-	for (unsigned d : {4, 5, 7, 3, 1, 8, 0, 2, 6})
+	for (auto&& [drift_idx, h] : results)
 	{
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
-			unsigned distance = image_hash::hamming_distance(hashes[d], _tileHashes[i]);
+			unsigned distance = image_hash::hamming_distance(h, _tileHashes[i]);
 			if (distance < best_distance)
 			{
 				best_distance = distance;
 				best_fit = i;
-				drift_offset = d;
+				drift_offset = drift_idx;
 				if (best_distance == 0)
 					return best_fit;
 			}
@@ -79,16 +80,8 @@ unsigned CimbDecoder::get_best_symbol(const std::array<uint64_t,9>& hashes, unsi
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	auto bits = image_hash::fuzzy_ahash(cell, _ahashThreshold);
-	std::array<uint64_t,9> hashes = image_hash::extract_fuzzy_ahash(bits);
-	/*for (const std::pair<int, int>& drift : CellDrift::driftPairs)
-	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
-		cv::Mat img = cell(crop);
-
-		hashes.push_back(image_hash::average_hash(img));
-	}*/
-	return get_best_symbol(hashes, drift_offset, best_distance);
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
 }
 
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
@@ -157,3 +150,7 @@ unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
 	return decode(color_cell, color_cell, drift_offset, distance);
 }
 
+bool CimbDecoder::expects_binary_threshold() const
+{
+	return _ahashThreshold >= 0xFE;
+}

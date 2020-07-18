@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ahash_result.h"
 #include "bit_extractor.h"
 #include "cimb_translator/Cell.h"
 
@@ -34,7 +35,7 @@ namespace image_hash
 		return res;
 	}
 
-	inline intx::uint128 special_case_fuzzy_ahash(const cv::Mat& gray)
+	inline ahash_result special_case_fuzzy_ahash(const cv::Mat& gray, unsigned mode)
 	{
 		// if the Mat is already 10x10 and threshold'd to (0, 0xFF), we can do some things...
 		static std::array<uint8_t, 2> lookup1 = {0, 2};
@@ -56,7 +57,7 @@ namespace image_hash
 				res |= intx::uint128(val) << count;
 			}
 		}
-		return res;
+		return ahash_result(res, mode);
 	}
 
 	// need something like a bitset_extractor(), with an api like:
@@ -67,7 +68,7 @@ namespace image_hash
 	//  ... with each index corresponding to an 8 bit read?
 	//  ... this way, we could do compile time validation that the return value makes sense.
 	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline intx::uint128 fuzzy_ahash(const cv::Mat& img, uchar threshold=0)
+	inline ahash_result fuzzy_ahash(const cv::Mat& img, uchar threshold=0, unsigned mode=ahash_result::ALL)
 	{
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
@@ -79,7 +80,7 @@ namespace image_hash
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
 		else if (threshold == 0xFF)
-			return special_case_fuzzy_ahash(gray);
+			return special_case_fuzzy_ahash(gray, mode);
 
 		intx::uint128 res(0);
 		int count = 0;
@@ -89,26 +90,6 @@ namespace image_hash
 			for (int j = 0; j < gray.cols; ++j, ++count)
 				res |= intx::uint128(p[j] > threshold) << count;
 		}
-		return res;
-	}
-
-	inline std::array<uint64_t, 9> extract_fuzzy_ahash(const intx::uint128& bits)
-	{
-		bit_extractor<intx::uint128, 100> be(bits);
-		std::array<uint64_t, 9> hashes = {
-		    // top row -- top left bit is the end bit. bottom right is 0.
-		    be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left
-		    be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-		    be.extract(20, 30, 40, 50, 60, 70, 80, 90),  // right
-		    // middle row
-		    be.extract(12, 22, 32, 42, 52, 62, 72, 82),
-		    be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-		    be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-		    // bottom row
-		    be.extract(2, 12, 22, 32, 42, 52, 62, 72),
-		    be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-		    be.extract(0, 10, 20, 30, 40, 50, 60, 70)
-		};
-		return hashes;
+		return ahash_result(res, mode);
 	}
 }

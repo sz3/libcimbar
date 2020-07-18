@@ -14,42 +14,45 @@ namespace {
 	}
 
 	template <typename MAT>
-	void preprocessSymbolGrid(const MAT& img, cv::Mat& out)
+	void sharpenSymbolGrid(const MAT& img, cv::Mat& out)
 	{
 		cv::filter2D(img, out, -1, kernel());
 	}
+
+	template <typename MAT>
+	cv::Mat preprocessSymbolGrid(const MAT& img, bool needs_sharpen, bool needs_threshold)
+	{
+		cv::Mat symbols;
+		if (needs_sharpen)
+		{
+			sharpenSymbolGrid(img, symbols);
+			cv::cvtColor(symbols, symbols, cv::COLOR_BGR2GRAY);
+		}
+		else
+			cv::cvtColor(img, symbols, cv::COLOR_BGR2GRAY);
+
+		if (needs_threshold)
+			cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 5, 0);
+		return symbols;
+	}
 }
 
-CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool should_preprocess)
+CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool needs_sharpen)
     : _image(img)
     , _cellSize(Config::cell_size() + 2)
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
 {
-	if (should_preprocess)
-	{
-		preprocessSymbolGrid(img, _grayscale);
-		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
-	}
-	else
-		cv::cvtColor(img, _grayscale, cv::COLOR_BGR2GRAY);
-	cv::adaptiveThreshold(_grayscale, _grayscale, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
+	_grayscale = preprocessSymbolGrid(img, needs_sharpen, decoder.expects_binary_threshold());
 }
 
-CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool should_preprocess)
+CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen)
     : _image(img.getMat(cv::ACCESS_READ))
     , _cellSize(Config::cell_size() + 2)
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
 {
-	if (should_preprocess) // rename to needs_sharpen?
-	{
-		preprocessSymbolGrid(img, _grayscale);
-		cv::cvtColor(_grayscale, _grayscale, cv::COLOR_BGR2GRAY);
-	}
-	else
-		cv::cvtColor(img, _grayscale, cv::COLOR_BGR2GRAY);
-	cv::adaptiveThreshold(_grayscale, _grayscale, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
+	_grayscale = preprocessSymbolGrid(img, needs_sharpen, decoder.expects_binary_threshold());
 }
 
 unsigned CimbReader::read(unsigned& bits)

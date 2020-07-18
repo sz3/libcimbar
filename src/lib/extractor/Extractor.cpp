@@ -49,9 +49,8 @@ int Extractor::extract(string read_path, cv::Mat& out)
 
 int Extractor::extract(string read_path, string write_path)
 {
-	cv::UMat img = cv::imread(read_path).getUMat(cv::ACCESS_READ);
-	cv::UMat out;
-	int res = extract(img, out);
-	cv::imwrite(write_path, out);
+	cv::UMat img = cv::imread(read_path).getUMat(cv::ACCESS_FAST); // cv::USAGE_ALLOCATE_SHARED_MEMORY would be nice...;
+	int res = extract(img, img);
+	cv::imwrite(write_path, img);
 	return res;
 }
