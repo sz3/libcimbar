@@ -60,11 +60,11 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	// 4 == center.
 	// 5, 7, 3, 1 == sides.
 	// 8, 0, 2, 6 == corners.
-	for (auto&& [drift_idx, hash] : results)
+	for (auto&& [drift_idx, h] : results)
 	{
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
-			unsigned distance = image_hash::hamming_distance(hash, _tileHashes[i]);
+			unsigned distance = image_hash::hamming_distance(h, _tileHashes[i]);
 			if (distance < best_distance)
 			{
 				best_distance = distance;
@@ -80,7 +80,7 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
 {
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold);
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
