@@ -38,11 +38,6 @@ namespace image_hash
 	inline ahash_result special_case_fuzzy_ahash(const cv::Mat& gray, unsigned mode)
 	{
 		// if the Mat is already 10x10 and threshold'd to (0, 0xFF), we can do some things...
-		static std::array<uint8_t, 2> lookup1 = {0, 2};
-		static std::array<uint8_t, 2> lookup2 = {0, 4};
-		static std::array<uint8_t, 2> lookup3 = {0, 8};
-		static std::array<uint8_t, 2> lookup4 = {0, 16};
-
 		intx::uint128 res(0);
 		int count = 0;
 		for (int i = 0; i < gray.rows; ++i)
@@ -53,7 +48,7 @@ namespace image_hash
 				const uint64_t* hax = reinterpret_cast<const uint64_t*>(p+j);
 				uint64_t mval = (*hax) & 0x101010101ULL;
 				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
-				uint8_t val = cv[0] | lookup1[cv[1]] | lookup2[cv[2]] | lookup3[cv[3]] | lookup4[cv[4]];
+				uint8_t val = cv[0] | cv[1] << 1 | cv[2] << 2 | cv[3] << 3 | cv[4] << 4;
 				res |= intx::uint128(val) << count;
 			}
 		}
