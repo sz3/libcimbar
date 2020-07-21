@@ -27,8 +27,8 @@ public:
 	{
 	public:
 		iterator(const ahash_result& hr, unsigned i=0)
-			: _hr(hr)
-			, _i(i)
+		    : _hr(hr)
+		    , _i(i)
 		{}
 
 		std::pair<int, uint64_t> operator*()
@@ -55,8 +55,8 @@ public:
 
 public:
 	ahash_result(const intx::uint128& bits, unsigned mode=ALL)
-		: _bits(bits)
-		, _mode(mode)
+	    : _bits(bits)
+	    , _mode(mode)
 	{
 		if (mode == ALL)
 			_results = extract_all();
@@ -68,18 +68,18 @@ public:
 	{
 		bit_extractor<intx::uint128, 100> be(_bits);
 		return {
-			// top row -- top left bit is the end bit. bottom right is 0.
-			be.extract(22, 32, 42, 52, 62, 72, 82, 92),  // left
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-			be.extract(20, 30, 40, 50, 60, 70, 80, 90),  // right
-			// middle row
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-			// bottom row
-			be.extract(2, 12, 22, 32, 42, 52, 62, 72),
+			// top row -- top left bit is the start bit (0). bottom right is end bit.
+			be.extract(0, 10, 20, 30, 40, 50, 60, 70), // left
 			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-			be.extract(0, 10, 20, 30, 40, 50, 60, 70)
+			be.extract(2, 12, 22, 32, 42, 52, 62, 72), // right
+			// middle row
+			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
+			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
+			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+			// bottom row
+			be.extract(20, 30, 40, 50, 60, 70, 80, 90),
+			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
+			be.extract(22, 32, 42, 52, 62, 72, 82, 92)
 		};
 	}
 
@@ -89,15 +89,15 @@ public:
 		// skip the corners
 		return {
 			0,
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
+			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
 			0,
 			// middle row
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
 			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
+			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
+			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
 			// bottom row
 			0,
-			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
+			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
 			0
 		};
 	}

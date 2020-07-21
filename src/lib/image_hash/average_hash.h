@@ -30,7 +30,7 @@ namespace image_hash
 		{
 			const uchar* p = gray.ptr<uchar>(i);
 			for (int j = 0; j < gray.cols; ++j, ++count)
-				res |= (uint64_t)(p[j] > threshold) << count;
+				res |= (uint64_t)(p[j] > threshold) << (63-count);
 		}
 		return res;
 	}
@@ -48,8 +48,8 @@ namespace image_hash
 				const uint64_t* hax = reinterpret_cast<const uint64_t*>(p+j);
 				uint64_t mval = (*hax) & 0x101010101ULL;
 				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
-				uint8_t val = cv[0] | cv[1] << 1 | cv[2] << 2 | cv[3] << 3 | cv[4] << 4;
-				res |= intx::uint128(val) << count;
+				uint8_t val = cv[0] << 4 | cv[1] << 3 | cv[2] << 2 | cv[3] << 1 | cv[4];
+				res |= intx::uint128(val) << (95-count);
 			}
 		}
 		return ahash_result(res, mode);
@@ -83,7 +83,7 @@ namespace image_hash
 		{
 			const uchar* p = gray.ptr<uchar>(i);
 			for (int j = 0; j < gray.cols; ++j, ++count)
-				res |= intx::uint128(p[j] > threshold) << count;
+				res |= intx::uint128(p[j] > threshold) << (99-count);
 		}
 		return ahash_result(res, mode);
 	}
