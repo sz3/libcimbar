@@ -1,6 +1,8 @@
 #pragma once
 
+#include "CellDrift.h"
 #include "image_hash/ahash_result.h"
+#include "image_hash/average_hash.h"
 #include <opencv2/opencv.hpp>
 #include <cstdint>
 #include <string>
@@ -11,10 +13,12 @@ public:
 	CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark=true, uchar ahashThreshold=0);
 
 	unsigned decode(const cv::Mat& color_cell) const;
-	unsigned decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
+	template <typename MAT>
+	unsigned decode(const MAT& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const;
-	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const;
+	template <typename MAT>
+	unsigned decode_symbol(const MAT& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;
 	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
@@ -36,3 +40,26 @@ protected:
 	bool _dark;
 	uchar _ahashThreshold;
 };
+
+template <typename MAT>
+inline unsigned CimbDecoder::decode_symbol(const MAT& cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
+}
+
+template <>
+inline unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
+	return 0;
+}
+
+template <typename MAT>
+inline unsigned CimbDecoder::decode(const MAT& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	unsigned bits = decode_symbol(cell, drift_offset, best_distance);
+	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
+	return bits;
+}

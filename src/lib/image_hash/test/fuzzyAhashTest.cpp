@@ -3,6 +3,7 @@
 #include "average_hash.h"
 
 #include "bit_file/bitbuffer.h"
+#include "bit_file/bitmatrix.h"
 #include "cimb_translator/CellDrift.h"
 #include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
@@ -25,33 +26,6 @@ namespace {
 			cv::adaptiveThreshold(tenxten, tenxten, 0xFF, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 5, 0);
 		}
 		return tenxten;
-	}
-
-	template <typename BITSTREAM>
-	void mat_to_bitbuffer(const cv::Mat& img, BITSTREAM& writer)
-	{
-		const uchar* p = img.ptr<uchar>(0);
-		unsigned size = img.cols * img.rows;
-		while (size >= 8)
-		{
-			const uint64_t* hax = reinterpret_cast<const uint64_t*>(p);
-			uint64_t mval = (*hax) & 0x101010101010101ULL;
-			const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
-			uint8_t val = cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 | cv[6] << 1 | cv[7];
-			writer << val;
-			p += 8;
-			size -= 8;
-		}
-
-		// remainder
-		uint8_t val = 0;
-		while (size > 0)
-		{
-			val |= (*p > 0) << size;
-			++p;
-			--size;
-		}
-		writer << val;
 	}
 }
 
@@ -191,7 +165,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 
 	bitbuffer bb;
 	bitbuffer::writer writer(bb);
-	mat_to_bitbuffer(tenxten, writer);
+	bitmatrix::mat_to_bitbuffer(tenxten, writer);
 
 	// do the real work
 	bitmatrix bm(bb, 10, 10);

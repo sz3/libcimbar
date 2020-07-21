@@ -3,6 +3,7 @@
 #include "CimbDecoder.h"
 #include "FloodDecodePositions.h"
 
+#include "bit_file/bitbuffer.h"
 #include <opencv2/opencv.hpp>
 #include <string>
 
@@ -19,7 +20,7 @@ public:
 
 protected:
 	cv::Mat _image;
-	cv::Mat _grayscale;
+	bitbuffer _grayscale;
 	unsigned _cellSize;
 	FloodDecodePositions _positions;
 	const CimbDecoder& _decoder;

@@ -92,12 +92,9 @@ namespace image_hash
 	inline ahash_result fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result::ALL)
 	{
 		intx::uint128 res(0);
-		if (img.width() != 10 or img.height() != 10)
-			return ahash_result(res, mode);
-
 		for (int i = 0; i < 10; ++i)
 		{
-			unsigned r = img.get(i, 0, 10);
+			unsigned r = img.get(0, i, 10);
 			res |= intx::uint128(r) << (90-10*i);
 		}
 		return ahash_result(res, mode);

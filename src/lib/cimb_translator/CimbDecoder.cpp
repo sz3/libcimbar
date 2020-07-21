@@ -2,8 +2,6 @@
 
 #include "Common.h"
 #include "Cell.h"
-#include "CellDrift.h"
-#include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
@@ -78,12 +76,6 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
-{
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
-}
-
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
 {
 	return {
@@ -134,13 +126,6 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	uchar r,g,b;
 	std::tie(r, g, b) = Cell(center).mean_rgb(Cell::SKIP);
 	return get_best_color(r, g, b);
-}
-
-unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const
-{
-	unsigned bits = decode_symbol(cell, drift_offset, best_distance);
-	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
-	return bits;
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
