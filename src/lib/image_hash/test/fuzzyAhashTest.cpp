@@ -189,12 +189,13 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 		expected.push_back(image_hash::average_hash(img, 64));
 	}
 
-	bitbuffer<> bb;
-	bitbuffer<>::writer writer(bb);
+	bitbuffer bb;
+	bitbuffer::writer writer(bb);
 	mat_to_bitbuffer(tenxten, writer);
 
 	// do the real work
-	auto actual = image_hash::fuzzy_ahash(bb);
+	bitmatrix bm(bb, 10, 10);
+	auto actual = image_hash::fuzzy_ahash(bm);
 
 	for (int i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )

@@ -5,16 +5,15 @@
 // wraps/inherits bitbuffer
 // imposes dimensionality
 
-template <unsigned _size_hint=1550>
 class bitmatrix
 {
 public:
-	bitmatrix(const bitbuffer<_size_hint>& buff, unsigned width, unsigned height,  unsigned xstart=0, unsigned ystart=0)
-		: _buff(buff)
-		, _xstart(xstart)
-		, _ystart(ystart)
-		, _width(width)
-		, _height(height)
+	bitmatrix(const bitbuffer& buff, unsigned width, unsigned height, unsigned xstart=0, unsigned ystart=0)
+	    : _buff(buff)
+	    , _xstart(xstart)
+	    , _ystart(ystart)
+	    , _width(width)
+	    , _height(height)
 	{
 	}
 
@@ -37,7 +36,7 @@ public:
 	}
 
 protected:
-	bitbuffer<_size_hint> _buff;
+	const bitbuffer& _buff;
 	unsigned _xstart;
 	unsigned _ystart;
 	unsigned _width;

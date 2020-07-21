@@ -1,10 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
 
 // write bits -> buffer
-template <unsigned _size_hint=1550>
 class bitbuffer
 {
 public:
@@ -42,7 +40,8 @@ public:
 	};
 
 public:
-	bitbuffer()
+	bitbuffer(unsigned size_hint=1550)
+	    : _sizeHint(size_hint)
 	{
 		clear();
 	}
@@ -55,7 +54,7 @@ public:
 			return;
 
 		while (size < requestedSize)
-			size += _size_hint;
+			size += _sizeHint;
 		_buffer.resize(size, 0);
 	}
 
@@ -117,7 +116,7 @@ public:
 	void clear()
 	{
 		_buffer = {0};
-		_buffer.resize(6 * _size_hint, 0);
+		_buffer.resize(6 * _sizeHint, 0);
 	}
 
 	const std::vector<char>& buffer() const
@@ -127,4 +126,5 @@ public:
 
 protected:
 	std::vector<char> _buffer;
+	unsigned _sizeHint;
 };
