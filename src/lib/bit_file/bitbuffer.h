@@ -30,6 +30,12 @@ public:
 			return _bb.write(byte, pos, length);
 		}
 
+		writer& operator<<(uint8_t byte)
+		{
+			write_byte(byte);
+			return *this;
+		}
+
 	protected:
 		bitbuffer& _bb;
 		size_t _pos;

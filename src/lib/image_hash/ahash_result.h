@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bit_extractor.h"
+#include "bit_file/bitmatrix.h"
 #include "intx/int128.hpp"
 #include <array>
 #include <iostream>
@@ -27,8 +28,8 @@ public:
 	{
 	public:
 		iterator(const ahash_result& hr, unsigned i=0)
-			: _hr(hr)
-			, _i(i)
+		    : _hr(hr)
+		    , _i(i)
 		{}
 
 		std::pair<int, uint64_t> operator*()
@@ -55,8 +56,8 @@ public:
 
 public:
 	ahash_result(const intx::uint128& bits, unsigned mode=ALL)
-		: _bits(bits)
-		, _mode(mode)
+	    : _bits(bits)
+	    , _mode(mode)
 	{
 		if (mode == ALL)
 			_results = extract_all();
