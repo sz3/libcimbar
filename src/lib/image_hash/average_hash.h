@@ -26,12 +26,12 @@ namespace image_hash
 			threshold = Cell(gray).mean_grayscale();
 
 		uint64_t res = 0;
-		int count = 0;
+		int bitpos = 63; // 8*8 - 1
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
-			for (int j = 0; j < gray.cols; ++j, ++count)
-				res |= (uint64_t)(p[j] > threshold) << (63-count);
+			for (int j = 0; j < gray.cols; ++j, --bitpos)
+				res |= (uint64_t)(p[j] > threshold) << bitpos;
 		}
 		return res;
 	}
@@ -40,17 +40,17 @@ namespace image_hash
 	{
 		// if the Mat is already 10x10 and threshold'd to (0, 0xFF), we can do some things...
 		intx::uint128 res(0);
-		int count = 0;
+		int bitpos = 95; // 10*10 - 5
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
-			for (int j = 0; j < gray.cols; j+=5, count+=5)
+			for (int j = 0; j < gray.cols; j+=5, bitpos-=5)
 			{
 				const uint64_t* hax = reinterpret_cast<const uint64_t*>(p+j);
 				uint64_t mval = (*hax) & 0x101010101ULL;
 				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
 				uint8_t val = cv[0] << 4 | cv[1] << 3 | cv[2] << 2 | cv[3] << 1 | cv[4];
-				res |= intx::uint128(val) << (95-count);
+				res |= intx::uint128(val) << bitpos;
 			}
 		}
 		return ahash_result(res, mode);
@@ -79,12 +79,12 @@ namespace image_hash
 			return special_case_fuzzy_ahash(gray, mode);
 
 		intx::uint128 res(0);
-		int count = 0;
+		int bitpos = 99; // 10*10 - 1
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
-			for (int j = 0; j < gray.cols; ++j, ++count)
-				res |= intx::uint128(p[j] > threshold) << (99-count);
+			for (int j = 0; j < gray.cols; ++j, --bitpos)
+				res |= intx::uint128(p[j] > threshold) << bitpos;
 		}
 		return ahash_result(res, mode);
 	}
@@ -92,10 +92,11 @@ namespace image_hash
 	inline ahash_result fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result::ALL)
 	{
 		intx::uint128 res(0);
-		for (int i = 0; i < 10; ++i)
+		int bitpos = 90; // 10*10 - 10
+		for (int i = 0; i < 10; ++i, bitpos-=10)
 		{
 			unsigned r = img.get(0, i, 10);
-			res |= intx::uint128(r) << (90-10*i);
+			res |= intx::uint128(r) << bitpos;
 		}
 		return ahash_result(res, mode);
 	}
