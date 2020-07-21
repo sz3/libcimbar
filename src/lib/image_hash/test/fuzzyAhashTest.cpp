@@ -2,7 +2,7 @@
 
 #include "average_hash.h"
 
-#include "bit_file/bitmatrix.h"
+#include "bit_file/bitbuffer.h"
 #include "cimb_translator/CellDrift.h"
 #include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
@@ -37,7 +37,7 @@ namespace {
 			const uint64_t* hax = reinterpret_cast<const uint64_t*>(p);
 			uint64_t mval = (*hax) & 0x101010101010101ULL;
 			const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
-			uint8_t val = cv[0] | cv[1] << 1 | cv[2] << 2 | cv[3] << 3 | cv[4] << 4 | cv[5] << 5 | cv[6] << 6 | cv[7] << 7;
+			uint8_t val = cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 | cv[6] << 1 | cv[7];
 			writer << val;
 			p += 8;
 			size -= 8;
@@ -186,16 +186,15 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 100));
+		expected.push_back(image_hash::average_hash(img, 64));
 	}
 
 	bitbuffer<> bb;
 	bitbuffer<>::writer writer(bb);
 	mat_to_bitbuffer(tenxten, writer);
-	bitmatrix<> bm(bb, 10, 10);
 
 	// do the real work
-	auto actual = image_hash::fuzzy_ahash(bm);
+	auto actual = image_hash::fuzzy_ahash(bb);
 
 	for (int i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )

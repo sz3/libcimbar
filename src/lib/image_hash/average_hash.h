@@ -2,7 +2,6 @@
 
 #include "ahash_result.h"
 #include "bit_extractor.h"
-#include "bit_file/bitbuffer.h"
 #include "cimb_translator/Cell.h"
 
 #include "intx/int128.hpp"
@@ -89,14 +88,15 @@ namespace image_hash
 		return ahash_result(res, mode);
 	}
 
-	inline ahash_result fuzzy_ahash(const bitbuffer<>& img, unsigned mode=ahash_result::ALL)
+	template <typename BITBUFFER>
+	inline ahash_result fuzzy_ahash(const BITBUFFER& buff, unsigned mode=ahash_result::ALL)
 	{
 		intx::uint128 res(0);
-		/*if (img.width() != 10 or img.height() != 10)
-			return ahash_result(res, mode);*/
-
 		for (int i = 0; i < 100; i+=10)
-			res |= intx::uint128(img.read(i, 10) << i);
+		{
+			unsigned r = buff.read(i, 10);
+			res |= intx::uint128(r) << (90-i);
+		}
 		return ahash_result(res, mode);
 	}
 }
