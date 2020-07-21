@@ -16,13 +16,13 @@ using std::string;
 namespace {
 	cv::Mat embedTile(const cv::Mat& tile, bool binaryThresh=false)
 	{
-		cv::Mat tenxten(10, 10, tile.type());
+		cv::Mat tenxten(10, 10, tile.type(), cv::Scalar(0, 0, 0));
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 		if (binaryThresh)
 		{
 			cv::cvtColor(tenxten, tenxten, cv::COLOR_BGR2GRAY);
-			cv::adaptiveThreshold(tenxten, tenxten, 0xFF, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
+			cv::adaptiveThreshold(tenxten, tenxten, 0xFF, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 5, 0);
 		}
 		return tenxten;
 	}
@@ -67,7 +67,7 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 100)); // we pass in a threshold value to match what fuzzy_ahash will compute
+		expected.push_back(image_hash::average_hash(img, 64)); // we pass in a threshold value to match what fuzzy_ahash will compute
 	}
 
 	// do the real work
@@ -92,7 +92,7 @@ TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 100)); // we pass in a threshold value to match what fuzzy_ahash will compute
+		expected.push_back(image_hash::average_hash(img, 64)); // we pass in a threshold value to match what fuzzy_ahash will compute
 	}
 
 	// do the real work
@@ -133,7 +133,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 100));
+		expected.push_back(image_hash::average_hash(img, 64));
 	}
 
 	// do the real work
@@ -158,7 +158,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.SpecialCase", "[unit]" )
 	{
 		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
 		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 100));
+		expected.push_back(image_hash::average_hash(img, 64));
 	}
 
 	// do the real work
