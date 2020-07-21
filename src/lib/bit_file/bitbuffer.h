@@ -3,12 +3,38 @@
 #include <iostream>
 #include <vector>
 
-// may become bitwriter again
-
 // write bits -> buffer
 template <unsigned _size_hint=1550>
 class bitbuffer
 {
+public:
+	class writer
+	{
+	public:
+		writer(bitbuffer& bb, size_t pos=0)
+		    : _bb(bb)
+		    , _pos(pos)
+		{}
+
+		template <typename UINT>
+		bool write_byte(UINT byte)
+		{
+			return write(byte, 8);
+		}
+
+		template <typename UINT>
+		bool write(UINT byte, int length)
+		{
+			size_t pos = _pos;
+			_pos += length;
+			return _bb.write(byte, pos, length);
+		}
+
+	protected:
+		bitbuffer& _bb;
+		size_t _pos;
+	};
+
 public:
 	bitbuffer()
 	{
@@ -49,6 +75,29 @@ public:
 			nextWrite = std::min(length, 8-currentBit);
 		}
 		return true;
+	}
+
+	unsigned read(unsigned index, int length) const
+	{
+		int currentByte = index/8;
+		int currentBit = index%8;
+
+		unsigned res = 0;
+		int nextRead = std::min(length, 8-currentBit); // read this many bits
+		while (length > 0)
+		{
+			unsigned char bits = _buffer[currentByte] << currentBit;
+			bits = bits >> (8-nextRead);
+			res |= bits << (length - nextRead);
+
+			length -= nextRead;
+			currentBit += nextRead;
+			if (currentBit >= 8)
+				currentBit = 0;
+			currentByte += 1;
+			nextRead = std::min(length, 8-currentBit);
+		}
+		return res;
 	}
 
 	template <typename STREAM>
