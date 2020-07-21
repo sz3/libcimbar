@@ -69,9 +69,8 @@ unsigned CimbReader::read(unsigned& bits)
 	auto [i, xy, drift] = _positions.next();
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
-	cv::Rect crop(x-1, y-1, _cellSize, _cellSize);
 	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
-	cv::Mat color_cell = _image(crop);
+	Cell color_cell(_image, x-1, y-1, _cellSize, _cellSize);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;

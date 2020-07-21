@@ -140,6 +140,19 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	return get_best_color(r, g, b);
 }
 
+unsigned CimbDecoder::decode_color(const Cell& color_cell, const std::pair<int, int>& drift) const
+{
+	if (_numColors <= 1)
+		return 0;
+
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	Cell center = color_cell;
+	center.crop(2+drift.first, 2+drift.second, color_cell.cols()-4, color_cell.rows()-4);
+	uchar r,g,b;
+	std::tie(r, g, b) = center.mean_rgb(Cell::SKIP);
+	return get_best_color(r, g, b);
+}
+
 unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
 {
 	unsigned drift_offset;
