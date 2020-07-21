@@ -17,8 +17,8 @@ public:
 	unsigned decode(const MAT& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const;
-	template <typename MAT>
-	unsigned decode_symbol(const MAT& cell, unsigned& drift_offset, unsigned& best_distance) const;
+	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const;
+	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;
 	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
@@ -40,21 +40,6 @@ protected:
 	bool _dark;
 	uchar _ahashThreshold;
 };
-
-template <typename MAT>
-inline unsigned CimbDecoder::decode_symbol(const MAT& cell, unsigned& drift_offset, unsigned& best_distance) const
-{
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
-}
-
-template <>
-inline unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
-{
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
-	return 0;
-}
 
 template <typename MAT>
 inline unsigned CimbDecoder::decode(const MAT& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const

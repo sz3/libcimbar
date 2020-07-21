@@ -76,6 +76,18 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	return best_fit;
 }
 
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
+}
+
+unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
+}
+
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
 {
 	return {
