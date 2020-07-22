@@ -23,7 +23,7 @@ namespace {
 		return input;
 	}
 
-	string createFrame(fountain_encoder_stream<626>& fes, string name)
+	string createFrame(fountain_encoder_stream& fes, string name)
 	{
 		fes.encode_metadata_block(name);
 
@@ -44,7 +44,7 @@ namespace {
 	string createFrame(string name, unsigned size)
 	{
 		stringstream input = dummyContents(size);
-		fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+		fountain_encoder_stream fes = fountain_encoder_stream::create(input, 626);
 		return createFrame(fes, name);
 	}
 }
@@ -90,7 +90,7 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 	fountain_decoder_sink<626> sink("/tmp");
 
 	stringstream input = dummyContents(20000);
-	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 626);
 
 	string expectedName = "testMultip";
 	for (int i = 0; i < 4; ++i)
@@ -122,7 +122,7 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	fountain_decoder_sink<626> sink("/tmp");
 
 	stringstream input = dummyContents(20000);
-	fountain_encoder_stream fes = fountain_encoder_stream<626>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 626);
 
 	string expectedName = "pog.py";
 	std::array<uint8_t,10> nameBuff = {0};

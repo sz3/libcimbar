@@ -6,32 +6,32 @@
 #include <sstream>
 #include <string>
 
-template <unsigned _bufferSize> // 599
 class fountain_encoder_stream
 {
 public:
 	static const unsigned _headerSize = 2;
 
 protected:
-	fountain_encoder_stream(std::string&& data)
+	fountain_encoder_stream(std::string&& data, unsigned buffer_size)
 	    : _data(data)
+	    , _buffer(buffer_size, 0)
 	    , _encoder((uint8_t*)_data.data(), _data.size(), block_size())
 	{
 	}
 
 	unsigned block_size() const
 	{
-		return _bufferSize - _headerSize;
+		return _buffer.size() - _headerSize;
 	}
 
 public:
 	template <typename STREAM>
-	static fountain_encoder_stream create(STREAM& stream)
+	static fountain_encoder_stream create(STREAM& stream, unsigned buffer_size)
 	{
 		std::stringstream buffs;
 		if (stream)
 			 buffs << stream.rdbuf();
-		return fountain_encoder_stream(buffs.str());
+		return fountain_encoder_stream(buffs.str(), buffer_size);
 	}
 
 	bool good() const
@@ -65,6 +65,7 @@ public:
 		if (res != block_size())
 			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
+		// write header
 		unsigned block = _block - 1;
 		_buffer.data()[0] = (block >> 8) & 0xFF;
 		_buffer.data()[1] = block & 0xFF;
@@ -109,9 +110,9 @@ public:
 
 protected:
 	std::string _data;
+	std::vector<uint8_t> _buffer;
 	FountainEncoder _encoder;
 
-	std::array<uint8_t,_bufferSize> _buffer;
 	unsigned _buffIndex = ~0U;
 	unsigned _block = 0;
 	std::streamsize _lastRead = 0;
