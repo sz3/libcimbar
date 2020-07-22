@@ -6,26 +6,21 @@
 #include <optional>
 #include <string>
 
-template <unsigned _bufferSize>  // 599
 class fountain_decoder_stream
 {
 public:
 	static const unsigned _headerSize = 2;
 
 public:
-	fountain_decoder_stream(unsigned dataSize)
-	    : _decoder(dataSize, block_size())
+	fountain_decoder_stream(unsigned data_size, unsigned buffer_size)
+	    : _buffer(buffer_size, 0)
+	    , _decoder(data_size, block_size())
 	{
-	}
-
-	static fountain_decoder_stream create(const FountainMetadata& md)
-	{
-		return fountain_decoder_stream(md.file_size());
 	}
 
 	unsigned block_size() const
 	{
-		return _bufferSize - _headerSize;
+		return _buffer.size() - _headerSize;
 	}
 
 	size_t data_size() const
@@ -73,7 +68,7 @@ public:
 	}
 
 protected:
+	std::vector<uint8_t> _buffer;
 	FountainDecoder _decoder;
-	std::array<uint8_t, _bufferSize> _buffer;
 	unsigned _buffIndex = 0;
 };

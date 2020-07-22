@@ -12,12 +12,12 @@
 // what we're trying to do here is have an object that can accept a complete (~8400 byte) buffer,
 // pull out the header, and give the appropriate decoder its bytes
 
-template <unsigned _bufferSize>  // 599
 class fountain_decoder_sink
 {
 public:
-	fountain_decoder_sink(std::string data_dir)
+	fountain_decoder_sink(std::string data_dir, unsigned buffer_size)
 	    : _dataDir(data_dir)
+	    , _bufferSize(buffer_size)
 	{
 	}
 
@@ -79,8 +79,8 @@ public:
 			return false;
 
 		// find or create
-		auto p = _streams.emplace(md.name(), md.file_size());
-		fountain_decoder_stream<_bufferSize>& s = p.first->second;
+		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.name()), std::make_tuple(md.file_size(), _bufferSize));
+		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
 			return false;
 
@@ -101,6 +101,7 @@ public:
 
 protected:
 	std::string _dataDir;
-	std::map<std::string, fountain_decoder_stream<_bufferSize>> _streams;
+	unsigned _bufferSize;
+	std::map<std::string, fountain_decoder_stream> _streams;
 	std::set<std::pair<std::string, unsigned>> _done;
 };

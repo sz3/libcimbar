@@ -123,7 +123,7 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<830> fds(input.str().size());
+	fountain_decoder_stream fds(input.str().size(), 830);
 
 	std::array<char, 140> buff;
 	for (int i = 0; i < 1000; ++i)
@@ -165,7 +165,7 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<830> fds(input.str().size());
+	fountain_decoder_stream fds(input.str().size(), 830);
 
 	std::array<char, 830> buff; // one block per read/write
 	for (int i = 0; i < 1000; ++i)

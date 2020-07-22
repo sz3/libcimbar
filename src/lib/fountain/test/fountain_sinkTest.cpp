@@ -53,7 +53,7 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 {
 	FountainInit::init();
 
-	fountain_decoder_sink<626> sink("/tmp");
+	fountain_decoder_sink sink("/tmp", 626);
 	string iframe = createFrame("theBeginning", 1200);
 	assertEquals( 6900, iframe.size() );
 
@@ -87,7 +87,7 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 {
 	FountainInit::init();
 
-	fountain_decoder_sink<626> sink("/tmp");
+	fountain_decoder_sink sink("/tmp", 626);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 626);
@@ -119,7 +119,7 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	// sometimes it's fine. The docs say "don't do it", so FountainDecoder acts as the bouncer.
 	FountainInit::init();
 
-	fountain_decoder_sink<626> sink("/tmp");
+	fountain_decoder_sink sink("/tmp", 626);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 626);
