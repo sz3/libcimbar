@@ -2,6 +2,7 @@
 
 #include "fountain_decoder_stream.h"
 #include "FountainMetadata.h"
+#include "serialize/format.h"
 
 #include <fstream>
 #include <map>
