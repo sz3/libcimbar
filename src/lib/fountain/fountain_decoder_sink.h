@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fountain_decoder_stream.h"
-#include "FountainMetadata.h"
+#include "FountainMd.h"
 #include "serialize/format.h"
 #include <fstream>
 #include <map>
@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	bool good() const
+	{
+		return true;
+	}
+
 	unsigned chunk_size() const
 	{
 		return _bufferSize;
@@ -28,21 +33,21 @@ public:
 
 	unsigned md_size() const
 	{
-		return FountainMetadata::md_size;
+		return FountainMd::md_size;
 	}
 
-	bool store(const std::string& name, const std::vector<uint8_t>& data)
+	bool store(const FountainMd& md, const std::vector<uint8_t>& data)
 	{
-		std::string file_path = fmt::format("{}/{}", _dataDir, name);
+		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
 		std::ofstream f(file_path);
 		f.write((char*)data.data(), data.size());
 		return true;
 	}
 
-	void mark_done(const std::string& name, unsigned size)
+	void mark_done(uint64_t id)
 	{
-		_done.insert({name, size});
-		auto it = _streams.find(name);
+		_done.insert(id);
+		auto it = _streams.find(id);
 		if (it != _streams.end())
 			_streams.erase(it);
 	}
@@ -57,9 +62,9 @@ public:
 		return _done.size();
 	}
 
-	bool is_done(const std::string& name, unsigned size) const
+	bool is_done(uint64_t id) const
 	{
-		return _done.find({name, size}) != _done.end();
+		return _done.find(id) != _done.end();
 	}
 
 	bool decode_frame(const char* data, unsigned size)
@@ -67,19 +72,16 @@ public:
 		if (size < md_size())
 			return false;
 
-		FountainMetadata md(data, size);
+		FountainMd md(data, size);
 		if (!md.file_size())
 			return false;
 
-		data += md_size();
-		size -= md_size();
-
 		// check if already done
-		if (is_done(md.name(), md.file_size()))
+		if (is_done(md.id()))
 			return false;
 
 		// find or create
-		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.name()), std::make_tuple(md.file_size(), _bufferSize));
+		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.id()), std::make_tuple(md.file_size(), _bufferSize));
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
 			return false;
@@ -88,9 +90,14 @@ public:
 		if (!finished)
 			return false;
 
-		if (store(md.name(), *finished))
-			mark_done(md.name(), md.file_size());
+		if (store(md, *finished))
+			mark_done(md.id());
 		return true;
+	}
+
+	bool write(const char* data, unsigned length)
+	{
+		return decode_frame(data, length);
 	}
 
 	fountain_decoder_sink& operator<<(const std::string& buffer)
@@ -102,6 +109,9 @@ public:
 protected:
 	std::string _dataDir;
 	unsigned _bufferSize;
-	std::map<std::string, fountain_decoder_stream> _streams;
-	std::set<std::pair<std::string, unsigned>> _done;
+
+	// streams becomes uint64_t,fds ... uint64_t will be combo of encode_id,size
+	std::map<uint64_t, fountain_decoder_stream> _streams;
+	// set just is the uint64_t
+	std::set<uint64_t> _done;
 };

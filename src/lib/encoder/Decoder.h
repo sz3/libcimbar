@@ -91,11 +91,8 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 {
 	CimbReader reader(img, _decoder, should_preprocess);
 
-	std::stringstream buff;
-	aligned_stream aligner(buff, ostream.chunk_size(), ostream.md_size());
+	aligned_stream aligner(ostream, ostream.chunk_size());
 	unsigned res = do_decode(reader, aligner);
-
-	ostream << buff.str(); // make the buffer contiguous
 	return res;
 }
 
