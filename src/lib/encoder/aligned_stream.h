@@ -66,9 +66,11 @@ public:
 				}
 				else
 				{
+					// we could do two writes here, but fountain_decoder_stream would like a contiguous buffer.
+					// and since that's our primary use case, we'll give it one.
+					std::copy(data, data+writeLen, _buffer.data()+_offset);
+					_offset += writeLen;
 					flush();
-					_stream.write(data, writeLen);
-					_totalCount += writeLen;
 				}
 
 				length -= writeLen;
