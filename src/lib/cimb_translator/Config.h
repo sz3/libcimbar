@@ -6,7 +6,6 @@ namespace cimbar
 	namespace Config
 	{
 		bool dark();
-		bool gpu_opt();
 
 		unsigned color_bits();
 		unsigned symbol_bits();

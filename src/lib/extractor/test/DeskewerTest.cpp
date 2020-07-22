@@ -14,6 +14,6 @@ TEST_CASE( "DeskewerTest/testSimple", "[unit]" )
 	cv::Mat actual = de.deskew(TestCimbar::getSample("4color1.jpg"), corners);
 	assertEquals(cv::Size(1024, 1024), actual.size());
 
-	assertEquals( 0x434caa959f7e56c7, image_hash::average_hash(actual) );
+	assertEquals( 0xe36a7ef9a95532c2, image_hash::average_hash(actual) );
 }
 

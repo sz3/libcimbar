@@ -22,7 +22,7 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 	Encoder enc(40, 4, 2);
 	assertEquals( 3, enc.encode(inputFile, outPrefix) );
 
-	std::vector<uint64_t> hashes = {0xd5ddd11402691bc3, 0x52d3e4c604f094d1, 0x3070703051306};
+	std::vector<uint64_t> hashes = {0xc3d89640288bbbab, 0x8b290f206327cb4a, 0x60c8a0c0e0e0c000};
 	for (int i = 0; i < 3; ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
