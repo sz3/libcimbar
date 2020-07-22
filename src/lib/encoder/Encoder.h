@@ -101,7 +101,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame)
 {
 	std::ifstream f(filename);
-	fountain_encoder_stream fes = fountain_encoder_stream::create(f, 389);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(f, 389, 0); // will eventually do something clever with encode_id?
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
 	// 626 * 11 == 6886.
 	// or 313 * 22 == 6886? Smaller may be better, given we need full chunks to make progress
