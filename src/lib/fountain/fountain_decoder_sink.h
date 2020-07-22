@@ -31,11 +31,6 @@ public:
 		return _chunkSize;
 	}
 
-	unsigned md_size() const
-	{
-		return FountainMetadata::md_size;
-	}
-
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
 		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
@@ -69,7 +64,7 @@ public:
 
 	bool decode_frame(const char* data, unsigned size)
 	{
-		if (size < md_size())
+		if (size < FountainMetadata::md_size)
 			return false;
 
 		FountainMetadata md(data, size);
