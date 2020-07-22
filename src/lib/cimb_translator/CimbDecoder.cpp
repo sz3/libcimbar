@@ -2,8 +2,6 @@
 
 #include "Common.h"
 #include "Cell.h"
-#include "CellDrift.h"
-#include "image_hash/average_hash.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
@@ -84,6 +82,12 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset,
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
+unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
+{
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
+	return get_best_symbol(results, drift_offset, best_distance);
+}
+
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
 {
 	return {
@@ -136,11 +140,17 @@ unsigned CimbDecoder::decode_color(const cv::Mat& color_cell, const std::pair<in
 	return get_best_color(r, g, b);
 }
 
-unsigned CimbDecoder::decode(const cv::Mat& cell, const cv::Mat& color_cell, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::decode_color(const Cell& color_cell, const std::pair<int, int>& drift) const
 {
-	unsigned bits = decode_symbol(cell, drift_offset, best_distance);
-	bits |= decode_color(color_cell, CellDrift::driftPairs[drift_offset]) << _symbolBits;
-	return bits;
+	if (_numColors <= 1)
+		return 0;
+
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	Cell center = color_cell;
+	center.crop(2+drift.first, 2+drift.second, color_cell.cols()-4, color_cell.rows()-4);
+	uchar r,g,b;
+	std::tie(r, g, b) = center.mean_rgb(Cell::SKIP);
+	return get_best_color(r, g, b);
 }
 
 unsigned CimbDecoder::decode(const cv::Mat& color_cell) const

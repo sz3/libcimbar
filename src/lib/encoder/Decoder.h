@@ -57,7 +57,7 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleav
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	bitbuffer<> bb;
+	bitbuffer bb(_bitsPerOp * 1550);
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks);
 	while (!reader.done())
 	{

@@ -2,6 +2,8 @@
 
 #include "CellDrift.h"
 #include "Config.h"
+
+#include "bit_file/bitmatrix.h"
 #include <opencv2/opencv.hpp>
 
 using namespace cimbar;
@@ -20,7 +22,7 @@ namespace {
 	}
 
 	template <typename MAT>
-	cv::Mat preprocessSymbolGrid(const MAT& img, bool needs_sharpen, bool needs_threshold)
+	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
 		cv::Mat symbols;
 		if (needs_sharpen)
@@ -31,9 +33,11 @@ namespace {
 		else
 			cv::cvtColor(img, symbols, cv::COLOR_BGR2GRAY);
 
-		if (needs_threshold)
-			cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 0);
-		return symbols;
+		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 0);
+
+		bitbuffer bb(1024*128);
+		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
+		return bb;
 	}
 }
 
@@ -43,7 +47,7 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool need
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
 {
-	_grayscale = preprocessSymbolGrid(img, needs_sharpen, decoder.expects_binary_threshold());
+	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 }
 
 CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen)
@@ -52,7 +56,7 @@ CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool nee
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
 {
-	_grayscale = preprocessSymbolGrid(img, needs_sharpen, decoder.expects_binary_threshold());
+	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 }
 
 unsigned CimbReader::read(unsigned& bits)
@@ -64,9 +68,8 @@ unsigned CimbReader::read(unsigned& bits)
 	auto [i, xy, drift] = _positions.next();
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
-	cv::Rect crop(x-1, y-1, _cellSize, _cellSize);
-	cv::Mat cell = _grayscale(crop);
-	cv::Mat color_cell = _image(crop);
+	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
+	Cell color_cell(_image, x-1, y-1, _cellSize, _cellSize);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;

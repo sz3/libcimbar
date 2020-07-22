@@ -1,16 +1,47 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
 
-// may become bitwriter again
-
 // write bits -> buffer
-template <unsigned _size_hint=1550>
 class bitbuffer
 {
 public:
-	bitbuffer()
+	class writer
+	{
+	public:
+		writer(bitbuffer& bb, size_t pos=0)
+		    : _bb(bb)
+		    , _pos(pos)
+		{}
+
+		template <typename UINT>
+		bool write_byte(UINT byte)
+		{
+			return write(byte, 8);
+		}
+
+		template <typename UINT>
+		bool write(UINT byte, int length)
+		{
+			size_t pos = _pos;
+			_pos += length;
+			return _bb.write(byte, pos, length);
+		}
+
+		writer& operator<<(uint8_t byte)
+		{
+			write_byte(byte);
+			return *this;
+		}
+
+	protected:
+		bitbuffer& _bb;
+		size_t _pos;
+	};
+
+public:
+	bitbuffer(unsigned size_hint=9300)
+	    : _sizeHint(size_hint)
 	{
 		clear();
 	}
@@ -23,7 +54,7 @@ public:
 			return;
 
 		while (size < requestedSize)
-			size += _size_hint;
+			size += _sizeHint;
 		_buffer.resize(size, 0);
 	}
 
@@ -51,6 +82,29 @@ public:
 		return true;
 	}
 
+	unsigned read(unsigned index, int length) const
+	{
+		int currentByte = index/8;
+		int currentBit = index%8;
+
+		unsigned res = 0;
+		int nextRead = std::min(length, 8-currentBit); // read this many bits
+		while (length > 0)
+		{
+			unsigned char bits = _buffer[currentByte] << currentBit;
+			bits = bits >> (8-nextRead);
+			res |= bits << (length - nextRead);
+
+			length -= nextRead;
+			currentBit += nextRead;
+			if (currentBit >= 8)
+				currentBit = 0;
+			currentByte += 1;
+			nextRead = std::min(length, 8-currentBit);
+		}
+		return res;
+	}
+
 	template <typename STREAM>
 	long flush(STREAM& f)
 	{
@@ -62,7 +116,7 @@ public:
 	void clear()
 	{
 		_buffer = {0};
-		_buffer.resize(6 * _size_hint, 0);
+		_buffer.resize(_sizeHint, 0);
 	}
 
 	const std::vector<char>& buffer() const
@@ -70,6 +124,12 @@ public:
 		return _buffer;
 	}
 
+	writer get_writer(size_t pos=0)
+	{
+		return writer(*this, pos);
+	}
+
 protected:
 	std::vector<char> _buffer;
+	unsigned _sizeHint;
 };
