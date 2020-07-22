@@ -101,24 +101,15 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame)
 {
 	std::ifstream f(filename);
-	fountain_encoder_stream fes = fountain_encoder_stream::create(f, 389, 0); // will eventually do something clever with encode_id?
-	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with. 14 are the header.
-	// 626 * 11 == 6886.
-	// or 313 * 22 == 6886? Smaller may be better, given we need full chunks to make progress
-	// for 7 bits + 40 ecc, we'd have 70 blocks == 8050 bytes. -> 8036 of data.
-	//  could use any of 164, 196, 287, 574
-	// it would be nice to make this saner
-	unsigned target = fes.blocks_required() * 2 / 14;
-
-	std::vector<std::string> splits = turbo::str::split(filename, '/');
-	std::string shortname = splits.size()? splits.back() : filename;
+	fountain_encoder_stream fes = fountain_encoder_stream::create(f, cimbar::Config::fountain_chunk_size(_eccBytes), 0); // will eventually do something clever with encode_id?
+	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
+	// the fountain_chunk_size will be 690.
+	// fountain_chunks_per_frame() is currently a constant (10).
+	unsigned requiredFrames = fes.blocks_required() * 2 / cimbar::Config::fountain_chunks_per_frame();
 
 	unsigned i = 0;
-	while (i < target)
+	while (i < requiredFrames)
 	{
-		// need to encode header at start of each frame...
-		fes.encode_metadata_block(shortname);
-
 		auto frame = encode_next(fes);
 		if (!frame)
 			break;

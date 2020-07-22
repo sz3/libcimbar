@@ -1,6 +1,6 @@
 #include "unittest.h"
 
-#include "FountainMd.h"
+#include "FountainMetadata.h"
 #include "fountain_encoder_stream.h"
 #include "fountain_decoder_sink.h"
 
@@ -54,7 +54,7 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 	string iframe = createFrame(0, 1200);
 	assertEquals( 6900, iframe.size() );
 
-	FountainMd md(iframe.data(), iframe.size());
+	FountainMetadata md(iframe.data(), iframe.size());
 	assertEquals( 1200, md.file_size() );
 	assertEquals( 0, md.encode_id() );
 
@@ -64,7 +64,7 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 
 	string frame2 = createFrame(1, 1600);
 	assertEquals( true, sink.decode_frame(frame2.data(), frame2.size()) );
-	assertEquals( true, sink.is_done(FountainMd(1, 1600).id()) );
+	assertEquals( true, sink.is_done(FountainMetadata(1, 1600).id()) );
 
 	assertEquals( 0, sink.num_streams() );
 	assertEquals( 2, sink.num_done() );
@@ -89,7 +89,7 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 		string iframe = createFrame(fes);
 		assertEquals( 6900, iframe.size() );
 
-		FountainMd md(iframe.data(), iframe.size());
+		FountainMetadata md(iframe.data(), iframe.size());
 		assertEquals( 20000, md.file_size() );
 		assertEquals( 2, md.encode_id() );
 
@@ -118,7 +118,7 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	string iframe = createFrame(fes);
 	assertEquals( 6900, iframe.size() );
 
-	FountainMd md(iframe.data(), iframe.size());
+	FountainMetadata md(iframe.data(), iframe.size());
 	assertEquals( 20000, md.file_size() );
 	assertEquals( 3, md.encode_id() );
 

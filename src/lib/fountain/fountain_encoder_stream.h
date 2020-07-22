@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FountainEncoder.h"
-#include "FountainMetadata.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -48,15 +47,6 @@ public:
 	unsigned blocks_required() const
 	{
 		return (_data.size() / block_size()) + 1;
-	}
-
-	void encode_metadata_block(std::string name)
-	{
-		FountainMetadata md(_data.size(), name);
-		_buffIndex = _buffer.size() - md.md_size;
-
-		uint8_t* begin = _buffer.data() + _buffIndex;
-		std::copy(md.data.begin(), md.data.end(), begin);
 	}
 
 	void encode_new_block()

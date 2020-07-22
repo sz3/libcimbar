@@ -1,8 +1,8 @@
 #pragma once
 
 #include "fountain_decoder_stream.h"
-#include "FountainMd.h"
-#include "serialize/format.h"
+#include "FountainMetadata.h"
+
 #include <fstream>
 #include <map>
 #include <set>
@@ -15,9 +15,9 @@
 class fountain_decoder_sink
 {
 public:
-	fountain_decoder_sink(std::string data_dir, unsigned buffer_size)
+	fountain_decoder_sink(std::string data_dir, unsigned chunk_size)
 	    : _dataDir(data_dir)
-	    , _bufferSize(buffer_size)
+	    , _chunkSize(chunk_size)
 	{
 	}
 
@@ -28,15 +28,15 @@ public:
 
 	unsigned chunk_size() const
 	{
-		return _bufferSize;
+		return _chunkSize;
 	}
 
 	unsigned md_size() const
 	{
-		return FountainMd::md_size;
+		return FountainMetadata::md_size;
 	}
 
-	bool store(const FountainMd& md, const std::vector<uint8_t>& data)
+	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
 		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
 		std::ofstream f(file_path);
@@ -72,7 +72,7 @@ public:
 		if (size < md_size())
 			return false;
 
-		FountainMd md(data, size);
+		FountainMetadata md(data, size);
 		if (!md.file_size())
 			return false;
 
@@ -81,7 +81,7 @@ public:
 			return false;
 
 		// find or create
-		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.id()), std::make_tuple(md.file_size(), _bufferSize));
+		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.id()), std::make_tuple(md.file_size(), _chunkSize));
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
 			return false;
@@ -108,7 +108,7 @@ public:
 
 protected:
 	std::string _dataDir;
-	unsigned _bufferSize;
+	unsigned _chunkSize;
 
 	// streams becomes uint64_t,fds ... uint64_t will be combo of encode_id,size
 	std::map<uint64_t, fountain_decoder_stream> _streams;

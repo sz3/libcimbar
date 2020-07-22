@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		fountain_decoder_sink<389> sink(outpath);
+		fountain_decoder_sink sink(outpath, cimbar::Config::fountain_chunk_size(ecc));
 		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
 			return d.decode_fountain(m, sink, pre);
 		};
