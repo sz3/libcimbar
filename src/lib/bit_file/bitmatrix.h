@@ -10,7 +10,7 @@ class bitmatrix
 {
 public:
 	template <typename BITSTREAM>
-	static void mat_to_bitbuffer(const cv::Mat& img, BITSTREAM& writer)
+	static void mat_to_bitbuffer(const cv::Mat& img, BITSTREAM&& writer)
 	{
 		const uchar* p = img.ptr<uchar>(0);
 		unsigned size = img.cols * img.rows;

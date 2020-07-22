@@ -36,8 +36,7 @@ namespace {
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 0);
 
 		bitbuffer bb(1024*128);
-		bitbuffer::writer bw(bb);
-		bitmatrix::mat_to_bitbuffer(symbols, bw);
+		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
 }

@@ -124,6 +124,11 @@ public:
 		return _buffer;
 	}
 
+	writer get_writer(size_t pos=0)
+	{
+		return writer(*this, pos);
+	}
+
 protected:
 	std::vector<char> _buffer;
 	unsigned _sizeHint;
