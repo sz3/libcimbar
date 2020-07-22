@@ -1,7 +1,6 @@
 #pragma once
 
 #include "bit_extractor.h"
-#include "bit_file/bitmatrix.h"
 #include "intx/int128.hpp"
 #include <array>
 #include <iostream>
