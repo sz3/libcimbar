@@ -31,6 +31,7 @@ protected:
 	unsigned _eccBytes;
 	unsigned _bitsPerOp;
 	unsigned _interleaveBlocks;
+	unsigned _interleavePartitions;
 	CimbDecoder _decoder;
 };
 
@@ -38,6 +39,7 @@ inline Decoder::Decoder(unsigned ecc_bytes, unsigned bits_per_op, bool interleav
     : _eccBytes(ecc_bytes)
     , _bitsPerOp(bits_per_op? bits_per_op : cimbar::Config::bits_per_cell())
     , _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
+    , _interleavePartitions(cimbar::Config::interleave_partitions())
     , _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits(), cimbar::Config::dark(), 0xFF)
 {
 }
@@ -58,7 +60,7 @@ template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer bb(_bitsPerOp * 1550);
-	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks);
+	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
 	while (!reader.done())
 	{
 		// reader should probably be in charge of the cell index (i) calculation

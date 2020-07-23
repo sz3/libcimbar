@@ -47,16 +47,16 @@ CellPositions::positions_list CellPositions::compute_linear(int spacing, int dim
 	return res;
 }
 
-CellPositions::positions_list CellPositions::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
+CellPositions::positions_list CellPositions::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
 {
 	CellPositions::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
 	if (interleave_blocks)
-		return Interleave::interleave(pos, interleave_blocks);
+		return Interleave::interleave(pos, interleave_blocks, interleave_partitions);
 	return pos;
 }
 
-CellPositions::CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks)
-    : _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks))
+CellPositions::CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
+    : _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks, interleave_partitions))
 {
 	reset();
 }

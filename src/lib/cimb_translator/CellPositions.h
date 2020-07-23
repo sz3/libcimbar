@@ -10,10 +10,10 @@ public:
 	using positions_list = std::vector<coordinate>;
 
 	static positions_list compute_linear(int spacing, int dimensions, int offset, int marker_size);
-	static positions_list compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
+	static positions_list compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
 
 public:
-	CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0);
+	CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
 
 	unsigned index() const;
 	size_t count() const;

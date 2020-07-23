@@ -62,6 +62,11 @@ unsigned Config::interleave_blocks()
 	return 155;
 }
 
+unsigned Config::interleave_partitions()
+{
+	return 5;
+}
+
 unsigned Config::fountain_chunk_size(unsigned ecc)
 {
 	// this calculation is based off the 112x112-6 grid.
