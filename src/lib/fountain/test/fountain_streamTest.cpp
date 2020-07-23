@@ -20,7 +20,7 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 830);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
@@ -46,7 +46,7 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream<636>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 636);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 16, fes.blocks_required() );
@@ -58,12 +58,20 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 		unsigned res = fes.readsome(buff.data(), buff.size());
 		assertEquals( res, buff.size() );
 
+		// encode_id
 		assertEquals( 0, buff[0] );
 
+		// total size == 10000
+		assertEquals( 0, buff[1] );
+		assertEquals( 39, (unsigned)buff[2] );
+		assertEquals( 16, buff[3] );
+
+		// block_id
+		assertEquals( 0, buff[4] );
 		if (i+1 >= fes.blocks_required())
-			assertEquals( i+1, buff[1] );
+			assertEquals( i+1, buff[5] );
 		else
-			assertEquals( i, buff[1] );
+			assertEquals( i, buff[5] );
 	}
 
 	assertEquals( 21, fes.block_count() );
@@ -82,8 +90,8 @@ TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 	stringstream input2;
 	input2 << input.str();
 
-	fountain_encoder_stream fes1 = fountain_encoder_stream<830>::create(input);
-	fountain_encoder_stream fes2 = fountain_encoder_stream<830>::create(input2);
+	fountain_encoder_stream fes1 = fountain_encoder_stream::create(input, 830);
+	fountain_encoder_stream fes2 = fountain_encoder_stream::create(input2, 830);
 
 	stringstream oneforty;
 	std::array<char, 140> buff1;
@@ -117,13 +125,13 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 830);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<830> fds(input.str().size());
+	fountain_decoder_stream fds(input.str().size(), 830);
 
 	std::array<char, 140> buff;
 	for (int i = 0; i < 1000; ++i)
@@ -142,7 +150,7 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 			assertMsg((bool)output, "couldn't decode :(");
 	}
 
-	assertEquals( 828, fds.block_size() );
+	assertEquals( 824, fds.block_size() );
 	assertEquals( 10000, fds.data_size() );
 	assertTrue( fds.good() );
 
@@ -159,13 +167,13 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
 
-	fountain_encoder_stream fes = fountain_encoder_stream<830>::create(input);
+	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 830);
 
 	assertEquals( 0, fes.block_count() );
 	assertEquals( 13, fes.blocks_required() );
 	assertTrue( fes.good() );
 
-	fountain_decoder_stream<830> fds(input.str().size());
+	fountain_decoder_stream fds(input.str().size(), 830);
 
 	std::array<char, 830> buff; // one block per read/write
 	for (int i = 0; i < 1000; ++i)
@@ -184,7 +192,7 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 			assertMsg((bool)output, "couldn't decode :(");
 	}
 
-	assertEquals( 828, fds.block_size() );
+	assertEquals( 824, fds.block_size() );
 	assertEquals( 10000, fds.data_size() );
 	assertTrue( fds.good() );
 

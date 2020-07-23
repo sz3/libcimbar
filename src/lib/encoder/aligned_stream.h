@@ -6,7 +6,7 @@ template <typename STREAM>
 class aligned_stream
 {
 public:
-	aligned_stream(STREAM& stream, unsigned align_increment, unsigned align_offset)
+	aligned_stream(STREAM& stream, unsigned align_increment, unsigned align_offset=0)
 	    : _stream(stream)
 	    , _buffer(align_increment, 0)
 	    , _offset(0)
@@ -24,7 +24,7 @@ public:
 
 	long tellp() const
 	{
-		return _stream.tellp();
+		return _totalCount;
 	}
 
 	// this is primarily a pass-through
@@ -45,6 +45,7 @@ public:
 			{
 				unsigned writeLen = std::min(_alignOffset - _offset, length);
 				_stream.write(data, writeLen);
+				_totalCount += writeLen;
 				length -= writeLen;
 				data += writeLen;
 				_alignOffset -= writeLen;
@@ -65,8 +66,11 @@ public:
 				}
 				else
 				{
+					// we could do two writes here, but fountain_decoder_stream would like a contiguous buffer.
+					// and since that's our primary use case, we'll give it one.
+					std::copy(data, data+writeLen, _buffer.data()+_offset);
+					_offset += writeLen;
 					flush();
-					_stream.write(data, writeLen);
 				}
 
 				length -= writeLen;
@@ -96,6 +100,7 @@ public:
 	{
 		if (_offset > 0)
 			_stream.write(_buffer.data(), _offset);
+		_totalCount += _offset;
 		_offset = 0;
 	}
 
@@ -108,5 +113,6 @@ protected:
 	unsigned _alignIncrement;
 	bool _badChunk;
 	bool _good;
+	size_t _totalCount = 0;
 };
 

@@ -1,43 +1,62 @@
 #pragma once
 
-#include <array>
-
-struct FountainMetadata
+class FountainMetadata
 {
-	static const unsigned md_size = 14;
+public:
+	static const unsigned md_size = 4;
 
-	std::array<uint8_t,md_size> data = {0};
-
-	FountainMetadata(uint32_t size, std::string name)
+public:
+	FountainMetadata(uint64_t id)
+	    : _data(id)
 	{
-		uint8_t* p = data.data();
-		p[0] = (size >> 24) & 0xFF;
-		p[1] = (size >> 16) & 0xFF;
-		p[2] = (size >> 8) & 0xFF;
-		p[3] = size & 0xFF;
-
-		name.resize(md_size - 4);
-		std::copy(name.begin(), name.end(), p+4);
 	}
 
 	FountainMetadata(const char* buff, unsigned len)
 	{
 		if (len > md_size)
 			len = md_size;
-		std::copy(buff, buff+len, data.data());
+		std::copy(buff, buff+len, data());
 	}
 
-	uint32_t file_size() const
+	FountainMetadata(uint8_t encode_id, unsigned size)
 	{
-		uint32_t res = data[3];
-		res |= ((uint32_t)data[2] << 8);
-		res |= ((uint32_t)data[1] << 16);
-		res |= ((uint32_t)data[0] << 24);
+		uint8_t* d = data();
+		d[0] = encode_id;
+		d[1] = (size >> 16) & 0xFF;
+		d[2] = (size >> 8) & 0xFF;
+		d[3] = size & 0xFF;
+	}
+
+	unsigned id() const
+	{
+		return _data;
+	}
+
+	uint8_t encode_id() const
+	{
+		return data()[0];
+	}
+
+	unsigned file_size() const
+	{
+		const uint8_t* d = data();
+		unsigned res = d[3];
+		res |= ((uint32_t)d[2] << 8);
+		res |= ((uint32_t)d[1] << 16);
 		return res;
 	}
 
-	std::string name() const
+protected:
+	uint8_t* data()
 	{
-		return std::string(data.data()+4, data.data()+md_size);
+		return reinterpret_cast<uint8_t*>(&_data);
 	}
+
+	const uint8_t* data() const
+	{
+		return reinterpret_cast<const uint8_t*>(&_data);
+	}
+
+protected:
+	uint64_t _data; // might invert this and only generate the uint64_t when we need it
 };

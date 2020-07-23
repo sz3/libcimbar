@@ -1,37 +1,37 @@
 #pragma once
 
 #include "FountainEncoder.h"
-#include "FountainMetadata.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 
-template <unsigned _bufferSize> // 599
 class fountain_encoder_stream
 {
 public:
-	static const unsigned _headerSize = 2;
+	static const unsigned _headerSize = 6;
 
 protected:
-	fountain_encoder_stream(std::string&& data)
+	fountain_encoder_stream(std::string&& data, unsigned buffer_size, uint8_t encode_id)
 	    : _data(data)
+	    , _buffer(buffer_size, 0)
+	    , _encodeId(encode_id)
 	    , _encoder((uint8_t*)_data.data(), _data.size(), block_size())
 	{
 	}
 
 	unsigned block_size() const
 	{
-		return _bufferSize - _headerSize;
+		return _buffer.size() - _headerSize;
 	}
 
 public:
 	template <typename STREAM>
-	static fountain_encoder_stream create(STREAM& stream)
+	static fountain_encoder_stream create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
 	{
 		std::stringstream buffs;
 		if (stream)
 			 buffs << stream.rdbuf();
-		return fountain_encoder_stream(buffs.str());
+		return fountain_encoder_stream(buffs.str(), buffer_size, encode_id);
 	}
 
 	bool good() const
@@ -49,15 +49,6 @@ public:
 		return (_data.size() / block_size()) + 1;
 	}
 
-	void encode_metadata_block(std::string name)
-	{
-		FountainMetadata md(_data.size(), name);
-		_buffIndex = _buffer.size() - md.md_size;
-
-		uint8_t* begin = _buffer.data() + _buffIndex;
-		std::copy(md.data.begin(), md.data.end(), begin);
-	}
-
 	void encode_new_block()
 	{
 		unsigned char* data = _buffer.data() + _headerSize;
@@ -65,9 +56,15 @@ public:
 		if (res != block_size())
 			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
-		unsigned block = _block - 1;
-		_buffer.data()[0] = (block >> 8) & 0xFF;
-		_buffer.data()[1] = block & 0xFF;
+		// write header
+		_buffer.data()[0] = _encodeId;
+		_buffer.data()[1] = (_data.size() >> 16) & 0xFF;
+		_buffer.data()[2] = (_data.size() >> 8) & 0xFF;
+		_buffer.data()[3] = _data.size() & 0xFF;
+
+		unsigned block = _block - 1; // we already incremented it above
+		_buffer.data()[4] = (block >> 8) & 0xFF;
+		_buffer.data()[5] = block & 0xFF;
 		_buffIndex = 0;
 	}
 
@@ -109,9 +106,10 @@ public:
 
 protected:
 	std::string _data;
+	std::vector<uint8_t> _buffer;
+	uint8_t _encodeId;
 	FountainEncoder _encoder;
 
-	std::array<uint8_t,_bufferSize> _buffer;
 	unsigned _buffIndex = ~0U;
 	unsigned _block = 0;
 	std::streamsize _lastRead = 0;
