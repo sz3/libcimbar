@@ -4,11 +4,6 @@
 
 namespace Interleave
 {
-	inline unsigned block_size(unsigned size, int num_chunks)
-	{
-		return size / num_chunks;
-	}
-
 	inline std::vector<unsigned> interleave_indices(unsigned size, int num_chunks)
 	{
 		std::vector<unsigned> indices;
@@ -19,13 +14,9 @@ namespace Interleave
 			return indices;
 		}
 
-		int blockSize = block_size(size, num_chunks);
 		for (int chunk = 0; chunk < num_chunks; ++chunk)
-			for (int offset = 0; offset < blockSize; ++offset)
-			{
-				unsigned i = (offset * num_chunks) + chunk;
+			for (int i = chunk; i < size; i+=num_chunks)
 				indices.push_back(i);
-			}
 		return indices;
 	}
 
