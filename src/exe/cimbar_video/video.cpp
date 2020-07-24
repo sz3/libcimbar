@@ -1,6 +1,7 @@
 
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "util/loop_iterator.h"
 
 #include "cxxopts/cxxopts.hpp"
 
@@ -11,6 +12,7 @@
 using std::string;
 using std::vector;
 
+
 int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
@@ -19,7 +21,7 @@ int main(int argc, char** argv)
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
 	    ("e,ecc", "ECC level (default: 64)", cxxopts::value<unsigned>())
 	    ("f,fps", "Target FPS (default: 30)", cxxopts::value<unsigned>())
-	    ("s,stagger", "Stagger successive images", cxxopts::value<bool>())
+	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
 
@@ -45,7 +47,6 @@ int main(int argc, char** argv)
 
 	FountainInit::init();
 
-	bool stagger = result.count("stagger");
 	bool dark = true;
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
 	cv::Mat windowImg = cv::Mat(1080, 1080, CV_8UC3, bgcolor);
@@ -53,11 +54,15 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool start = true;
 
-	std::array<std::pair<int, int>, 8> staggerPos = {{
+	bool shakycam = result.count("shakycam");
+	using ShakeArr = std::array<std::pair<int, int>, 8>;
+	ShakeArr shakePos = {{
 	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
 	}};
-	unsigned staggerCount = 0;
-	auto draw = [&windowImg, delay, bgcolor, stagger, staggerPos, &running, &start, &staggerCount] (const cv::Mat& frame, unsigned) {
+
+	loop_iterator<ShakeArr, ShakeArr::const_iterator> shakeIt(shakePos);
+
+	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
 		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
 			return running = false;
 
@@ -65,15 +70,14 @@ int main(int argc, char** argv)
 
 		int offsetX = 28;
 		int offsetY = 28;
-		if (stagger)
+		if (shakycam)
 		{
 			windowImg = bgcolor;
-			++staggerCount;
-			if (staggerCount >= 8)
-				staggerCount = 0;
-
-			offsetX += staggerPos[staggerCount].first;
-			offsetY += staggerPos[staggerCount].second;
+			if (++shakeIt)
+			{
+				offsetX += (*shakeIt).first;
+				offsetY += (*shakeIt).second;
+			}
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
 		cv::imshow("image", windowImg);
