@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = 64;
+	unsigned ecc = 40;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
