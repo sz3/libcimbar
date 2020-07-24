@@ -55,17 +55,14 @@ int main(int argc, char** argv)
 	bool start = true;
 
 	bool shakycam = result.count("shakycam");
-	using ShakeArr = std::array<std::pair<int, int>, 8>;
-	ShakeArr shakePos = {{
+	std::array<std::pair<int, int>, 8> shakePos = {{
 	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
 	}};
-
-	loop_iterator<ShakeArr, ShakeArr::const_iterator> shakeIt(shakePos);
+	loop_iterator shakeIt(shakePos);
 
 	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
 		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
 			return running = false;
-
 		start = false;
 
 		int offsetX = 28;

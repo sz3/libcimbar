@@ -1,6 +1,6 @@
 #pragma once
 
-template <typename CONTAINER, typename CONTAINER_IT>
+template <typename CONTAINER, typename CONTAINER_IT=typename CONTAINER::const_iterator>
 class loop_iterator
 {
 public:
