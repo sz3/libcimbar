@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
-	unsigned ecc = 64;
+	unsigned ecc = 40;
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
@@ -52,19 +52,30 @@ int main(int argc, char** argv)
 
 	bool running = true;
 	bool start = true;
-	bool staggerCount = false;
-	auto draw = [&windowImg, delay, bgcolor, stagger, &running, &start, &staggerCount] (const cv::Mat& frame, unsigned) {
+
+	std::array<std::pair<int, int>, 8> staggerPos = {{
+	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
+	}};
+	unsigned staggerCount = 0;
+	auto draw = [&windowImg, delay, bgcolor, stagger, staggerPos, &running, &start, &staggerCount] (const cv::Mat& frame, unsigned) {
 		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
 			return running = false;
 
 		start = false;
-		int offset = staggerCount? 36 : 28;
+
+		int offsetX = 28;
+		int offsetY = 28;
 		if (stagger)
 		{
-			staggerCount = !staggerCount;
 			windowImg = bgcolor;
+			++staggerCount;
+			if (staggerCount >= 8)
+				staggerCount = 0;
+
+			offsetX += staggerPos[staggerCount].first;
+			offsetY += staggerPos[staggerCount].second;
 		}
-		frame.copyTo(windowImg(cv::Rect(offset, offset, frame.cols, frame.rows)));
+		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
 		cv::imshow("image", windowImg);
 		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
 		return true;
