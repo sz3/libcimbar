@@ -1,4 +1,5 @@
 
+#include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
 #include "util/loop_iterator.h"
@@ -19,8 +20,8 @@ int main(int argc, char** argv)
 
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("e,ecc", "ECC level (default: 64)", cxxopts::value<unsigned>())
-	    ("f,fps", "Target FPS (default: 30)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 40)", cxxopts::value<unsigned>())
+	    ("f,fps", "Target FPS (default: 15)", cxxopts::value<unsigned>())
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
-	unsigned ecc = 40;
+	unsigned ecc = cimbar::Config::ecc_bytes();
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv)
 	if (result.count("fps"))
 		fps = result["fps"].as<unsigned>();
 	if (fps == 0)
-		fps = 30;
+		fps = 15;
 	unsigned delay = 1000 / fps;
 
 	FountainInit::init();

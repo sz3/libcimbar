@@ -1,4 +1,5 @@
 
+#include "cimb_translator/Config.h"
 #include "encoder/Decoder.h"
 #include "encoder/Encoder.h"
 #include "extractor/Extractor.h"
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = 40;
+	unsigned ecc = cimbar::Config::ecc_bytes();
 	if (result.count("ecc"))
 		ecc = result["ecc"].as<unsigned>();
 

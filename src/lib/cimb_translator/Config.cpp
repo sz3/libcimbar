@@ -64,7 +64,7 @@ unsigned Config::interleave_blocks()
 
 unsigned Config::interleave_partitions()
 {
-	return 5;
+	return 2;
 }
 
 unsigned Config::fountain_chunk_size(unsigned ecc)
