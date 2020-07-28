@@ -36,7 +36,7 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, u
 
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
 {
-	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark);
+	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark, _numColors);
 	return image_hash::average_hash(tile);
 }
 
@@ -116,7 +116,7 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 	double best_distance = 1000000;
 	for (int i = 0; i < _numColors; ++i)
 	{
-		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i);
+		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);
 		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
 		{

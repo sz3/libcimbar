@@ -8,7 +8,7 @@
 class CimbEncoder
 {
 public:
-	CimbEncoder(unsigned symbol_bits=4, unsigned color_bits=2);
+	CimbEncoder(unsigned symbol_bits=4, unsigned color_bits=2, bool dark=true);
 
 	cv::Mat load_tile(unsigned symbol_bits, unsigned index);
 	bool load_tiles(unsigned symbol_bits);
@@ -19,4 +19,5 @@ protected:
 	std::vector<cv::Mat> _tiles;
 	unsigned _numSymbols;
 	unsigned _numColors;
+	bool _dark;
 };
