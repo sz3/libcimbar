@@ -12,7 +12,13 @@ using std::get;
 using std::string;
 
 namespace {
-	unsigned squared_difference(uchar a, uchar b)
+	inline constexpr unsigned char operator"" _uchar(unsigned long long arg) noexcept
+	{
+		return static_cast<unsigned char>(arg);
+	}
+
+	template <typename T>
+	unsigned squared_difference(T a, T b)
 	{
 		return std::pow(a - b, 2);
 	}
@@ -20,7 +26,29 @@ namespace {
 	uchar fix_single_color(uchar c, float adjustUp, uchar down)
 	{
 		c -= down;
-		return (uchar)(c * adjustUp);
+		c = (uchar)(c * adjustUp);
+		if (c > 200)
+			c = 255;
+		return c;
+	}
+
+	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
+	{
+		int r = std::get<0>(c);
+		int g = std::get<1>(c);
+		int b = std::get<2>(c);
+		return {r - g, g - b, b - r};
+	}
+
+	unsigned color_diff(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b)
+	{
+		std::tuple<int,int,int> rel1 = relative_color(a);
+		std::tuple<int,int,int> rel2 = relative_color(b);
+		return (
+		    squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
+		    squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
+		    squared_difference(std::get<2>(rel1), std::get<2>(rel2))
+		);
 	}
 }
 
@@ -99,15 +127,13 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,ucha
 
 unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b) const
 {
-	return squared_difference(get<0>(a), get<0>(b)) + squared_difference(get<1>(a), get<1>(b)) + squared_difference(get<2>(a), get<2>(b));
+	return color_diff(a, b);
 }
 
 unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 {
-	unsigned char max = std::max({r, g, b});
-	unsigned char min = std::min({r, g, b});
-	if (min > (max >> 1)) // cutoff ... may need to be 75%? need some data
-		min = 0;
+	unsigned char max = std::max({r, g, b, 1_uchar});
+	unsigned char min = std::min({r, g, b, 48_uchar});
 	float adjust = 255.0;
 	if (max > min)
 		adjust /= (max - min);
