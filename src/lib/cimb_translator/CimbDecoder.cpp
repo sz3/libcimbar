@@ -106,6 +106,8 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 {
 	unsigned char max = std::max({r, g, b});
 	unsigned char min = std::min({r, g, b});
+	if (min > (max >> 1)) // cutoff ... may need to be 75%? need some data
+		min = 0;
 	float adjust = 255.0;
 	if (max > min)
 		adjust /= (max - min);

@@ -30,15 +30,15 @@ namespace {
 	RGB getColor8(unsigned index)
 	{
 		static constexpr array<RGB, 8> colors = {
-		    RGB(0, 0xFF, 0xFF),
-		    RGB(0xFF, 0xFF, 0),
-		    RGB(0xFF, 0x6F, 0xFF),
+		    RGB(0, 0xFF, 0xFF), // cyan
+		    RGB(0xFF, 0xFF, 0), // yellow
+		    RGB(0xFF, 0, 0xFF), // magenta
 		    RGB(0, 0xFF, 0),
 		    RGB(0, 0x7F, 0xFF),  // mid-blue
 		    RGB(0xFF, 0xFF, 0xFF),
-		    RGB(0xFF, 65, 65), // red
+		    RGB(0x9F, 0, 0xFF),  // purple
 		    RGB(0xFF, 0x9F, 0)  // orange
-		    // RGB(0x9F, 0, 0xFF)  // purple
+		    // RGB(0xFF, 65, 65), // red
 		};
 		return colors[index];
 	}

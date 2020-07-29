@@ -9,7 +9,7 @@ bool Config::dark()
 
 unsigned Config::color_bits()
 {
-	return 2;
+	return 3;
 }
 
 unsigned Config::symbol_bits()
