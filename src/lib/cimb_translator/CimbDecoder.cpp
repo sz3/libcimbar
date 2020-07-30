@@ -27,7 +27,7 @@ namespace {
 	{
 		c -= down;
 		c = (uchar)(c * adjustUp);
-		if (c > 200)
+		if (c > (245 - down))
 			c = 255;
 		return c;
 	}
@@ -135,8 +135,9 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 	unsigned char max = std::max({r, g, b, 1_uchar});
 	unsigned char min = std::min({r, g, b, 48_uchar});
 	float adjust = 255.0;
-	if (max > min)
-		adjust /= (max - min);
+	if (min >= max)
+		min = 0;
+	adjust /= (max - min);
 
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
