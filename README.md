@@ -40,9 +40,13 @@ I would like to add emscripten->wasm support.
 	* These 6-7 bits per tile work out to a maximum of 9300-10850 bytes per barcode, though in practice this number is reduced by error correction.
 	* The default ecc setting is 30/155, which is where we go from 9300 -> 7500 bytes of real data for a 4-color cimbar image.
 		* Reed Solomon is not an ideal for this use case -- specifically, it corrects byte errors, and cimbar errors tend to involve 1-3 bits at a time. However, since Reed Solomon implementations are ubiquitous, I used it for this prototype.
-* 18 seconds to transfer a 1.2 MB file == 66 kb/s. This is the current benchmark on my old Android phone.
+* 43 seconds to transfer a 3.0 MB file == 69 kb/s. This is the current benchmark on my old Android phone.
 	* specifically, this is using https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625
-	* this is not using the GPU. Also, the android app kind of sucks.
+	* for smaller (~1MB) files, I've seen 75 kb/s.
+		* for inflating benchmark numbers, a decent strategy is to turn down the ecc settings and say a prayer to your prefered deity
+			* this is neither reliable, nor representative of the usable case, however
+	* the android app is not currently using the GPU. Also, it's a pretty minimal effort app build on an opencv tutorial. It kind of sucks.
+		* notably: the app doesn't do anything useful with camera settings. It would help processing if the app was handing libcimbar better quality images!
 
 ## Implementation details
 
@@ -59,6 +63,9 @@ Performance optimizations aside, there are a number of paths that might be inter
 * proper metadata/header information?
 	* would be nice to be able to determine ecc/#colors/#smybols from the cimbar image itself?
 	* The bottom right corner is the obvious place to reclaim space to make this possible.
+* multi-frame decoding?
+	* when decoding a static cimbar image, it would be useful to be able to use prior (unsuccessful) decode attempts to inform a future decode, and -- hopefully -- increase the probability of success. Currently, all frames are decoded independently.
+		* there is already a granular confidence metric that could be reused -- the `distance` that's tracked when decoding symbol tiles...
 * optimal symbol set?
 	* the 16-symbol (4 bit) set is hand-drawn. I stared with ~40 or so hand-drawn symbols, and used the 16 that performed best with each other.
 	* there is surely a more optimal set -- a more rigorous approach should yield lower error rates!
