@@ -4,12 +4,7 @@
 
 namespace Interleave
 {
-	inline unsigned block_size(unsigned size, int num_chunks)
-	{
-		return size / num_chunks;
-	}
-
-	inline std::vector<unsigned> interleave_indices(unsigned size, int num_chunks)
+	inline std::vector<unsigned> interleave_indices(unsigned size, int num_chunks, int partitions)
 	{
 		std::vector<unsigned> indices;
 		if (num_chunks == 0)
@@ -19,19 +14,17 @@ namespace Interleave
 			return indices;
 		}
 
-		int blockSize = block_size(size, num_chunks);
-		for (int chunk = 0; chunk < num_chunks; ++chunk)
-			for (int offset = 0; offset < blockSize; ++offset)
-			{
-				unsigned i = (offset * num_chunks) + chunk;
-				indices.push_back(i);
-			}
+		unsigned partitionSize = size/partitions;
+		for (int part = 0; part < size; part+=partitionSize)
+			for (int chunk = 0; chunk < num_chunks; ++chunk)
+				for (int i = chunk; i < partitionSize; i+=num_chunks)
+					indices.push_back(i + part);
 		return indices;
 	}
 
-	inline std::vector<unsigned> interleave_reverse(unsigned size, int num_chunks)
+	inline std::vector<unsigned> interleave_reverse(unsigned size, int num_chunks, int partitions)
 	{
-		std::vector<unsigned> indices = interleave_indices(size, num_chunks);
+		std::vector<unsigned> indices = interleave_indices(size, num_chunks, partitions);
 		std::vector<unsigned> inverted(indices.size(), 0);
 		for (unsigned src = 0; src < indices.size(); ++src)
 		{
@@ -42,11 +35,11 @@ namespace Interleave
 	}
 
 	template <typename PT>
-	inline std::vector<PT> interleave(const std::vector<PT>& positions, int num_chunks)
+	inline std::vector<PT> interleave(const std::vector<PT>& positions, int num_chunks, int partitions)
 	{
 		std::vector<PT> res;
 
-		std::vector<unsigned> indices = interleave_indices(positions.size(), num_chunks);
+		std::vector<unsigned> indices = interleave_indices(positions.size(), num_chunks, partitions);
 		for (int i = 0; i < indices.size(); ++i)
 		{
 			unsigned interleaveIdx = indices[i];

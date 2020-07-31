@@ -30,7 +30,7 @@ TEST_CASE( "DecoderTest/testDecode", "[unit]" )
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("4color-ecc40-fountain-0.png"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
 
-	assertEquals( "56d1cc8c1564e22a63b9e64e686fc67a1f304c693f5513c1fb7f5618816031ba", get_hash(decodedFile) );
+	assertEquals( "2ca63e05281d7aeeed2be469b6872b4357b94be1ef02fe9dba5d1736d6ae64cc", get_hash(decodedFile) );
 }
 
 
@@ -43,5 +43,5 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("4color-ecc40-fountain-0.png"), decodedFile);
 	assertEquals( 6900, bytesDecoded );
 
-	assertEquals( "f219b98c8bfaf7369975f7a4e0c95f580308438b6467290a0220b7bb28b807b4", get_hash(decodedFile) );
+	assertEquals( "c7a1574e6a40ea446cb3cf40bfb346ab7cdc2a5d3b1c59908e676c466a3285a1", get_hash(decodedFile) );
 }
