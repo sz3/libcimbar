@@ -17,19 +17,19 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool no_undistort, bool force_preprocess)
+int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
 {
 	int err = 0;
 	Undistort<SimpleCameraCalibration> und;
 	for (const string& inf : infiles)
 	{
-		bool shouldPreprocess = force_preprocess;
+		bool shouldPreprocess = (preprocess == 1);
 		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		if (!no_deskew)
 		{
 			// attempt undistort
 			// we don't fail outright, but we'll probably fail the decode :(
-			if (!no_undistort)
+			if (undistort)
 			{
 				if (!und.undistort(img, img))
 					err |= 1;
@@ -42,7 +42,7 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 				err |= 2;
 				continue;
 			}
-			else if (res == Extractor::NEEDS_SHARPEN)
+			else if (preprocess != 0 and res == Extractor::NEEDS_SHARPEN)
 				shouldPreprocess = true;
 		}
 
@@ -64,8 +64,8 @@ int main(int argc, char** argv)
 	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
-	    ("no-undistort", "Skip the undistort step -- treat input image as already undistorted.", cxxopts::value<bool>())
-	    ("force-preprocess", "Force the sharpen/preprocessing filter to run on the input image.", cxxopts::value<bool>())
+	    ("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
+	    ("preprocess", "Force the sharpen/preprocessing filter to run on the input image. 1 == on. 0 == off. Default is to guess.", cxxopts::value<int>())
 	    ("h,help", "Print usage")
 	;
 
@@ -103,8 +103,11 @@ int main(int argc, char** argv)
 
 	// else, decode
 	bool no_deskew = result.count("no-deskew");
-	bool no_undistort = result.count("no-undistort");
-	bool force_preprocess = result.count("force-preprocess");
+	bool undistort = result.count("undistort");
+	int preprocess = -1;
+	if (result.count("preprocess"))
+		preprocess = result["preprocess"].as<int>();
+
 	Decoder d(ecc);
 
 	if (fountain)
@@ -113,7 +116,7 @@ int main(int argc, char** argv)
 		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
 			return d.decode_fountain(m, sink, pre);
 		};
-		return decode(infiles, fun, no_deskew, no_undistort, force_preprocess);
+		return decode(infiles, fun, no_deskew, undistort, preprocess);
 	}
 
 	// else
@@ -121,5 +124,5 @@ int main(int argc, char** argv)
 	std::function<int(cv::UMat,bool)> fun = [&f, &d] (cv::UMat m, bool pre) {
 		return d.decode(m, f, pre);
 	};
-	return decode(infiles, fun, no_deskew, no_undistort, force_preprocess);
+	return decode(infiles, fun, no_deskew, undistort, preprocess);
 }
