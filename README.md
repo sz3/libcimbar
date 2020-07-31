@@ -1,6 +1,6 @@
 ## libcimbar
-### Color Icon Matrix barcodes
-#### The quest for 100 kb/s over the air gap
+#### Color Icon Matrix BARcode
+#### And the quest for 100 kb/s over the air gap
 
 ## Libraries
 Except for opencv, all of these are included in the repo. Most are header-only.
