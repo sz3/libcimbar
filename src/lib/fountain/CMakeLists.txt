@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
+	concurrent_fountain_decoder_sink.h
 	FountainDecoder.h
 	FountainEncoder.h
 	FountainInit.h
