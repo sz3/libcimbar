@@ -75,6 +75,10 @@ enum {
   NICKO_GROUP_UNSPECIFIED
 };
 
+#if defined (__cplusplus)
+extern "C" {
+#endif
+
 struct nicko_magic {
   unsigned int type;
   unsigned int group;
@@ -99,6 +103,10 @@ int nicko(const char *filename, struct nicko_magic **p);
  * @return printable name of the group.
  */
 const char *nicko_get_group_name(int group);
+
+#if defined (__cplusplus)
+}
+#endif
 
 #endif /* LIBNICKO_H */
 

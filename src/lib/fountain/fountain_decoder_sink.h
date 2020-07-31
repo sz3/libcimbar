@@ -4,6 +4,7 @@
 #include "FountainMetadata.h"
 #include "serialize/format.h"
 
+#include "libnicko/nicko.h"
 #include <fstream>
 #include <map>
 #include <set>
@@ -34,9 +35,14 @@ public:
 
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
-		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
+		const char* cdat = reinterpret_cast<const char*>(data.data());
+		std::string file_path = fmt::format("{}/{}-{}", _dataDir, md.encode_id(), md.file_size());
 		std::ofstream f(file_path);
-		f.write((char*)data.data(), data.size());
+		f.write(cdat, data.size());
+
+		std::string fpath = get_best_file_path(file_path);
+		if (fpath.size() > 0)
+			::rename(file_path.c_str(), fpath.c_str());
 		return true;
 	}
 
@@ -100,6 +106,15 @@ public:
 	{
 		decode_frame(buffer.data(), buffer.size());
 		return *this;
+	}
+
+protected:
+	std::string get_best_file_path(const std::string& path) const
+	{
+		struct nicko_magic* m = NULL;
+		if (nicko(path.c_str(), &m) != 0)
+			return "";
+		return fmt::format("{}.{}", path, m->name);
 	}
 
 protected:

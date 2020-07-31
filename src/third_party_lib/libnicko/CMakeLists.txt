@@ -6,5 +6,5 @@ set(SOURCES
 	nicko.h
 )
 
-add_library(libnicko STATIC ${SOURCES})
+add_library(nicko STATIC ${SOURCES})
 

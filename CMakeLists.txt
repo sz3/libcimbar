@@ -37,6 +37,7 @@ set (PROJECTS
 
 	src/third_party_lib/base91
 	src/third_party_lib/cxxopts
+	src/third_party_lib/libnicko
 	src/third_party_lib/intx
 	src/third_party_lib/libcorrect
 	src/third_party_lib/libpopcnt

@@ -17,6 +17,7 @@ target_link_libraries(cimbar
 	extractor
 
 	correct
+	nicko
 	wirehair
 	${OPENCV_LIBS}
 )
