@@ -18,7 +18,7 @@ namespace {
 	RGB getColor4(unsigned index)
 	{
 		// opencv uses BGR, but we don't have to conform to this tyranny
-		static constexpr array<cimbar::RGB, 4> colors = {
+		static constexpr array<RGB, 4> colors = {
 		    RGB(0, 0xFF, 0xFF),
 		    RGB(0xFF, 0xFF, 0),
 		    RGB(0xFF, 0, 0xFF),
