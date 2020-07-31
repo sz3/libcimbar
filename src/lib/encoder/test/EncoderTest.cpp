@@ -22,8 +22,8 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 	Encoder enc(40, 4, 2);
 	assertEquals( 3, enc.encode(inputFile, outPrefix) );
 
-	std::vector<uint64_t> hashes = {0xc3d89640288bbbab, 0x8b290f206327cb4a, 0x60c8a0c0e0e0c000};
-	for (int i = 0; i < 3; ++i)
+	std::vector<uint64_t> hashes = {0xc47ced006f253562, 0x2d8cc44256ccb9eb, 0x6ed0efb800000000};
+	for (int i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
@@ -43,10 +43,10 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
 	Encoder enc(40, 4, 2);
-	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix) );
+	assertEquals( 5, enc.encode_fountain(inputFile, outPrefix) );
 
-	std::vector<uint64_t> hashes = {0x52b755f3a0330131, 0xd19d40a780e193b1, 0x6335f5b3c47a4891, 0x1791f7e212f58545};
-	for (int i = 0; i < 4; ++i)
+	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x8c2f0f40e6ecb08b, 0x93a3830d042966e1, 0x21f4ef48d3ed685e};
+	for (int i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
