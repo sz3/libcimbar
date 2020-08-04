@@ -24,7 +24,7 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
-		int blockSize = 3;
+		int blockSize = 3; // default: no preprocessing
 
 		cv::Mat symbols;
 		if (needs_sharpen)
