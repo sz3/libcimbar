@@ -78,11 +78,11 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 	return merged;
 }
 
-void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
+unsigned Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 {
 	// returns the best 3 candidates
 	if (candidates.size() <= 3)
-		return;
+		return 0;
 
 	std::sort(candidates.begin(), candidates.end(), size_sort());
 	unsigned cutoff = 0;
@@ -98,18 +98,19 @@ void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 		i = 3;
 	if (i < candidates.size())
 		candidates.resize(i);
+	return cutoff;
 }
 
-bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
+bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 {
-	std::sort(candidates.begin(), candidates.end());
-	if (candidates.size() < 3)
+	std::sort(anchors.begin(), anchors.end());
+	if (anchors.size() < 3)
 		return false;
 
 	std::vector<point<int>> edges({
-	    candidates[1].center() - candidates[2].center(),
-	    candidates[2].center() - candidates[0].center(),
-	    candidates[0].center() - candidates[1].center(),
+	    anchors[1].center() - anchors[2].center(),
+	    anchors[2].center() - anchors[0].center(),
+	    anchors[0].center() - anchors[1].center(),
 	});
 
 	// because of how we ordered our edges, the index of the longest edge is also the index of the anchor opposite it.
@@ -119,7 +120,7 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
 
 	// now, we need to find the order of the other two:
 	int outgoing_edge = fix_index<3>(top_left - 1);
-	if (edges[outgoing_edge].dot(candidates[top_left].center()) >= 0)
+	if (edges[outgoing_edge].dot(anchors[top_left].center()) >= 0)
 	{
 		top_right = fix_index<3>(top_left - 1);
 		bottom_left = fix_index<3>(top_left + 1);
@@ -131,11 +132,41 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
 	}
 
 	// apply the order.
-	if (&candidates[0] != &candidates[top_left])
-		std::swap(candidates[0], candidates[top_left]);
-	if (&candidates[1] != &candidates[top_right])
-		std::swap(candidates[1], candidates[top_right]);
+	if (&anchors[0] != &anchors[top_left])
+		std::swap(anchors[0], anchors[top_left]);
+	if (&anchors[1] != &anchors[top_right])
+		std::swap(anchors[1], anchors[top_right]);
 	return true;
+}
+
+bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, unsigned cutoff_range)
+{
+	point<int> guess1 = anchors[2].center() + (anchors[1].center() - anchors[0].center()); // top edge
+	point<int> guess2 = anchors[1].center() + (anchors[2].center() - anchors[0].center()); // left edge
+	point<int> center = (guess1 + guess2) / 2;
+
+	int skip = _skip >> 1; // the secondary anchor center is about half the size of the primary one. So we need a 2x granular search.
+	int range = cutoff_range << 2;
+	int ystart = center.y() - range;
+	int yend = center.y() + range;
+	int xstart = center.x() - range;
+	int xend = center.x() + range;
+
+	std::vector<Anchor> candidates;
+	t1_scan_rows<ScanState_122>([&] (const Anchor& p) {
+		on_t1_scan<ScanState_122>(p, candidates);
+	}, skip, ystart, yend, xstart, xend);
+
+	if (candidates.size() == 0)
+		return false;
+
+	for (const Anchor& c : candidates)
+		if (c.size() > cutoff_range)
+		{
+			anchors.push_back(c);
+			return true;
+		}
+	return false;
 }
 
 std::vector<Anchor> Scanner::scan()
@@ -145,8 +176,10 @@ std::vector<Anchor> Scanner::scan()
 		on_t1_scan<ScanState_114>(p, candidates);
 	});
 
-	filter_candidates(candidates);
+	int cutoffRange = filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
+
+	add_bottom_right_corner(candidates, cutoffRange);
 	return candidates;
 }
 
