@@ -4,13 +4,6 @@
 #include <string>
 #include <vector>
 
-enum ScanRatio
-{
-	R114, // "1:1:4"
-	R122,
-};
-
-
 class ScanState
 {
 public:
@@ -21,13 +14,9 @@ public:
 protected:
 	ScanState(const LimitList& limits)
 	    : _limits(limits)
-	{
-	}
+	{}
 
 public:
-	template <int>
-	static ScanState create();
-
 	int process(bool active)
 	{
 		bool isTransition = false;
@@ -98,14 +87,18 @@ protected:
 	LimitList _limits;
 };
 
-template <>
-inline ScanState ScanState::create<ScanRatio::R114>()
+class ScanState_114 : public ScanState
 {
-	return ScanState({{0,0}, {3.0, 6.0}, {3.0, 6.0}, {0,0}, {3.0, 6.0}, {3.0, 6.0}});
-}
+public:
+	ScanState_114()
+	    : ScanState({{0,0}, {3.0, 6.0}, {3.0, 6.0}, {0,0}, {3.0, 6.0}, {3.0, 6.0}})
+	{}
+};
 
-template <>
-inline ScanState ScanState::create<ScanRatio::R122>()
+class ScanState_122 : public ScanState
 {
-	return ScanState({{0,0}, {1.5, 3.0}, {0.5, 1.5}, {0,0}, {0.5, 1.5}, {1.5, 3.0}});
-}
+public:
+	ScanState_122()
+	    : ScanState({{0,0}, {1.5, 3.0}, {0.5, 1.5}, {0,0}, {0.5, 1.5}, {1.5, 3.0}})
+	{}
+};

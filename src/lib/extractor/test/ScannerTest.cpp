@@ -16,26 +16,26 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
 	Scanner sc(img);
 
-	std::vector<Anchor> candidates = sc.t1_scan_rows();
+	std::vector<Anchor> candidates = sc.t1_scan_rows<ScanState_114>();
 	std::string res = turbo::str::join(candidates);
 	assertStringContains("51+-27,288+-0", res);
 	assertStringContains("993+-28,288+-0", res);
 	assertStringContains("84+-25,1188+-0", res);
 	assertStringContains("959+-26,1206+-0", res);
 
-	candidates = sc.t2_scan_columns(candidates);
+	candidates = sc.t2_scan_columns<ScanState_114>(candidates);
 	assertStringContains("51+-0,285+-28", turbo::str::join(candidates));
 	assertStringContains("993+-0,282+-28", turbo::str::join(candidates));
 	assertStringContains("84+-0,1188+-24", turbo::str::join(candidates));
 	assertStringContains("959+-0,1196+-24", turbo::str::join(candidates));
 
-	candidates = sc.t3_scan_diagonal(candidates);
+	candidates = sc.t3_scan_diagonal<ScanState_114>(candidates);
 	assertStringContains("51+-28,285+-28", turbo::str::join(candidates));
 	assertStringContains("993+-27,282+-28", turbo::str::join(candidates));
 	assertStringContains("84+-24,1188+-24", turbo::str::join(candidates));
 	assertStringContains("960+-24,1196+-24", turbo::str::join(candidates));
 
-	candidates = sc.t4_confirm_scan(candidates);
+	candidates = sc.t4_confirm_scan<ScanState_114>(candidates);
 	sc.filter_candidates(candidates);
 
 	// ordered by size
