@@ -38,7 +38,7 @@ public: // other interesting methods
 	void filter_candidates(std::vector<Anchor>& candidates) const;
 
 	template <typename SCANTYPE>
-	std::vector<Anchor> t1_scan_rows() const;
+	std::vector<Anchor> t1_scan_rows(int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
 
 	template <typename SCANTYPE>
 	std::vector<Anchor> t2_scan_columns(const std::vector<Anchor>& candidates) const;
@@ -239,11 +239,18 @@ inline bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int 
 }
 
 template <typename SCANTYPE>
-inline std::vector<Anchor> Scanner::t1_scan_rows() const
+inline std::vector<Anchor> Scanner::t1_scan_rows(int skip, int y, int yend, int xstart, int xend) const
 {
+	if (skip <= 0)
+		skip = _skip;
+	if (y < 0)
+		y = skip;
+	if (yend < 0 or yend > _img.rows)
+		yend = _img.rows;
+
 	std::vector<Anchor> points;
-	for (int y = _skip; y < _img.rows; y += _skip)
-		scan_horizontal<SCANTYPE>(points, y);
+	for (; y < yend; y += skip)
+		scan_horizontal<SCANTYPE>(points, y, xstart, xend);
 	return points;
 }
 
