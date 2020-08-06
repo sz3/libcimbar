@@ -10,37 +10,45 @@
 #include <string>
 #include <vector>
 
-
 TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 {
 	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
 	Scanner sc(img);
 
-	std::vector<Anchor> candidates = sc.t1_scan_rows<ScanState_114>();
+	std::vector<Anchor> candidates;
+	sc.t1_scan_rows<ScanState_114>([&candidates] (const Anchor& p) { candidates.push_back(p); });
 	std::string res = turbo::str::join(candidates);
-	assertStringContains("51+-27,288+-0", res);
-	assertStringContains("993+-28,288+-0", res);
-	assertStringContains("84+-25,1188+-0", res);
-	assertStringContains("959+-26,1206+-0", res);
+	assertStringContains("51+-26,288+-0", res);
+	assertStringContains("992+-27,288+-0", res);
+	assertStringContains("85+-24,1188+-0", res);
+	assertStringContains("959+-25,1188+-0", res);
 
-	candidates = sc.t2_scan_columns<ScanState_114>(candidates);
-	assertStringContains("51+-0,285+-28", turbo::str::join(candidates));
-	assertStringContains("993+-0,282+-28", turbo::str::join(candidates));
-	assertStringContains("84+-0,1188+-24", turbo::str::join(candidates));
-	assertStringContains("959+-0,1196+-24", turbo::str::join(candidates));
+	std::vector<Anchor> c2;
+	for (const Anchor& c : candidates)
+		sc.t2_scan_column<ScanState_114>(c, [&c2] (const Anchor& p) { c2.push_back(p); });
+	assertStringContains("51+-0,286+-28", turbo::str::join(c2));
+	assertStringContains("992+-0,283+-28", turbo::str::join(c2));
+	assertStringContains("85+-0,1188+-24", turbo::str::join(c2));
+	assertStringContains("959+-0,1196+-24", turbo::str::join(c2));
 
-	candidates = sc.t3_scan_diagonal<ScanState_114>(candidates);
-	assertStringContains("51+-28,285+-28", turbo::str::join(candidates));
-	assertStringContains("993+-27,282+-28", turbo::str::join(candidates));
-	assertStringContains("84+-24,1188+-24", turbo::str::join(candidates));
-	assertStringContains("960+-24,1196+-24", turbo::str::join(candidates));
+	std::vector<Anchor> c3;
+	for (const Anchor& c : c2)
+		sc.t3_scan_diagonal<ScanState_114>(c, [&c3] (const Anchor& p) { c3.push_back(p); });
+	assertStringContains("51+-27,286+-28", turbo::str::join(c3));
+	assertStringContains("992+-26,283+-28", turbo::str::join(c3));
+	assertStringContains("85+-24,1188+-24", turbo::str::join(c3));
+	assertStringContains("958+-23,1196+-24", turbo::str::join(c3));
 
-	candidates = sc.t4_confirm_scan<ScanState_114>(candidates);
+	std::vector<Anchor> c4;
+	for (const Anchor& c : c3)
+		sc.t4_confirm_scan<ScanState_114>(c, [&c4] (const Anchor& p) { c4.push_back(p); });
+
+	candidates = sc.deduplicate_candidates(c4);
 	sc.filter_candidates(candidates);
 
 	// ordered by size
 	assertEquals(
-	    "993+-28,282+-28 51+-28,285+-28 84+-25,1188+-24 959+-25,1196+-24",
+	    "992+-27,283+-28 51+-27,286+-28 85+-24,1188+-24 959+-25,1196+-24",
 	    turbo::str::join(candidates)
 	);
 }

@@ -92,17 +92,10 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
 
 std::vector<Anchor> Scanner::scan()
 {
-	// scan horizontal
-	std::vector<Anchor> candidates = t1_scan_rows<ScanState_114>();
-
-	// for all horizontal results, scan vertical
-	candidates = t2_scan_columns<ScanState_114>(candidates);
-
-	// for all horizontal+vertical results, scan diagonal
-	candidates = t3_scan_diagonal<ScanState_114>(candidates);
-
-	// for all horizontal+vertical+diagonal results, do one more sanity check
-	candidates = t4_confirm_scan<ScanState_114>(candidates);
+	std::vector<Anchor> candidates;
+	t1_scan_rows<ScanState_114>([&] (const Anchor& p) {
+		on_t1_scan<ScanState_114>(p, candidates);
+	});
 
 	filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
