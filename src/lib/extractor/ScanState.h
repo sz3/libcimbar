@@ -46,7 +46,6 @@ public:
 		return NOOP;
 	}
 
-
 protected:
 	void pop_state()
 	{
@@ -99,6 +98,6 @@ class ScanState_122 : public ScanState
 {
 public:
 	ScanState_122()
-	    : ScanState({{0,0}, {1.5, 3.0}, {0.5, 1.5}, {0,0}, {0.5, 1.5}, {1.5, 3.0}})
+	    : ScanState({{0,0}, {1.0, 3.0}, {0.5, 1.5}, {0,0}, {0.5, 1.5}, {1.0, 3.0}})
 	{}
 };

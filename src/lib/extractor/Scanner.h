@@ -36,7 +36,8 @@ public: // public inline methods
 
 public: // other interesting methods
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
-	unsigned filter_candidates(std::vector<Anchor>& candidates) const;
+	int filter_candidates(std::vector<Anchor>& candidates) const;
+	bool sort_top_to_bottom(std::vector<Anchor>& anchors);
 
 	template <typename SCANTYPE>
 	void t1_scan_rows(std::function<void(const Anchor&)> fun, int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
@@ -50,8 +51,8 @@ public: // other interesting methods
 	template <typename SCANTYPE>
 	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
 
-	bool sort_top_to_bottom(std::vector<Anchor>& anchors);
-	bool add_bottom_right_corner(std::vector<Anchor>& anchors, unsigned cutoff_range);
+	int scan_primary(std::vector<Anchor>& candidates);
+	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff);
 
 protected: // internal member functions
 	bool test_pixel(int x, int y) const;
@@ -198,7 +199,7 @@ inline bool Scanner::scan_vertical(std::vector<Anchor>& points, int x, int xmax,
 	if (res > 0)
 	{
 		int y = yend;
-		points.push_back(Anchor(x, xmax, y-res, y-1));
+		points.push_back(Anchor(xavg, xavg, y-res, y-1));
 	}
 	return initCount != points.size();
 }

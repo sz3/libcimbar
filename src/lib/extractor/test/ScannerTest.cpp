@@ -143,7 +143,6 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 	assertEquals( "518.99,283.51 975.369,755.954 518.903,1191.98 68.1046,753.045", turbo::str::join(mp.points()) );
 }
 
-
 TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
 {
 	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
@@ -157,6 +156,43 @@ TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
 
 	assertEquals(
 	    "330+-30,330+-30 130+-30,330+-30 330+-30,130+-30",
+	    turbo::str::join(candidates)
+	);
+}
+
+TEST_CASE( "ScannerTest/testSortTopToBottom.2", "[unit]" )
+{
+	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates;
+	candidates.push_back(Anchor(966, 1020, 966, 1020));
+	candidates.push_back(Anchor(966, 1020, 2, 56));
+	candidates.push_back(Anchor(2, 56, 966, 1020));
+	assertTrue( sc.sort_top_to_bottom(candidates) );
+
+	assertEquals(
+	    "993+-27,993+-27 29+-27,993+-27 993+-27,29+-27",
+	    turbo::str::join(candidates)
+	);
+}
+
+TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
+{
+	cv::Mat img = cv::imread("/tmp/3b.png");
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates;
+	int cutoff = sc.scan_primary(candidates);
+	assertEquals( 2255, cutoff );
+	assertEquals(
+	    "993+-27,993+-27 29+-27,993+-27 994+-27,29+-27",
+	    turbo::str::join(candidates)
+	);
+
+	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
+	assertEquals(
+	    "993+-27,993+-27 29+-27,993+-27 994+-27,29+-27 29+-27,29+-28",
 	    turbo::str::join(candidates)
 	);
 }
