@@ -312,13 +312,7 @@ inline std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& c
 		if (!scan_vertical<SCANTYPE>(confirms, p.xavg(), p.xavg(), ystart, yend))
 			continue;
 
-		Anchor merged(p);
-		for (const Anchor& co : confirms)
-		{
-			if (co.is_mergeable(p, _mergeCutoff))
-				merged.merge(co);
-		}
-		points.push_back(merged);
+		points.push_back(p);
 	}
 	return deduplicate_candidates(points);
 }
