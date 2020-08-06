@@ -19,13 +19,15 @@ map<string, string> getFileBlobs(string dir_path)
 	// std::filesystem is still hard to get the compiler to use, so we'll manually enumerate for now
 	map<string, string> blobs;
 
-	vector<string> anchors = {"anchor-dark.png", "guide-horizontal-dark.png", "guide-vertical-dark.png"};
-	for (string& a : anchors)
-	{
-		string file_path = fmt::format("{}/{}", dir_path, a);
-		string contents = File(file_path).read_all();
-		blobs[file_path] = base91::encode(contents);
-	}
+	vector<string> anchors = {"anchor-{}.png", "anchor-secondary-{}.png", "guide-horizontal-{}.png", "guide-vertical-{}.png"};
+	for (const string& mode : {"light", "dark"})
+		for (const string& a : anchors)
+		{
+			string short_path = fmt::format(a, mode);
+			string file_path = fmt::format("{}/{}", dir_path, short_path);
+			string contents = File(file_path).read_all();
+			blobs[file_path] = base91::encode(contents);
+		}
 
 	for (int i = 0; i < 16; ++i)
 	{
