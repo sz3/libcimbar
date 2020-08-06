@@ -82,7 +82,7 @@ bool Scanner::scan_horizontal(std::vector<Anchor>& points, int y, int xstart, in
 		xend = _img.cols;
 
 	unsigned initCount = points.size();
-	ScanState state;
+	ScanState state = ScanState::create<ScanRatio::R114>();
 	for (int x = xstart; x < xend; ++x)
 	{
 		bool active = test_pixel(x, y);
@@ -113,7 +113,7 @@ bool Scanner::scan_vertical(std::vector<Anchor>& points, int x, int xmax, int ys
 		yend = _img.rows;
 
 	unsigned initCount = points.size();
-	ScanState state;
+	ScanState state = ScanState::create<ScanRatio::R114>();
 	for (int y = ystart; y < yend; ++y)
 	{
 		bool active = test_pixel(xavg, y);
@@ -153,7 +153,7 @@ bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, i
 
 	// do the scan
 	unsigned initCount = points.size();
-	ScanState state;
+	ScanState state = ScanState::create<ScanRatio::R114>();
 	int x = xstart, y = ystart;
 	for (; x < xend and y < yend; ++x, ++y)
 	{
