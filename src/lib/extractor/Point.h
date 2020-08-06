@@ -73,6 +73,11 @@ public:
 		return *this;
 	}
 
+	V dot(const point& rhs) const
+	{
+		return (rhs.x() * x()) + (rhs.y() * y());
+	}
+
 	V squared_distance(const point& rhs) const
 	{
 		return std::pow(rhs.x() - x(), 2) + std::pow(rhs.y() - y(), 2);

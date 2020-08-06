@@ -143,3 +143,20 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 	assertEquals( "518.99,283.51 975.369,755.954 518.903,1191.98 68.1046,753.045", turbo::str::join(mp.points()) );
 }
 
+
+TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
+{
+	cv::Mat img = cv::imread(TestCimbar::getSample("4c-cam-40-f1.jpg"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates;
+	candidates.push_back(Anchor(300, 360, 100, 160));
+	candidates.push_back(Anchor(300, 360, 300, 360));
+	candidates.push_back(Anchor(100, 160, 300, 360));
+	assertTrue( sc.sort_top_to_bottom(candidates) );
+
+	assertEquals(
+	    "330+-30,330+-30 130+-30,330+-30 330+-30,130+-30",
+	    turbo::str::join(candidates)
+	);
+}

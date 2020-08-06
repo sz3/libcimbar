@@ -15,6 +15,32 @@ namespace {
 			return an1.size() > an2.size();
 		}
 	};
+
+	template <int N>
+	int fix_index(int i)
+	{
+		if (i < 0)
+			i = N-1;
+		else if (i > N-1)
+			i = 0;
+		return i;
+	}
+
+	int get_longest_edge(const std::vector<point<int>>& edges)
+	{
+		int longest = 0;
+		int max_d = 0;
+		for (int i = 0; i < edges.size(); ++i)
+		{
+			int d = edges[i].dot(edges[i]);
+			if (d > max_d)
+			{
+				longest = i;
+				max_d = d;
+			}
+		}
+		return longest;
+	}
 }
 
 int Scanner::anchor_size() const
@@ -54,13 +80,13 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 
 void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 {
-	// returns the best 4 candidates
-	if (candidates.size() <= 4)
+	// returns the best 3 candidates
+	if (candidates.size() <= 3)
 		return;
 
 	std::sort(candidates.begin(), candidates.end(), size_sort());
 	unsigned cutoff = 0;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 3; ++i)
 		cutoff += candidates[i].size();
 	cutoff /= 8; // avg / 2
 
@@ -68,8 +94,8 @@ void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 	for (; i < candidates.size(); ++i)
 		if (candidates[i].size() < cutoff)
 			break;
-	if (i > 4)
-		i = 4;
+	if (i > 3)
+		i = 3;
 	if (i < candidates.size())
 		candidates.resize(i);
 }
@@ -77,16 +103,38 @@ void Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 bool Scanner::sort_top_to_bottom(std::vector<Anchor>& candidates)
 {
 	std::sort(candidates.begin(), candidates.end());
-	if (candidates.size() < 4)
+	if (candidates.size() < 3)
 		return false;
 
-	const Anchor& topLeft = candidates.front();
-	std::vector<Anchor>::iterator p1_it = ++candidates.begin();
-	std::vector<Anchor>::iterator p2_it = ++std::vector<Anchor>::iterator(p1_it);
-	int p1_xoff = ::abs(p1_it->xavg() - topLeft.xavg());
-	int p2_xoff = ::abs(p2_it->xavg() - topLeft.xavg());
-	if (p2_xoff > p1_xoff)
-		std::iter_swap(p1_it, p2_it);
+	std::vector<point<int>> edges({
+	    candidates[1].center() - candidates[2].center(),
+	    candidates[2].center() - candidates[0].center(),
+	    candidates[0].center() - candidates[1].center(),
+	});
+
+	// because of how we ordered our edges, the index of the longest edge is also the index of the anchor opposite it.
+	int top_left = get_longest_edge(edges);
+	int top_right;
+	int bottom_left;
+
+	// now, we need to find the order of the other two:
+	int outgoing_edge = fix_index<3>(top_left - 1);
+	if (edges[outgoing_edge].dot(candidates[top_left].center()) >= 0)
+	{
+		top_right = fix_index<3>(top_left - 1);
+		bottom_left = fix_index<3>(top_left + 1);
+	}
+	else
+	{
+		top_right = fix_index<3>(top_left + 1);
+		bottom_left = fix_index<3>(top_left - 1);
+	}
+
+	// apply the order.
+	if (&candidates[0] != &candidates[top_left])
+		std::swap(candidates[0], candidates[top_left]);
+	if (&candidates[1] != &candidates[top_right])
+		std::swap(candidates[1], candidates[top_right]);
 	return true;
 }
 
