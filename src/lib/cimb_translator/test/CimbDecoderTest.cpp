@@ -64,8 +64,8 @@ TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
 	assertEquals(3, cd.get_best_color(0, 255, 0));
 
 	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
-	assertEquals(3, cd.get_best_color(0, 0, 0));
-	assertEquals(3, cd.get_best_color(70, 70, 70));
+	assertEquals(0, cd.get_best_color(0, 0, 0));
+	assertEquals(0, cd.get_best_color(70, 70, 70));
 
 	// these we can use!
 	assertEquals(3, cd.get_best_color(20, 200, 20));
@@ -122,12 +122,11 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 
 	string sample_path = TestCimbar::getSample("mycell.png");
 	cv::Mat cell = cv::imread(sample_path);
-	cv::resize(cell, cell, cv::Size(10, 10));
 
 	unsigned drift_offset;
 	unsigned best_distance;
 	unsigned res = cd.decode_symbol(cell, drift_offset, best_distance);
-	assertEquals(4, res);
-	assertEquals(2, drift_offset);
-	assertEquals(16, best_distance);
+	assertEquals(0, res);
+	assertEquals(7, drift_offset);
+	assertEquals(6, best_distance);
 }
