@@ -191,7 +191,8 @@ std::vector<Anchor> Scanner::scan()
 	std::vector<Anchor> candidates;
 	int cutoff = scan_primary(candidates);
 
-	add_bottom_right_corner(candidates, cutoff);
+	if (candidates.size() == 3 and cutoff != 0)
+		add_bottom_right_corner(candidates, cutoff);
 	return candidates;
 }
 
