@@ -37,9 +37,9 @@ TEST_CASE( "ExtractorTest/testExtractUpscale", "[unit]" )
 
 	std::string imgPath = tempdir.path() / "exup.jpg";
 	Extractor ext;
-	ext.extract(TestCimbar::getSample("4color-cam-140.jpg"), imgPath);
+	ext.extract(TestCimbar::getSample("4_30_f0_627.jpg"), imgPath);
 
 	cv::Mat out = cv::imread(imgPath);
-	assertEquals( 0x3af1bfb10fe33204, image_hash::average_hash(out) );
+	assertEquals( 0x29c64eaca3376394, image_hash::average_hash(out) );
 }
 

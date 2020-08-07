@@ -14,7 +14,7 @@ using std::string;
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("4color_ecc30_fountain_0.png");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
