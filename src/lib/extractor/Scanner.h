@@ -36,7 +36,7 @@ public: // public inline methods
 
 public: // other interesting methods
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
-	int filter_candidates(std::vector<Anchor>& candidates) const;
+	std::pair<int, float> filter_candidates(std::vector<Anchor>& candidates) const;
 	bool sort_top_to_bottom(std::vector<Anchor>& anchors);
 
 	template <typename SCANTYPE>
@@ -51,8 +51,8 @@ public: // other interesting methods
 	template <typename SCANTYPE>
 	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
 
-	int scan_primary(std::vector<Anchor>& candidates);
-	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff);
+	std::pair<int, float> scan_primary(std::vector<Anchor>& candidates);
+	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff, float uncertainty);
 
 protected: // internal member functions
 	bool test_pixel(int x, int y) const;
