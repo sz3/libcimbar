@@ -330,7 +330,7 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 }
 
 template <typename SCANTYPE>
-void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const
+inline void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const
 {
 	for (const Anchor& c : candidates)
 		if (c.is_mergeable(found, _mergeCutoff))
