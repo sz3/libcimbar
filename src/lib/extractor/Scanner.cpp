@@ -77,11 +77,11 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 	return merged;
 }
 
-std::pair<int, float> Scanner::filter_candidates(std::vector<Anchor>& candidates) const
+int Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 {
 	// returns the best 3 candidates
 	if (candidates.size() < 3)
-		return {0, 0};
+		return 0;
 
 	std::sort(candidates.begin(), candidates.end(), size_sort());
 	int cutoff = 0;
@@ -98,8 +98,7 @@ std::pair<int, float> Scanner::filter_candidates(std::vector<Anchor>& candidates
 	if (i < candidates.size())
 		candidates.resize(i);
 
-	float uncertainty = candidates.front().size() * 1.0 / candidates.back().size();
-	return {cutoff, uncertainty};
+	return cutoff;
 }
 
 bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
@@ -143,14 +142,20 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	return true;
 }
 
-bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff, float uncertainty)
+bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
 {
-	point<int> guess1 = anchors[2].center() + (anchors[1].center() - anchors[0].center()); // top edge
-	point<int> guess2 = anchors[1].center() + (anchors[2].center() - anchors[0].center()); // left edge
+	double topScalar = anchors[2].max_range() / std::max<double>(anchors[1].max_range(), anchors[0].max_range());
+	point<int> topEdge = (anchors[1].center() - anchors[0].center()) * topScalar;
+	point<int> guess1 = anchors[2].center() + topEdge;
+
+	double leftScalar = anchors[1].max_range() / std::max<double>(anchors[2].max_range(), anchors[0].max_range());
+	point<int> leftEdge = (anchors[2].center() - anchors[0].center()) * leftScalar;
+	point<int> guess2 = anchors[1].center() + leftEdge;
+
 	point<int> center = (guess1 + guess2) / 2;
 
 	// the scan area
-	uncertainty *= 2;
+	float uncertainty = 2;
 	int range = std::max({anchors[0].max_range(), anchors[1].max_range(), anchors[2].max_range()}) * uncertainty;
 
 	// the secondary anchor center is about half the size of the primary one. So we need a 2x granular search.
@@ -178,24 +183,24 @@ bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff, 
 	return false;
 }
 
-std::pair<int, float> Scanner::scan_primary(std::vector<Anchor>& candidates)
+int Scanner::scan_primary(std::vector<Anchor>& candidates)
 {
 	t1_scan_rows<ScanState_114>([&] (const Anchor& p) {
 		on_t1_scan<ScanState_114>(p, candidates);
 	});
 
-	std::pair<int, float> info = filter_candidates(candidates);
+	int cutoff = filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
-	return info;
+	return cutoff;
 }
 
 std::vector<Anchor> Scanner::scan()
 {
 	std::vector<Anchor> candidates;
-	auto [cutoff, uncertainty] = scan_primary(candidates);
+	int cutoff = scan_primary(candidates);
 
 	if (candidates.size() == 3 and cutoff != 0)
-	    add_bottom_right_corner(candidates, cutoff, uncertainty);
+		add_bottom_right_corner(candidates, cutoff);
 	return candidates;
 }
 

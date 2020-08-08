@@ -56,12 +56,14 @@ public:
 		return {x() - scalar, y() - scalar};
 	}
 
-	point operator/(V div) const
+	template <typename T>
+	point operator/(T div) const
 	{
 		return {x() / div, y() / div};
 	}
 
-	point operator*(V scalar) const
+	template <typename T>
+	point operator*(T scalar) const
 	{
 		return {x() * scalar, y() * scalar};
 	}

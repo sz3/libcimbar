@@ -56,15 +56,14 @@ TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
-	auto [cutoff, uncertainty] = sc.scan_primary(candidates);
+	int cutoff = sc.scan_primary(candidates);
 	assertEquals( 1730, cutoff );
-	assertEquals( Approx(1.18092), uncertainty );
 	assertEquals(
 	    "210+-24,914+-24 195+-25,61+-25 1039+-22,887+-23",
 	    turbo::str::join(candidates)
 	);
 
-	assertTrue( sc.add_bottom_right_corner(candidates, cutoff, uncertainty) );
+	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
 	    "210+-24,914+-24 195+-25,61+-25 1039+-22,887+-23 1036+-23,67+-24",
 	    turbo::str::join(candidates)
@@ -77,15 +76,14 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.2", "[unit]" )
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
-	auto [cutoff, uncertainty] = sc.scan_primary(candidates);
+	int cutoff = sc.scan_primary(candidates);
 	assertEquals( 2255, cutoff );
-	assertEquals( Approx(1.01835), uncertainty );
 	assertEquals(
 	    "29+-27,29+-27 994+-27,29+-27 29+-27,993+-27",
 	    turbo::str::join(candidates)
 	);
 
-	assertTrue( sc.add_bottom_right_corner(candidates, cutoff, uncertainty) );
+	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
 	    "29+-27,29+-27 994+-27,29+-27 29+-27,993+-27 993+-27,994+-28",
 	    turbo::str::join(candidates)
@@ -94,24 +92,44 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.2", "[unit]" )
 
 TEST_CASE( "ScannerTest/testBottomRightCorner.3", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("scan734.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("4_30_f2_734.jpg"));
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
-	auto [cutoff, uncertainty] = sc.scan_primary(candidates);
+	int cutoff = sc.scan_primary(candidates);
 	assertEquals( 1576, cutoff );
-	assertEquals( Approx(1.69702), uncertainty );
 	assertEquals(
 	    "55+-24,166+-25 870+-23,133+-26 137+-19,910+-19",
 	    turbo::str::join(candidates)
 	);
 
-	assertTrue( sc.add_bottom_right_corner(candidates, cutoff, uncertainty) );
+	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
 	    "55+-24,166+-25 870+-23,133+-26 137+-19,910+-19 836+-18,898+-19",
 	    turbo::str::join(candidates)
 	);
 }
+
+TEST_CASE( "ScannerTest/testBottomRightCorner.4", "[unit]" )
+{
+	cv::Mat img = cv::imread(TestCimbar::getSample("4_30_f2_246.jpg"));
+	Scanner sc(img);
+
+	std::vector<Anchor> candidates;
+	int cutoff = sc.scan_primary(candidates);
+	assertEquals( 1461, cutoff );
+	assertEquals(
+	    "189+-20,899+-23 156+-25,79+-25 924+-17,811+-19",
+	    turbo::str::join(candidates)
+	);
+
+	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
+	assertEquals(
+	    "189+-20,899+-23 156+-25,79+-25 924+-17,811+-19 911+-18,122+-19",
+	    turbo::str::join(candidates)
+	);
+}
+
 
 TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 {

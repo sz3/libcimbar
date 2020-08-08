@@ -26,7 +26,7 @@ TEST_CASE( "ExtractorTest/testExtractMid", "[unit]" )
 
 	std::string imgPath = tempdir.path() / "ex.jpg";
 	Extractor ext;
-	ext.extract(TestCimbar::getSample("scan734.jpg"), imgPath);
+	ext.extract(TestCimbar::getSample("4_30_f2_734.jpg"), imgPath);
 
 	cv::Mat out = cv::imread(imgPath);
 	assertEquals( 0x2c57aa25f6d7b802, image_hash::average_hash(out) );
