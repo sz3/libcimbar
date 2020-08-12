@@ -7,9 +7,10 @@
 using cv::Vec3b;
 using std::string;
 
-CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits)
+CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
     : _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
+    , _dark(dark)
 {
 	load_tiles(symbol_bits);
 }
@@ -18,7 +19,7 @@ cv::Mat CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
 {
 	unsigned symbol = index % _numSymbols;
 	unsigned color = index / _numSymbols;
-	return cimbar::getTile(symbol_bits, symbol, true, color);
+	return cimbar::getTile(symbol_bits, symbol, _dark, _numColors, color);
 }
 
 // dir will need to be passed via env? Doesn't make sense to compile it in, and doesn't *really* make sense to use cwd

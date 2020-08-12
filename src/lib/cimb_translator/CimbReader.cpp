@@ -11,7 +11,7 @@ using namespace cimbar;
 namespace {
 	cv::Mat kernel()
 	{
-		static const cv::Mat k = (cv::Mat_<float>(3,3) <<  -1, -1, -1, -1, 8.5, -1, -1, -1, -1);
+		static const cv::Mat k = (cv::Mat_<float>(3,3) <<  -0, -1, -0, -1, 4.5, -1, -0, -1, -0);
 		return k;
 	}
 
@@ -24,16 +24,19 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
+		int blockSize = 3; // default: no preprocessing
+
 		cv::Mat symbols;
 		if (needs_sharpen)
 		{
 			sharpenSymbolGrid(img, symbols);
 			cv::cvtColor(symbols, symbols, cv::COLOR_BGR2GRAY);
+			blockSize = 7;
 		}
 		else
 			cv::cvtColor(img, symbols, cv::COLOR_BGR2GRAY);
 
-		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 3, 0);
+		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
 		bitbuffer bb(1024*128);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
