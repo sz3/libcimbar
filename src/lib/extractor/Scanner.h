@@ -111,7 +111,7 @@ inline cv::Mat Scanner::threshold_fast(const MAT& img)
 	unsigned unit = std::min(img.cols, img.rows);
 	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
 	cv::Mat res;
-	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -20);
+	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
 	return res;
 }
 
