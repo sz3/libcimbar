@@ -11,7 +11,7 @@
 
 TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("4_30_f0_627.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
 
 
 	SimpleCameraCalibration scc;
@@ -26,5 +26,5 @@ TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 	assertEquals( "[320, 0, 640;\n"
 	              " 0, 240, 480;\n"
 	              " 0, 0, 1]", cam.str() );
-	assertEquals( "[-0.00185284516091886, 0, 0, 0]", dis.str() );
+	assertEquals( "[-0.001852885275781788, 0, 0, 0]", dis.str() );
 }

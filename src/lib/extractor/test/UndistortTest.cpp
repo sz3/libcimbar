@@ -11,7 +11,7 @@
 
 TEST_CASE( "UndistortTest/testUndistort", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("4_30_f0_627.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
 	cv::Mat out;
 
 	Undistort<SimpleCameraCalibration> und;
@@ -22,7 +22,7 @@ TEST_CASE( "UndistortTest/testUndistort", "[unit]" )
 
 TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("4_30_f0_627.jpg"));
+	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
 	cv::Mat out;
 
 	Undistort<SimpleCameraCalibration> und;
@@ -31,5 +31,5 @@ TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 	Extractor ex;
 	assertTrue( ex.extract(out, out) );
 
-	assertEquals( 0x1a306d6ca7762710, image_hash::average_hash(out) );
+	assertEquals( 0x8326faca7727600, image_hash::average_hash(out) );
 }

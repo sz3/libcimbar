@@ -22,7 +22,7 @@ namespace {
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color_ecc30_fountain_0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
@@ -56,7 +56,7 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4_30_f0_627_extract.jpg");
+	string sample_path = TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
