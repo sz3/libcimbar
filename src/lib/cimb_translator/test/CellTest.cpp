@@ -114,7 +114,6 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 
 	cv::Rect crop(125, 8, 4, 6);
 	cv::Mat cell = img(crop);
-	cv::imwrite("/tmp/hello.png", cell);
 
 	auto [r, g, b] = Cell(img, 125, 8, 4, 6).mean_rgb();
 

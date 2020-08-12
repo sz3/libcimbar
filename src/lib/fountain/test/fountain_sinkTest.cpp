@@ -6,6 +6,7 @@
 
 #include "serialize/format.h"
 #include "util/File.h"
+#include "util/MakeTempDirectory.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -49,8 +50,9 @@ namespace {
 TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 {
 	FountainInit::init();
+	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink("/tmp", 690);
+	fountain_decoder_sink sink(tempdir.path(), 690);
 	string iframe = createFrame(0, 1200);
 	assertEquals( 6900, iframe.size() );
 
@@ -69,17 +71,18 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 	assertEquals( 0, sink.num_streams() );
 	assertEquals( 2, sink.num_done() );
 
-	string contents = File("/tmp/0.1200").read_all();
+	string contents = File(tempdir.path() / "0.1200").read_all();
 	assertEquals( 1200, contents.size() );
-	contents = File("/tmp/1.1600").read_all();
+	contents = File(tempdir.path() / "1.1600").read_all();
 	assertEquals( 1600, contents.size() );
 }
 
 TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 {
 	FountainInit::init();
+	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink("/tmp", 690);
+	fountain_decoder_sink sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 2);
@@ -100,7 +103,7 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 	assertEquals( 0, sink.num_streams() );
 	assertEquals( 1, sink.num_done() );
 
-	string contents = File("/tmp/2.20000").read_all();
+	string contents = File(tempdir.path() / "2.20000").read_all();
 	assertEquals( 20000, contents.size() );
 }
 
@@ -109,8 +112,9 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	// if you give wirehair the same frame (under certain circumstances), you get a seg fault
 	// sometimes it's fine. The docs say "don't do it", so FountainDecoder acts as the bouncer.
 	FountainInit::init();
+	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink("/tmp", 690);
+	fountain_decoder_sink sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 3);
