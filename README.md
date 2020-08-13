@@ -1,8 +1,23 @@
-## libcimbar: Color Icon Matrix Barcodes
+### [INTRODUCTION](https://github.com/sz3/cimbar) | [ABOUT](ABOUT.md) | LIBCIMBAR
+
+## libcimbar: implementing Color Icon Matrix Barcodes
 #### And the quest for 100 kb/s over the air gap
 
-## Libraries
-Except for opencv, all of these are included in the repo. Most are header-only.
+## What is it?
+
+`cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile with. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected.
+
+`libcimbar` also includes a simple protocol for file encoding based on fountain codes (`wirehair`). This allows for files of up to 16MB to be encoded in a series of cimbar codes, which can be output as a series of images, or generated on the fly as a "video" feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
+
+## Platforms
+
+The code is developed/tested on amd64+linux and arm64+android. It probably works, or can be made to work, on other platforms. But YMMV.
+
+I would like to add emscripten->wasm support.
+
+## Library dependencies
+
+[OpenCV](https://opencv.org/) must be installed before building. The rest are included in the source tree.
 
 * opencv - https://opencv.org/
 * base - https://github.com/r-lyeh-archived/base
@@ -15,21 +30,17 @@ Except for opencv, all of these are included in the repo. Most are header-only.
 * PicoSHA2 - https://github.com/okdshin/PicoSHA2 (used for testing)
 * wirehair - https://github.com/catid/wirehair
 
-## What is it?
+## Build
 
-`cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile with. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected.
+```
+cmake .
+make -j4
+```
 
-There are multiple color schemes:
-* "dark" mode -- meant for backlit computer screens, with bright tiles on a black background
-* "light" mode -- meant for paper, with dark tiles on a white background
+## Usage
 
-`libcimbar` also includes a simple protocol for file encoding based on fountain codes (`wirehair`). This allows for files of up to 16MB to be encoded in a series of cimbar codes, which can be output as a series of images, or generated on the fly as a "video" feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
-
-## Platforms
-
-The code is developed/tested on amd64+linux and arm64+android. It probably works, or can be made to work, on other platforms. But YMMV.
-
-I would like to add emscripten->wasm support.
+```
+```
 
 ## Numbers of note
 
@@ -97,3 +108,4 @@ Performance optimizations aside, there are a number of paths that might be inter
 * https://github.com/JohannesBuchner/imagehash/
 * https://github.com/divan/txqr
 * https://en.wikipedia.org/wiki/High_Capacity_Color_Barcode (if MS had already open sourced this, I wouldn't have bothered to invent my own)
+
