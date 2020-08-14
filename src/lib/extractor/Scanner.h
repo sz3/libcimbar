@@ -305,16 +305,23 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 	// because we have a lot of weird crap going on in the center of the image,
 	// do one more scan of our (theoretical) anchor points.
 	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
+
+	// probably should do multiple sets of confirm checks, rather than just the one.
+	// validate on various input samples though!
 	std::vector<Anchor> confirms;
 	int xstart = hint.x() - hint.xrange();
 	int xend = hint.xmax() + hint.xrange();
-	if (!scan_horizontal<SCANTYPE>(confirms, hint.yavg(), xstart, xend))
-		return;
+	int yavg = hint.yavg();
+	for (int y : {yavg - 1, yavg, yavg + 1})
+		if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
+			return;
 
 	int ystart = hint.y() - hint.yrange();
 	int yend = hint.ymax() + hint.yrange();
-	if (!scan_vertical<SCANTYPE>(confirms, hint.xavg(), hint.xavg(), ystart, yend))
-		return;
+	int xavg = hint.xavg();
+	for (int x : {xavg - 1, xavg, xavg + 1})
+		if (!scan_vertical<SCANTYPE>(confirms, x, x, ystart, yend))
+			return;
 
 	bool confirm = false;
 	for (const Anchor& co : confirms)
