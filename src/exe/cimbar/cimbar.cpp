@@ -7,6 +7,7 @@
 #include "extractor/Undistort.h"
 #include "fountain/FountainInit.h"
 #include "fountain/fountain_decoder_sink.h"
+#include "serialize/str.h"
 
 #include "cxxopts/cxxopts.hpp"
 
@@ -55,19 +56,23 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 
 int main(int argc, char** argv)
 {
-	cxxopts::Options options("cimbar decoder", "Test decode program! Probably not as user friendly as the python version!");
+	cxxopts::Options options("cimbar encoder/decoder", "Demonstration program for cimbar codes");
 
+	unsigned ecc = cimbar::Config::ecc_bytes();
 	options.add_options()
-	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<vector<string>>())
-	    ("o,out", "Output file or directory", cxxopts::value<string>())
-	    ("e,ecc", "ECC level (default: 30)", cxxopts::value<unsigned>())
-	    ("f,fountain", "Attempt fountain decoding", cxxopts::value<bool>())
+	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
+	    ("o,out", "Output file or directory.", cxxopts::value<string>())
+	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
+	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
 	    ("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
-	    ("preprocess", "Force the sharpen/preprocessing filter to run on the input image. 1 == on. 0 == off. Default is to guess.", cxxopts::value<int>())
+	    ("preprocess", "Run sharpen filter on the input image. 1 == on. 0 == off. -1 == guess.", cxxopts::value<int>()->default_value("-1"))
 	    ("h,help", "Print usage")
 	;
+	options.show_positional_help();
+	options.parse_positional({"in"});
+	options.positional_help("<in...>");
 
 	auto result = options.parse(argc, argv);
 	if (result.count("help") or !result.count("out") or !result.count("in"))
@@ -81,9 +86,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
-	unsigned ecc = cimbar::Config::ecc_bytes();
-	if (result.count("ecc"))
-		ecc = result["ecc"].as<unsigned>();
+	ecc = result["ecc"].as<unsigned>();
 
 	if (fountain)
 		FountainInit::init();
@@ -104,9 +107,7 @@ int main(int argc, char** argv)
 	// else, decode
 	bool no_deskew = result.count("no-deskew");
 	bool undistort = result.count("undistort");
-	int preprocess = -1;
-	if (result.count("preprocess"))
-		preprocess = result["preprocess"].as<int>();
+	int preprocess = result["preprocess"].as<int>();
 
 	Decoder d(ecc);
 

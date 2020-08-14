@@ -2,6 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "serialize/str.h"
 #include "util/loop_iterator.h"
 
 #include "cxxopts/cxxopts.hpp"
@@ -18,13 +19,18 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
 
+	unsigned ecc = cimbar::Config::ecc_bytes();
+	unsigned defaultFps = 15;
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("e,ecc", "ECC level (default: 30)", cxxopts::value<unsigned>())
-	    ("f,fps", "Target FPS (default: 15)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
+	    ("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
+	options.show_positional_help();
+	options.parse_positional({"in"});
+	options.positional_help("<in...>");
 
 	auto result = options.parse(argc, argv);
 	if (result.count("help") or !result.count("in"))
@@ -35,15 +41,10 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
-	unsigned ecc = cimbar::Config::ecc_bytes();
-	if (result.count("ecc"))
-		ecc = result["ecc"].as<unsigned>();
-
-	unsigned fps = 0;
-	if (result.count("fps"))
-		fps = result["fps"].as<unsigned>();
+	ecc = result["ecc"].as<unsigned>();
+	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
-		fps = 15;
+		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
 	FountainInit::init();
