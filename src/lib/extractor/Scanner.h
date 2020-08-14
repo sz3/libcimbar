@@ -308,32 +308,51 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 
 	// probably should do multiple sets of confirm checks, rather than just the one.
 	// validate on various input samples though!
-	std::vector<Anchor> confirms;
-	int xstart = hint.x() - hint.xrange();
-	int xend = hint.xmax() + hint.xrange();
-	int yavg = hint.yavg();
-	for (int y : {yavg - 1, yavg, yavg + 1})
-		if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
-			return;
-
-	int ystart = hint.y() - hint.yrange();
-	int yend = hint.ymax() + hint.yrange();
-	int xavg = hint.xavg();
-	for (int x : {xavg - 1, xavg, xavg + 1})
-		if (!scan_vertical<SCANTYPE>(confirms, x, x, ystart, yend))
-			return;
-
-	bool confirm = false;
-	for (const Anchor& co : confirms)
 	{
-		if (co.is_mergeable(hint, _mergeCutoff))
+		std::vector<Anchor> confirms;
+		int xstart = hint.x() - hint.xrange();
+		int xend = hint.xmax() + hint.xrange();
+		int yavg = hint.yavg();
+		for (int y : {yavg - 1, yavg, yavg + 1})
+			if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
+				return;
+
+		bool confirm = false;
+		for (const Anchor& co : confirms)
 		{
-			confirm = true;
-			break;
+			if (co.is_mergeable(hint, _mergeCutoff))
+			{
+				confirm = true;
+				break;
+			}
 		}
+		if (!confirm)
+			return;
 	}
-	if (confirm)
-		fun(hint);
+
+	{
+		std::vector<Anchor> confirms;
+		int ystart = hint.y() - hint.yrange();
+		int yend = hint.ymax() + hint.yrange();
+		int xavg = hint.xavg();
+		for (int x : {xavg - 1, xavg, xavg + 1})
+			if (!scan_vertical<SCANTYPE>(confirms, x, x, ystart, yend))
+				return;
+
+		bool confirm = false;
+		for (const Anchor& co : confirms)
+		{
+			if (co.is_mergeable(hint, _mergeCutoff))
+			{
+				confirm = true;
+				break;
+			}
+		}
+		if (!confirm)
+			return;
+	}
+
+	fun(hint);
 }
 
 template <typename SCANTYPE>
