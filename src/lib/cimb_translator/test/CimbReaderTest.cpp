@@ -8,13 +8,21 @@
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
+#include <map>
 #include <string>
-#include <vector>
 using std::string;
+
+namespace {
+	std::ostream& operator<<(std::ostream& s, const std::pair<unsigned, unsigned>& p)
+	{
+		s << p.first << "=" << p.second;
+		return s;
+	}
+}
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
@@ -22,17 +30,18 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 	// read
 	int count = 0;
-	std::vector<string> res;
+	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
 		unsigned bits;
 		unsigned index = cr.read(bits);
-		res.push_back(fmt::format("{}={}", index, bits));
+		res[index] = bits;
 		++count;
 	}
 
-	string expected = "0=0 12399=29 12300=4 100=27 12299=35 12301=44 101=8 200=55 12199=40 12201=1 "
-	        "1=10 300=3 12099=8 12200=37 12101=37 2=61 400=2 11999=6 12100=13 12001=12 102=30 500=53";
+	string expected = "0=0 99=8 12097=9 12100=0 12196=1 12197=25 12198=33 12200=5 12201=0 12295=32 "
+	        "12296=32 12297=46 12298=32 12299=34 12300=30 12301=32 12394=32 12395=57 "
+	        "12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	unsigned bits;
@@ -47,7 +56,7 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4c-f1-e.jpg");
+	string sample_path = TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg");
 	cv::Mat sample = cv::imread(sample_path);
 
 	CimbDecoder decoder(4, 2);
@@ -55,17 +64,17 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 
 	// read
 	int count = 0;
-	std::vector<string> res;
+	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
 		unsigned bits;
 		unsigned index = cr.read(bits);
-		res.push_back(fmt::format("{}={}", index, bits));
+		res[index] = bits;
 		++count;
 	}
 
-	string expected = "0=0 12399=29 12300=4 99=8 100=27 1=10 101=8 200=55 201=3 300=3 202=54 301=6 "
-	        "400=2 401=1 402=20 501=53 500=53 102=30 2=61 98=50 97=8 198=22";
+	string expected = "0=0 1=28 99=8 11900=28 12000=23 12001=29 12100=0 12101=0 12102=25 12200=5 "
+	        "12201=0 12202=33 12297=46 12298=32 12299=34 12300=30 12301=32 12302=32 12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	unsigned bits;

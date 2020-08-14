@@ -17,7 +17,12 @@ static const std::map<std::string, std::string> bitmaps = {
 {"bitmap/4/0e.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAAnbCw`XaxEy\~B'B'1'z(OO21/1Xbw+&a5N{~!eggL*zHiC!u\g`p=\o'7w6iS/bWrI,(AA,9:BMOC7XMAAAA=5GUv+oX!GE)"},
 {"bitmap/4/0f.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA'aCw`XaxEy\~B'B'zA:hJB~(ZSxt(ajLv(AmX~8Z:GjDbP2!jRw2.\&JY.{N7NAA7*wB{2YGO7AAAA=5GUv+oX!GE)"},
 {"bitmap/anchor-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAAk_AAAA.FMAAAkUJ/IKAAdZ=J.!wCC'\vBAVBWBP%tvNAAAskCw`Xg#A$mr2Dmu1X~4C*~sns0GV]=CYS#olfs)j'~4i8n5Rja=Ytlm5slR:K~%Re)(F-S:Diz*Xqr{NUwa{;Bk?S-GK)OSFpFE@:M:iVE7===wt=CmK]BRxEZ3j6H)OSFpv1YC7.S:DiHJwU*aNu{pf_E{\r~v.?Qi*aNuRIC?`8EzH`I@Qi*aNuRIC?%|Z:Y$Z4U!g~lh1lJAAAuW&wUY6eit&F)"},
+{"bitmap/anchor-light.png", R"(vuk:eJs4+BAAN/-MCG4DAAk_AAAA.FMAAAkUJ/IKAAdZ=J.!wCC'\vBAVBWBP%tvNAAA_kCw`Xg#A$?UPF$AO5sc?_B'29saGT,H|Ur0xDcVZID6t;$O}@TspIvaOXvO4`D`^#5+#2)EZ3j6rgZ1L4P~'`?gle{?Qi*aNuRIC?'8XK\[+jB_Zj9NSudkK]BRxEZ3j6H)OSFpv1YC7.S:DiHJwU*aY=f$j(OqiS#2)EZ3j6rg`%'0A}J@#2)EZ3j6rgw$X6!^2VCP-G3l/(]`!tV07AAABtnHpwZ9)'&F)"},
+{"bitmap/anchor-secondary-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAAk_AAAA.FMAAAkUJ/IKAAdZ=J.!wCC'\vBAVBWBP%tvNAAAkkCw`Xg#A$mr+DpB`X~4HQ@~?QkxPv,Fiu%;Yj)E5/00wypzzSx^D4G\~nGi)!8[AesS&uCRxE+gFCvgFO)~v~Xgb60^Qi*aNudkK]BRxEZ3j6N:Y6op2TZ|k$\#%uCRxEZ3j6H)OSFpv1oyOgRLGbp^Qi*aNudkK]BRxEZ3j6N:XNXhwqibiC7.S:`gbP%,q!3CwE2v/&kEzWAAAA=5GUv+oX!GE)"},
+{"bitmap/anchor-secondary-light.png", R"(vuk:eJs4+BAAN/-MCG4DAAk_AAAA.FMAAAkUJ/IKAAdZ=J.!wCC'\vBAVBWBP%tvNAAA-kCw`Xg#A$?U'ElB+B~42)~s?ig#6uKOY^SeM!#zs5al&ls^&y?sx'A9NLY0gWRy8;+L*mBTFpv1[nS9dW=.H]B\6K&x%uCRxEZ3j6H)OSFpv1%XLQk;xhvn]p|w%uCRxEZ3j6H)OSFpv1waXgUy$N`$F-S:DiHJwU*aNudkK]h#5GXWYV-GK)OSFpFEb~K:*rh$\FmDEBUwmw:c=SmlAAAA=5GUv+oX!GE)"},
 {"bitmap/guide-horizontal-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAA6yBAC'5FMAAAR9S,$BAAdZ=J.!wCC'\vBAVBWBP%tvNAAA$YCw`XJ0Cy\~B'B'di~haCJlf^Vxa4CAmy4B|;F4_RBAAA9ZNoBz[uhNI)"},
+{"bitmap/guide-horizontal-light.png", R"(vuk:eJs4+BAAN/-MCG4DAA6yBAC'5FMAAAR9S,$BAAdZ=J.!wCC'\vBAVBWBP%tvNAAA$YCw`XJ0CylE[h_sbxWEaAdCTFeO+OAA_cYtpIKWUOAAAA=5GUv+oX!GE)"},
 {"bitmap/guide-vertical-dark.png", R"(vuk:eJs4+BAAN/-MCG4DAA:CAAAA]FMAAAs8KD,IAAdZ=J.!wCC'\vBAVBWBP%tvNAAAFZCw`XJ0Cy\~B'B'0tVE[hHB~hpx+RJ,pVZA|;DV-vzcLWKBAABtnHpwZ9)'&F)"},
+{"bitmap/guide-vertical-light.png", R"(vuk:eJs4+BAAN/-MCG4DAA:CAAAA]FMAAAs8KD,IAAdZ=J.!wCC'\vBAVBWBP%tvNAAA}YCw`XJ0CylE[h_s{Qxt(aNtXxnR(*@I`NDAqv9(Xu`EEAAAAAr7vbMo\F9BB)"},
 };
 }

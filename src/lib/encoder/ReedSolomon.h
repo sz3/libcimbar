@@ -13,7 +13,7 @@ public:
 	{
 		unsigned size;
 
-		BadChunk(unsigned size)
+		explicit BadChunk(unsigned size)
 		    : size(size)
 		{}
 	};

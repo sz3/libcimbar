@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("e,ecc", "ECC level (default: 40)", cxxopts::value<unsigned>())
+	    ("e,ecc", "ECC level (default: 30)", cxxopts::value<unsigned>())
 	    ("f,fps", "Target FPS (default: 15)", cxxopts::value<unsigned>())
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
 	    ("h,help", "Print usage")

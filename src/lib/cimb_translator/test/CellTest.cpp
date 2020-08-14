@@ -35,7 +35,7 @@ TEST_CASE( "CellTest/testRgbMatchesOpenCV", "[unit]" )
 
 TEST_CASE( "CellTest/testRgbCellOffsets", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat img = cv::imread(sample_path);
 
 	cv::Rect crop(125, 8, 8, 8);
@@ -60,7 +60,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets", "[unit]" )
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Contiguous", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat img = cv::imread(sample_path);
 
 	cv::Rect crop(125, 8, 8, 8);
@@ -85,7 +85,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Contiguous", "[unit]" )
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat img = cv::imread(sample_path);
 
 	cv::Rect crop(125, 8, 4, 6);
@@ -95,21 +95,21 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric", "[unit]" )
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertAlmostEquals( 0, (int)r );
+		assertEquals( 191, (int)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
-		assertAlmostEquals( 191, (int)g );
+		assertEquals( 191, (int)g );
 	}
 	DYNAMIC_SECTION( "b" )
 	{
-		assertAlmostEquals( 191, (int)b );
+		assertEquals( 0, (int)b );
 	}
 }
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("4color-ecc40-fountain-0.png");
+	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
 	cv::Mat img = cv::imread(sample_path);
 
 	cv::Rect crop(125, 8, 4, 6);
@@ -119,14 +119,14 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertAlmostEquals( 0, (int)r );
+		assertEquals( 191, (int)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
-		assertAlmostEquals( 191, (int)g );
+		assertEquals( 191, (int)g );
 	}
 	DYNAMIC_SECTION( "b" )
 	{
-		assertAlmostEquals( 191, (int)b );
+		assertEquals( 0, (int)b );
 	}
 }
