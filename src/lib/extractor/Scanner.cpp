@@ -166,10 +166,10 @@ bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
 	int xstart = center.x() - range;
 	int xend = center.x() + range;
 
-	std::vector<Anchor> candidates;
-	t1_scan_rows<ScanState_122>([&] (const Anchor& p) {
-		on_t1_scan<ScanState_122>(p, candidates);
-	}, skip, ystart, yend, xstart, xend);
+	std::vector<Anchor> candidates = t1_scan_rows<ScanState_122>(skip, ystart, yend, xstart, xend);
+	candidates = t2_scan_columns<ScanState_122>(candidates);
+	candidates = t3_scan_diagonal<ScanState_122>(candidates);
+	candidates = t4_confirm_scan<ScanState_122>(candidates);
 
 	if (candidates.size() == 0)
 		return false;
@@ -185,9 +185,17 @@ bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
 
 int Scanner::scan_primary(std::vector<Anchor>& candidates)
 {
-	t1_scan_rows<ScanState_114>([&] (const Anchor& p) {
-		on_t1_scan<ScanState_114>(p, candidates);
-	});
+	// scan horizontal
+	candidates = t1_scan_rows<ScanState_114>();
+
+	// for all horizontal results, scan vertical
+	candidates = t2_scan_columns<ScanState_114>(candidates);
+
+	// for all horizontal+vertical results, scan diagonal
+	candidates = t3_scan_diagonal<ScanState_114>(candidates);
+
+	// for all horizontal+vertical+diagonal results, do one more sanity check
+	candidates = t4_confirm_scan<ScanState_114>(candidates);
 
 	int cutoff = filter_candidates(candidates);
 	sort_top_to_bottom(candidates);

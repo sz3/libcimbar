@@ -15,31 +15,23 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
 	Scanner sc(img);
 
-	std::vector<Anchor> candidates;
-	sc.t1_scan_rows<ScanState_114>([&candidates] (const Anchor& p) { candidates.push_back(p); });
+	std::vector<Anchor> candidates = sc.t1_scan_rows<ScanState_114>();
 	std::string res = turbo::str::join(candidates);
 	assertStringContains("210+-25,912+-0", res);
 	assertStringContains("195+-25,64+-0", res);
 	assertStringContains("1039+-23,880+-0", res);
 
-	std::vector<Anchor> c2;
-	for (const Anchor& c : candidates)
-		sc.t2_scan_column<ScanState_114>(c, [&c2] (const Anchor& p) { c2.push_back(p); });
+	std::vector<Anchor> c2 = sc.t2_scan_columns<ScanState_114>(candidates);
 	assertStringContains("210+-0,914+-24", turbo::str::join(c2));
 	assertStringContains("195+-0,61+-25", turbo::str::join(c2));
 	assertStringContains("1039+-0,887+-23", turbo::str::join(c2));
 
-	std::vector<Anchor> c3;
-	for (const Anchor& c : c2)
-		sc.t3_scan_diagonal<ScanState_114>(c, [&c3] (const Anchor& p) { c3.push_back(p); });
+	std::vector<Anchor> c3 = sc.t3_scan_diagonal<ScanState_114>(c2);
 	assertStringContains("210+-24,914+-24", turbo::str::join(c3));
 	assertStringContains("195+-25,61+-25", turbo::str::join(c3));
 	assertStringContains("1039+-22,887+-23", turbo::str::join(c3));
 
-	std::vector<Anchor> c4;
-	for (const Anchor& c : c3)
-		sc.t4_confirm_scan<ScanState_114>(c, [&c4] (const Anchor& p) { c4.push_back(p); });
-
+	std::vector<Anchor> c4 = sc.t4_confirm_scan<ScanState_114>(c3);
 	candidates = sc.deduplicate_candidates(c4);
 	sc.filter_candidates(candidates);
 

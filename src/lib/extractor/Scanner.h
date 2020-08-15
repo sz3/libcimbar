@@ -40,16 +40,19 @@ public: // other interesting methods
 	bool sort_top_to_bottom(std::vector<Anchor>& anchors);
 
 	template <typename SCANTYPE>
-	void t1_scan_rows(std::function<void(const Anchor&)> fun, int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
+	std::vector<Anchor> t1_scan_rows(int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
 
 	template <typename SCANTYPE>
-	void t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	std::vector<Anchor> t2_scan_columns(const std::vector<Anchor>& candidates) const;
 
 	template <typename SCANTYPE>
-	void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> funs) const;
+	std::vector<Anchor> t3_scan_diagonal(const std::vector<Anchor>& candidates) const;
 
 	template <typename SCANTYPE>
-	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	bool t4_confirm_once(const Anchor& hint) const;
+
+	template <typename SCANTYPE>
+	std::vector<Anchor> t4_confirm_scan(const std::vector<Anchor>& candidates) const;
 
 	int scan_primary(std::vector<Anchor>& candidates);
 	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff);
@@ -65,9 +68,6 @@ protected: // internal member functions
 
 	template <typename SCANTYPE>
 	bool scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
-
-	template <typename SCANTYPE>
-	void on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const;
 
 	// edge detection
 	bool chase_edge(const point<double>& start, const point<double>& unit) const;
@@ -245,7 +245,7 @@ inline bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int 
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun, int skip, int y, int yend, int xstart, int xend) const
+inline std::vector<Anchor> Scanner::t1_scan_rows(int skip, int y, int yend, int xstart, int xend) const
 {
 	if (skip <= 0)
 		skip = _skip;
@@ -257,57 +257,51 @@ inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun, int sk
 	std::vector<Anchor> points;
 	for (; y < yend; y += skip)
 		scan_horizontal<SCANTYPE>(points, y, xstart, xend);
-
-	for (const Anchor& p : points)
-		fun(p);
+	return points;
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+inline std::vector<Anchor> Scanner::t2_scan_columns(const std::vector<Anchor>& candidates) const
 {
 	std::vector<Anchor> points;
-	int ystart = hint.y() - (3 * hint.xrange());
-	int yend = hint.ymax() + (3 * hint.xrange());
-	scan_vertical<SCANTYPE>(points, hint.x(), hint.xmax(), ystart, yend);
-
-	for (const Anchor& p : points)
-		fun(p);
-}
-
-template <typename SCANTYPE>
-inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const
-{
-	std::vector<Anchor> confirms;
-	int xstart = hint.xavg() - (2 * hint.yrange());
-	int xend = hint.xavg() + (2 * hint.yrange());
-	int ystart = hint.y() - hint.yrange();
-	int yend = hint.ymax() + hint.yrange();
-	if (!scan_diagonal<SCANTYPE>(confirms, xstart, xend, ystart, yend))
-		return;
-
-	bool confirm = false;
-	Anchor merged(hint);
-	for (const Anchor& co : confirms)
+	for (const Anchor& p : candidates)
 	{
-		if (co.is_mergeable(hint, _mergeCutoff))
-		{
-			confirm = true;
-			merged.merge(co);
-		}
+		int ystart = p.y() - (3 * p.xrange());
+		int yend = p.ymax() + (3 * p.xrange());
+		scan_vertical<SCANTYPE>(points, p.x(), p.xmax(), ystart, yend);
 	}
-	if (confirm)
-		fun(merged);
+	return points;
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+inline std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& candidates) const
 {
-	// because we have a lot of weird crap going on in the center of the image,
-	// do one more scan of our (theoretical) anchor points.
-	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
+	std::vector<Anchor> points;
+	for (const Anchor& p : candidates)
+	{
+		std::vector<Anchor> confirms;
+		int xstart = p.xavg() - (2 * p.yrange());
+		int xend = p.xavg() + (2 * p.yrange());
+		int ystart = p.y() - p.yrange();
+		int yend = p.ymax() + p.yrange();
+		if (!scan_diagonal<SCANTYPE>(confirms, xstart, xend, ystart, yend))
+			continue;
 
-	// probably should do multiple sets of confirm checks, rather than just the one.
-	// validate on various input samples though!
+		Anchor merged(p);
+		for (const Anchor& co : confirms)
+		{
+			if (co.is_mergeable(p, _mergeCutoff))
+				merged.merge(co);
+		}
+		points.push_back(merged);
+	}
+	return points;
+}
+
+template <typename SCANTYPE>
+inline bool Scanner::t4_confirm_once(const Anchor& hint) const
+{
+	// horizontal slice
 	{
 		std::vector<Anchor> confirms;
 		int xstart = hint.x() - hint.xrange();
@@ -315,7 +309,7 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 		int yavg = hint.yavg();
 		for (int y : {yavg - 1, yavg, yavg + 1})
 			if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
-				return;
+				return false;
 
 		bool confirm = false;
 		for (const Anchor& co : confirms)
@@ -327,9 +321,10 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 			}
 		}
 		if (!confirm)
-			return;
+			return false;
 	}
 
+	// vertical slice
 	{
 		std::vector<Anchor> confirms;
 		int ystart = hint.y() - hint.yrange();
@@ -337,7 +332,7 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 		int xavg = hint.xavg();
 		for (int x : {xavg - 1, xavg, xavg + 1})
 			if (!scan_vertical<SCANTYPE>(confirms, x, x, ystart, yend))
-				return;
+				return false;
 
 		bool confirm = false;
 		for (const Anchor& co : confirms)
@@ -349,24 +344,26 @@ inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(cons
 			}
 		}
 		if (!confirm)
-			return;
+			return false;
 	}
 
-	fun(hint);
+	return true;
 }
 
 template <typename SCANTYPE>
-inline void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const
+inline std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidates) const
 {
-	for (const Anchor& c : candidates)
-		if (c.is_mergeable(found, _mergeCutoff))
-			return;
+	// because we have a lot of weird crap going on in the center of the image,
+	// do one more scan of our (theoretical) anchor points.
+	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
 
-	t2_scan_column<SCANTYPE>(found, [&] (const Anchor& p) {
-		t3_scan_diagonal<SCANTYPE>(p, [&] (const Anchor& p) {
-			t4_confirm_scan<SCANTYPE>(p, [&] (const Anchor& p) {
-				candidates.push_back(p);
-			});
-		});
-	});
+	std::vector<Anchor> points;
+	for (const Anchor& p : candidates)
+	{
+		if (!t4_confirm_once<SCANTYPE>(p))
+			continue;
+
+		points.push_back(p);
+	}
+	return deduplicate_candidates(points);
 }
