@@ -19,13 +19,10 @@ public: // public inline methods
 	Scanner(const MAT& img, bool dark=true, int skip=0);
 
 	template <typename MAT>
-	static cv::Mat threshold_clahe(const MAT& img);
-
-	template <typename MAT>
 	static cv::Mat threshold_fast(const MAT& img);
 
 	template <typename MAT>
-	static cv::Mat preprocess_image(const MAT& img, bool quick=true);
+	static cv::Mat preprocess_image(const MAT& img);
 
 	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
 
@@ -95,17 +92,6 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 }
 
 template <typename MAT>
-inline cv::Mat Scanner::threshold_clahe(const MAT& img)
-{
-	cv::Mat res;
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
-	clahe->apply(img, res);
-
-	cv::threshold(res, res, 127, 255, cv::THRESH_BINARY);
-	return res;
-}
-
-template <typename MAT>
 inline cv::Mat Scanner::threshold_fast(const MAT& img)
 {
 	unsigned unit = std::min(img.cols, img.rows);
@@ -116,7 +102,7 @@ inline cv::Mat Scanner::threshold_fast(const MAT& img)
 }
 
 template <typename MAT>
-inline cv::Mat Scanner::preprocess_image(const MAT& img, bool quick)
+inline cv::Mat Scanner::preprocess_image(const MAT& img)
 {
 	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
 	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
@@ -128,10 +114,7 @@ inline cv::Mat Scanner::preprocess_image(const MAT& img, bool quick)
 		out = img.clone();
 
 	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
-	if (quick)
-		return threshold_fast(out);
-	else
-		return threshold_clahe(out);
+	return threshold_fast(out);
 }
 
 template <typename MAT>

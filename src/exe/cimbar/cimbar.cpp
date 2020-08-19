@@ -21,7 +21,6 @@ using std::vector;
 int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
 {
 	int err = 0;
-	Undistort<SimpleCameraCalibration> und;
 	for (const string& inf : infiles)
 	{
 		bool shouldPreprocess = (preprocess == 1);
@@ -32,6 +31,7 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 			// we don't fail outright, but we'll probably fail the decode :(
 			if (undistort)
 			{
+				Undistort<SimpleCameraCalibration> und;
 				if (!und.undistort(img, img))
 					err |= 1;
 			}
