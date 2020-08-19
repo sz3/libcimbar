@@ -49,10 +49,10 @@ public: // other interesting methods
 	std::vector<Anchor> t3_scan_diagonal(const std::vector<Anchor>& candidates) const;
 
 	template <typename SCANTYPE>
-	bool t4_confirm_once(const Anchor& hint) const;
+	bool t4_confirm_once(Anchor& hint, bool merge) const;
 
 	template <typename SCANTYPE>
-	std::vector<Anchor> t4_confirm_scan(const std::vector<Anchor>& candidates) const;
+	std::vector<Anchor> t4_confirm_scan(const std::vector<Anchor>& candidates, bool merge) const;
 
 	int scan_primary(std::vector<Anchor>& candidates);
 	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff);
@@ -299,7 +299,7 @@ inline std::vector<Anchor> Scanner::t3_scan_diagonal(const std::vector<Anchor>& 
 }
 
 template <typename SCANTYPE>
-inline bool Scanner::t4_confirm_once(const Anchor& hint) const
+inline bool Scanner::t4_confirm_once(Anchor& hint, bool merge) const
 {
 	// horizontal slice
 	{
@@ -311,13 +311,15 @@ inline bool Scanner::t4_confirm_once(const Anchor& hint) const
 			if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
 				return false;
 
+		// maybe param for merge???
 		bool confirm = false;
 		for (const Anchor& co : confirms)
 		{
 			if (co.is_mergeable(hint, _mergeCutoff))
 			{
 				confirm = true;
-				break;
+				if (merge)
+					hint.merge(co);
 			}
 		}
 		if (!confirm)
@@ -340,7 +342,8 @@ inline bool Scanner::t4_confirm_once(const Anchor& hint) const
 			if (co.is_mergeable(hint, _mergeCutoff))
 			{
 				confirm = true;
-				break;
+				if (merge)
+					hint.merge(co);
 			}
 		}
 		if (!confirm)
@@ -351,16 +354,16 @@ inline bool Scanner::t4_confirm_once(const Anchor& hint) const
 }
 
 template <typename SCANTYPE>
-inline std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidates) const
+inline std::vector<Anchor> Scanner::t4_confirm_scan(const std::vector<Anchor>& candidates, bool merge) const
 {
 	// because we have a lot of weird crap going on in the center of the image,
 	// do one more scan of our (theoretical) anchor points.
 	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
 
 	std::vector<Anchor> points;
-	for (const Anchor& p : candidates)
+	for (Anchor p : candidates)
 	{
-		if (!t4_confirm_once<SCANTYPE>(p))
+		if (!t4_confirm_once<SCANTYPE>(p, merge))
 			continue;
 
 		points.push_back(p);

@@ -169,7 +169,7 @@ bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
 	std::vector<Anchor> candidates = t1_scan_rows<ScanState_122>(skip, ystart, yend, xstart, xend);
 	candidates = t2_scan_columns<ScanState_122>(candidates);
 	candidates = t3_scan_diagonal<ScanState_122>(candidates);
-	candidates = t4_confirm_scan<ScanState_122>(candidates);
+	candidates = t4_confirm_scan<ScanState_122>(candidates, false);
 
 	if (candidates.size() == 0)
 		return false;
@@ -195,7 +195,7 @@ int Scanner::scan_primary(std::vector<Anchor>& candidates)
 	candidates = t3_scan_diagonal<ScanState_114>(candidates);
 
 	// for all horizontal+vertical+diagonal results, do one more sanity check
-	candidates = t4_confirm_scan<ScanState_114>(candidates);
+	candidates = t4_confirm_scan<ScanState_114>(candidates, true);
 
 	int cutoff = filter_candidates(candidates);
 	sort_top_to_bottom(candidates);

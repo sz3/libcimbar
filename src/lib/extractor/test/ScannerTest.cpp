@@ -31,7 +31,7 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	assertStringContains("195+-25,61+-25", turbo::str::join(c3));
 	assertStringContains("1039+-22,887+-23", turbo::str::join(c3));
 
-	std::vector<Anchor> c4 = sc.t4_confirm_scan<ScanState_114>(c3);
+	std::vector<Anchor> c4 = sc.t4_confirm_scan<ScanState_114>(c3, true);
 	candidates = sc.deduplicate_candidates(c4);
 	sc.filter_candidates(candidates);
 
