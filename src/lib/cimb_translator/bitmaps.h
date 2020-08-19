@@ -1,3 +1,4 @@
+/* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 namespace cimbar {
 static const std::map<std::string, std::string> bitmaps = {
 {"bitmap/4/00.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA&aCw`XaxEylEB'B'atItc|3|y|UAp!E8e+_GyD?^VR_3wcW'Qh#GAaztVEMA`*8DBfF/k8AAAA9ZNoBz[uhNI)"},
