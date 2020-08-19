@@ -1,4 +1,4 @@
-### [INTRODUCTION](https://github.com/sz3/cimbar) | [ABOUT](https://github.com/sz3/cimbar/ABOUT.md) | LIBCIMBAR
+### [INTRODUCTION](https://github.com/sz3/cimbar) | [ABOUT](https://github.com/sz3/cimbar/blob/master/ABOUT.md) | LIBCIMBAR
 ### [DETAILS](DETAILS.md) | [PERFORMANCE](PERFORMANCE.md) | [TODO](TODO.md)
 
 ## libcimbar: implementing Color Icon Matrix Barcodes
@@ -22,6 +22,7 @@ I would like to add emscripten->wasm support.
 
 * opencv - https://opencv.org/
 * base - https://github.com/r-lyeh-archived/base
+* catch2 - https://github.com/catchorg/Catch2
 * concurrentqueue - https://github.com/cameron314/concurrentqueue
 * cxxopts - https://github.com/jarro2783/cxxopts (used for command line tools)
 * fmt - https://github.com/fmtlib/fmt

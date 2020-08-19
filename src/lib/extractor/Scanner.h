@@ -19,13 +19,10 @@ public: // public inline methods
 	Scanner(const MAT& img, bool dark=true, int skip=0);
 
 	template <typename MAT>
-	static cv::Mat threshold_clahe(const MAT& img);
-
-	template <typename MAT>
 	static cv::Mat threshold_fast(const MAT& img);
 
 	template <typename MAT>
-	static cv::Mat preprocess_image(const MAT& img, bool quick=true);
+	static cv::Mat preprocess_image(const MAT& img);
 
 	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
 
@@ -49,7 +46,7 @@ public: // other interesting methods
 	void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> funs) const;
 
 	template <typename SCANTYPE>
-	void t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	void t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const;
 
 	int scan_primary(std::vector<Anchor>& candidates);
 	bool add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff);
@@ -67,7 +64,7 @@ protected: // internal member functions
 	bool scan_diagonal(std::vector<Anchor>& points, int xstart, int xend, int ystart, int yend) const;
 
 	template <typename SCANTYPE>
-	void on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const;
+	void on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates, bool merge_confirms) const;
 
 	// edge detection
 	bool chase_edge(const point<double>& start, const point<double>& unit) const;
@@ -95,17 +92,6 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 }
 
 template <typename MAT>
-inline cv::Mat Scanner::threshold_clahe(const MAT& img)
-{
-	cv::Mat res;
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(100, 100));
-	clahe->apply(img, res);
-
-	cv::threshold(res, res, 127, 255, cv::THRESH_BINARY);
-	return res;
-}
-
-template <typename MAT>
 inline cv::Mat Scanner::threshold_fast(const MAT& img)
 {
 	unsigned unit = std::min(img.cols, img.rows);
@@ -116,7 +102,7 @@ inline cv::Mat Scanner::threshold_fast(const MAT& img)
 }
 
 template <typename MAT>
-inline cv::Mat Scanner::preprocess_image(const MAT& img, bool quick)
+inline cv::Mat Scanner::preprocess_image(const MAT& img)
 {
 	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
 	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
@@ -128,10 +114,7 @@ inline cv::Mat Scanner::preprocess_image(const MAT& img, bool quick)
 		out = img.clone();
 
 	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
-	if (quick)
-		return threshold_fast(out);
-	else
-		return threshold_clahe(out);
+	return threshold_fast(out);
 }
 
 template <typename MAT>
@@ -300,37 +283,67 @@ inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(con
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t4_confirm_scan(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+inline void Scanner::t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const
 {
 	// because we have a lot of weird crap going on in the center of the image,
 	// do one more scan of our (theoretical) anchor points.
 	// this shouldn't be an issue for real anchors, but pretenders might get filtered out.
-	std::vector<Anchor> confirms;
-	int xstart = hint.x() - hint.xrange();
-	int xend = hint.xmax() + hint.xrange();
-	if (!scan_horizontal<SCANTYPE>(confirms, hint.yavg(), xstart, xend))
-		return;
 
-	int ystart = hint.y() - hint.yrange();
-	int yend = hint.ymax() + hint.yrange();
-	if (!scan_vertical<SCANTYPE>(confirms, hint.xavg(), hint.xavg(), ystart, yend))
-		return;
-
-	bool confirm = false;
-	for (const Anchor& co : confirms)
+	// probably should do multiple sets of confirm checks, rather than just the one.
+	// validate on various input samples though!
 	{
-		if (co.is_mergeable(hint, _mergeCutoff))
+		std::vector<Anchor> confirms;
+		int xstart = hint.x() - hint.xrange();
+		int xend = hint.xmax() + hint.xrange();
+		int yavg = hint.yavg();
+		for (int y : {yavg - 1, yavg, yavg + 1})
+			if (!scan_horizontal<SCANTYPE>(confirms, y, xstart, xend))
+				return;
+
+		bool confirm = false;
+		for (const Anchor& co : confirms)
 		{
-			confirm = true;
-			break;
+			if (co.is_mergeable(hint, _mergeCutoff))
+			{
+				confirm = true;
+				if (!merge_confirms)
+					break;
+				hint.merge(co);
+			}
 		}
+		if (!confirm)
+			return;
 	}
-	if (confirm)
-		fun(hint);
+
+	{
+		std::vector<Anchor> confirms;
+		int ystart = hint.y() - hint.yrange();
+		int yend = hint.ymax() + hint.yrange();
+		int xavg = hint.xavg();
+		for (int x : {xavg - 1, xavg, xavg + 1})
+			if (!scan_vertical<SCANTYPE>(confirms, x, x, ystart, yend))
+				return;
+
+		bool confirm = false;
+		for (const Anchor& co : confirms)
+		{
+			if (co.is_mergeable(hint, _mergeCutoff))
+			{
+				confirm = true;
+				if (!merge_confirms)
+					break;
+				hint.merge(co);
+			}
+		}
+		if (!confirm)
+			return;
+	}
+
+	fun(hint);
 }
 
 template <typename SCANTYPE>
-inline void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates) const
+inline void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candidates, bool merge_confirms) const
 {
 	for (const Anchor& c : candidates)
 		if (c.is_mergeable(found, _mergeCutoff))
@@ -338,7 +351,7 @@ inline void Scanner::on_t1_scan(const Anchor& found, std::vector<Anchor>& candid
 
 	t2_scan_column<SCANTYPE>(found, [&] (const Anchor& p) {
 		t3_scan_diagonal<SCANTYPE>(p, [&] (const Anchor& p) {
-			t4_confirm_scan<SCANTYPE>(p, [&] (const Anchor& p) {
+			t4_confirm_scan<SCANTYPE>(p, merge_confirms, [&] (const Anchor& p) {
 				candidates.push_back(p);
 			});
 		});

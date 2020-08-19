@@ -13,6 +13,11 @@ public:
 	{
 	}
 
+	bool good() const
+	{
+		return true;
+	}
+
 	unsigned chunk_size() const
 	{
 		return _decoder.chunk_size();
@@ -37,6 +42,13 @@ public:
 				_decoder << buff;
 			_mutex.unlock();
 		}
+	}
+
+	bool write(const char* data, unsigned length)
+	{
+		std::string buffer(data, length);
+		operator<<(buffer);
+		return true;
 	}
 
 	concurrent_fountain_decoder_sink& operator<<(const std::string& buffer)

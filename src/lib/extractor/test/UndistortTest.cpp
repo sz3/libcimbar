@@ -31,5 +31,5 @@ TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 	Extractor ex;
 	assertTrue( ex.extract(out, out) );
 
-	assertEquals( 0x8326faca7727600, image_hash::average_hash(out) );
+	assertEquals( 0x8326daca7726690, image_hash::average_hash(out) );
 }
