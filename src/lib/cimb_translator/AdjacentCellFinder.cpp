@@ -1,3 +1,4 @@
+/* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "AdjacentCellFinder.h"
 
 AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size)
