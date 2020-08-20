@@ -1,20 +1,20 @@
 ### [INTRODUCTION](https://github.com/sz3/cimbar) | [ABOUT](https://github.com/sz3/cimbar/blob/master/ABOUT.md) | [CFC](https://github.com/sz3/cfc) | LIBCIMBAR
 ### [DETAILS](DETAILS.md) | [PERFORMANCE](PERFORMANCE.md) | [TODO](TODO.md)
 
-## libcimbar: implementing Color Icon Matrix Barcodes
+## libcimbar: Color Icon Matrix Barcodes
 And the quest for 100 kb/s over the air gap...
 
 ## What is it?
 
 `cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile with. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected.
 
-`libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). This allows for files of up to 16MB to be encoded in a series of cimbar codes, which can be output as a series of images, or generated on the fly as a "video" feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
+`libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 16MB to be encoded in a series of cimbar codes, which can be output as a series of images, or -- more usefully -- generated on the fly as a video feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
 
 ## Platforms
 
 The code is written in C++, and developed/tested on amd64+linux and arm64+android. It probably works, or can be made to work, on other platforms. Maybe.
 
-I would like to add emscripten->wasm support.
+I would like to add emscripten+wasm support.
 
 ## Library dependencies
 
@@ -36,15 +36,19 @@ I would like to add emscripten->wasm support.
 
 ```
 cmake .
-make -j4
+make -j7
+make install
 ```
+
+By default, libcimbar will try to "install" its build products under `./dist/bin/`.
 
 ## Usage
 
 Encode:
+* large input files may fill up your disk with pngs!
 
 ```
-./cimbar --encode -i inputfile.pdf -o outputprefix -f
+./cimbar --encode -i inputfile.txt -o outputprefix -f
 ```
 
 Decode (extracts file into output directory):
