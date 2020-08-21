@@ -6,9 +6,9 @@ And the quest for 100 kb/s over the air gap...
 
 ## What is it?
 
-`cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile with. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected.
+`cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
 
-`libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 16MB to be encoded in a series of cimbar codes, which can be output as a series of images, or -- more usefully -- generated on the fly as a video feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
+`libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 16MB can be encoded in a series of cimbar codes, which can be output as a series of images, or -- more usefully -- generated on the fly as a video feed of animated cimbar codes. The magic of fountain codes means that once enough distinct images have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are out of order, or if random images have been corrupted or are missing.
 
 ## Platforms
 
@@ -40,7 +40,7 @@ make -j7
 make install
 ```
 
-By default, libcimbar will try to "install" its build products under `./dist/bin/`.
+By default, libcimbar will try to put its build products under `./dist/bin/`.
 
 ## Usage
 
