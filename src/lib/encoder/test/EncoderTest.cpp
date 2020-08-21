@@ -28,7 +28,7 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
-			std::string path = fmt::format("{}-{}.png", outPrefix, i);
+			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
@@ -51,7 +51,7 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
-			std::string path = fmt::format("{}-{}.png", outPrefix, i);
+			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
