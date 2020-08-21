@@ -3,7 +3,7 @@
 
 ## Room for improvement/next steps
 
-libcimbar is fairly optimized, to achieve the "proof" part of proof-of-concept. Specifically, it felt unreasonable to claim that it could be used to transfer MBs of data over a camera lens (on a non-geologic time scale) without seeing performance numbers to back that up.
+libcimbar is fairly optimized, to achieve the *proof* part of proof-of-concept. Specifically, it felt unreasonable to claim that it could be used to transfer MBs of data over a camera lens (on a non-geologic time scale) without seeing performance numbers to back that up.
 
 Performance optimizations aside, there are a number of paths that might be interesting to pursue. Some I may take a look at, but most I will leave to any enterprising developer who wants to take up the cause:
 
