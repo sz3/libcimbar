@@ -83,3 +83,22 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		cr.read(bits);
 	assertTrue(cr.done());
 }
+
+TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
+{
+	// this is a non-extracted image, and it's dimensions are too small.
+	// should immediately bail
+	string sample_path = TestCimbar::getSample("6bit/4_30_f2_246.jpg");
+	cv::Mat sample = cv::imread(sample_path);
+
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder);
+
+	// refuse to do anything
+	assertTrue( cr.done() );
+
+	unsigned bits;
+	assertEquals( 0, cr.read(bits) );
+
+	assertTrue( cr.done() );
+}

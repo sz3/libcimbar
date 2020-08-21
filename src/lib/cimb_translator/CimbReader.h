@@ -25,4 +25,5 @@ protected:
 	unsigned _cellSize;
 	FloodDecodePositions _positions;
 	const CimbDecoder& _decoder;
+	bool _good;
 };

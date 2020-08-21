@@ -50,17 +50,14 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool need
     , _cellSize(Config::cell_size() + 2)
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
+    , _good(_image.cols >= 1024 and _image.rows >= 1024)
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 }
 
 CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen)
-    : _image(img.getMat(cv::ACCESS_READ))
-    , _cellSize(Config::cell_size() + 2)
-    , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
-    , _decoder(decoder)
+    : CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen)
 {
-	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 }
 
 unsigned CimbReader::read(unsigned& bits)
@@ -87,7 +84,7 @@ unsigned CimbReader::read(unsigned& bits)
 
 bool CimbReader::done() const
 {
-	return _positions.done();
+	return !_good or _positions.done();
 }
 
 unsigned CimbReader::num_reads() const
