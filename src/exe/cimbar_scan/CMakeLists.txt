@@ -18,4 +18,14 @@ target_link_libraries(cimbar_scan
 	${OPENCV_LIBS}
 )
 
+add_custom_command(
+	TARGET cimbar_scan POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:cimbar_scan> cimbar_scan.dbg
+	COMMAND ${CMAKE_STRIP} -g $<TARGET_FILE:cimbar_scan>
+)
+
+install(
+	TARGETS cimbar_scan
+	DESTINATION bin
+)
 

@@ -15,10 +15,20 @@ target_link_libraries(cimbar_video
 
 	cimb_translator
 
-	correct
+	correct_static
 	wirehair
 	${OPENCV_LIBS}
 	opencv_highgui
 )
 
+add_custom_command(
+	TARGET cimbar_video POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:cimbar_video> cimbar_video.dbg
+	COMMAND ${CMAKE_STRIP} -g $<TARGET_FILE:cimbar_video>
+)
+
+install(
+	TARGETS cimbar_video
+	DESTINATION bin
+)
 

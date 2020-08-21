@@ -16,9 +16,19 @@ target_link_libraries(cimbar
 	cimb_translator
 	extractor
 
-	correct
+	correct_static
 	wirehair
 	${OPENCV_LIBS}
 )
 
+add_custom_command(
+	TARGET cimbar POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:cimbar> cimbar.dbg
+	COMMAND ${CMAKE_STRIP} -g $<TARGET_FILE:cimbar>
+)
+
+install(
+	TARGETS cimbar
+	DESTINATION bin
+)
 
