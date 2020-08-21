@@ -1,0 +1,4 @@
+[submodule "samples"]
+	path = samples
+	url = https://github.com/sz3/cimbar-samples
+	branch = v0.5
