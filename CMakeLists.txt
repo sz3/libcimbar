@@ -32,6 +32,7 @@ set (PROJECTS
 
 	src/lib/bit_file
 	src/lib/cimb_translator
+	src/lib/compression
 	src/lib/encoder
 	src/lib/extractor
 	src/lib/fountain
