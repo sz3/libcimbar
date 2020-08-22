@@ -50,7 +50,7 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool need
     , _cellSize(Config::cell_size() + 2)
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
     , _decoder(decoder)
-    , _good(_image.cols >= 1024 and _image.rows >= 1024)
+    , _good(_image.cols >= Config::image_size() and _image.rows >= 1024)
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 }
