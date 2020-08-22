@@ -92,7 +92,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 		if (!frame)
 			break;
 
-		std::string output = fmt::format("{}-{}.png", output_prefix, i);
+		std::string output = fmt::format("{}_{}.png", output_prefix, i);
 		cv::imwrite(output, *frame);
 		++i;
 	}
@@ -125,7 +125,7 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
 {
 	std::function<bool(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
-		std::string output = fmt::format("{}-{}.png", output_prefix, i);
+		std::string output = fmt::format("{}_{}.png", output_prefix, i);
 		return cv::imwrite(output, frame);
 	};
 	return encode_fountain(filename, fun);
