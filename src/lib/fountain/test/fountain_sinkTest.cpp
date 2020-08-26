@@ -8,6 +8,7 @@
 #include "serialize/format.h"
 #include "util/File.h"
 #include "util/MakeTempDirectory.h"
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -53,7 +54,7 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 	FountainInit::init();
 	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink(tempdir.path(), 690);
+	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
 	string iframe = createFrame(0, 1200);
 	assertEquals( 6900, iframe.size() );
 
@@ -83,7 +84,7 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 	FountainInit::init();
 	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink(tempdir.path(), 690);
+	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 2);
@@ -115,7 +116,7 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	FountainInit::init();
 	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink sink(tempdir.path(), 690);
+	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
 	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 3);
