@@ -32,7 +32,7 @@ TEST_CASE( "zstd_compressorTest/testCompress", "[unit]" )
 	for (int i = 0; i < 1000; i+=10)
 		ss << "0123456789";
 
-	zstd_compressor comp;
+	zstd_compressor<std::stringstream> comp;
 	assertEquals( 1000, comp.compress(ss) );
 
 	std::stringstream output;
@@ -51,7 +51,7 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.SmallRandom", "[unit]" )
 	std::stringstream ss;
 	ss << big_random(SIZE);
 
-	zstd_compressor comp;
+	zstd_compressor<std::stringstream> comp;
 	assertEquals( SIZE, comp.compress(ss) );
 
 	std::stringstream output;
@@ -60,7 +60,7 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.SmallRandom", "[unit]" )
 	assertInRange( SIZE-100, output.str().size(), SIZE+100 );
 
 	// point at decompressor
-	zstd_decompressor dec;
+	zstd_decompressor<std::stringstream> dec;
 	assertEquals( output.str().size(), dec.decompress(output) );
 
 	std::stringstream recovered;
@@ -76,7 +76,7 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom", "[unit]" )
 	std::stringstream ss;
 	ss << big_random(SIZE);
 
-	zstd_compressor comp;
+	zstd_compressor<std::stringstream> comp;
 	assertEquals( SIZE, comp.compress(ss) );
 
 	std::stringstream output;
@@ -85,14 +85,11 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom", "[unit]" )
 	assertInRange( SIZE-1000, output.str().size(), SIZE+1000 );
 
 	// point at decompressor
-	zstd_decompressor dec;
+	zstd_decompressor<std::stringstream> dec;
 	assertEquals( output.str().size(), dec.decompress(output) );
 
 	std::stringstream recovered;
 	recovered << dec.rdbuf();
-
-	std::ofstream f("/tmp/test.txt");
-	f << recovered.str();
 
 	assertEquals( ss.str().size(), recovered.str().size() );
 	assertEquals( ss.str(), recovered.str() );

@@ -6,9 +6,12 @@
 #include <iostream>
 #include <sstream>
 
-//template <typename STREAM>
-class zstd_decompressor : public std::stringstream
+template <typename STREAM>
+class zstd_decompressor : public STREAM
 {
+public:
+	using STREAM::STREAM; // pull in constructors
+
 public:
 	template <typename INSTREAM>
 	size_t decompress(INSTREAM& source)

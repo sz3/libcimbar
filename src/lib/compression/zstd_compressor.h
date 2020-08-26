@@ -6,9 +6,12 @@
 #include <iostream>
 #include <sstream>
 
-//template <typename STREAM>
-class zstd_compressor : public std::stringstream
+template <typename STREAM>
+class zstd_compressor : public STREAM
 {
+public:
+	using STREAM::STREAM; // pull in constructors
+
 public:
 	template <typename INSTREAM>
 	size_t compress(INSTREAM& raw)
