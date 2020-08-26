@@ -24,8 +24,8 @@ public:
 	std::optional<cv::Mat> encode_next(STREAM& stream);
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
-	unsigned encode_fountain(const std::string& filename, std::string output_prefix);
-	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame);
+	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6);
+	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6);
 
 protected:
 	unsigned _eccBytes;
@@ -100,21 +100,28 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame)
+inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level)
 {
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes);
 
+	std::stringstream ss;
 	std::ifstream infile(filename);
-	cimbar::zstd_compressor<std::stringstream> f;
-	if (!f.compress(infile))
-		return 0;
+	if (compression_level <= 0)
+		ss << infile.rdbuf();
+	else
+	{
+		cimbar::zstd_compressor<std::stringstream> f;
+		if (!f.compress(infile))
+			return 0;
 
-	// find size of compressed zstd stream, and pad it if necessary.
-	size_t compressedSize = f.size();
-	if (compressedSize < chunk_size)
-		f.pad(chunk_size - compressedSize + 1);
+		// find size of compressed zstd stream, and pad it if necessary.
+		size_t compressedSize = f.size();
+		if (compressedSize < chunk_size)
+			f.pad(chunk_size - compressedSize + 1);
+		ss = std::move(f);
+	}
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(f, chunk_size, 0); // will eventually do something clever with encode_id?
+	fountain_encoder_stream fes = fountain_encoder_stream::create(ss, chunk_size, 0); // will eventually do something clever with encode_id?
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
 	// the fountain_chunk_size will be 690.
 	// fountain_chunks_per_frame() is currently a constant (10).
@@ -136,11 +143,11 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix)
+inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix, int compression_level)
 {
 	std::function<bool(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
 		return cv::imwrite(output, frame);
 	};
-	return encode_fountain(filename, fun);
+	return encode_fountain(filename, fun, compression_level);
 }
