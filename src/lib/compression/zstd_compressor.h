@@ -21,6 +21,27 @@ public:
 			ZSTD_freeCCtx(_cctx);
 	}
 
+	bool write(const char* data, size_t len)
+	{
+		size_t writeLen = CHUNK_SIZE;
+		while (len > 0)
+		{
+			if (len < writeLen)
+				writeLen = len;
+			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), data, writeLen, 6);
+			if (ZSTD_isError(compressedBytes))
+			{
+				std::cout << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
+				return false;
+			}
+			STREAM::write(_compBuff.data(), compressedBytes);
+
+			data += writeLen;
+			len -= writeLen;
+		}
+		return true;
+	}
+
 	template <typename INSTREAM>
 	size_t compress(INSTREAM& raw)
 	{
@@ -37,21 +58,14 @@ public:
 				break;
 			totalBytesRead += bytesRead;
 
-			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), rawBuff.data(), (size_t)bytesRead, 6);
-			if (ZSTD_isError(compressedBytes))
-			{
-				std::cout << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
+			if (!write(rawBuff.data(), bytesRead))
 				break;
-			}
-			STREAM::write(_compBuff.data(), compressedBytes);
 		}
-
-
 		return totalBytesRead;
 	}
 
 protected:
-	static const uint16_t CHUNK_SIZE = 0x4000;
+	static const size_t CHUNK_SIZE = 0x4000;
 	std::vector<char> _compBuff = std::vector<char>(ZSTD_compressBound(CHUNK_SIZE));
 	ZSTD_CCtx* _cctx = ZSTD_createCCtx();
 };
