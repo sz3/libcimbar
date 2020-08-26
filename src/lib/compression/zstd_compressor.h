@@ -28,7 +28,7 @@ public:
 		{
 			if (len < writeLen)
 				writeLen = len;
-			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), data, writeLen, 6);
+			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), data, writeLen, _compressionLevel);
 			if (ZSTD_isError(compressedBytes))
 			{
 				std::cout << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
@@ -42,11 +42,18 @@ public:
 		return true;
 	}
 
+	void set_compression_level(int level)
+	{
+		if (level > 0)
+			_compressionLevel = level;
+	}
+
 	template <typename INSTREAM>
-	size_t compress(INSTREAM& raw)
+	size_t compress(INSTREAM& raw, int compression_level=0)
 	{
 		if (!_cctx)
 			return 0;
+		set_compression_level(compression_level);
 
 		std::array<char, CHUNK_SIZE> rawBuff;
 		size_t totalBytesRead = 0;
@@ -66,6 +73,7 @@ public:
 
 protected:
 	static const size_t CHUNK_SIZE = 0x4000;
+	int _compressionLevel = 6;
 	ZSTD_CCtx* _cctx = ZSTD_createCCtx();
 	std::vector<char> _compBuff = std::vector<char>(ZSTD_compressBound(CHUNK_SIZE));
 };
