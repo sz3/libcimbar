@@ -17,6 +17,38 @@ public:
 	using STREAM::STREAM; // pull in constructors
 
 public:
+	bool write(const char* data, size_t len)
+	{
+		size_t writeLen = CHUNK_SIZE;
+		while (len > 0)
+		{
+			if (len < writeLen)
+				writeLen = len;
+
+			ZSTD_inBuffer input = {data, writeLen, 0};
+			ZSTD_outBuffer output = {_outBuff.data(), _outBuff.size(), 0};
+
+			while (input.pos < input.size)
+			{
+				size_t res = ZSTD_decompressStream(_ds, &output, &input);
+				if (ZSTD_isError(res))
+				{
+					_lastError << " failed decompress? " << ZSTD_getErrorName(res);
+					return false;
+				}
+
+				if (output.pos > 0)
+				{
+					STREAM::write(_outBuff.data(), output.pos);
+					output.pos = 0;
+				}
+			}
+
+			data += writeLen;
+			len -= writeLen;
+		}
+		return true;
+	}
 
 	template <typename INSTREAM>
 	size_t decompress(INSTREAM& source)
@@ -26,8 +58,7 @@ public:
 
 		std::vector<char> srcBuff(CHUNK_SIZE);
 		size_t totalBytesRead = 0;
-		bool done = false;
-		while (source and !done)
+		while (source)
 		{
 			source.read(srcBuff.data(), srcBuff.size());
 			std::streamsize bytesRead = source.gcount();
@@ -38,25 +69,8 @@ public:
 			}
 			totalBytesRead += bytesRead;
 
-			ZSTD_inBuffer input = {srcBuff.data(), (size_t)bytesRead, 0};
-			ZSTD_outBuffer output = {_outBuff.data(), _outBuff.size(), 0};
-
-			while (input.pos < input.size)
-			{
-				size_t res = ZSTD_decompressStream(_ds, &output, &input);
-				if (ZSTD_isError(res))
-				{
-					_lastError << " failed decompress? " << ZSTD_getErrorName(res);
-					done = true;
-					break;
-				}
-
-				if (output.pos > 0)
-				{
-					STREAM::write(_outBuff.data(), output.pos);
-					output.pos = 0;
-				}
-			}
+			if (!write(srcBuff.data(), bytesRead))
+				break;
 		}
 		return totalBytesRead;
 	}
