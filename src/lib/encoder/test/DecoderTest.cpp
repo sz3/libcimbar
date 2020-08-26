@@ -3,7 +3,11 @@
 
 #include "Decoder.h"
 
+#include "compression/zstd_decompressor.h"
+#include "fountain/fountain_decoder_sink.h"
+#include "util/File.h"
 #include "util/MakeTempDirectory.h"
+
 #include "PicoSHA2/picosha2.h"
 #include <fstream>
 #include <iostream>
@@ -44,3 +48,19 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 
 	assertEquals( "382c76644a4dff475c5793c5fe061e35e47be252010d29aeaf8d93ee6a3f7045", get_hash(decodedFile) );
 }
+
+TEST_CASE( "DecoderTest/testDecodeFountain.Pad", "[unit]" )
+{
+	MakeTempDirectory tempdir;
+
+	Decoder dec(30);
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30));
+
+	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/encoder.fountain_0.png"));
+	unsigned bytesDecoded = dec.decode_fountain(img, fds);
+	assertEquals( 7500, bytesDecoded );
+
+	std::string contents = File(tempdir.path() / "0.751").read_all();
+	assertEquals( "hello", contents );
+}
+

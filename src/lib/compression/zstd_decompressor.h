@@ -19,6 +19,9 @@ public:
 public:
 	bool write(const char* data, size_t len)
 	{
+		if (!_ds)
+			return false;
+
 		size_t writeLen = CHUNK_SIZE;
 		while (len > 0)
 		{

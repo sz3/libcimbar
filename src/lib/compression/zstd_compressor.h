@@ -71,6 +71,33 @@ public:
 		return totalBytesRead;
 	}
 
+	int pad(int len)
+	{
+		if (len < 9)
+			len = 9;
+
+		std::array<char, 8> header = {0x50, 0x2A, 0x4D, 0x18, (char)(len&0xFF), (char)(len&0xFF00 >> 8), (char)(len&0xFF0000 >> 16), 0};
+		STREAM::write(header.data(), header.size());
+
+		len -= 8;
+		std::fill(_compBuff.begin(), _compBuff.end(), 0);
+		for (size_t writeLen = CHUNK_SIZE; len > 0; len -= writeLen)
+		{
+			if (len < writeLen)
+				writeLen = len;
+			STREAM::write(_compBuff.data(), writeLen);
+		}
+		return len;
+	}
+
+	size_t size()
+	{
+		STREAM::seekg(0, std::ios::end);
+		size_t len = STREAM::tellg();
+		STREAM::seekg(0, std::ios::beg);
+		return len;
+	}
+
 protected:
 	static const size_t CHUNK_SIZE = 0x4000;
 	int _compressionLevel = 6;

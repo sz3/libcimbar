@@ -102,16 +102,25 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame)
 {
+	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes);
+
 	std::ifstream infile(filename);
 	cimbar::zstd_compressor<std::stringstream> f;
 	if (!f.compress(infile))
 		return 0;
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(f, cimbar::Config::fountain_chunk_size(_eccBytes), 0); // will eventually do something clever with encode_id?
+	// find size of compressed zstd stream, and pad it if necessary.
+	size_t compressedSize = f.size();
+	if (compressedSize < chunk_size)
+		f.pad(chunk_size - compressedSize + 1);
+
+	fountain_encoder_stream fes = fountain_encoder_stream::create(f, chunk_size, 0); // will eventually do something clever with encode_id?
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
 	// the fountain_chunk_size will be 690.
 	// fountain_chunks_per_frame() is currently a constant (10).
 	unsigned requiredFrames = fes.blocks_required() * 2 / cimbar::Config::fountain_chunks_per_frame();
+	if (requiredFrames == 0)
+		requiredFrames = 1; // could also do +1 on the division above?
 
 	unsigned i = 0;
 	while (i < requiredFrames)

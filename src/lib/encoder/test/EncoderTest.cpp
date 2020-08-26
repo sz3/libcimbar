@@ -57,3 +57,26 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 		}
 	}
 }
+
+TEST_CASE( "EncoderTest/testFountain.Padded", "[unit]" )
+{
+	FountainInit::init();
+	MakeTempDirectory tempdir;
+
+	std::string inputFile = tempdir.path() / "hello.txt";
+	std::string outPrefix = tempdir.path() / "encoder.fountain";
+
+	{
+		std::ofstream f(inputFile);
+		f << "hello"; // 5 bytes!
+	}
+
+	 // will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
+	Encoder enc(30, 4, 2);
+	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
+
+	uint64_t hash = 0xaecc8c00efce8c28;
+	std::string path = fmt::format("{}_0.png", outPrefix);
+	cv::Mat img = cv::imread(path);
+	assertEquals( hash, image_hash::average_hash(img) );
+}
