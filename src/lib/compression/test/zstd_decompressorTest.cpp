@@ -55,6 +55,25 @@ TEST_CASE( "zstd_decompressorTest/testDecompress.Big", "[unit]" )
 	assertEquals( expectedOutput.str(), output.str() );
 }
 
+TEST_CASE( "zstd_decompressorTest/testDecompress.FromBuff", "[unit]" )
+{
+	char inputC[] = "(\xb5/\xfd\xa0\xa0\x86\x01\x00\x95\x00\x00" "P0123456789\x01\x00\x93\x86\xcd\x0b\x12";
+	string input(inputC, 30);
+
+	std::stringstream expectedOutput;
+	for (int i = 0; i < 100000; i+=10)
+		expectedOutput << "0123456789";
+
+	zstd_decompressor<std::stringstream> dec;
+	assertTrue( dec.write(input.data(), input.size()) );
+
+	std::stringstream output;
+	output << dec.rdbuf();
+
+	assertEquals( 100000, output.str().size() );
+	assertEquals( expectedOutput.str(), output.str() );
+}
+
 TEST_CASE( "zstd_decompressorTest/testDecompress.ToFile", "[unit]" )
 {
 	MakeTempDirectory tempdir;

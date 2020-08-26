@@ -95,3 +95,23 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom", "[unit]" )
 	assertEquals( ss.str().size(), recovered.str().size() );
 	assertEquals( ss.str(), recovered.str() );
 }
+
+TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom.Buffs", "[unit]" )
+{
+	const int SIZE = 100000;
+	string original = big_random(SIZE);
+
+	zstd_compressor<std::stringstream> comp;
+	assertTrue( comp.write(original.data(), original.size()) );
+
+	string output = comp.str();
+	assertInRange( SIZE-1000, output.size(), SIZE+1000 );
+
+	// point at decompressor
+	zstd_decompressor<std::stringstream> dec;
+	assertTrue( dec.write(output.data(), output.size()) );
+
+	string recovered = dec.str();
+	assertEquals( original.size(), recovered.size() );
+	assertEquals( original, recovered );
+}
