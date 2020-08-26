@@ -4,9 +4,9 @@
 
 #include "zstd/zstd.h"
 #include <array>
-#include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 namespace cimbar {
 

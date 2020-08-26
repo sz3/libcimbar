@@ -6,6 +6,7 @@
 #include "serialize/format.h"
 #include "util/File.h"
 #include "util/MakeTempDirectory.h"
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>

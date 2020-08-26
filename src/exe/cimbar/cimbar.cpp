@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimb_translator/Config.h"
+#include "compression/zstd_decompressor.h"
 #include "encoder/Decoder.h"
 #include "encoder/Encoder.h"
 #include "extractor/Extractor.h"
@@ -113,7 +114,7 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		fountain_decoder_sink<std::ofstream> sink(outpath, cimbar::Config::fountain_chunk_size(ecc));
+		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, cimbar::Config::fountain_chunk_size(ecc));
 		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
 			return d.decode_fountain(m, sink, pre);
 		};

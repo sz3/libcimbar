@@ -29,6 +29,7 @@ target_link_libraries(encoder_test
 
 	correct
 	wirehair
+	zstd
 	${OPENCV_LIBS}
 	${CPPFILESYSTEM}
 )

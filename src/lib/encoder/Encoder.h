@@ -5,6 +5,7 @@
 #include "bit_file/bitreader.h"
 #include "cimb_translator/CimbWriter.h"
 #include "cimb_translator/Config.h"
+#include "compression/zstd_compressor.h"
 #include "fountain/fountain_encoder_stream.h"
 #include "serialize/format.h"
 #include "serialize/str.h"
@@ -101,7 +102,11 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame)
 {
-	std::ifstream f(filename);
+	std::ifstream infile(filename);
+	cimbar::zstd_compressor<std::stringstream> f;
+	if (!f.compress(infile))
+		return 0;
+
 	fountain_encoder_stream fes = fountain_encoder_stream::create(f, cimbar::Config::fountain_chunk_size(_eccBytes), 0); // will eventually do something clever with encode_id?
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
 	// the fountain_chunk_size will be 690.
