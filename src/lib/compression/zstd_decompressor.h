@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+namespace cimbar {
+
 template <typename STREAM>
 class zstd_decompressor : public STREAM
 {
@@ -13,6 +15,11 @@ public:
 	using STREAM::STREAM; // pull in constructors
 
 public:
+	// need a write(char*, size_t len)
+	// either overload or new method name
+
+
+
 	template <typename INSTREAM>
 	size_t decompress(INSTREAM& source)
 	{
@@ -57,7 +64,7 @@ public:
 
 				if (output.pos > 0)
 				{
-					this->write(outBuff.data(), output.pos);
+					STREAM::write(outBuff.data(), output.pos);
 					output.pos = 0;
 				}
 			}
@@ -75,3 +82,5 @@ public:
 protected:
 	std::stringstream _lastError;
 };
+
+}

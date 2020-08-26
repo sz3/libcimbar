@@ -11,6 +11,7 @@
 #include <vector>
 
 using std::string;
+using namespace cimbar;
 using namespace std;
 
 namespace {
