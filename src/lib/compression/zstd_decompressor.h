@@ -1,5 +1,7 @@
 #pragma once
 
+#include "zstd_dstream.h"
+
 #include "zstd/zstd.h"
 #include <array>
 #include <fstream>
@@ -15,27 +17,14 @@ public:
 	using STREAM::STREAM; // pull in constructors
 
 public:
-	// need a write(char*, size_t len)
-	// either overload or new method name
-
-
 
 	template <typename INSTREAM>
 	size_t decompress(INSTREAM& source)
 	{
-		// ????
-		std::vector<char> srcBuff(ZSTD_DStreamInSize());
-		std::vector<char> outBuff(ZSTD_DStreamOutSize());
-
-		ZSTD_DStream* ds = ZSTD_createDStream();
-		size_t initRes = ZSTD_initDStream(ds);
-		if (ZSTD_isError(initRes))
-		{
-			_lastError << " failed init? " << ZSTD_getErrorName(initRes);
-			ZSTD_freeDStream(ds);
+		if (!_ds)
 			return 0;
-		}
 
+		std::vector<char> srcBuff(CHUNK_SIZE);
 		size_t totalBytesRead = 0;
 		bool done = false;
 		while (source and !done)
@@ -50,11 +39,11 @@ public:
 			totalBytesRead += bytesRead;
 
 			ZSTD_inBuffer input = {srcBuff.data(), (size_t)bytesRead, 0};
-			ZSTD_outBuffer output = {outBuff.data(), outBuff.size(), 0};
+			ZSTD_outBuffer output = {_outBuff.data(), _outBuff.size(), 0};
 
 			while (input.pos < input.size)
 			{
-				size_t res = ZSTD_decompressStream(ds, &output, &input);
+				size_t res = ZSTD_decompressStream(_ds, &output, &input);
 				if (ZSTD_isError(res))
 				{
 					_lastError << " failed decompress? " << ZSTD_getErrorName(res);
@@ -64,13 +53,11 @@ public:
 
 				if (output.pos > 0)
 				{
-					STREAM::write(outBuff.data(), output.pos);
+					STREAM::write(_outBuff.data(), output.pos);
 					output.pos = 0;
 				}
 			}
 		}
-
-		ZSTD_freeDStream(ds);
 		return totalBytesRead;
 	}
 
@@ -80,6 +67,10 @@ public:
 	}
 
 protected:
+	const size_t CHUNK_SIZE = ZSTD_DStreamInSize();
+	zstd_dstream _ds;
+	std::vector<char> _outBuff = std::vector<char>(ZSTD_DStreamOutSize());
+
 	std::stringstream _lastError;
 };
 
