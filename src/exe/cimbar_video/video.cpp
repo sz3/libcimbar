@@ -19,10 +19,12 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
 
+	int compressionLevel = cimbar::Config::compression_level();
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	unsigned defaultFps = 15;
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
+	    ("c,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
@@ -41,6 +43,7 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
+	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
@@ -87,6 +90,6 @@ int main(int argc, char** argv)
 	Encoder en(ecc);
 	while (running)
 		for (const string& f : infiles)
-			en.encode_fountain(f, draw);
+			en.encode_fountain(f, draw, compressionLevel);
 	return 0;
 }

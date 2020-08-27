@@ -84,4 +84,9 @@ unsigned Config::fountain_chunks_per_frame()
 	return 10;
 }
 
+int Config::compression_level()
+{
+	return 6;
+}
+
 }
