@@ -55,6 +55,14 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 	return err;
 }
 
+template <typename SINK>
+std::function<int(cv::UMat,bool)> fountain_decode_fun(SINK& sink, Decoder& d)
+{
+	return [&sink, &d] (cv::UMat m, bool pre) {
+		return d.decode_fountain(m, sink, pre);
+	};
+}
+
 int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar encoder/decoder", "Demonstration program for cimbar codes");
@@ -121,18 +129,12 @@ int main(int argc, char** argv)
 		if (compressionLevel <= 0)
 		{
 			fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize);
-			std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
-				return d.decode_fountain(m, sink, pre);
-			};
-			return decode(infiles, fun, no_deskew, undistort, preprocess);
+			return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
 		}
 
 		// else -- default case, all bells and whistles
 		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
-		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
-			return d.decode_fountain(m, sink, pre);
-		};
-		return decode(infiles, fun, no_deskew, undistort, preprocess);
+		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
 	}
 
 	// else
