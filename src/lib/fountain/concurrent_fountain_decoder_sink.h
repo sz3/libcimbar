@@ -6,6 +6,7 @@
 #include "concurrentqueue/concurrentqueue.h"
 #include <mutex>
 
+template <typename OUTSTREAM>
 class concurrent_fountain_decoder_sink
 {
 public:
@@ -61,6 +62,6 @@ public:
 
 protected:
 	std::mutex _mutex;
-	fountain_decoder_sink _decoder;
+	fountain_decoder_sink<OUTSTREAM> _decoder;
 	moodycamel::ConcurrentQueue< std::string > _backlog;
 };
