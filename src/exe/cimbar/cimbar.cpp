@@ -19,7 +19,7 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
+int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
 {
 	int err = 0;
 	for (const string& inf : infiles)
