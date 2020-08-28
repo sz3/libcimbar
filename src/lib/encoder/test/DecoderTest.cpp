@@ -2,8 +2,8 @@
 #include "unittest.h"
 
 #include "Decoder.h"
-
 #include "util/MakeTempDirectory.h"
+
 #include "PicoSHA2/picosha2.h"
 #include <fstream>
 #include <iostream>
@@ -44,3 +44,4 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 
 	assertEquals( "382c76644a4dff475c5793c5fe061e35e47be252010d29aeaf8d93ee6a3f7045", get_hash(decodedFile) );
 }
+

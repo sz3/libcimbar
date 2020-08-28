@@ -32,6 +32,7 @@ set (PROJECTS
 
 	src/lib/bit_file
 	src/lib/cimb_translator
+	src/lib/compression
 	src/lib/encoder
 	src/lib/extractor
 	src/lib/fountain
@@ -45,6 +46,7 @@ set (PROJECTS
 	src/third_party_lib/libcorrect
 	src/third_party_lib/libpopcnt
 	src/third_party_lib/wirehair
+	src/third_party_lib/zstd
 )
 
 include_directories(

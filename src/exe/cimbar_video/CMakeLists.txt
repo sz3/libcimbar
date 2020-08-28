@@ -17,6 +17,7 @@ target_link_libraries(cimbar_video
 
 	correct_static
 	wirehair
+	zstd
 	${OPENCV_LIBS}
 	opencv_highgui
 )

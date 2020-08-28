@@ -18,6 +18,7 @@ target_link_libraries(cimbar
 
 	correct_static
 	wirehair
+	zstd
 	${OPENCV_LIBS}
 )
 

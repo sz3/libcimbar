@@ -25,5 +25,6 @@ namespace cimbar
 
 		unsigned fountain_chunk_size(unsigned ecc);
 		unsigned fountain_chunks_per_frame();
+		int compression_level();
 	}
 }

@@ -31,6 +31,7 @@ I would like to add emscripten+wasm support.
 * libpopcnt - https://github.com/kimwalisch/libpopcnt
 * PicoSHA2 - https://github.com/okdshin/PicoSHA2 (used for testing)
 * wirehair - https://github.com/catid/wirehair
+* zstd - https://github.com/facebook/zstd
 
 ## Build
 

@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimb_translator/Config.h"
+#include "compression/zstd_decompressor.h"
 #include "encoder/Decoder.h"
 #include "encoder/Encoder.h"
 #include "extractor/Extractor.h"
@@ -18,7 +19,7 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
+int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
 {
 	int err = 0;
 	for (const string& inf : infiles)
@@ -54,14 +55,24 @@ int decode(const vector<string>& infiles, std::function<int(cv::UMat, bool)>& de
 	return err;
 }
 
+template <typename SINK>
+std::function<int(cv::UMat,bool)> fountain_decode_fun(SINK& sink, Decoder& d)
+{
+	return [&sink, &d] (cv::UMat m, bool pre) {
+		return d.decode_fountain(m, sink, pre);
+	};
+}
+
 int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar encoder/decoder", "Demonstration program for cimbar codes");
 
+	int compressionLevel = cimbar::Config::compression_level();
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	options.add_options()
 	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory.", cxxopts::value<string>())
+	    ("c,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
@@ -86,6 +97,7 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
+	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
 	if (fountain)
@@ -97,7 +109,7 @@ int main(int argc, char** argv)
 		for (const string& f : infiles)
 		{
 			if (fountain)
-				en.encode_fountain(f, outpath);
+				en.encode_fountain(f, outpath, compressionLevel);
 			else
 				en.encode(f, outpath);
 		}
@@ -113,11 +125,16 @@ int main(int argc, char** argv)
 
 	if (fountain)
 	{
-		fountain_decoder_sink sink(outpath, cimbar::Config::fountain_chunk_size(ecc));
-		std::function<int(cv::UMat,bool)> fun = [&sink, &d] (cv::UMat m, bool pre) {
-			return d.decode_fountain(m, sink, pre);
-		};
-		return decode(infiles, fun, no_deskew, undistort, preprocess);
+		unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc);
+		if (compressionLevel <= 0)
+		{
+			fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize);
+			return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
+		}
+
+		// else -- default case, all bells and whistles
+		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
+		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
 	}
 
 	// else

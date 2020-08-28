@@ -5,7 +5,6 @@
 #include "FountainMetadata.h"
 #include "serialize/format.h"
 
-#include <fstream>
 #include <map>
 #include <set>
 #include <string>
@@ -14,6 +13,7 @@
 // what we're trying to do here is have an object that can accept a complete (~8400 byte) buffer,
 // pull out the header, and give the appropriate decoder its bytes
 
+template <typename OUTSTREAM>
 class fountain_decoder_sink
 {
 public:
@@ -36,7 +36,7 @@ public:
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
 		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
-		std::ofstream f(file_path);
+		OUTSTREAM f(file_path);
 		f.write((char*)data.data(), data.size());
 		return true;
 	}
