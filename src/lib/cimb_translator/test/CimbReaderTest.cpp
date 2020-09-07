@@ -5,7 +5,6 @@
 
 #include "cimb_translator/CimbDecoder.h"
 #include "serialize/format.h"
-#include "serialize/str_join.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -20,6 +19,7 @@ namespace {
 		return s;
 	}
 }
+#include "serialize/str_join.h"
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
