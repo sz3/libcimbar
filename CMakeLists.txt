@@ -19,10 +19,8 @@ if(NOT DEFINED OPENCV_LIBS)
 	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
-        set(CPPFILESYSTEM "stdc++fs")
-    endif()
+if(NOT DEFINED CPPFILESYSTEM)
+    set(CPPFILESYSTEM "stdc++fs")
 endif()
 
 set (PROJECTS
@@ -58,4 +56,5 @@ include_directories(
 foreach(proj ${PROJECTS})
 	add_subdirectory(${proj} build/${proj})
 endforeach()
+
 
