@@ -1,0 +1,43 @@
+language: cpp
+
+addons: &gcc7
+  apt:
+    packages:
+      - g++-7
+    sources:
+      - ubuntu-toolchain-r-test
+
+addons: &clang6
+  apt:
+    packages:
+      - clang-6.0
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-bionic-6.0
+
+matrix:
+  include:
+    - env: CXX="g++-7" CC="gcc-7"
+      os: linux
+      dist: bionic
+      addons: &gcc7
+
+    - env: CXX="clang++-6.0" CC="clang-6.0"
+      os: linux
+      dist: bionic
+      addons: &clang6
+
+before_install:
+  - sudo apt-get -y install libopencv-dev cppcheck
+
+before_script:
+  - $CXX --version
+  - cmake --version
+
+script:
+    - mkdir -p build && cd build
+    - cmake ..
+    - make -j2
+    - make test CTEST_OUTPUT_ON_FAILURE=TRUE
+    - cppcheck ../src/
+
