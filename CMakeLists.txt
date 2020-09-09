@@ -11,9 +11,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-DLIBCIMBAR_PROJECT_ROOT=\\\"${libcimbar_SOURCE_DIR}\\\"")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic")
+	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -flto")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic -flto")
 endif()
+
+# workaround for weird clang error
+SET(CMAKE_AR ${CMAKE_CXX_COMPILER_AR} CACHE PATH "AR" FORCE)
+SET(CMAKE_RANLIB ${CMAKE_CXX_COMPILER_RANLIB} CACHE PATH "RANLIB" FORCE)
 
 if(NOT DEFINED OPENCV_LIBS)
 	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
