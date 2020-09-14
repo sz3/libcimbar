@@ -15,6 +15,20 @@ using std::string;
 using std::vector;
 
 
+namespace {
+	bool window_is_closed()
+	{
+		return cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0;
+	}
+
+	void show_image(const cv::Mat& img, unsigned delay)
+	{
+		cv::imshow("image", img);
+		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
+	}
+}
+
+
 int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
@@ -66,7 +80,7 @@ int main(int argc, char** argv)
 	loop_iterator shakeIt(shakePos);
 
 	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
-		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
+		if (!start and window_is_closed())
 			return running = false;
 		start = false;
 
@@ -82,8 +96,7 @@ int main(int argc, char** argv)
 			}
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
-		cv::imshow("image", windowImg);
-		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
+		show_image(windowImg, delay);
 		return true;
 	};
 
