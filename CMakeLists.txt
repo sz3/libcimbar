@@ -20,7 +20,11 @@ if(NOT DEFINED OPENCV_LIBS)
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
-    set(CPPFILESYSTEM "stdc++fs")
+	set(CPPFILESYSTEM "stdc++fs")
+endif()
+
+if(NOT DEFINED USE_SDL)
+	set(libcimbar_UI_LIB "opencv_highgui")
 endif()
 
 set (PROJECTS

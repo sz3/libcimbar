@@ -19,6 +19,7 @@ target_link_libraries(cimbar_send
 	wirehair
 	zstd
 	${OPENCV_LIBS}
+	${libcimbar_UI_LIB}
 )
 
 add_custom_command(
