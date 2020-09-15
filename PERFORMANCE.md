@@ -22,6 +22,7 @@
 			* this is neither reliable, nor representative of the usable case, however
 
 * we have good excuses:
-	* the android app is not currently using the GPU. OpenCV nominally supports OpenCL, but its SVM (shared virtual memory) support appears to be incomplete. In any case, the time cost of moving data between CPU memory and GPU memory makes the OpenCV+GPU non-viable on android (for now). As far as I know, this is a software problem, not a hard technical limitation.
-	* my test android app (cfc) is barbones, and kind of sucks: it doesn't do anything useful with camera settings. We capture at ~25 fps, and are forced to discard a full 60% of the images. A 100% success rate won't happen -- the camera capture rate and the screen display rate are not going to be perfectly aligned, resulting in some number of screen-torn frames. But I'm pretty confident we can do better than 40%!
+	* the android app is not currently using the GPU. OpenCV supports OpenCL (though you need a custom build on Android), but there doesn't seem to be a supported way to copy data from the GPU -> CPU without bottlenecking system resources (ex: a 90ms pause every frame). I'd like to investigate how well OpenGL PBOs will work for this, but in the mean time, no GPU for us.
+	* additionally, my test android app (cfc) is barbones, and kind of sucks: it doesn't do anything useful with camera settings. We capture at ~25 fps, and are forced to discard a full 60% of the images. A 100% success rate won't happen -- the camera capture rate and the screen display rate are not going to be perfectly aligned, resulting in some number of screen-torn frames. But I'm pretty confident we can do better than 40%!
 		* a bit of editorial warning may be in order: the android camera APIs are, to put it charitably, a raging tire fire
+		* cfc is currently using the legacy "camera" API. Despite repeated efforts, the camera2 API has eluded my comprehension.
