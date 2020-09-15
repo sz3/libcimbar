@@ -15,6 +15,17 @@
 using std::string;
 using std::vector;
 
+namespace {
+	std::shared_ptr<cimbar::window> create_window(unsigned width, unsigned height)
+	{
+    #ifdef LIBCIMBAR_USE_GLFW
+		return std::shared_ptr<cimbar::window>(new cimbar::window_glfw(1080, 1080, "cimbar_send"));
+    #else
+		return std::shared_ptr<cimbar::window>(new cimbar::window_cvhighgui());
+    #endif
+	}
+}
+
 
 int main(int argc, char** argv)
 {
@@ -39,7 +50,7 @@ int main(int argc, char** argv)
 	if (result.count("help") or !result.count("in"))
 	{
 	  std::cout << options.help() << std::endl;
-	  exit(0);
+	  return 0;
 	}
 
 	vector<string> infiles = result["in"].as<vector<string>>();
@@ -66,19 +77,15 @@ int main(int argc, char** argv)
 	}};
 	loop_iterator shakeIt(shakePos);
 
-#ifdef LIBCIMBAR_USE_GLFW
-	window_glfw w(1080, 1080, "cimbar_send");
-	if (!w.is_good())
+	std::shared_ptr<cimbar::window> w = create_window(1080, 1080);
+	if (!w or !w->is_good())
 	{
-		std::cerr << "failed to open GL window :(" << std::endl;
+		std::cerr << "failed to create window :(" << std::endl;
 		return 50;
 	}
-#else
-	window_cvhighgui w;
-#endif
 
-	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt, &w] (const cv::Mat& frame, unsigned) {
-		if (!start and w.should_close())
+	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt, w] (const cv::Mat& frame, unsigned) {
+		if (!start and w->should_close())
 			return running = false;
 		start = false;
 
@@ -95,7 +102,7 @@ int main(int argc, char** argv)
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
 
-		w.show(windowImg, delay);
+		w->show(windowImg, delay);
 		return true;
 	};
 

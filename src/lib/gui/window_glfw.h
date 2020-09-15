@@ -8,10 +8,13 @@
 #include <string>
 #include <thread>
 
-class window_glfw : public window_interface<window_glfw>
+namespace cimbar {
+
+class window_glfw : public window
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
+		: window()
 	{
 		if (!glfwInit())
 		{
@@ -85,3 +88,6 @@ protected:
 	GLFWwindow* _w;
 	bool _good = true;
 };
+
+}
+

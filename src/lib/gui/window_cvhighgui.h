@@ -2,10 +2,18 @@
 
 #include "window_interface.h"
 
-class window_cvhighgui : public window_interface<window_cvhighgui>
+namespace cimbar {
+
+class window_cvhighgui : public window
 {
 public:
-	window_cvhighgui() {}
+	window_cvhighgui() : window()
+	{}
+
+	bool is_good() const
+	{
+		return true;
+	}
 
 	bool should_close() const
 	{
@@ -20,3 +28,5 @@ public:
 
 protected:
 };
+
+}
