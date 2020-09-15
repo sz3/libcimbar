@@ -2,8 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
-#include "gui/window_cvhighgui.h"
-#include "gui/window_glfw.h"
+#include "gui/window.h"
 #include "serialize/str.h"
 #include "util/loop_iterator.h"
 

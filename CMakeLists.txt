@@ -8,7 +8,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-DLIBCIMBAR_PROJECT_ROOT=\\\"${libcimbar_SOURCE_DIR}\\\" -DLIBCIMBAR_USE_GLFW=${USE_GLFW}")
+add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os")
@@ -25,6 +26,7 @@ endif()
 
 if(DEFINED USE_GLFW)
 	set(libcimbar_UI_LIB "glfw" "GL")
+	add_definitions("-DLIBCIMBAR_USE_GLFW=${USE_GLFW}")
 else()
 	set(libcimbar_UI_LIB "opencv_highgui")
 endif()
