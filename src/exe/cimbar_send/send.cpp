@@ -2,6 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "gui/window_cvhighgui.h"
 #include "gui/window_glfw.h"
 #include "serialize/str.h"
 #include "util/loop_iterator.h"
@@ -66,12 +67,16 @@ int main(int argc, char** argv)
 	}};
 	loop_iterator shakeIt(shakePos);
 
+#ifdef LIBCIMBAR_USE_GLFW
 	window_glfw w(1080, 1080, "cimbar_send");
 	if (!w.is_good())
 	{
 		std::cerr << "failed to open GL window :(" << std::endl;
 		return 50;
 	}
+#else
+	window_cvhighgui w;
+#endif
 
 	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt, &w] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
