@@ -23,7 +23,9 @@ if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
 endif()
 
-if(NOT DEFINED USE_SDL)
+if(DEFINED USE_GLFW)
+	set(libcimbar_UI_LIB "glfw" "GL")
+else()
 	set(libcimbar_UI_LIB "opencv_highgui")
 endif()
 

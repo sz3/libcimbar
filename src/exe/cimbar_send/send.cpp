@@ -2,6 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "gui/window_glfw.h"
 #include "serialize/str.h"
 #include "util/loop_iterator.h"
 
@@ -13,20 +14,6 @@
 #include <vector>
 using std::string;
 using std::vector;
-
-
-namespace {
-	bool window_is_closed()
-	{
-		return cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0;
-	}
-
-	void show_image(const cv::Mat& img, unsigned delay)
-	{
-		cv::imshow("image", img);
-		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
-	}
-}
 
 
 int main(int argc, char** argv)
@@ -79,8 +66,15 @@ int main(int argc, char** argv)
 	}};
 	loop_iterator shakeIt(shakePos);
 
-	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
-		if (!start and window_is_closed())
+	window_glfw w(1080, 1080, "cimbar_send");
+	if (!w.is_good())
+	{
+		std::cerr << "failed to open GL window :(" << std::endl;
+		return 50;
+	}
+
+	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt, &w] (const cv::Mat& frame, unsigned) {
+		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
@@ -96,7 +90,8 @@ int main(int argc, char** argv)
 			}
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
-		show_image(windowImg, delay);
+
+		w.show(windowImg, delay);
 		return true;
 	};
 
