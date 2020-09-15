@@ -4,7 +4,9 @@
 
 #include <GLFW/glfw3.h>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 #include <string>
+#include <thread>
 
 class window_glfw
 {
@@ -48,9 +50,15 @@ public:
 
 	void show(const cv::Mat& img, unsigned delay)
 	{
+		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+
 		cimbar::mat_to_gl::draw(img);
 		swap();
 		poll();
+
+		unsigned millis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
+		if (delay > millis)
+			std::this_thread::sleep_for(std::chrono::milliseconds(delay-millis));
 	}
 
 protected:
