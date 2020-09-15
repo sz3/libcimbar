@@ -1,14 +1,14 @@
 #pragma once
 
 #include "mat_to_gl.h"
+#include "window_interface.h"
 
 #include <GLFW/glfw3.h>
-#include <opencv2/opencv.hpp>
 #include <chrono>
 #include <string>
 #include <thread>
 
-class window_glfw
+class window_glfw : public window_interface<window_glfw>
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)

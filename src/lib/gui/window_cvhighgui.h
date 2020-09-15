@@ -1,8 +1,8 @@
 #pragma once
 
-#include <opencv2/opencv.hpp>
+#include "window_interface.h"
 
-class window_cvhighgui
+class window_cvhighgui : public window_interface<window_cvhighgui>
 {
 public:
 	window_cvhighgui() {}
