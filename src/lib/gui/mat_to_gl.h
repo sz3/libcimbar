@@ -13,8 +13,8 @@ namespace mat_to_gl {
 		glBindTexture(GL_TEXTURE_2D, texid);
 
 		// not sure whether we need this or not
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -30,7 +30,8 @@ namespace mat_to_gl {
 			default:
 				;
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mat.cols, mat.rows, 0, format, GL_UNSIGNED_BYTE, mat.data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mat.cols, mat.rows, 0, format, GL_UNSIGNED_BYTE, mat.data);
+		glBindTexture(GL_TEXTURE_2D, 0); // clean up
 		return texid;
 	}
 
@@ -43,8 +44,9 @@ namespace mat_to_gl {
 
 		glEnable(GL_TEXTURE_2D);
 		GLuint tex = create_gl_texture(mat);
+		glBindTexture(GL_TEXTURE_2D, tex);
 
-		// might have to mirror direction here??
+		// these are old and busted, need to replace with GLSL hotness. I guess. :(
 		glBegin(GL_QUADS);
 		glTexCoord2i(0, 0);
 		glVertex2i(0, 0);
