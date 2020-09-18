@@ -26,7 +26,7 @@ public:
 	unsigned encode(const std::string& filename, std::string output_prefix);
 
 	template <typename STREAM>
-	std::shared_ptr<fountain_encoder_stream> create_fountain_encoder(STREAM& stream, int compression_level=6);
+	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
 
 	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6);
 	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6);
@@ -105,7 +105,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 }
 
 template <typename STREAM>
-inline std::shared_ptr<fountain_encoder_stream> Encoder::create_fountain_encoder(STREAM& stream, int compression_level)
+inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& stream, int compression_level)
 {
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes);
 
@@ -125,13 +125,13 @@ inline std::shared_ptr<fountain_encoder_stream> Encoder::create_fountain_encoder
 		ss = std::move(f);
 	}
 
-	return fountain_encoder_stream::create_shared(ss, chunk_size, 0); // will eventually do something clever with encode_id?
+	return fountain_encoder_stream::create(ss, chunk_size, 0); // will eventually do something clever with encode_id?
 }
 
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level)
 {
 	std::ifstream infile(filename);
-	std::shared_ptr<fountain_encoder_stream> fes = create_fountain_encoder(infile, compression_level);
+	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, compression_level);
 	if (!fes)
 		return 0;
 

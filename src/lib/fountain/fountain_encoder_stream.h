@@ -10,6 +10,9 @@
 class fountain_encoder_stream
 {
 public:
+	using ptr = std::shared_ptr<fountain_encoder_stream>;
+
+protected:
 	static const unsigned _headerSize = 6;
 
 protected:
@@ -27,22 +30,14 @@ protected:
 	}
 
 public:
-	template <typename STREAM>
-	static fountain_encoder_stream create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
-	{
-		std::stringstream buffs;
-		if (stream)
-			 buffs << stream.rdbuf();
-		return fountain_encoder_stream(buffs.str(), buffer_size, encode_id);
-	}
 
 	template <typename STREAM>
-	static std::shared_ptr<fountain_encoder_stream> create_shared(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
+	static fountain_encoder_stream::ptr create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
 	{
 		std::stringstream buffs;
 		if (stream)
 			buffs << stream.rdbuf();
-		return std::shared_ptr<fountain_encoder_stream>( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id) );
+		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id) );
 	}
 
 	bool good() const
