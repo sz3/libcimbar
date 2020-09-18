@@ -24,6 +24,10 @@ public:
 	std::optional<cv::Mat> encode_next(STREAM& stream);
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
+
+	template <typename STREAM>
+	std::shared_ptr<fountain_encoder_stream> create_fountain_encoder(STREAM& stream, int compression_level=6);
+
 	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6);
 	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6);
 
@@ -100,19 +104,19 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level)
+template <typename STREAM>
+inline std::shared_ptr<fountain_encoder_stream> Encoder::create_fountain_encoder(STREAM& stream, int compression_level)
 {
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes);
 
 	std::stringstream ss;
-	std::ifstream infile(filename);
 	if (compression_level <= 0)
-		ss << infile.rdbuf();
+		ss << stream.rdbuf();
 	else
 	{
 		cimbar::zstd_compressor<std::stringstream> f;
-		if (!f.compress(infile))
-			return 0;
+		if (!f.compress(stream))
+			return nullptr;
 
 		// find size of compressed zstd stream, and pad it if necessary.
 		size_t compressedSize = f.size();
@@ -121,18 +125,27 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 		ss = std::move(f);
 	}
 
-	fountain_encoder_stream fes = fountain_encoder_stream::create(ss, chunk_size, 0); // will eventually do something clever with encode_id?
+	return fountain_encoder_stream::create_shared(ss, chunk_size, 0); // will eventually do something clever with encode_id?
+}
+
+inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level)
+{
+	std::ifstream infile(filename);
+	std::shared_ptr<fountain_encoder_stream> fes = create_fountain_encoder(infile, compression_level);
+	if (!fes)
+		return 0;
+
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
 	// the fountain_chunk_size will be 690.
 	// fountain_chunks_per_frame() is currently a constant (10).
-	unsigned requiredFrames = fes.blocks_required() * 2 / cimbar::Config::fountain_chunks_per_frame();
+	unsigned requiredFrames = fes->blocks_required() * 2 / cimbar::Config::fountain_chunks_per_frame();
 	if (requiredFrames == 0)
 		requiredFrames = 1; // could also do +1 on the division above?
 
 	unsigned i = 0;
 	while (i < requiredFrames)
 	{
-		auto frame = encode_next(fes);
+		auto frame = encode_next(*fes);
 		if (!frame)
 			break;
 

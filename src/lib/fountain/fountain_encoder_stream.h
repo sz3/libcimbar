@@ -3,6 +3,7 @@
 
 #include "FountainEncoder.h"
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -33,6 +34,15 @@ public:
 		if (stream)
 			 buffs << stream.rdbuf();
 		return fountain_encoder_stream(buffs.str(), buffer_size, encode_id);
+	}
+
+	template <typename STREAM>
+	static std::shared_ptr<fountain_encoder_stream> create_shared(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
+	{
+		std::stringstream buffs;
+		if (stream)
+			buffs << stream.rdbuf();
+		return std::shared_ptr<fountain_encoder_stream>( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id) );
 	}
 
 	bool good() const
