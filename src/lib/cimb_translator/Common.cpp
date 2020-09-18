@@ -1,9 +1,10 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "Common.h"
 
-#include "serialize/format.h"
-
 #include "base91/base.hpp"
+#include "serialize/format.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 #include <opencv2/opencv.hpp>
 
 #include <map>
@@ -46,18 +47,25 @@ namespace {
 
 namespace cimbar {
 
-cv::Mat load_img(string path, const string& image_dir)
+cv::Mat load_img(string path)
 {
-	if (image_dir != "")
-		return cv::imread(image_dir + "/" + path);
-
 	auto it = cimbar::bitmaps.find(path);
 	if (it == cimbar::bitmaps.end())
-		return cv::imread(path);
+		return cv::Mat();
 
 	string bytes = base91::decode(it->second);
-	vector<char> data(bytes.data(), bytes.data() + bytes.size());
-	return cv::imdecode(data, cv::IMREAD_COLOR);
+	vector<unsigned char> data(bytes.data(), bytes.data() + bytes.size());
+
+	int width, height, channels;
+	std::unique_ptr<uint8_t[]> imgdata(stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &width, &height, &channels, STBI_rgb_alpha));
+	if (!imgdata)
+		return cv::Mat();
+
+	size_t len = width * height * channels;
+	cv::Mat mat(height, width, CV_MAKETYPE(CV_8U, channels));
+	std::copy(imgdata.get(), imgdata.get()+len, mat.data);
+	cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+	return mat;
 }
 
 RGB getColor(unsigned index, unsigned num_colors)
@@ -68,12 +76,12 @@ RGB getColor(unsigned index, unsigned num_colors)
 		return getColor8(index);
 }
 
-cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color, const string& image_dir)
+cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
 {
 	static cv::Vec3b background({0xFF, 0xFF, 0xFF});
 
 	string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
-	cv::Mat tile = load_img(imgPath, image_dir);
+	cv::Mat tile = load_img(imgPath);
 
 	uchar r, g, b;
 	std::tie(r, g, b) = getColor(color, num_colors);
@@ -90,11 +98,6 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 		c = {b, g, r};
 	}
 	return tile;
-}
-
-cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, const string& image_dir, unsigned num_colors, unsigned color)
-{
-	return getTile(symbol_bits, symbol, dark, num_colors, color, image_dir);
 }
 
 }
