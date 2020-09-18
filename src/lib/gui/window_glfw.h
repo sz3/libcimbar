@@ -61,7 +61,7 @@ public:
 		if (_display)
 		{
 			cv::Mat rgb;
-			cv::cvtColor(img, rgb, CV_BGR2RGB);
+			cv::cvtColor(img, rgb, cv::COLOR_BGR2RGB);
 			GLuint texture = cimbar::mat_to_gl::create_gl_texture(rgb);
 			_display->draw(texture);
 			glDeleteTextures(1, &texture);
