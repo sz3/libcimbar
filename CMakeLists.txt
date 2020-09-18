@@ -44,6 +44,7 @@ set (PROJECTS
 	src/lib/encoder
 	src/lib/extractor
 	src/lib/fountain
+	src/lib/gui
 	src/lib/image_hash
 	src/lib/serialize
 	src/lib/util

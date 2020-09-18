@@ -1,5 +1,7 @@
+/* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include "gl_2d_display.h"
 #include "mat_to_gl.h"
 #include "window_interface.h"
 
@@ -14,7 +16,7 @@ class window_glfw : public window
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
-		: window()
+	    : window()
 	{
 		if (!glfwInit())
 		{
@@ -31,6 +33,7 @@ public:
 
 		glfwMakeContextCurrent(_w);
 
+		_display = std::make_shared<cimbar::gl_2d_display>();
 		init_opengl(width, height);
 	}
 
@@ -55,9 +58,17 @@ public:
 	{
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
-		cimbar::mat_to_gl::draw(img);
-		swap();
-		poll();
+		if (_display)
+		{
+			cv::Mat rgb;
+			cv::cvtColor(img, rgb, CV_BGR2RGB);
+			GLuint texture = cimbar::mat_to_gl::create_gl_texture(rgb);
+			_display->draw(texture);
+			glDeleteTextures(1, &texture);
+
+			swap();
+			poll();
+		}
 
 		unsigned millis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		if (delay > millis)
@@ -67,10 +78,8 @@ public:
 protected:
 	void init_opengl(int width, int height)
 	{
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glViewport(0, 0, width, height);
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0.0, width, height, 0.0, 0.0, 100.0);
 	}
 
 	void swap()
@@ -86,6 +95,7 @@ protected:
 
 protected:
 	GLFWwindow* _w;
+	std::shared_ptr<cimbar::gl_2d_display> _display;
 	bool _good = true;
 };
 
