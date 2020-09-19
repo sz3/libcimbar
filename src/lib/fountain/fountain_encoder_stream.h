@@ -45,6 +45,13 @@ public:
 		return _encoder.good();
 	}
 
+	void reset()
+	{
+		_block = 0;
+		_buffIndex = ~0U;
+		_lastRead = 0;
+	}
+
 	unsigned block_count() const
 	{
 		return _block;
