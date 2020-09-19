@@ -5,6 +5,8 @@
 #include "fountain/FountainInit.h"
 #include "image_hash/average_hash.h"
 #include "serialize/format.h"
+#include "util/byte_istream.h"
+#include "util/File.h"
 #include "util/MakeTempDirectory.h"
 
 #include <iostream>
@@ -73,4 +75,29 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( hash, image_hash::average_hash(img) );
+}
+
+TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
+{
+	// use the fountain_encoder_stream directly on a char*,int pair
+	FountainInit::init();
+	MakeTempDirectory tempdir;
+	Encoder enc(40, 4, 2);
+
+	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
+	std::string contents = File(inputFile).read_all();
+
+	cimbar::byte_istream bis(contents.data(), contents.size());
+	// equivalent to:
+	// cimbar::bytebuf bb(contents.data(), contents.size());
+	// std::istream is(&bb);
+
+	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis);
+	assertTrue( fes );
+
+	std::optional<cv::Mat> frame = enc.encode_next(*fes);
+	assertTrue( frame );
+
+	uint64_t hash = 0xf8cde200e90582e4;
+	assertEquals( hash, image_hash::average_hash(*frame) );
 }
