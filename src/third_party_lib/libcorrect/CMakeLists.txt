@@ -72,11 +72,9 @@ if(HAVE_SSE)
 else()
   set(correct_obj_files $<TARGET_OBJECTS:correct-reed-solomon> $<TARGET_OBJECTS:correct-convolutional>)
 endif()
-add_library(correct SHARED ${correct_obj_files})
 add_library(correct_static ${correct_obj_files})
 set_target_properties(correct_static PROPERTIES OUTPUT_NAME "correct")
 if(HAVE_SSE)
-  target_compile_definitions(correct PUBLIC HAVE_SSE=1)
   target_compile_definitions(correct_static PUBLIC HAVE_SSE=1)
 endif()
 
@@ -85,7 +83,4 @@ endif()
 #add_subdirectory(tools)
 # add_subdirectory(benchmarks)
 
-install(TARGETS correct correct_static
-        DESTINATION lib)
-install(FILES ${INSTALL_HEADERS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
 
