@@ -56,6 +56,15 @@ set(GEN_TABLES
         gf256.h
         )
 
+if(NOT ANDROID)
+    set(ARCH_NATIVE "-march=native")
+endif()
+
+if(MSVC)
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_NATIVE}")
+endif()
+
 include_directories(.)
 
 add_library(wirehair STATIC ${LIB_SOURCE_FILES})

@@ -28,7 +28,7 @@ target_link_libraries(encoder_test
 
 	cimb_translator
 
-	correct
+	correct_static
 	wirehair
 	zstd
 	${OPENCV_LIBS}
