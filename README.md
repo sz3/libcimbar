@@ -59,7 +59,7 @@ Decode (extracts file into output directory):
 
 Encode and animate to window:
 ```
-./cimbar_video inputfile.pdf
+./cimbar_send inputfile.pdf
 ```
 
 ## Performance numbers
