@@ -16,6 +16,18 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic")
 endif()
 
+if(DEFINED WASM)
+	set( DISABLE_TESTS true )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE" )
+	file( GLOB OPENCV_LIBS "${OPENCV_DIR}/opencv-build-wasm/build_wasm/lib/*.a" )
+	file( GLOB opencv_include_modules "${OPENCV_DIR}/modules/*/include" )
+	include_directories(
+		${OPENCV_DIR}/include/
+		${OPENCV_DIR}/opencv-build-wasm/build_wasm/
+		${opencv_include_modules}
+	)
+endif()
+
 if(NOT DEFINED OPENCV_LIBS)
 	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
 endif()
@@ -32,12 +44,6 @@ else()
 endif()
 
 set (PROJECTS
-	src/exe/cimbar
-	src/exe/cimbar_scan  # rename to cimbar_extract
-	src/exe/cimbar_send
-	src/exe/cimbar_video
-	src/exe/build_image_assets
-
 	src/lib/bit_file
 	src/lib/cimb_translator
 	src/lib/compression
@@ -57,6 +63,22 @@ set (PROJECTS
 	src/third_party_lib/wirehair
 	src/third_party_lib/zstd
 )
+
+if(DEFINED WASM)
+set (PROJECTS
+	${PROJECTS}
+	src/wasm/cimbar_js
+)
+else()
+set(PROJECTS
+	${PROJECTS}
+	src/exe/cimbar
+	src/exe/cimbar_scan  # rename to cimbar_extract
+	src/exe/cimbar_send
+	src/exe/cimbar_video
+	src/exe/build_image_assets
+)
+endif()
 
 include_directories(
 	${libcimbar_SOURCE_DIR}/src/lib
