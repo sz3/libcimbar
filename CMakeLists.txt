@@ -16,7 +16,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic")
 endif()
 
-if(DEFINED WASM)
+if(DEFINED USE_WASM)
 	set( DISABLE_TESTS true )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE" )
 	file( GLOB OPENCV_LIBS "${OPENCV_DIR}/opencv-build-wasm/build_wasm/lib/*.a" )
@@ -48,7 +48,6 @@ set (PROJECTS
 	src/lib/cimb_translator
 	src/lib/compression
 	src/lib/encoder
-	src/lib/extractor
 	src/lib/fountain
 	src/lib/gui
 	src/lib/image_hash
@@ -64,7 +63,7 @@ set (PROJECTS
 	src/third_party_lib/zstd
 )
 
-if(DEFINED WASM)
+if(DEFINED USE_WASM)
 set (PROJECTS
 	${PROJECTS}
 	src/wasm/cimbar_js
@@ -72,6 +71,8 @@ set (PROJECTS
 else()
 set(PROJECTS
 	${PROJECTS}
+	src/lib/extractor
+
 	src/exe/cimbar
 	src/exe/cimbar_scan  # rename to cimbar_extract
 	src/exe/cimbar_send

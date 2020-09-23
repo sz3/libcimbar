@@ -2,7 +2,7 @@
 #include "unittest.h"
 
 #include "encoder/Decoder.h"
-#include "encoder/Encoder.h"
+#include "encoder/FileEncoder.h"
 
 #include "compression/zstd_decompressor.h"
 #include "fountain/FountainInit.h"
@@ -29,7 +29,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	}
 
 	 // will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
-	Encoder enc(30, 4, 2);
+	FileEncoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
 	uint64_t hash = 0xaecc8c00efce8c28;

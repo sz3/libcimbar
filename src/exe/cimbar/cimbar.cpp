@@ -2,7 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "compression/zstd_decompressor.h"
 #include "encoder/Decoder.h"
-#include "encoder/Encoder.h"
+#include "encoder/FileEncoder.h"
 #include "extractor/Extractor.h"
 #include "extractor/SimpleCameraCalibration.h"
 #include "extractor/Undistort.h"
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 
 	if (encode)
 	{
-		Encoder en(ecc);
+		FileEncoder en(ecc);
 		for (const string& f : infiles)
 		{
 			if (fountain)
