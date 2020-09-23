@@ -33,6 +33,9 @@ I would like to add emscripten+wasm support.
 * wirehair - https://github.com/catid/wirehair
 * zstd - https://github.com/facebook/zstd
 
+Optional:
+* GLFW - https://github.com/glfw/glfw (for when `opencv-highgui` is not available)
+
 ## Build
 
 ```
