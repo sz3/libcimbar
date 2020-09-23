@@ -53,10 +53,8 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	FountainInit::init();
 	MakeTempDirectory tempdir;
 
-	std::string outPrefix = tempdir.path() / "encoder.fountain";
-
-	std::stringstream infile;
-	infile << "hello";
+	//input
+	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
 
 	// create encoder
 	Encoder enc(30, 4, 2);
@@ -69,13 +67,21 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30));
 
 	// encode frames, then pass to decoder
-	std::optional<cv::Mat> frame = enc.encode_next(*fes);
-	assertTrue( frame );
+	for (int i = 0; i < 100; ++i)
+	{
+		std::optional<cv::Mat> frame = enc.encode_next(*fes);
+		assertTrue( frame );
 
-	unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
-	assertEquals( 7500, bytesDecoded );
+		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
+		assertEquals( 7500, bytesDecoded );
+
+		if (fds.num_done())
+			break;
+	}
 
 	// done
-	std::string decodedContents = File(tempdir.path() / "0.751").read_all();
-	assertEquals( "hello", decodedContents );
+	assertEquals( 1, fds.num_done() );
+	std::string decodedContents = File(tempdir.path() / "0.5387").read_all();
+	assertEquals( 16727, decodedContents.size() );
+	assertStringContains( "Mozilla Public License Version 2.0", decodedContents );
 }
