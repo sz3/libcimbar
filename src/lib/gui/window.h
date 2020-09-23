@@ -3,6 +3,12 @@
 
 #ifdef LIBCIMBAR_USE_GLFW
 #include "gui/window_glfw.h"
+namespace cimbar {
+	using window = window_glfw;
+}
 #else
 #include "gui/window_cvhighgui.h"
+namespace cimbar {
+	using window = window_cvhighgui;
+}
 #endif

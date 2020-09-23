@@ -5,10 +5,10 @@
 
 namespace cimbar {
 
-class window_cvhighgui : public window
+class window_cvhighgui : public window_interface<window_cvhighgui>
 {
 public:
-	window_cvhighgui() : window()
+	window_cvhighgui(unsigned, unsigned, std::string)
 	{}
 
 	bool is_good() const

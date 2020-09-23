@@ -12,11 +12,10 @@
 
 namespace cimbar {
 
-class window_glfw : public window
+class window_glfw : public window_interface<window_glfw>
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
-	    : window()
 	{
 		if (!glfwInit())
 		{
