@@ -8,7 +8,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-DLIBCIMBAR_PROJECT_ROOT=\\\"${libcimbar_SOURCE_DIR}\\\"")
+add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
+
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os")
@@ -20,13 +21,20 @@ if(NOT DEFINED OPENCV_LIBS)
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
-    set(CPPFILESYSTEM "stdc++fs")
+	set(CPPFILESYSTEM "stdc++fs")
+endif()
+
+if(DEFINED USE_GLFW)
+	set(libcimbar_UI_LIB "glfw" "GL")
+	add_definitions("-DLIBCIMBAR_USE_GLFW=${USE_GLFW}")
+else()
+	set(libcimbar_UI_LIB "opencv_highgui")
 endif()
 
 set (PROJECTS
 	src/exe/cimbar
-	src/exe/cimbar_scan
-	src/exe/cimbar_video
+	src/exe/cimbar_extract
+	src/exe/cimbar_send
 	src/exe/build_image_assets
 
 	src/lib/bit_file
@@ -35,6 +43,7 @@ set (PROJECTS
 	src/lib/encoder
 	src/lib/extractor
 	src/lib/fountain
+	src/lib/gui
 	src/lib/image_hash
 	src/lib/serialize
 	src/lib/util

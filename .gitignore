@@ -1,6 +1,7 @@
 CMakeFiles/
 Testing/
 build/
+dist/
 CMakeCache.txt
 CMakeLists.txt.user
 CTestTestfile.cmake

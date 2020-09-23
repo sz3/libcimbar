@@ -2,6 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "gui/window.h"
 #include "serialize/str.h"
 #include "util/loop_iterator.h"
 
@@ -13,7 +14,6 @@
 #include <vector>
 using std::string;
 using std::vector;
-
 
 int main(int argc, char** argv)
 {
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 	if (result.count("help") or !result.count("in"))
 	{
 	  std::cout << options.help() << std::endl;
-	  exit(0);
+	  return 0;
 	}
 
 	vector<string> infiles = result["in"].as<vector<string>>();
@@ -65,8 +65,15 @@ int main(int argc, char** argv)
 	}};
 	loop_iterator shakeIt(shakePos);
 
-	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
-		if (!start and cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0)
+	cimbar::window w(windowImg.cols, windowImg.rows, "cimbar_send");
+	if (!w.is_good())
+	{
+		std::cerr << "failed to create window :(" << std::endl;
+		return 50;
+	}
+
+	auto draw = [&w, &windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
+		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
@@ -82,8 +89,8 @@ int main(int argc, char** argv)
 			}
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
-		cv::imshow("image", windowImg);
-		cv::waitKey(delay); // functions as the frame delay... you can hold down a key to make it go faster
+
+		w.show(windowImg, delay);
 		return true;
 	};
 
