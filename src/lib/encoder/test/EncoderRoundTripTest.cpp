@@ -28,7 +28,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 		f << "hello"; // 5 bytes!
 	}
 
-	 // will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
+	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
 	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
@@ -46,4 +46,42 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 
 	std::string decodedContents = File(tempdir.path() / "0.751").read_all();
 	assertEquals( "hello", decodedContents );
+}
+
+TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
+{
+	FountainInit::init();
+	MakeTempDirectory tempdir;
+
+	//input
+	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
+
+	// create encoder
+	Encoder enc(30, 4, 2);
+	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(infile);
+	assertTrue( fes );
+	assertTrue( fes->good() );
+
+	// create decoder
+	Decoder dec(30);
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30));
+
+	// encode frames, then pass to decoder
+	for (int i = 0; i < 100; ++i)
+	{
+		std::optional<cv::Mat> frame = enc.encode_next(*fes);
+		assertTrue( frame );
+
+		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
+		assertEquals( 7500, bytesDecoded );
+
+		if (fds.num_done())
+			break;
+	}
+
+	// done
+	assertEquals( 1, fds.num_done() );
+	std::string decodedContents = File(tempdir.path() / "0.5387").read_all();
+	assertEquals( 16727, decodedContents.size() );
+	assertStringContains( "Mozilla Public License Version 2.0", decodedContents );
 }

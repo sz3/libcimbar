@@ -18,10 +18,9 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 	// it's as if the tile set is not optimal!
 	CimbDecoder cd(4, 0);
 
-	string root = TestCimbar::getProjectDir();
 	for (int i = 0; i < 16; ++i)
 	{
-		cv::Mat tile = cimbar::getTile(4, i, true, root);
+		cv::Mat tile = cimbar::getTile(4, i, true);
 		cv::Mat tenxten(10, 10, tile.type());
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 		unsigned res = cd.decode(tenxten);
@@ -38,10 +37,9 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 	// But in this test, we just want to see it get the right answer.
 	CimbDecoder cd(4, 0, true, 0xFF);
 
-	string root = TestCimbar::getProjectDir();
 	for (int i = 0; i < 16; ++i)
 	{
-		cv::Mat tile = cimbar::getTile(4, i, true, root);
+		cv::Mat tile = cimbar::getTile(4, i, true);
 		cv::Mat tenxten(10, 10, tile.type());
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
@@ -86,8 +84,7 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string root = TestCimbar::getProjectDir();
-	cv::Mat tile = cimbar::getTile(4, 2, true, root, 4, 2);
+	cv::Mat tile = cimbar::getTile(4, 2, true, 4, 2);
 	cv::resize(tile, tile, cv::Size(10, 10));
 
 	unsigned color = cd.decode_color(tile, {0, 0});
@@ -100,11 +97,10 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string root = TestCimbar::getProjectDir();
 	for (int c = 0; c < 4; ++c)  // 2 color bits == 4 colors
 		for (int i = 0; i < 16; ++i)
 		{
-			cv::Mat tile = cimbar::getTile(4, i, true, root, 4, c);
+			cv::Mat tile = cimbar::getTile(4, i, true, 4, c);
 			cv::Mat tenxten(10, 10, tile.type());
 			tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 			DYNAMIC_SECTION( "testColor " << c << ":" << i )

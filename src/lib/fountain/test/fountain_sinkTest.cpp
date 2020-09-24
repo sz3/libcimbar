@@ -44,8 +44,8 @@ namespace {
 	string createFrame(uint8_t encode_id, unsigned size)
 	{
 		stringstream input = dummyContents(size);
-		fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, encode_id);
-		return createFrame(fes);
+		fountain_encoder_stream::ptr fes = fountain_encoder_stream::create(input, 690, encode_id);
+		return createFrame(*fes);
 	}
 }
 
@@ -87,11 +87,11 @@ TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
-	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 2);
+	fountain_encoder_stream::ptr fes = fountain_encoder_stream::create(input, 690, 2);
 
 	for (int i = 0; i < 4; ++i)
 	{
-		string iframe = createFrame(fes);
+		string iframe = createFrame(*fes);
 		assertEquals( 6900, iframe.size() );
 
 		FountainMetadata md(iframe.data(), iframe.size());
@@ -119,9 +119,9 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
 
 	stringstream input = dummyContents(20000);
-	fountain_encoder_stream fes = fountain_encoder_stream::create(input, 690, 3);
+	fountain_encoder_stream::ptr fes = fountain_encoder_stream::create(input, 690, 3);
 
-	string iframe = createFrame(fes);
+	string iframe = createFrame(*fes);
 	assertEquals( 6900, iframe.size() );
 
 	FountainMetadata md(iframe.data(), iframe.size());

@@ -3,12 +3,16 @@
 
 #include "FountainEncoder.h"
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 
 class fountain_encoder_stream
 {
 public:
+	using ptr = std::shared_ptr<fountain_encoder_stream>;
+
+protected:
 	static const unsigned _headerSize = 6;
 
 protected:
@@ -26,18 +30,26 @@ protected:
 	}
 
 public:
+
 	template <typename STREAM>
-	static fountain_encoder_stream create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
+	static fountain_encoder_stream::ptr create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
 	{
 		std::stringstream buffs;
 		if (stream)
-			 buffs << stream.rdbuf();
-		return fountain_encoder_stream(buffs.str(), buffer_size, encode_id);
+			buffs << stream.rdbuf();
+		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id) );
 	}
 
 	bool good() const
 	{
 		return _encoder.good();
+	}
+
+	void reset()
+	{
+		_block = 0;
+		_buffIndex = ~0U;
+		_lastRead = 0;
 	}
 
 	unsigned block_count() const
