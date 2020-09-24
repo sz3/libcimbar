@@ -58,8 +58,8 @@ return {
   nextFrame : function()
   {
     //console.log("draw frame, interval " + _interval);
-    setTimeout(Main.nextFrame, _interval);
     Module._render();
+    setTimeout(Main.nextFrame, _interval);
   },
 
   setHTML : function(id, msg)
