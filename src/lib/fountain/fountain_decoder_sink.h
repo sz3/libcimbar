@@ -5,9 +5,9 @@
 #include "FountainMetadata.h"
 #include "serialize/format.h"
 
-#include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 // what we're trying to do here is have an object that can accept a complete (~8400 byte) buffer,
@@ -78,7 +78,7 @@ public:
 			return false;
 
 		// find or create
-		auto p = _streams.emplace(std::piecewise_construct, std::make_tuple(md.id()), std::make_tuple(md.file_size(), _chunkSize));
+		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
 			return false;
@@ -104,11 +104,17 @@ public:
 	}
 
 protected:
+	// streams is limited to at most 8 decoders at a time. Current, we just use the lower bits of the encode_id.
+	uint8_t stream_slot(const FountainMetadata& md) const
+	{
+		return md.encode_id() & 0x7;
+	}
+
+protected:
 	std::string _dataDir;
 	unsigned _chunkSize;
 
-	// streams becomes uint64_t,fds ... uint64_t will be combo of encode_id,size
-	std::map<uint64_t, fountain_decoder_stream> _streams;
-	// set just is the uint64_t
+	std::unordered_map<uint8_t, fountain_decoder_stream> _streams;
+	// track the uint64_t combo of (encode_id,size) to avoid redundant work
 	std::set<uint64_t> _done;
 };
