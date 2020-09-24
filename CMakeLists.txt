@@ -17,8 +17,10 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 endif()
 
 if(DEFINED USE_WASM)
-	set( DISABLE_TESTS true )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE" )
+	set(DISABLE_TESTS true)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os")
+
 	file( GLOB OPENCV_LIBS "${OPENCV_DIR}/opencv-build-wasm/build_wasm/lib/*.a" )
 	file( GLOB opencv_include_modules "${OPENCV_DIR}/modules/*/include" )
 	include_directories(
