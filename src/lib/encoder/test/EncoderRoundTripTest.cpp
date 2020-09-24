@@ -57,7 +57,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
 
 	// create encoder
-	Encoder enc(30, 4, 2);
+	FileEncoder enc(30, 4, 2);
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(infile);
 	assertTrue( fes );
 	assertTrue( fes->good() );
