@@ -30,8 +30,12 @@ I would like to add emscripten+wasm support.
 * libcorrect - https://github.com/quiet/libcorrect
 * libpopcnt - https://github.com/kimwalisch/libpopcnt
 * PicoSHA2 - https://github.com/okdshin/PicoSHA2 (used for testing)
+* stb_image - https://github.com/nothings/stb (for the png loader)
 * wirehair - https://github.com/catid/wirehair
 * zstd - https://github.com/facebook/zstd
+
+Optional:
+* GLFW - https://github.com/glfw/glfw (for when `opencv-highgui` is not available)
 
 ## Build
 
@@ -59,7 +63,7 @@ Decode (extracts file into output directory):
 
 Encode and animate to window:
 ```
-./cimbar_video inputfile.pdf
+./cimbar_send inputfile.pdf
 ```
 
 ## Performance numbers

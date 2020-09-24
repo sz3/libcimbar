@@ -74,9 +74,8 @@ set(PROJECTS
 	src/lib/extractor
 
 	src/exe/cimbar
-	src/exe/cimbar_scan  # rename to cimbar_extract
+	src/exe/cimbar_extract
 	src/exe/cimbar_send
-	src/exe/cimbar_video
 	src/exe/build_image_assets
 )
 endif()

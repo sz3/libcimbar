@@ -15,18 +15,6 @@
 using std::string;
 using std::vector;
 
-namespace {
-	std::shared_ptr<cimbar::window> create_window(unsigned width, unsigned height)
-	{
-    #ifdef LIBCIMBAR_USE_GLFW
-		return std::shared_ptr<cimbar::window>(new cimbar::window_glfw(1080, 1080, "cimbar_send"));
-    #else
-		return std::shared_ptr<cimbar::window>(new cimbar::window_cvhighgui());
-    #endif
-	}
-}
-
-
 int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
@@ -77,15 +65,15 @@ int main(int argc, char** argv)
 	}};
 	loop_iterator shakeIt(shakePos);
 
-	std::shared_ptr<cimbar::window> w = create_window(1080, 1080);
-	if (!w or !w->is_good())
+	cimbar::window w(windowImg.cols, windowImg.rows, "cimbar_send");
+	if (!w.is_good())
 	{
 		std::cerr << "failed to create window :(" << std::endl;
 		return 50;
 	}
 
-	auto draw = [&windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt, w] (const cv::Mat& frame, unsigned) {
-		if (!start and w->should_close())
+	auto draw = [&w, &windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
+		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
@@ -102,7 +90,7 @@ int main(int argc, char** argv)
 		}
 		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
 
-		w->show(windowImg, delay);
+		w.show(windowImg, delay);
 		return true;
 	};
 
