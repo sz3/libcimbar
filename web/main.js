@@ -23,10 +23,20 @@ function importFile(f)
 
 // public interface
 return {
-  run : function(container, canvas)
+  run : function(canvas)
   {
-    console.log("init for canvas " + container);
+    console.log("init for canvas " + canvas);
+    var dim = canvas.width;
+    if (canvas.height < dim) {
+      dim = canvas.height;
+    }
+    console.log(dim);
+    if (dim > 1024) {
+      dim = 1024;
+    }
     Module._initialize_GL(1024, 1024);
+    canvas.style.width = dim + "px";
+    canvas.style.height = dim + "px";
   },
 
   encode : function(filename, data)

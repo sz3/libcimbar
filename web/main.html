@@ -3,9 +3,9 @@
 <head>
 <title>Cimbar Encoder</title>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no" />
 </head>
 <body>
-
 
 <style>
 * {
@@ -40,14 +40,15 @@ body {
 }
 
 #container::before {
-	content: "Drag and drop a file";
+	content: "⌜ Drag and drop file ⌟";
 	font: 1.5em serif;
+	padding-top: 2em;
 	position: absolute;
-	top: 2em;
-	left: 40%;
+	left: 0;
+	text-align: center;
+	width: 100%;
 	z-index: -1;
 }
-
 </style>
 
 <div id="status"></div>
@@ -57,14 +58,13 @@ body {
 </div>
 <script type="text/javascript">
 	const canvas = document.getElementById('canvas');
-	const container = document.getElementById('container');
-	canvas.width = container.clientWidth;
-	canvas.height = container.clientHeight;
+	canvas.width = window.outerWidth;
+	canvas.height = window.outerHeight;
 
 	var Module = {};
 	Module.canvas = canvas;
 	Module.onRuntimeInitialized = () => {
-		Main.run(container, canvas);
+		Main.run(canvas);
 		Main.nextFrame();
 	};
 </script>
