@@ -44,7 +44,7 @@ return {
     console.log("encoding " + filename);
     var res = Module._encode(data.byteOffset, data.length);
     console.log(res);
-    Main.setHTML("status", filename + ":" + res);
+    Main.setTitle(filename);
   },
 
   dragDrop : function(event)
@@ -75,6 +75,11 @@ return {
   setHTML : function(id, msg)
   {
     document.getElementById(id).innerHTML = msg;
+  },
+
+  setTitle : function(msg)
+  {
+    document.title = "Cimbar: " + msg;
   }
 };
 }();
