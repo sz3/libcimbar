@@ -6,7 +6,6 @@
 #include <GLES2/gl2ext.h>
 #define GLFW_INCLUDE_ES2
 #include <GLFW/glfw3.h>
-#include <emscripten.h>
 
 #include <iostream>
 #include <sstream>
