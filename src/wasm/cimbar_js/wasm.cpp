@@ -1,4 +1,4 @@
-#include "encoder/Encoder.h"
+#include "encoder/SimpleEncoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
 
@@ -46,7 +46,7 @@ void render()
 	if (_fes->block_count() > _fes->blocks_required()*2)
 		_fes->reset();
 
-	Encoder enc(30);
+	SimpleEncoder enc(30);
 	std::optional<cv::Mat> img = enc.encode_next(*_fes);
 	if (!img)
 	{
@@ -64,7 +64,7 @@ int encode(uint8_t* buffer, size_t size)
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
-	Encoder enc(30);
+	SimpleEncoder enc(30);
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
 	_fes = enc.create_fountain_encoder(bis);
 

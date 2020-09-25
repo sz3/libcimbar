@@ -1,6 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimb_translator/Config.h"
-#include "encoder/FileEncoder.h"
+#include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
 #include "gui/window.h"
 #include "serialize/str.h"
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 		return true;
 	};
 
-	FileEncoder en(ecc);
+	Encoder en(ecc);
 	while (running)
 		for (const string& f : infiles)
 			en.encode_fountain(f, draw, compressionLevel);
