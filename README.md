@@ -35,8 +35,8 @@ I would like to add emscripten+wasm support.
 * zstd - https://github.com/facebook/zstd
 
 Optional:
-* GLFW - https://github.com/glfw/glfw / `libglfw3-dev` (for when `opencv-highgui` is not available)
-    * will also require `GLES3/gl3.h` (`libgles2-mesa-dev` on ubuntu)
+* GLFW - https://github.com/glfw/glfw or `libglfw3-dev` (for when `opencv-highgui` is not available)
+    * this code path also needs/uses `GLES3/gl3.h` (`libgles2-mesa-dev` on ubuntu)
 
 ## Build
 
