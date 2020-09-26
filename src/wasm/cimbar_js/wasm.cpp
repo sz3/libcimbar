@@ -15,8 +15,6 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
-	int _w;
-	int _h;
 }
 
 extern "C" {
@@ -32,8 +30,6 @@ int initialize_GL(int width, int height)
 	if (!_window or !_window->is_good())
 		return 0;
 
-	_w = width;
-	_h = height;
 	return 1;
 }
 
