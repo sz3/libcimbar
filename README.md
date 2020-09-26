@@ -12,9 +12,7 @@ And the quest for 100 kb/s over the air gap...
 
 ## Platforms
 
-The code is written in C++, and developed/tested on amd64+linux and arm64+android. It probably works, or can be made to work, on other platforms. Maybe.
-
-I would like to add emscripten+wasm support.
+The code is written in C++, and developed/tested on amd64+linux, arm64+android, and emscripten+wasm. It probably works, or can be made to work, on other platforms. Maybe.
 
 ## Library dependencies
 
@@ -47,6 +45,8 @@ make install
 ```
 
 By default, libcimbar will try to put its build products under `./dist/bin/`.
+
+There is also a beta emscripten+WASM build for the encoder. See [WASM](WASM.md).
 
 ## Usage
 
