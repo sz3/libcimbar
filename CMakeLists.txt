@@ -12,8 +12,22 @@ add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fpic")
+	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -fPIC")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -O2 -fPIC")
+endif()
+
+if(DEFINED USE_WASM)
+	set(DISABLE_TESTS true)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os")
+
+	file( GLOB OPENCV_LIBS "${OPENCV_DIR}/opencv-build-wasm/build_wasm/lib/*.a" )
+	file( GLOB opencv_include_modules "${OPENCV_DIR}/modules/*/include" )
+	include_directories(
+		${OPENCV_DIR}/include/
+		${OPENCV_DIR}/opencv-build-wasm/build_wasm/
+		${opencv_include_modules}
+	)
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
@@ -32,16 +46,10 @@ else()
 endif()
 
 set (PROJECTS
-	src/exe/cimbar
-	src/exe/cimbar_extract
-	src/exe/cimbar_send
-	src/exe/build_image_assets
-
 	src/lib/bit_file
 	src/lib/cimb_translator
 	src/lib/compression
 	src/lib/encoder
-	src/lib/extractor
 	src/lib/fountain
 	src/lib/gui
 	src/lib/image_hash
@@ -56,6 +64,25 @@ set (PROJECTS
 	src/third_party_lib/wirehair
 	src/third_party_lib/zstd
 )
+
+if(NOT DEFINED USE_WASM)
+set(PROJECTS
+	${PROJECTS}
+	src/lib/extractor
+
+	src/exe/cimbar
+	src/exe/cimbar_extract
+	src/exe/cimbar_send
+	src/exe/build_image_assets
+)
+endif()
+
+if (DEFINED USE_WASM OR USE_GLFW)
+set(PROJECTS
+	${PROJECTS}
+	src/wasm/cimbar_js
+)
+endif()
 
 include_directories(
 	${libcimbar_SOURCE_DIR}/src/lib

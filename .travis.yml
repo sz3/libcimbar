@@ -1,5 +1,8 @@
 language: cpp
 
+git:
+  depth: 1
+
 addons: &gcc7
   apt:
     packages:
@@ -17,7 +20,7 @@ addons: &clang6
 
 matrix:
   include:
-    - env: CXX="g++-7" CC="gcc-7"
+    - env: CXX="g++-7" CC="gcc-7" CPP_CHECK=1 USE_GLFW=1
       os: linux
       dist: bionic
       addons: &gcc7
@@ -28,16 +31,17 @@ matrix:
       addons: &clang6
 
 before_install:
-  - sudo apt-get -y install libopencv-dev cppcheck
+  - sudo apt-get -y install libopencv-dev libglfw3-dev libgles2-mesa-dev cppcheck
 
 before_script:
   - $CXX --version
   - cmake --version
+  - if [[ ${USE_GLFW} ]]; then export CMAKE_FLAGS="-DUSE_GLFW=1"; fi
 
 script:
     - mkdir -p build && cd build
-    - cmake ..
+    - cmake .. ${CMAKE_FLAGS}
     - make -j2
     - make test CTEST_OUTPUT_ON_FAILURE=TRUE
-    - cppcheck ../src/
+    - if [[ ${CPP_CHECK} ]]; then cppcheck ../src/; fi
 

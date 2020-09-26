@@ -4,6 +4,7 @@ set(SOURCES
 	Decoder.h
 	Encoder.h
 	ReedSolomon.h
+	SimpleEncoder.h
 	reed_solomon_stream.h
 )
 

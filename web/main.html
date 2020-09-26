@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en" data-framework="javascript">
+<head>
+<title>Cimbar Encoder</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+</head>
+<body>
+
+<style>
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background-color: black;
+	color: gray;
+	height: 100vh;
+	display: grid;
+	align-items: center;
+}
+
+#status {
+	position: fixed;
+	right: 0;
+	top: 0;
+}
+
+#file_input {
+	position: fixed;
+	left: 0;
+	top: 0;
+}
+
+#container {
+	background: linear-gradient(white, black) border-box;
+	margin: 0 auto;
+	z-index: -1;
+}
+
+#container::before {
+	content: "⌜ Drop file ⌟";
+	font: 1.5em serif;
+	padding-top: 2em;
+	position: absolute;
+	left: 0;
+	text-align: center;
+	width: 100%;
+	z-index: -1;
+}
+</style>
+
+<div id="status"></div>
+<input type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
+<div id="container" class="container" title="Drag and drop a file">
+	<canvas id="canvas" class="canvas"></canvas>
+</div>
+<script type="text/javascript">
+	const canvas = document.getElementById('canvas');
+	canvas.width = window.outerWidth;
+	canvas.height = window.outerHeight;
+
+	var Module = {};
+	Module.canvas = canvas;
+	Module.onRuntimeInitialized = () => {
+		Main.run(canvas);
+		Main.nextFrame();
+	};
+</script>
+
+<script src="cimbar_js.js"></script>
+<script src="main.js"></script>
+
+</body>
+</html>
