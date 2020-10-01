@@ -20,7 +20,7 @@ public:
 
 	unsigned progress() const
 	{
-		return _progress;
+		return _decoder.progress();
 	}
 
 	unsigned blocks_required() const
@@ -46,7 +46,6 @@ public:
 	std::optional<std::vector<uint8_t>> decode()
 	{
 		// if we're full
-		++_progress;
 		_buffIndex = 0;
 		// we ignore the first 4 bytes. It's the sink's job to make sure we're getting the right stuff.
 		// we may, at some point, sanity check if data_size == [1]+[2]+[3]
@@ -84,5 +83,4 @@ protected:
 	std::vector<uint8_t> _buffer;
 	FountainDecoder _decoder;
 	unsigned _buffIndex = 0;
-	unsigned _progress = 0;
 };
