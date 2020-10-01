@@ -11,7 +11,7 @@ class concurrent_fountain_decoder_sink
 {
 public:
 	concurrent_fountain_decoder_sink(std::string data_dir, unsigned chunk_size)
-		: _decoder(data_dir, chunk_size)
+	    : _decoder(data_dir, chunk_size)
 	{
 	}
 
@@ -35,14 +35,37 @@ public:
 		return _decoder.num_done();
 	}
 
+	std::vector<std::string> get_done() const
+	{
+		std::lock_guard<std::mutex> lock(_readMutex);
+		return _done;
+	}
+
+	std::vector<double> get_progress() const
+	{
+		std::lock_guard<std::mutex> lock(_readMutex);
+		return _progress;
+	}
+
+	void update_status()
+	{
+		// called under the writeMutex -- don't hold this for long!
+		std::lock_guard<std::mutex> lock(_readMutex);
+		_done = _decoder.get_done();
+		_progress = _decoder.get_progress();
+	}
+
 	void process()
 	{
-		if (_mutex.try_lock())
+		if (_writeMutex.try_lock())
 		{
+			// maybe a 2nd mutex for retrieving _decoder.has_file()??
 			std::string buff;
 			while (_backlog.try_dequeue(buff))
 				_decoder << buff;
-			_mutex.unlock();
+
+			update_status();
+			_writeMutex.unlock();
 		}
 	}
 
@@ -61,7 +84,11 @@ public:
 	}
 
 protected:
-	std::mutex _mutex;
+	std::mutex _writeMutex;
+	mutable std::mutex _readMutex;
 	fountain_decoder_sink<OUTSTREAM> _decoder;
 	moodycamel::ConcurrentQueue< std::string > _backlog;
+
+	std::vector<std::string> _done;
+	std::vector<double> _progress;
 };
