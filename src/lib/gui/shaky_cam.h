@@ -37,7 +37,12 @@ public:
 
 	bool toggle()
 	{
-		_shakycam = !_shakycam;
+		return _shakycam = !_shakycam;
+	}
+
+	void reset()
+	{
+		_shakePos.reset();
 	}
 
 	cv::Mat& draw(const cv::Mat& img)

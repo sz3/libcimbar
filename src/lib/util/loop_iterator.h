@@ -6,8 +6,8 @@ class loop_iterator
 {
 public:
 	loop_iterator(const CONTAINER& c)
-		: _c(c)
-		, _it(c.begin())
+	    : _c(c)
+	    , _it(c.begin())
 	{
 	}
 
@@ -25,13 +25,18 @@ public:
 	{
 		++_it;
 		if (_it == _c.end() and !_halt)
-			_it = _c.begin();
+			reset();
 		return *this;
 	}
 
 	CONTAINER_IT end() const
 	{
 		return _c.end();
+	}
+
+	void reset()
+	{
+		_it = _c.begin();
 	}
 
 	void halt()

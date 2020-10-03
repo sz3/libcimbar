@@ -54,13 +54,13 @@ int main(int argc, char** argv)
 	FountainInit::init();
 
 	bool dark = true;
-	bool is_shakycam = result.count("shakycam");
+	bool use_shakycam = result.count("shakycam");
 
 	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
 	// if we don't need the shakycam, we'll just turn it off
 	// we could use a separate code path (just do a mat copyTo),
 	// but this is fine.
-	if (!is_shakycam)
+	if (!use_shakycam)
 		cam.toggle();
 
 	cimbar::window w(cam.width(), cam.height(), "cimbar_send");

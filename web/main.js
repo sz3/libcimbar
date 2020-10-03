@@ -1,6 +1,6 @@
 var Main = function() {
 
-var _interval = 100;
+var _interval = 70;
 
 function importFile(f)
 {
@@ -31,10 +31,10 @@ return {
       dim = canvas.height;
     }
     console.log(dim);
-    if (dim > 1024) {
-      dim = 1024;
+    if (dim > 1040) {
+      dim = 1040;
     }
-    Module._initialize_GL(1024, 1024);
+    Module._initialize_GL(1040, 1040);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
   },
