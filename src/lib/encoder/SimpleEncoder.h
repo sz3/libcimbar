@@ -38,7 +38,7 @@ inline SimpleEncoder::SimpleEncoder(unsigned ecc_bytes, unsigned bits_per_symbol
 {
 }
 
-void SimpleEncoder::set_encode_id(uint8_t encode_id)
+inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
 {
 	_encodeId = encode_id;
 }
