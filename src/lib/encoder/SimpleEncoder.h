@@ -16,6 +16,7 @@ class SimpleEncoder
 {
 public:
 	SimpleEncoder(unsigned ecc_bytes=40, unsigned bits_per_symbol=0, unsigned bits_per_color=0);
+	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
 	std::optional<cv::Mat> encode_next(STREAM& stream);
@@ -23,11 +24,11 @@ public:
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
 
-
 protected:
 	unsigned _eccBytes;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
+	uint8_t _encodeId = 0;
 };
 
 inline SimpleEncoder::SimpleEncoder(unsigned ecc_bytes, unsigned bits_per_symbol, unsigned bits_per_color)
@@ -35,6 +36,11 @@ inline SimpleEncoder::SimpleEncoder(unsigned ecc_bytes, unsigned bits_per_symbol
     , _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
     , _bitsPerColor(bits_per_color? bits_per_color : cimbar::Config::color_bits())
 {
+}
+
+void SimpleEncoder::set_encode_id(uint8_t encode_id)
+{
+	_encodeId = encode_id;
 }
 
 /* while bits == f.read(buffer, 8192)
@@ -100,6 +106,6 @@ inline fountain_encoder_stream::ptr SimpleEncoder::create_fountain_encoder(STREA
 		ss = std::move(f);
 	}
 
-	return fountain_encoder_stream::create(ss, chunk_size, 0); // will eventually do something clever with encode_id?
+	return fountain_encoder_stream::create(ss, chunk_size, _encodeId);
 }
 

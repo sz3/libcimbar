@@ -15,6 +15,7 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
+	uint8_t _encodeId = 0;
 }
 
 extern "C" {
@@ -43,6 +44,8 @@ void render()
 		_fes->reset();
 
 	SimpleEncoder enc(30);
+	enc.set_encode_id(_encodeId);
+
 	std::optional<cv::Mat> img = enc.encode_next(*_fes);
 	if (!img)
 	{
@@ -61,6 +64,8 @@ int encode(uint8_t* buffer, size_t size)
 		std::cerr << "failed FountainInit :(" << std::endl;
 
 	SimpleEncoder enc(30);
+	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
+
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
 	_fes = enc.create_fountain_encoder(bis);
 
