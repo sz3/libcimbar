@@ -69,7 +69,11 @@ public:
 	{
 		std::vector<double> progress;
 		for (auto&& [slot, s] : _streams)
-			progress.push_back( s.progress() * 1.0 / s.blocks_required() );
+		{
+			unsigned br = s.blocks_required();
+			if (br)
+				progress.push_back( s.progress() * 1.0 / s.blocks_required() );
+		}
 		return progress;
 	}
 

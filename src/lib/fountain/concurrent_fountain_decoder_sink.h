@@ -49,7 +49,8 @@ public:
 
 	void update_status()
 	{
-		// called under the writeMutex -- don't hold this for long!
+		// we call this under the writeMutex+readMutex. The `const`s are only under readMutex.
+		// just thought you ought to know
 		std::lock_guard<std::mutex> lock(_readMutex);
 		_done = _decoder.get_done();
 		_progress = _decoder.get_progress();
