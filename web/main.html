@@ -57,6 +57,9 @@ body {
 	<canvas id="canvas" class="canvas"></canvas>
 </div>
 <script type="text/javascript">
+	// reset zoom
+	document.body.style.zoom = (window.innerWidth / window.outerWidth);
+
 	const canvas = document.getElementById('canvas');
 	canvas.width = window.outerWidth;
 	canvas.height = window.outerHeight;
