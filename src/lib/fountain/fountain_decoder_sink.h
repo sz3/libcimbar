@@ -9,9 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
-
-// what we're trying to do here is have an object that can accept a complete (~8400 byte) buffer,
-// pull out the header, and give the appropriate decoder its bytes
+#include <vector>
 
 template <typename OUTSTREAM>
 class fountain_decoder_sink
@@ -35,7 +33,7 @@ public:
 
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
-		std::string file_path = fmt::format("{}/{}.{}", _dataDir, md.encode_id(), md.file_size());
+		std::string file_path = fmt::format("{}/{}", _dataDir, get_filename(md));
 		OUTSTREAM f(file_path);
 		f.write((char*)data.data(), data.size());
 		return true;
@@ -57,6 +55,26 @@ public:
 	unsigned num_done() const
 	{
 		return _done.size();
+	}
+
+	std::vector<std::string> get_done() const
+	{
+		std::vector<std::string> done;
+		for (uint64_t id : _done)
+			done.push_back( get_filename(FountainMetadata(id)) );
+		return done;
+	}
+
+	std::vector<double> get_progress() const
+	{
+		std::vector<double> progress;
+		for (auto&& [slot, s] : _streams)
+		{
+			unsigned br = s.blocks_required();
+			if (br)
+				progress.push_back( s.progress() * 1.0 / s.blocks_required() );
+		}
+		return progress;
 	}
 
 	bool is_done(uint64_t id) const
@@ -108,6 +126,11 @@ protected:
 	uint8_t stream_slot(const FountainMetadata& md) const
 	{
 		return md.encode_id() & 0x7;
+	}
+
+	std::string get_filename(const FountainMetadata& md) const
+	{
+		return fmt::format("{}.{}", md.encode_id(), md.file_size());
 	}
 
 protected:
