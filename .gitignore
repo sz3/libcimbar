@@ -7,4 +7,5 @@ CMakeCache.txt
 CMakeLists.txt.user
 CTestTestfile.cmake
 Makefile
+callgrind.out*
 cmake_install.cmake

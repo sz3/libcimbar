@@ -31,6 +31,11 @@ public:
 		wirehair_free(_codec);
 	}
 
+	unsigned progress() const
+	{
+		return _seenBlocks.size();
+	}
+
 	size_t length() const
 	{
 		return _length;

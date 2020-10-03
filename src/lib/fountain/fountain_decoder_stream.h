@@ -18,6 +18,16 @@ public:
 	{
 	}
 
+	unsigned progress() const
+	{
+		return _decoder.progress();
+	}
+
+	unsigned blocks_required() const
+	{
+		return (data_size() / block_size()) + 1;
+	}
+
 	unsigned block_size() const
 	{
 		return _buffer.size() - _headerSize;

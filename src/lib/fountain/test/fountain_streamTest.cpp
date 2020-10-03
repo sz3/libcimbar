@@ -154,6 +154,8 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 	assertEquals( 824, fds.block_size() );
 	assertEquals( 10000, fds.data_size() );
 	assertTrue( fds.good() );
+	assertEquals( fes->blocks_required(), fds.blocks_required() );
+	assertEquals( fes->blocks_required(), fds.progress() );
 
 	assertEquals( 15, fes->block_count() );
 	assertEquals( 13, fes->blocks_required() );

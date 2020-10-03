@@ -95,8 +95,7 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 	CimbReader reader(img, _decoder, should_preprocess);
 
 	aligned_stream aligner(ostream, ostream.chunk_size());
-	unsigned res = do_decode(reader, aligner);
-	return res;
+	return do_decode(reader, aligner);
 }
 
 inline unsigned Decoder::decode(std::string filename, std::string output)
