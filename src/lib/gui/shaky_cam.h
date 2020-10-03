@@ -54,11 +54,12 @@ public:
 		if (_shakycam)
 		{
 			_frame = _bgcolor;
-			if (++_shakePos)
+			if (_shakePos)
 			{
 				offsetX += (*_shakePos).first;
 				offsetY += (*_shakePos).second;
 			}
+			++_shakePos;
 		}
 
 		img.copyTo(_frame(cv::Rect(offsetX, offsetY, img.cols, img.rows)));
