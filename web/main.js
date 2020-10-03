@@ -87,6 +87,15 @@ return {
 window.addEventListener("dragover", function(e) {
   e = e || event;
   e.preventDefault();
+
+  document.body.style["opacity"] = 0.5;
+}, false);
+
+window.addEventListener("dragleave", function(e) {
+  e = e || event;
+  e.preventDefault();
+
+  document.body.style["opacity"] = 1.0;
 }, false);
 
 window.addEventListener("drop", function(e) {
@@ -94,4 +103,5 @@ window.addEventListener("drop", function(e) {
   e.preventDefault();
   e.stopPropagation();
   Main.dragDrop(e);
+  document.body.style["opacity"] = 1.0;
 }, false);
