@@ -97,6 +97,7 @@ TEST_CASE( "FountainEncodingTest/testEncodingAndDecoding", "[unit]" )
 
 	assertEquals( 11, block_id );
 	assertEquals( 8, decoded_blocks );
+	assertEquals( decoded_blocks, decoder.progress() );
 }
 
 TEST_CASE( "FountainEncodingTest/testConsistency", "[unit]" )
@@ -174,5 +175,6 @@ TEST_CASE( "FountainEncodingTest/testWhichN", "[unit]" )
 
 	assertEquals( 96, block_id );
 	assertEquals( message, string((char*)final_result.data(), final_result.size()) );
+	assertEquals( 10, decoder.progress() );
 }
 

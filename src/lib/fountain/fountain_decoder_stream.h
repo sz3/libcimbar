@@ -25,7 +25,7 @@ public:
 
 	unsigned blocks_required() const
 	{
-		return data_size() / std::max<unsigned>(block_size(), 1UL);
+		return (data_size() / block_size()) + 1;
 	}
 
 	unsigned block_size() const
