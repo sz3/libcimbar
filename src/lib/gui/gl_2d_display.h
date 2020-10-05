@@ -15,17 +15,17 @@ class gl_2d_display
 {
 protected:
 	static constexpr GLfloat PLANE[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f
+	    -1.0f, -1.0f, 0.0f,
+	     1.0f, -1.0f, 0.0f,
+	    -1.0f,  1.0f, 0.0f,
+	     1.0f, -1.0f, 0.0f,
+	     1.0f,  1.0f, 0.0f,
+	    -1.0f,  1.0f, 0.0f
 	};
 
 public:
 	gl_2d_display()
-		: _p(create())
+	    : _p(create())
 	{
 	}
 

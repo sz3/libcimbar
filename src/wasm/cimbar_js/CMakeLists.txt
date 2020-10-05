@@ -41,7 +41,6 @@ endif()
 set (LINK_WASM_LIST
 	--bind -Os
 	${LINK_WASM_OPT}
-	-s FULL_ES2=1
 	-s USE_WEBGL2=1
 	-s MIN_WEBGL_VERSION=2
 	-s MAX_WEBGL_VERSION=2
