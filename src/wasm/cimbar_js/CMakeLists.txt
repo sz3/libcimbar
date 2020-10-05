@@ -59,7 +59,7 @@ if(DEFINED USE_WASM)
 		TARGETS cimbar_js
 		DESTINATION ${libcimbar_SOURCE_DIR}/web
 	)
-	if(EXISTS $<TARGET_FILE_DIR:cimbar_js>/cimbar_js.wasm)
+	if(NOT USE_WASM EQUAL "2")
 		install(
 			FILES $<TARGET_FILE_DIR:cimbar_js>/cimbar_js.wasm
 			DESTINATION ${libcimbar_SOURCE_DIR}/web
