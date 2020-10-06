@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "Cell.h"
 #include "Common.h"
@@ -13,16 +14,14 @@ using std::string;
 
 TEST_CASE( "CellTest/testRgbMatchesOpenCV", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("mycell2.png");
-	cv::Mat cell = cv::imread(sample_path);
-
+	cv::Mat cell = TestCimbar::loadSample("mycell.png");
 	cv::Scalar expectedColor = cv::mean(cell);
 
 	auto [r, g, b] = Cell(cell).mean_rgb();
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertAlmostEquals( expectedColor[2], (unsigned)r );
+		assertAlmostEquals( expectedColor[0], (unsigned)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
@@ -30,14 +29,13 @@ TEST_CASE( "CellTest/testRgbMatchesOpenCV", "[unit]" )
 	}
 	DYNAMIC_SECTION( "b" )
 	{
-		assertAlmostEquals( expectedColor[0], (unsigned)b );
+		assertAlmostEquals( expectedColor[2], (unsigned)b );
 	}
 }
 
 TEST_CASE( "CellTest/testRgbCellOffsets", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
-	cv::Mat img = cv::imread(sample_path);
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	cv::Rect crop(125, 8, 8, 8);
 	cv::Mat cell = img(crop);
@@ -47,7 +45,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets", "[unit]" )
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertAlmostEquals( expectedColor[2], (int)r );
+		assertAlmostEquals( expectedColor[0], (int)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
@@ -55,14 +53,13 @@ TEST_CASE( "CellTest/testRgbCellOffsets", "[unit]" )
 	}
 	DYNAMIC_SECTION( "b" )
 	{
-		assertAlmostEquals( expectedColor[0], (int)b );
+		assertAlmostEquals( expectedColor[2], (int)b );
 	}
 }
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Contiguous", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
-	cv::Mat img = cv::imread(sample_path);
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	cv::Rect crop(125, 8, 8, 8);
 	cv::Mat cell = img(crop);
@@ -72,7 +69,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Contiguous", "[unit]" )
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertAlmostEquals( expectedColor[2], (int)r );
+		assertAlmostEquals( expectedColor[0], (int)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
@@ -80,14 +77,13 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Contiguous", "[unit]" )
 	}
 	DYNAMIC_SECTION( "b" )
 	{
-		assertAlmostEquals( expectedColor[0], (int)b );
+		assertAlmostEquals( expectedColor[2], (int)b );
 	}
 }
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
-	cv::Mat img = cv::imread(sample_path);
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	cv::Rect crop(125, 8, 4, 6);
 	cv::Mat cell = img(crop);
@@ -110,8 +106,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric", "[unit]" )
 
 TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
-	cv::Mat img = cv::imread(sample_path);
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	cv::Rect crop(125, 8, 4, 6);
 	cv::Mat cell = img(crop);

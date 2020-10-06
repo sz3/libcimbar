@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "Undistort.h"
 
@@ -12,7 +13,7 @@
 
 TEST_CASE( "UndistortTest/testUndistort", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	cv::Mat out;
 
 	Undistort<SimpleCameraCalibration> und;
@@ -23,7 +24,7 @@ TEST_CASE( "UndistortTest/testUndistort", "[unit]" )
 
 TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	cv::Mat out;
 
 	Undistort<SimpleCameraCalibration> und;

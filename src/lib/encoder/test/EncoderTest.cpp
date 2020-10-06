@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
@@ -32,6 +33,7 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 		{
 			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
+			cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
 	}
@@ -55,6 +57,7 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 		{
 			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
+			cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
 	}
@@ -74,6 +77,7 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	uint64_t hash = 0xf8cde200e90582e4;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
+	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 	assertEquals( hash, image_hash::average_hash(img) );
 }
 

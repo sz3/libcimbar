@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "encoder/Decoder.h"
 #include "encoder/Encoder.h"
@@ -35,6 +36,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	uint64_t hash = 0xaecc8c00efce8c28;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat encodedImg = cv::imread(path);
+	cv::cvtColor(encodedImg, encodedImg, cv::COLOR_BGR2RGB);
 	assertEquals( hash, image_hash::average_hash(encodedImg) );
 
 	// decoder

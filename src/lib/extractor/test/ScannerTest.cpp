@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "Scanner.h"
 
@@ -13,7 +14,7 @@
 
 TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -53,7 +54,7 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 
 TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -73,7 +74,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
 
 TEST_CASE( "ScannerTest/testBottomRightCorner.2", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -93,7 +94,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.2", "[unit]" )
 
 TEST_CASE( "ScannerTest/testBottomRightCorner.3", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f2_734.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f2_734.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -113,7 +114,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.3", "[unit]" )
 
 TEST_CASE( "ScannerTest/testBottomRightCorner.4", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f2_246.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f2_246.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -134,7 +135,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.4", "[unit]" )
 
 TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -147,7 +148,7 @@ TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 
 TEST_CASE( "ScannerTest/testExampleScan.2", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f1_360.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f1_360.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -161,7 +162,7 @@ TEST_CASE( "ScannerTest/testExampleScan.2", "[unit]" )
 
 TEST_CASE( "ScannerTest/testExampleScan.3", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -175,7 +176,7 @@ TEST_CASE( "ScannerTest/testExampleScan.3", "[unit]" )
 
 TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates = sc.scan();
@@ -196,7 +197,7 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 
 TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;
@@ -213,7 +214,7 @@ TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
 
 TEST_CASE( "ScannerTest/testSortTopToBottom.2", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 	Scanner sc(img);
 
 	std::vector<Anchor> candidates;

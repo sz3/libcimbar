@@ -31,6 +31,8 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 			break;
 
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
+		// imwrite expects BGR
+		cv::cvtColor(*frame, *frame, cv::COLOR_RGB2BGR);
 		cv::imwrite(output, *frame);
 		++i;
 	}
@@ -69,7 +71,9 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, std::strin
 {
 	std::function<bool(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
-		return cv::imwrite(output, frame);
+		cv::Mat bgr;
+		cv::cvtColor(frame, bgr, cv::COLOR_RGB2BGR);
+		return cv::imwrite(output, bgr);
 	};
 	return encode_fountain(filename, fun, compression_level);
 }
