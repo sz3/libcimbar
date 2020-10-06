@@ -2,6 +2,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/Encoder.h"
 #include "fountain/FountainInit.h"
+#include "gui/shaky_cam.h"
 #include "gui/window.h"
 #include "serialize/str.h"
 #include "util/loop_iterator.h"
@@ -53,43 +54,31 @@ int main(int argc, char** argv)
 	FountainInit::init();
 
 	bool dark = true;
-	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
-	cv::Mat windowImg = cv::Mat(1080, 1080, CV_8UC3, bgcolor);
+	bool use_shakycam = result.count("shakycam");
 
-	bool running = true;
-	bool start = true;
+	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
+	// if we don't need the shakycam, we'll just turn it off
+	// we could use a separate code path (just do a mat copyTo),
+	// but this is fine.
+	if (!use_shakycam)
+		cam.toggle();
 
-	bool shakycam = result.count("shakycam");
-	std::array<std::pair<int, int>, 8> shakePos = {{
-	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
-	}};
-	loop_iterator shakeIt(shakePos);
-
-	cimbar::window w(windowImg.cols, windowImg.rows, "cimbar_send");
+	cimbar::window w(cam.width(), cam.height(), "cimbar_send");
 	if (!w.is_good())
 	{
 		std::cerr << "failed to create window :(" << std::endl;
 		return 50;
 	}
 
-	auto draw = [&w, &windowImg, delay, bgcolor, shakycam, &running, &start, &shakeIt] (const cv::Mat& frame, unsigned) {
+	bool running = true;
+	bool start = true;
+
+	auto draw = [&w, &cam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
-		int offsetX = 28;
-		int offsetY = 28;
-		if (shakycam)
-		{
-			windowImg = bgcolor;
-			if (++shakeIt)
-			{
-				offsetX += (*shakeIt).first;
-				offsetY += (*shakeIt).second;
-			}
-		}
-		frame.copyTo(windowImg(cv::Rect(offsetX, offsetY, frame.cols, frame.rows)));
-
+		cv::Mat& windowImg = cam.draw(frame);
 		w.show(windowImg, delay);
 		return true;
 	};

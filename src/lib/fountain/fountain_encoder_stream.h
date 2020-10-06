@@ -2,6 +2,7 @@
 #pragma once
 
 #include "FountainEncoder.h"
+#include "FountainMetadata.h"
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -37,7 +38,7 @@ public:
 		std::stringstream buffs;
 		if (stream)
 			buffs << stream.rdbuf();
-		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id) );
+		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id & 0x7F) );
 	}
 
 	bool good() const
@@ -69,12 +70,10 @@ public:
 		if (res != block_size())
 			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
-		// write header
-		_buffer.data()[0] = _encodeId;
-		_buffer.data()[1] = (_data.size() >> 16) & 0xFF;
-		_buffer.data()[2] = (_data.size() >> 8) & 0xFF;
-		_buffer.data()[3] = _data.size() & 0xFF;
+		// write first 4 bytes of header
+		FountainMetadata::to_uint8_arr(_encodeId, _data.size(), _buffer.data());
 
+		// last 2 bytes of header
 		unsigned block = _block - 1; // we already incremented it above
 		_buffer.data()[4] = (block >> 8) & 0xFF;
 		_buffer.data()[5] = block & 0xFF;

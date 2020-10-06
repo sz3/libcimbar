@@ -15,6 +15,8 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
+	int _renders = 0;
+	uint8_t _encodeId = 0;
 }
 
 extern "C" {
@@ -33,24 +35,27 @@ int initialize_GL(int width, int height)
 	return 1;
 }
 
-void render()
+int render()
 {
 	if (!_window or !_fes)
-		return;
+		return 0;
 
 	// this should probably be x2 (at least), but for now...
 	if (_fes->block_count() > _fes->blocks_required()*2)
 		_fes->reset();
 
 	SimpleEncoder enc(30);
+	enc.set_encode_id(_encodeId);
+
 	std::optional<cv::Mat> img = enc.encode_next(*_fes);
 	if (!img)
 	{
 		std::cerr << "no image :(" << std::endl;
-		return;
+		return 0;
 	}
 
 	_window->show(*img, 0);
+	return ++_renders;
 }
 
 int encode(uint8_t* buffer, size_t size)
@@ -61,6 +66,8 @@ int encode(uint8_t* buffer, size_t size)
 		std::cerr << "failed FountainInit :(" << std::endl;
 
 	SimpleEncoder enc(30);
+	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
+
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
 	_fes = enc.create_fountain_encoder(bis);
 

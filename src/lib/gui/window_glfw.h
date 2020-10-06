@@ -29,10 +29,10 @@ public:
 			_good = false;
 			return;
 		}
-
 		glfwMakeContextCurrent(_w);
 
 		_display = std::make_shared<cimbar::gl_2d_display>();
+		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}
 
@@ -40,6 +40,8 @@ public:
 	{
 		if (_w)
 			glfwDestroyWindow(_w);
+		if (_texid)
+			glDeleteTextures(1, &_texid);
 		glfwTerminate();
 	}
 
@@ -59,11 +61,8 @@ public:
 
 		if (_display)
 		{
-			cv::Mat rgb;
-			cv::cvtColor(img, rgb, cv::COLOR_BGR2RGBA);
-			GLuint texture = cimbar::mat_to_gl::create_gl_texture(rgb);
-			_display->draw(texture);
-			glDeleteTextures(1, &texture);
+			cimbar::mat_to_gl::load_gl_texture(_texid, img);
+			_display->draw(_texid);
 
 			swap();
 			poll();
@@ -94,6 +93,7 @@ protected:
 
 protected:
 	GLFWwindow* _w;
+	GLuint _texid;
 	std::shared_ptr<cimbar::gl_2d_display> _display;
 	bool _good = true;
 };

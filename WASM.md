@@ -11,7 +11,8 @@ With opencv.js built:
 mkdir build-wasm
 cd build-wasm
 source /path/to/emscripten/emsdk/emsdk_env.sh
-emcmake cmake .. -DUSE_WASM=1 -DOPENCV_DIR=/path/to/opencv
+emcmake cmake .. -DUSE_WASM=2 -DOPENCV_DIR=/path/to/opencv
 emcmake make -j7 install
 ```
 
+(do `-DUSE_WASM=1` to actually use wasm and not asm.js)

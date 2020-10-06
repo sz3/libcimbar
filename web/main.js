@@ -1,6 +1,10 @@
 var Main = function() {
 
-var _interval = 100;
+var _interval = 66;
+
+var _showStats = true;
+var _renders = 0;
+var _renderTime = 0;
 
 function importFile(f)
 {
@@ -67,9 +71,17 @@ return {
 
   nextFrame : function()
   {
-    //console.log("draw frame, interval " + _interval);
-    Module._render();
-    setTimeout(Main.nextFrame, _interval);
+    var start = performance.now();
+    var renderCount = Module._render();
+
+    var elapsed = performance.now() - start;
+    var nextInterval = _interval>elapsed? _interval-elapsed : 0;
+    setTimeout(Main.nextFrame, nextInterval);
+
+    if (_showStats && renderCount) {
+      _renderTime += elapsed;
+      Main.setHTML( "status", elapsed + " : " + renderCount + " : " + Math.ceil(_renderTime/renderCount));
+    }
   },
 
   setHTML : function(id, msg)
@@ -87,6 +99,15 @@ return {
 window.addEventListener("dragover", function(e) {
   e = e || event;
   e.preventDefault();
+
+  document.body.style["opacity"] = 0.5;
+}, false);
+
+window.addEventListener("dragleave", function(e) {
+  e = e || event;
+  e.preventDefault();
+
+  document.body.style["opacity"] = 1.0;
 }, false);
 
 window.addEventListener("drop", function(e) {
@@ -94,4 +115,5 @@ window.addEventListener("drop", function(e) {
   e.preventDefault();
   e.stopPropagation();
   Main.dragDrop(e);
+  document.body.style["opacity"] = 1.0;
 }, false);

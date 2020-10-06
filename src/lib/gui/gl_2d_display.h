@@ -15,18 +15,20 @@ class gl_2d_display
 {
 protected:
 	static constexpr GLfloat PLANE[] = {
-		-1.0f, -1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f,
-		 1.0f, -1.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,
-		-1.0f,  1.0f, 0.0f
+	    -1.0f, -1.0f, 0.0f,
+	     1.0f, -1.0f, 0.0f,
+	    -1.0f,  1.0f, 0.0f,
+	     1.0f, -1.0f, 0.0f,
+	     1.0f,  1.0f, 0.0f,
+	    -1.0f,  1.0f, 0.0f
 	};
 
 public:
 	gl_2d_display()
-		: _p(create())
+	    : _p(create())
 	{
+		glGenBuffers(3, _vbo.data());
+		glGenVertexArrays(1, &_vao);
 	}
 
 	void draw(GLuint texture)
@@ -35,16 +37,12 @@ public:
 		glUseProgram(prog);
 
 		// Setup VBO
-		GLuint vbo;
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbo[_i]);
 		glBufferData(GL_ARRAY_BUFFER, 6 * 3 * sizeof(GLfloat), PLANE, GL_STATIC_DRAW);
 
 		// Setup VAO
-		GLuint vao;
-		glGenVertexArrays(1, &vao);
 		GLint vertexPositionAttribute = glGetAttribLocation(prog, "vert");
-		glBindVertexArray(vao);
+		glBindVertexArray(_vao);
 		glEnableVertexAttribArray(vertexPositionAttribute);
 		glVertexAttribPointer(vertexPositionAttribute, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -61,6 +59,10 @@ public:
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+
+		++_i;
+		if (_i >= 3)
+			_i = 0;
 	}
 
 	GLuint program() const
@@ -95,6 +97,9 @@ protected:
 
 protected:
 	std::shared_ptr<cimbar::gl_program> _p;
+	std::array<GLuint, 3> _vbo;
+	GLuint _vao;
+	int _i = 0;
 };
 
 }
