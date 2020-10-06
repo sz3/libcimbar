@@ -1,6 +1,10 @@
 var Main = function() {
 
-var _interval = 70;
+var _interval = 66;
+
+var _showStats = true;
+var _renders = 0;
+var _renderTime = 0;
 
 function importFile(f)
 {
@@ -31,10 +35,10 @@ return {
       dim = canvas.height;
     }
     console.log(dim);
-    if (dim > 1040) {
-      dim = 1040;
+    if (dim > 1024) {
+      dim = 1024;
     }
-    Module._initialize_GL(1040, 1040);
+    Module._initialize_GL(1024, 1024);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
   },
@@ -67,9 +71,17 @@ return {
 
   nextFrame : function()
   {
-    //console.log("draw frame, interval " + _interval);
-    Module._render();
-    setTimeout(Main.nextFrame, _interval);
+    var start = performance.now();
+    var renderCount = Module._render();
+
+    var elapsed = performance.now() - start;
+    var nextInterval = _interval>elapsed? _interval-elapsed : 0;
+    setTimeout(Main.nextFrame, nextInterval);
+
+    if (_showStats && renderCount) {
+      _renderTime += elapsed;
+      Main.setHTML( "status", elapsed + " : " + renderCount + " : " + Math.ceil(_renderTime/renderCount));
+    }
   },
 
   setHTML : function(id, msg)
