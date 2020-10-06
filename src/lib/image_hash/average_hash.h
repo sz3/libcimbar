@@ -19,7 +19,7 @@ namespace image_hash
 	{
 		cv::Mat gray = img;
 		if (img.channels() != 1)
-			cv::cvtColor(gray, gray, cv::COLOR_BGR2GRAY);
+			cv::cvtColor(gray, gray, cv::COLOR_RGB2GRAY);
 		if (gray.cols != 8 or gray.rows != 8)
 			cv::resize(gray, gray, cv::Size(8, 8));
 
@@ -70,7 +70,7 @@ namespace image_hash
 		// return 9 uint64_ts, each representing an 8x8 section of the 10x10 img
 		cv::Mat gray = img;
 		if (img.channels() != 1)
-			cv::cvtColor(gray, gray, cv::COLOR_BGR2GRAY);
+			cv::cvtColor(gray, gray, cv::COLOR_RGB2GRAY);
 		if (gray.cols != 10 or gray.rows != 10)
 			cv::resize(gray, gray, cv::Size(10, 10));
 

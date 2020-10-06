@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "CimbDecoder.h"
 
@@ -44,7 +45,7 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 		// grayscale and threshold, since that's what average_hash needs
-		cv::cvtColor(tenxten, tenxten, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(tenxten, tenxten, cv::COLOR_RGB2GRAY);
 		cv::adaptiveThreshold(tenxten, tenxten, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
 
 		unsigned res = cd.decode(tenxten);
@@ -117,8 +118,7 @@ TEST_CASE( "CimbDecoderTest/test_decode_symbol_sloppy", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	string sample_path = TestCimbar::getSample("mycell.png");
-	cv::Mat cell = cv::imread(sample_path);
+	cv::Mat cell = TestCimbar::loadSample("mycell.png");
 
 	unsigned drift_offset;
 	unsigned best_distance;

@@ -110,7 +110,7 @@ inline cv::Mat Scanner::preprocess_image(const MAT& img)
 
 	MAT out;
 	if (img.channels() >= 3)
-		cv::cvtColor(img, out, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(img, out, cv::COLOR_RGB2GRAY);
 	else
 		out = img.clone();
 

@@ -44,9 +44,9 @@ public:
 		{
 			for (int j = 0; j < _rows; ++j, ++count)
 			{
-				blue += p[0];
+				red += p[0];
 				green += p[1];
-				red += p[2];
+				blue += p[2];
 				p += channels;
 			}
 			p += toNextCol;
@@ -78,9 +78,9 @@ public:
 			const uchar* p = _img.ptr<uchar>(i);
 			for (int j = 0; j < yend; j+=_img.channels(), ++count)
 			{
-				blue += p[j];
+				red += p[j];
 				green += p[j+1];
-				red += p[j+2];
+				blue += p[j+2];
 			}
 		}
 

@@ -101,6 +101,8 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 inline unsigned Decoder::decode(std::string filename, std::string output)
 {
 	cv::Mat img = cv::imread(filename);
+	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+
 	std::ofstream f(output);
 	return decode(img, f, false);
 }

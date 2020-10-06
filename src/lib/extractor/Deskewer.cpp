@@ -16,10 +16,14 @@ int Deskewer::total_size() const
 
 cv::Mat Deskewer::deskew(std::string img, const Corners& corners)
 {
-	return deskew(cv::imread(img), corners);
+	cv::Mat mat = cv::imread(img);
+	cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
+	return deskew(mat, corners);
 }
 
 bool Deskewer::save(const cv::Mat& img, std::string path)
 {
+	cv::Mat bgr;
+	cv::cvtColor(img, bgr, cv::COLOR_RGB2BGR);
 	return cv::imwrite(path, img);
 }

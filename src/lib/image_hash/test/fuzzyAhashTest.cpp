@@ -23,7 +23,7 @@ namespace {
 
 		if (binaryThresh)
 		{
-			cv::cvtColor(tenxten, tenxten, cv::COLOR_BGR2GRAY);
+			cv::cvtColor(tenxten, tenxten, cv::COLOR_RGB2GRAY);
 			cv::adaptiveThreshold(tenxten, tenxten, 0xFF, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 5, 0);
 		}
 		return tenxten;

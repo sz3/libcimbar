@@ -64,7 +64,7 @@ cv::Mat load_img(string path)
 	size_t len = width * height * channels;
 	cv::Mat mat(height, width, CV_MAKETYPE(CV_8U, channels));
 	std::copy(imgdata.get(), imgdata.get()+len, mat.data);
-	cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+	cv::cvtColor(mat, mat, cv::COLOR_RGBA2RGB);
 	return mat;
 }
 
@@ -95,7 +95,7 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 				c = {0, 0, 0};
 			continue;
 		}
-		c = {b, g, r};
+		c = {r, g, b};
 	}
 	return tile;
 }

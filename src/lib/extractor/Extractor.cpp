@@ -45,13 +45,18 @@ int Extractor::extract(const cv::UMat& img, cv::UMat& out)
 int Extractor::extract(string read_path, cv::Mat& out)
 {
 	cv::Mat img = cv::imread(read_path);
+	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 	return extract(img, out);
 }
 
 int Extractor::extract(string read_path, string write_path)
 {
 	cv::UMat img = cv::imread(read_path).getUMat(cv::ACCESS_FAST); // cv::USAGE_ALLOCATE_SHARED_MEMORY would be nice...;
+	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+
 	int res = extract(img, img);
+
+	cv::cvtColor(img, img, cv::COLOR_RGB2BGR);
 	cv::imwrite(write_path, img);
 	return res;
 }

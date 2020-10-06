@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "SimpleCameraCalibration.h"
 
@@ -12,8 +13,7 @@
 
 TEST_CASE( "SimpleCameraCalibrationTest/testGetParams", "[unit]" )
 {
-	cv::Mat img = cv::imread(TestCimbar::getSample("6bit/4_30_f0_627.jpg"));
-
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
 
 	SimpleCameraCalibration scc;
 	DistortionParameters dp = scc.scan(img);

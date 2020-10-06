@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "CimbReader.h"
 
@@ -23,8 +24,7 @@ namespace {
 
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png");
-	cv::Mat sample = cv::imread(sample_path);
+	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
@@ -57,8 +57,7 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
-	string sample_path = TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg");
-	cv::Mat sample = cv::imread(sample_path);
+	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
@@ -88,8 +87,7 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 {
 	// this is a non-extracted image, and it's dimensions are too small.
 	// should immediately bail
-	string sample_path = TestCimbar::getSample("6bit/4_30_f2_246.jpg");
-	cv::Mat sample = cv::imread(sample_path);
+	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f2_246.jpg");
 
 	CimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
