@@ -7,10 +7,8 @@
 namespace cimbar {
 namespace mat_to_gl {
 
-	GLuint create_gl_texture(const cv::Mat& mat)
+	void load_gl_texture(GLuint texid, const cv::Mat& mat)
 	{
-		GLuint texid;
-		glGenTextures(1, &texid);
 		glBindTexture(GL_TEXTURE_2D, texid);
 
 		// not sure whether we need this or not
@@ -31,9 +29,8 @@ namespace mat_to_gl {
 			default:
 				;
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mat.cols, mat.rows, 0, format, GL_UNSIGNED_BYTE, mat.data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, mat.cols, mat.rows, 0, format, GL_UNSIGNED_BYTE, mat.data);
 		glBindTexture(GL_TEXTURE_2D, 0); // clean up
-		return texid;
 	}
 
 }

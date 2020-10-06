@@ -1,6 +1,5 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "encoder/SimpleEncoder.h"
-#include "gui/shaky_cam.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
 
@@ -14,9 +13,9 @@
 
 
 namespace {
-	std::shared_ptr<cimbar::shaky_cam> _cam;
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
+	int _renders = 0;
 	uint8_t _encodeId = 0;
 }
 
@@ -33,24 +32,17 @@ int initialize_GL(int width, int height)
 	if (!_window or !_window->is_good())
 		return 0;
 
-	_cam = std::make_shared<cimbar::shaky_cam>(cimbar::Config::image_size(), width, height, true);
-	if (!_cam)
-		return 0;
-
 	return 1;
 }
 
-void render()
+int render()
 {
-	if (!_cam or !_window or !_fes)
-		return;
+	if (!_window or !_fes)
+		return 0;
 
 	// this should probably be x2 (at least), but for now...
 	if (_fes->block_count() > _fes->blocks_required()*2)
-	{
 		_fes->reset();
-		_cam->reset();
-	}
 
 	SimpleEncoder enc(30);
 	enc.set_encode_id(_encodeId);
@@ -59,11 +51,11 @@ void render()
 	if (!img)
 	{
 		std::cerr << "no image :(" << std::endl;
-		return;
+		return 0;
 	}
 
-	cv::Mat& frame = _cam->draw(*img);
-	_window->show(frame, 0);
+	_window->show(*img, 0);
+	return ++_renders;
 }
 
 int encode(uint8_t* buffer, size_t size)
