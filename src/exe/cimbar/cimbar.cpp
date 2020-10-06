@@ -26,6 +26,8 @@ int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool
 	{
 		bool shouldPreprocess = (preprocess == 1);
 		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
+		cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
+
 		if (!no_deskew)
 		{
 			// attempt undistort
