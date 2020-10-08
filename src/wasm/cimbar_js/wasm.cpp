@@ -40,8 +40,11 @@ int render()
 	if (!_window or !_fes)
 		return 0;
 
-	// this should probably be x2 (at least), but for now...
-	if (_fes->block_count() > _fes->blocks_required()*2)
+	// we generate 2x the amount of required blocks -- unless everything fits in a single frame.
+	unsigned required = _fes->blocks_required();
+	if (required > cimbar::Config::fountain_chunks_per_frame())
+		required = required*2;
+	if (_fes->block_count() > required)
 		_fes->reset();
 
 	SimpleEncoder enc(30);
