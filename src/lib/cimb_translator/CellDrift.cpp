@@ -2,7 +2,7 @@
 #include "CellDrift.h"
 
 namespace {
-	const int _limit = 2;
+	const int _limit = 7; // max number of pixels we drift.
 }
 
 CellDrift::CellDrift(int x, int y)
