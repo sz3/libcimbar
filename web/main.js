@@ -41,6 +41,18 @@ return {
     Module._initialize_GL(1024, 1024);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
+
+    Main.alignInvisibleClick(canvas);
+  },
+
+  alignInvisibleClick : function(canvas)
+  {
+     var cpos = canvas.getBoundingClientRect();
+     var invisible_click = document.getElementById("invisible_click");
+     invisible_click.style.width = canvas.style.width;
+     invisible_click.style.height = canvas.style.height;
+     invisible_click.style.top = cpos.top + "px";
+     invisible_click.style.left = cpos.left + "px";
   },
 
   encode : function(filename, data)
@@ -61,9 +73,14 @@ return {
     }
   },
 
+  clickFileInput : function()
+  {
+    document.getElementById("file_input").click();
+  },
+
   fileInput : function(ev)
   {
-    console.log(ev);
+    console.log("file input: " + ev);
     var file = document.getElementById('file_input').files[0];
     if (file)
        importFile(file);
