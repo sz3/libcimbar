@@ -55,6 +55,12 @@ public:
 		return glfwWindowShouldClose(_w);
 	}
 
+	void rotate(unsigned i=1)
+	{
+		if (_display)
+			_display->rotate(i);
+	}
+
 	void show(const cv::Mat& img, unsigned delay)
 	{
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();

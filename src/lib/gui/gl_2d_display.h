@@ -68,7 +68,6 @@ public:
 		++_i;
 		if (_i >= 3)
 			_i = 0;
-		rotate();
 	}
 
 	GLuint program() const
@@ -76,9 +75,9 @@ public:
 		return *_p;
 	}
 
-	void rotate()
+	void rotate(unsigned i=1)
 	{
-		if (++_rotation >= 4)
+		if (i == 0 or ++_rotation >= 4)
 			_rotation = 0;
 	}
 

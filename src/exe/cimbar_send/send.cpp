@@ -28,6 +28,7 @@ int main(int argc, char** argv)
 	    ("c,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
+	    ("r,rotatecam", "Successive images are rotated 90 degrees", cxxopts::value<bool>())
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
 	    ("h,help", "Print usage")
 	;
@@ -54,6 +55,7 @@ int main(int argc, char** argv)
 	FountainInit::init();
 
 	bool dark = true;
+	bool use_rotatecam = result.count("rotatecam");
 	bool use_shakycam = result.count("shakycam");
 
 	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
@@ -73,13 +75,15 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool start = true;
 
-	auto draw = [&w, &cam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
+	auto draw = [&w, &cam, use_rotatecam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
 		cv::Mat& windowImg = cam.draw(frame);
 		w.show(windowImg, delay);
+		if (use_rotatecam)
+			w.rotate();
 		return true;
 	};
 

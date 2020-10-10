@@ -45,7 +45,10 @@ int render()
 	if (required > cimbar::Config::fountain_chunks_per_frame())
 		required = required*2;
 	if (_fes->block_count() > required)
+	{
 		_fes->reset();
+		_window->rotate(0);
+	}
 
 	SimpleEncoder enc(30);
 	enc.set_encode_id(_encodeId);
@@ -58,6 +61,7 @@ int render()
 	}
 
 	_window->show(*img, 0);
+	_window->rotate();
 	return ++_renders;
 }
 

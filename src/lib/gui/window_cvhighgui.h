@@ -21,6 +21,10 @@ public:
 		return cv::getWindowProperty("image", cv::WND_PROP_AUTOSIZE) < 0;
 	}
 
+	void rotate(unsigned i=1)
+	{
+	}
+
 	void show(const cv::Mat& img, unsigned delay)
 	{
 		cv::imshow("image", img);
