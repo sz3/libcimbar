@@ -52,6 +52,11 @@ public:
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniform1i(textureUniform, 0);
 
+		// pass in rotation matrix
+		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
+		std::array<GLfloat, 4> vals = rotation_matrix();
+		glUniformMatrix2fv(rotateUniform, 1, false, vals.data());
+
 		// Draw
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -63,6 +68,7 @@ public:
 		++_i;
 		if (_i >= 3)
 			_i = 0;
+		rotate();
 	}
 
 	GLuint program() const
@@ -70,15 +76,48 @@ public:
 		return *_p;
 	}
 
+	void rotate()
+	{
+		if (++_rotation >= 4)
+			_rotation = 0;
+	}
+
+	std::array<GLfloat, 4> rotation_matrix() const
+	{
+		// just using sin and cos is probably better?
+		switch (_rotation)
+		{
+			default:
+			case 0:
+				return {-1, 0, 0, 1};
+			case 1: // right 90
+				return {0, 1, 1, 0};
+			case 2: // right 180
+				return {1, 0, 0, -1};
+			case 3: // right 270
+				return {0, -1, -1, 0};
+		}
+	}
+
 protected:
 	static std::shared_ptr<cimbar::gl_program> create()
 	{
+		/* rotations
+		 *
+		 * vec2 br = vec2(1.0f + vert.x, 1.0f - vert.y); // default
+		 * vec2 bl = vec2(1.0f - vert.y, 1.0f - vert.x);
+		 * vec2 tl = vec2(1.0f - vert.x, 1.0f + vert.y);
+		 * vec2 tr = vec2(1.0f + vert.y, 1.0f + vert.x);
+		*/
 		static const std::string VERTEX_SHADER_SRC = R"(#version 300 es
+		uniform mat2 rot;
 		in vec4 vert;
 		out vec2 texCoord;
 		void main() {
 		   gl_Position = vec4(vert.x, vert.y, 0.0f, 1.0f);
-		   texCoord = vec2((vert.x + 1.0f) / 2.0f, (1.0f - vert.y) / 2.0);
+		   vec2 ori = vec2(vert.x, vert.y);
+		   ori *= rot;
+		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
 		})";
 
 		static const std::string FRAGMENT_SHADER_SRC = R"(#version 300 es
@@ -99,7 +138,8 @@ protected:
 	std::shared_ptr<cimbar::gl_program> _p;
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
-	int _i = 0;
+	unsigned _i = 0;
+	unsigned _rotation = 0;
 };
 
 }
