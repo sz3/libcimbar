@@ -30,8 +30,8 @@ int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool
 
 		if (!no_deskew)
 		{
-			// attempt undistort
-			// we don't fail outright, but we'll probably fail the decode :(
+			// attempt undistort. It's currently a low-effort attempt to *reduce* distortion, not eliminate it.
+			// we rely on the decoder to power through minor distortion
 			if (undistort)
 			{
 				Undistort<SimpleCameraCalibration> und;

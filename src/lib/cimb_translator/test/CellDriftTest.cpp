@@ -23,14 +23,15 @@ TEST_CASE( "CellDriftTest/testSimple", "[unit]" )
 
 	for (int i = 0; i < 10; ++i)
 		drift.updateDrift(1, 1);
-	assertEquals( 2, drift.x() );
-	assertEquals( 2, drift.y() );
+	assertEquals( 7, drift.x() );
+	assertEquals( 7, drift.y() );
 
 	drift.updateDrift(-1, 1);
-	assertEquals( 1, drift.x() );
-	assertEquals( 2, drift.y() );
+	assertEquals( 6, drift.x() );
+	assertEquals( 7, drift.y() );
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 20; ++i)
 		drift.updateDrift(-1, -1);
-	assertEquals( -2, drift.x() );
+	assertEquals( -7, drift.x() );
+	assertEquals( -7, drift.y() );
 }
