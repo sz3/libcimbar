@@ -18,6 +18,11 @@ struct window_interface
 		return static_cast<const T*>(this)->should_close();
 	}
 
+	void rotate(unsigned i)
+	{
+		static_cast<T*>(this)->rotate(i);
+	}
+
 	void show(const cv::Mat& img, unsigned delay)
 	{
 		static_cast<T*>(this)->show(img, delay);
