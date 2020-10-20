@@ -1,3 +1,9 @@
+### Demo
+
+[cimbar.org](https://cimbar.org)
+
+### Build
+
 To build opencv.js (and the static libraries we'll need to build against opencv)...
 ```
 cd /path/to/opencv
@@ -11,8 +17,8 @@ With opencv.js built:
 mkdir build-wasm
 cd build-wasm
 source /path/to/emscripten/emsdk/emsdk_env.sh
-emcmake cmake .. -DUSE_WASM=2 -DOPENCV_DIR=/path/to/opencv
+emcmake cmake .. -DUSE_WASM=1 -DOPENCV_DIR=/path/to/opencv
 emcmake make -j7 install
 ```
 
-(do `-DUSE_WASM=1` to actually use wasm and not asm.js)
+(do `-DUSE_WASM=2` to use asm.js instead of wasm)

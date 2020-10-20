@@ -7,8 +7,6 @@ libcimbar is fairly optimized, to achieve the *proof* part of proof-of-concept. 
 
 Performance optimizations aside, there are a number of paths that might be interesting to pursue. Some I may take a look at, but most I will leave to any enterprising developer who wants to take up the cause:
 
-* emscripten+wasm
-	* specifically, would like to be able to encode cimbar codes in the browser
 * proper metadata/header information?
 	* would be nice to be able to determine ecc/#colors/#smybols from the cimbar image itself?
 	* The bottom right corner is the obvious place to reclaim space to make this possible.

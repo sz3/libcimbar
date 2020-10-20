@@ -70,7 +70,7 @@ What if our source file is much smaller, and we'd like to make sure it can be de
 
 The solution cimbar implements is to use [fountain codes](https://en.wikipedia.org/wiki/Fountain_code).
 
-Fountain codes:
+Fountain (wirehair) codes:
 
 * introduce a small amount of overhead for bookkeeping purposes (in 6 bit cimbar, it is 6 bytes per 744 of real data)
 * allow the decoder to reconstruct a file over multiple fountain frames
@@ -80,15 +80,15 @@ Fountain codes:
 These properties may appear to be magical as you consider them more, and they do come with a few tradeoffs:
 
 1. the fountain decoder defines how large a file can be
-	* in cimbar's case, capped at 16.7MB
-2. may require the file contents to be stored in RAM
+	* in cimbar's case, capped at 33.55MB
+2. wirehair requires the file contents to be stored in RAM
 	* this relates to the size limit!
 
 This constraint is less of an obstacle than it may seem -- the fountain codes are essentially being used as a wire format, and the encoder and decoder could agree on a scheme to split up, and then reassemble, larger files. Cimbar does not yet implement this, however!
 
 ## Implementation: Decoder
 
-The decoder is, naturally, the inverse of the encoder in most respects. However, it's job is more difficult. The decoder must:
+The decoder is, unsurprisingly, the inverse of the encoder in most respects. However, it's job is more difficult. The decoder must:
 
 * locate the cimbar code inside a candidate image
 
@@ -127,8 +127,8 @@ decoded_data = error_correct(results)
 
 The reason for complexity is multi-fold:
 * we have to reverse the interleave, to reassemble the file contents in the right order
-* we also decode the cells out of order, because the image hash's `distance` metric is also a *confidence* metric -- and we want to decode cells we are more confident about before cells we are less confident about.
-* the distance/confidence is used in combination with `drift` -- an (x,y) offset -- that tracks the local distortion for upcoming decodes. When we have higher confidence in a cell, its drift is prefered over a lower confidence result.
+* we also decode the cells out of order, because the image hash's `distance` metric is also a *confidence* metric. To minimize errors, we want to decode cells we are more confident about before cells we are less confident about.
+* the distance/confidence is used in combination with `drift` -- an (x,y) offset -- that tracks the local distortion for upcoming decodes. When we have higher confidence in a cell, its drift is prefered over a lower confidence result's.
 
 ### Reasons for errors
 
