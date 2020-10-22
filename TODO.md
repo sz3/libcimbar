@@ -34,8 +34,7 @@ Performance optimizations aside, there are a number of paths that might be inter
 * more efficient ECC?
 	* LDPC?
 	* Reed Solomon operates on bytes. Most decode errors tend to average out at 1-3 bits. It's not a total disaster, because it works. However, it would be nice to have denser error correction codes.
-* crack the seal on OpenCV+OpenCL2.0+SVM, to enable proper GPU support on android?
-	* it would be nice to use the GPU on android. It currently is not reasonable because of the time cost of memory buffer copies between the GPU->CPU.
+* proper GPU support (OpenCV + openCL) on android?
 * ???
 	* still reading? Of course there's more! There's always more!
 
