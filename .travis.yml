@@ -1,37 +1,29 @@
 language: cpp
+dist: bionic
 
 git:
   depth: 1
 
-addons: &gcc7
-  apt:
-    packages:
-      - g++-7
-    sources:
-      - ubuntu-toolchain-r-test
-
-addons: &clang6
-  apt:
-    packages:
-      - clang-6.0
-    sources:
-      - ubuntu-toolchain-r-test
-      - llvm-toolchain-bionic-6.0
-
 matrix:
   include:
-    - env: CXX="g++-7" CC="gcc-7" CPP_CHECK=1 USE_GLFW=1
+    - env: CXX="g++-7" CC="gcc-7" USE_GLFW=1
       os: linux
-      dist: bionic
-      addons: &gcc7
+      addons:
+        apt:
+          packages: ['g++-7', 'libglfw3-dev', 'libgles2-mesa-dev']
+          sources: ['ubuntu-toolchain-r-test']
 
     - env: CXX="clang++-6.0" CC="clang-6.0"
       os: linux
-      dist: bionic
-      addons: &clang6
+      addons:
+        apt:
+          packages: ['clang-6.0', 'cppcheck']
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-bionic-6.0']
+      after_success:
+        - cppcheck ../src/
 
 before_install:
-  - sudo apt-get -y install libopencv-dev libglfw3-dev libgles2-mesa-dev cppcheck
+  - sudo apt-get -y install libopencv-dev
 
 before_script:
   - $CXX --version
@@ -43,5 +35,4 @@ script:
     - cmake .. ${CMAKE_FLAGS}
     - make -j2
     - make test CTEST_OUTPUT_ON_FAILURE=TRUE
-    - if [[ ${CPP_CHECK} ]]; then cppcheck ../src/; fi
 
