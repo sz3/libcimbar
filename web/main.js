@@ -2,7 +2,7 @@ var Main = function() {
 
 var _interval = 66;
 
-var _showStats = true;
+var _showStats = false;
 var _renders = 0;
 var _renderTime = 0;
 
@@ -27,22 +27,27 @@ function importFile(f)
 
 // public interface
 return {
-  run : function(canvas)
+  run : function(canvas, width, height)
   {
     console.log("init for canvas " + canvas);
-    var dim = canvas.width;
-    if (canvas.height < dim) {
-      dim = canvas.height;
+
+    Module._initialize_GL(1024, 1024);
+    Main.scaleCanvas(canvas, width, height);
+    Main.alignInvisibleClick(canvas);
+  },
+
+  scaleCanvas : function(canvas, width, height)
+  {
+    var dim = width;
+    if (height < dim) {
+      dim = height;
     }
     console.log(dim);
     if (dim > 1024) {
       dim = 1024;
     }
-    Module._initialize_GL(1024, 1024);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
-
-    Main.alignInvisibleClick(canvas);
   },
 
   alignInvisibleClick : function(canvas)

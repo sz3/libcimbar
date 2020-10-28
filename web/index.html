@@ -65,9 +65,10 @@ body {
 <div id="status"></div>
 <input type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 <div id="container" class="container" title="Drag and drop a file">
-	<canvas id="canvas" class="canvas"></canvas>
+	<canvas id="canvas" class="canvas" width="1024" height="1024"></canvas>
 </div>
 <a id="invisible_click" href="#" onclick="Main.clickFileInput()"></a>
+
 <script type="text/javascript">
 	var mobileAndTabletCheck = function() {
 	  let check = false;
@@ -78,20 +79,18 @@ body {
 	// reset zoom
 	document.body.style.zoom = (window.innerWidth / window.outerWidth);
 
-	const canvas = document.getElementById('canvas');
+	var canvas = document.getElementById('canvas');
+	var width = window.outerWidth;
+	var height = window.outerHeight;
 	if (mobileAndTabletCheck()) {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-	}
-	else {
-		canvas.width = window.outerWidth;
-		canvas.height = window.outerHeight;
+		width = window.innerWidth;
+		height = window.innerHeight;
 	}
 
 	var Module = {};
 	Module.canvas = canvas;
 	Module.onRuntimeInitialized = () => {
-		Main.run(canvas);
+		Main.run(canvas, width, height);
 		Main.nextFrame();
 	};
 </script>
