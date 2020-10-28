@@ -13,7 +13,10 @@ public:
 public:
 	Cell(const cv::Mat& img)
 	    : _img(img)
-	{}
+	    , _cols(img.cols)
+	    , _rows(img.rows)
+	{
+	}
 
 	Cell(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
 	    : _img(img)
@@ -155,6 +158,6 @@ protected:
 	const cv::Mat& _img;
 	int _xstart = 0;
 	int _ystart = 0;
-	int _cols = 0;
-	int _rows = 0;
+	int _cols;
+	int _rows;
 };
