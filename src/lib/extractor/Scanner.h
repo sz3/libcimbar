@@ -19,11 +19,14 @@ public: // public inline methods
 	template <typename MAT>
 	Scanner(const MAT& img, bool dark=true, int skip=0);
 
-	template <typename MAT>
-	static cv::Mat threshold_fast(const MAT& img);
+	template <typename MAT, typename MAT2>
+	static void threshold_fast(const MAT& img, MAT2& out);
 
 	template <typename MAT>
 	static cv::Mat preprocess_image(const MAT& img);
+
+	template <typename MAT>
+	static void preprocess_image(const MAT& img, MAT& out);
 
 	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
 
@@ -92,30 +95,52 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 	return std::max(3U, v + 2);
 }
 
-template <typename MAT>
-inline cv::Mat Scanner::threshold_fast(const MAT& img)
+template <typename MAT, typename MAT2>
+inline void Scanner::threshold_fast(const MAT& img, MAT2& out)
 {
 	unsigned unit = std::min(img.cols, img.rows);
 	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
-	cv::Mat res;
-	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
-	return res;
+	cv::adaptiveThreshold(img, out, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
+}
+
+template <>
+inline void Scanner::threshold_fast(const cv::UMat& img, cv::UMat& out)
+{
+	unsigned unit = std::min(img.cols, img.rows);
+	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
+	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(unit, unit));
+	clahe->apply(img, out);
+
+	cv::threshold(out, out, 117, 255, cv::THRESH_BINARY);
 }
 
 template <typename MAT>
 inline cv::Mat Scanner::preprocess_image(const MAT& img)
 {
-	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
-	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
+	cv::Mat out;
+	preprocess_image(img, out);
+	return out;
+}
 
-	MAT out;
+template <>
+inline cv::Mat Scanner::preprocess_image(const cv::UMat& img)
+{
+	return img.getMat(cv::ACCESS_FAST);
+}
+
+template <typename MAT>
+inline void Scanner::preprocess_image(const MAT& img, MAT& out)
+{
 	if (img.channels() >= 3)
 		cv::cvtColor(img, out, cv::COLOR_RGB2GRAY);
 	else
 		out = img.clone();
 
-	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
-	return threshold_fast(out);
+	unsigned unit = std::min(img.cols, img.rows);
+	unit = std::max(nextPowerOfTwoPlusOne((unsigned)(unit * 0.002)), 3U);
+	cv::GaussianBlur(out, out, cv::Size(unit, unit), 0);
+
+	threshold_fast(out, out);
 }
 
 template <typename MAT>
