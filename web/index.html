@@ -58,7 +58,8 @@ body {
 }
 
 #invisible_click {
-	position: fixed;	
+	position: fixed;
+	opacity: 0;
 }
 </style>
 
@@ -68,6 +69,7 @@ body {
 	<canvas id="canvas" class="canvas"></canvas>
 </div>
 <a id="invisible_click" href="#" onclick="Main.clickFileInput()"></a>
+
 <script type="text/javascript">
 	var mobileAndTabletCheck = function() {
 	  let check = false;
@@ -78,20 +80,18 @@ body {
 	// reset zoom
 	document.body.style.zoom = (window.innerWidth / window.outerWidth);
 
-	const canvas = document.getElementById('canvas');
+	var canvas = document.getElementById('canvas');
+	var width = window.outerWidth;
+	var height = window.outerHeight;
 	if (mobileAndTabletCheck()) {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-	}
-	else {
-		canvas.width = window.outerWidth;
-		canvas.height = window.outerHeight;
+		width = window.innerWidth;
+		height = window.innerHeight;
 	}
 
 	var Module = {};
 	Module.canvas = canvas;
 	Module.onRuntimeInitialized = () => {
-		Main.run(canvas);
+		Main.run(canvas, width, height);
 		Main.nextFrame();
 	};
 </script>
