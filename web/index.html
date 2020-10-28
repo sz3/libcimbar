@@ -58,14 +58,15 @@ body {
 }
 
 #invisible_click {
-	position: fixed;	
+	position: fixed;
+	opacity: 0;
 }
 </style>
 
 <div id="status"></div>
 <input type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 <div id="container" class="container" title="Drag and drop a file">
-	<canvas id="canvas" class="canvas" width="1024" height="1024"></canvas>
+	<canvas id="canvas" class="canvas"></canvas>
 </div>
 <a id="invisible_click" href="#" onclick="Main.clickFileInput()"></a>
 
