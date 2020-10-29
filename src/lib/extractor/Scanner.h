@@ -98,20 +98,7 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 template <typename MAT, typename MAT2>
 inline void Scanner::threshold_fast(const MAT& img, MAT2& out)
 {
-	unsigned unit = std::min(img.cols, img.rows);
-	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
-	cv::adaptiveThreshold(img, out, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
-}
-
-template <>
-inline void Scanner::threshold_fast(const cv::UMat& img, cv::UMat& out)
-{
-	unsigned unit = std::min(img.cols, img.rows);
-	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
-	cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(4.0, cv::Size(unit, unit));
-	clahe->apply(img, out);
-
-	cv::threshold(out, out, 117, 255, cv::THRESH_BINARY);
+	cv::threshold(img, out, 117, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 }
 
 template <typename MAT>
