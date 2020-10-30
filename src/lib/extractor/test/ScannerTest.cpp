@@ -34,7 +34,7 @@ TEST_CASE( "ScannerTest/testPiecemealScan", "[unit]" )
 	std::vector<Anchor> c3;
 	for (const Anchor& c : c2)
 		sc.t3_scan_diagonal<ScanState_114>(c, [&c3] (const Anchor& p) { c3.push_back(p); });
-	assertStringContains("210+-24,914+-24", turbo::str::join(c3));
+	assertStringContains("210+-23,914+-24", turbo::str::join(c3));
 	assertStringContains("195+-25,61+-25", turbo::str::join(c3));
 	assertStringContains("1039+-22,887+-23", turbo::str::join(c3));
 
@@ -59,7 +59,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
 
 	std::vector<Anchor> candidates;
 	int cutoff = sc.scan_primary(candidates);
-	assertEquals( 1754, cutoff );
+	assertEquals( 1766, cutoff );
 	assertEquals(
 	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23",
 	    turbo::str::join(candidates)
@@ -67,7 +67,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner", "[unit]" )
 
 	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
-	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,67+-24",
+	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,68+-24",
 	    turbo::str::join(candidates)
 	);
 }
@@ -87,7 +87,7 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.2", "[unit]" )
 
 	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
-	    "29+-27,29+-27 993+-27,29+-27 29+-27,993+-27 994+-27,993+-27",
+	    "29+-27,29+-27 993+-27,29+-27 29+-27,993+-27 993+-27,993+-27",
 	    turbo::str::join(candidates)
 	);
 }
@@ -99,15 +99,15 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.3", "[unit]" )
 
 	std::vector<Anchor> candidates;
 	int cutoff = sc.scan_primary(candidates);
-	assertEquals( 1607, cutoff );
+	assertEquals( 1575, cutoff );
 	assertEquals(
-	    "56+-24,166+-25 870+-24,133+-26 137+-20,910+-19",
+	    "56+-24,166+-25 870+-24,133+-25 137+-20,910+-18",
 	    turbo::str::join(candidates)
 	);
 
 	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
-	    "56+-24,166+-25 870+-24,133+-26 137+-20,910+-19 837+-18,898+-19",
+	    "56+-24,166+-25 870+-24,133+-25 137+-20,910+-18 837+-18,897+-18",
 	    turbo::str::join(candidates)
 	);
 }
@@ -119,15 +119,15 @@ TEST_CASE( "ScannerTest/testBottomRightCorner.4", "[unit]" )
 
 	std::vector<Anchor> candidates;
 	int cutoff = sc.scan_primary(candidates);
-	assertEquals( 1616, cutoff );
+	assertEquals( 1606, cutoff );
 	assertEquals(
-	    "189+-25,899+-23 157+-26,79+-25 924+-18,810+-19",
+	    "189+-25,899+-23 157+-26,79+-25 924+-18,811+-19",
 	    turbo::str::join(candidates)
 	);
 
 	assertTrue( sc.add_bottom_right_corner(candidates, cutoff) );
 	assertEquals(
-	    "189+-25,899+-23 157+-26,79+-25 924+-18,810+-19 911+-18,122+-20",
+	    "189+-25,899+-23 157+-26,79+-25 924+-18,811+-19 911+-18,122+-19",
 	    turbo::str::join(candidates)
 	);
 }
@@ -141,7 +141,7 @@ TEST_CASE( "ScannerTest/testExampleScan", "[unit]" )
 	std::vector<Anchor> candidates = sc.scan();
 	// order is top-left, top-right, bottom-left, bottom-right
 	assertEquals(
-	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,67+-24",
+	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,68+-24",
 	    turbo::str::join(candidates)
 	);
 }
@@ -155,7 +155,7 @@ TEST_CASE( "ScannerTest/testExampleScan.2", "[unit]" )
 	// order is top-left, top-right, bottom-left, bottom-right
 
 	assertEquals(
-	    "41+-25,196+-25 909+-25,183+-25 69+-23,1036+-23 896+-23,1036+-24",
+	    "41+-24,196+-25 909+-25,183+-25 69+-23,1036+-23 896+-23,1036+-23",
 	    turbo::str::join(candidates)
 	);
 }
@@ -169,7 +169,20 @@ TEST_CASE( "ScannerTest/testExampleScan.3", "[unit]" )
 	// order is top-left, top-right, bottom-left, bottom-right
 
 	assertEquals(
-	    "29+-27,29+-27 993+-27,29+-27 29+-27,993+-27 994+-27,993+-27",
+	    "29+-27,29+-27 993+-27,29+-27 29+-27,993+-27 993+-27,993+-27",
+	    turbo::str::join(candidates)
+	);
+}
+
+TEST_CASE( "ScannerTest/testExampleScan.Adaptive", "[unit]" )
+{
+	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
+	Scanner sc(img, false);
+
+	std::vector<Anchor> candidates = sc.scan();
+	// order is top-left, top-right, bottom-left, bottom-right
+	assertEquals(
+	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,67+-24",
 	    turbo::str::join(candidates)
 	);
 }
@@ -182,17 +195,17 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 	std::vector<Anchor> candidates = sc.scan();
 	// order is top-left, top-right, bottom-left, bottom-right
 	assertEquals(
-	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,67+-24",
+	    "210+-25,914+-24 195+-25,61+-25 1039+-23,887+-23 1035+-23,68+-24",
 	    turbo::str::join(candidates)
 	);
 
 	Corners cs(candidates);
 	Midpoints mp;
 	std::vector<point<int>> edges = sc.scan_edges(cs, mp);
-	assertEquals( "177,490 623,38 1062,479 633,925", turbo::str::join(edges) );
+	assertEquals( "177,490 623,39 1061,479 633,925", turbo::str::join(edges) );
 
 	// check "expected" midpoints as well.
-	assertEquals( "202.549,490.27 623.371,64.0598 1037.01,479.559 632.657,900.234", turbo::str::join(mp.points()) );
+	assertEquals( "202.549,490.268 623.627,64.5719 1037.01,480.052 632.907,900.226", turbo::str::join(mp.points()) );
 }
 
 TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
