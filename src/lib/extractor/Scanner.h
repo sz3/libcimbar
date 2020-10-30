@@ -98,7 +98,7 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 template <typename MAT, typename MAT2>
 inline void Scanner::threshold_fast(const MAT& img, MAT2& out)
 {
-	cv::threshold(img, out, 117, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+	cv::threshold(img, out, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 }
 
 template <typename MAT>
@@ -112,7 +112,9 @@ inline cv::Mat Scanner::preprocess_image(const MAT& img)
 template <>
 inline cv::Mat Scanner::preprocess_image(const cv::UMat& img)
 {
-	return img.getMat(cv::ACCESS_FAST);
+	cv::UMat out;
+	preprocess_image(img, out);
+	return out.getMat(cv::ACCESS_FAST);
 }
 
 template <typename MAT>
