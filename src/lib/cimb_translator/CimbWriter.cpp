@@ -40,10 +40,12 @@ namespace {
 	}
 }
 
-CimbWriter::CimbWriter(bool dark, unsigned size)
+CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark)
     : _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding(), Config::interleave_blocks(), Config::interleave_partitions())
-    , _encoder(Config::symbol_bits(), Config::color_bits())
+    , _encoder(symbol_bits, color_bits)
 {
+	unsigned size = cimbar::Config::image_size();
+
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
 	_image = cv::Mat(size, size, CV_8UC3, bgcolor);
 
