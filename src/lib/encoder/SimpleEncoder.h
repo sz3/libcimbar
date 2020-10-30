@@ -88,7 +88,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream)
 template <typename STREAM>
 inline fountain_encoder_stream::ptr SimpleEncoder::create_fountain_encoder(STREAM& stream, int compression_level)
 {
-	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes);
+	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol);
 
 	std::stringstream ss;
 	if (compression_level <= 0)

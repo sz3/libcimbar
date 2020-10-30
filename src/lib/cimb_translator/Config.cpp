@@ -68,15 +68,17 @@ unsigned Config::interleave_partitions()
 	return 2;
 }
 
-unsigned Config::fountain_chunk_size(unsigned ecc)
+unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell)
 {
 	// this calculation is based off the 112x112-6 grid.
 	// in that grid, we have 155 * bits_per_cell * 10 total bytes of data.
 	// so this neatly splits into 10 chunks per frame.
 	// ex: 690=6900/10 for ecc=40.
+	if (!bitspercell)
+		bitspercell = bits_per_cell();
 
-	// might double it to 5 per frame.
-	return (155-ecc) * bits_per_cell() * 10 / fountain_chunks_per_frame();
+	// the other reasonable settings for fountain_chunks_per_frame are `2` and `5`
+	return (155-ecc) * bitspercell * 10 / fountain_chunks_per_frame();
 }
 
 unsigned Config::fountain_chunks_per_frame()
@@ -84,7 +86,7 @@ unsigned Config::fountain_chunks_per_frame()
 	return 10;
 }
 
-int Config::compression_level()
+unsigned Config::compression_level()
 {
 	return 6;
 }
