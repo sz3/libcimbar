@@ -47,7 +47,7 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 	// do the real work
 	auto actual = image_hash::fuzzy_ahash(tenxten);
 
-	for (int i = 0; i < actual.size(); ++i)
+	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
 			assertEquals(expected[i], actual[i]);
@@ -111,7 +111,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 	// do the real work
 	auto actual = image_hash::fuzzy_ahash(tenxten, 0xFE);
 
-	for (int i = 0; i < actual.size(); ++i)
+	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
 			assertEquals(expected[i], actual[i]);
@@ -137,7 +137,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.SpecialCase", "[unit]" )
 	// e.g. we can make some assumptions about the input data that might help us optimize...
 	auto actual = image_hash::fuzzy_ahash(tenxten, 0xFF);
 
-	for (int i = 0; i < actual.size(); ++i)
+	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
 			assertEquals(expected[i], actual[i]);
@@ -167,7 +167,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 	bitmatrix bm(bb, 10, 10);
 	auto actual = image_hash::fuzzy_ahash(bm);
 
-	for (int i = 0; i < actual.size(); ++i)
+	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
 		{
 			assertEquals(expected[i], actual[i]);

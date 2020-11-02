@@ -144,7 +144,7 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 
 	unsigned best_fit = 0;
 	double best_distance = 1000000;
-	for (int i = 0; i < _numColors; ++i)
+	for (unsigned i = 0; i < _numColors; ++i)
 	{
 		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);
 		unsigned distance = check_color_distance(c, candidate);

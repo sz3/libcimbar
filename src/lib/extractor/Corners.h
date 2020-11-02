@@ -72,6 +72,6 @@ protected:
 protected:
 	point<int> _top_left;
 	point<int> _top_right;
-	point<int> _bottom_right;
 	point<int> _bottom_left;
+	point<int> _bottom_right;
 };

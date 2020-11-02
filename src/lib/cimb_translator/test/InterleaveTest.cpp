@@ -44,7 +44,6 @@ TEST_CASE( "InterleaveTest/testReverse", "[unit]" )
 	assertEquals( "0 5 1 6 2 7 3 8 4 9", turbo::str::join(invert) );
 
 	std::vector<int> reconstruct(pos.size(), -1);
-	auto it = actual.begin();
 	for (unsigned i = 0; i < pos.size(); ++i)
 		reconstruct[i] = actual[invert[i]];
 	assertEquals( "0 10 20 30 40 50 60 70 80 90", turbo::str::join(reconstruct) );

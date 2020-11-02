@@ -13,7 +13,7 @@ namespace cimbar
 		unsigned bits_per_cell();
 		unsigned ecc_bytes();
 
-		unsigned image_size();
+		int image_size();
 		unsigned anchor_size();
 
 		unsigned cell_size();

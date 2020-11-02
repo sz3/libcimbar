@@ -9,8 +9,8 @@ namespace cimbar {
 struct byte_istream : std::istream
 {
 	byte_istream(const char* data, unsigned len)
-	    : _buf((char*)data, len)
-	    , std::istream(&_buf)
+	    : std::istream(&_buf)
+	    , _buf((char*)data, len)
 	{
 	}
 

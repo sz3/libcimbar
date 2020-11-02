@@ -50,8 +50,8 @@ public:
 		}
 
 	protected:
-		unsigned _i;
 		const ahash_result& _hr;
+		unsigned _i;
 	};
 
 public:
@@ -124,9 +124,9 @@ public:
 	}
 
 protected:
+	intx::uint128 _bits;
 	int _mode;
 	std::array<uint64_t, 9> _results;
-	intx::uint128 _bits;
 };
 
 }
