@@ -23,8 +23,8 @@ namespace cimbar
 		unsigned interleave_blocks();
 		unsigned interleave_partitions();
 
-		unsigned fountain_chunk_size(unsigned ecc);
+		unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell=0);
 		unsigned fountain_chunks_per_frame();
-		int compression_level();
+		unsigned compression_level();
 	}
 }

@@ -20,16 +20,18 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
 
-	int compressionLevel = cimbar::Config::compression_level();
+	unsigned colorBits = cimbar::Config::color_bits();
+	unsigned compressionLevel = cimbar::Config::compression_level();
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	unsigned defaultFps = 15;
 	options.add_options()
 	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("c,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 	    ("r,rotatecam", "Successive images are rotated 90 degrees", cxxopts::value<bool>())
 	    ("s,shakycam", "Successive images are offset, like a shaky camera effect", cxxopts::value<bool>())
+	    ("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 	    ("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -45,6 +47,7 @@ int main(int argc, char** argv)
 
 	vector<string> infiles = result["in"].as<vector<string>>();
 
+	colorBits = std::min(3, result["colorbits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 	unsigned fps = result["fps"].as<unsigned>();
@@ -87,7 +90,7 @@ int main(int argc, char** argv)
 		return true;
 	};
 
-	Encoder en(ecc);
+	Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);
 	while (running)
 		for (const string& f : infiles)
 			en.encode_fountain(f, draw, compressionLevel);

@@ -11,7 +11,7 @@
 
 TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 {
-	CimbWriter cw;
+	CimbWriter cw(4, 2);
 
 	while (1)
 	{

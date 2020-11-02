@@ -7,7 +7,7 @@
 class CimbWriter
 {
 public:
-	CimbWriter(bool dark=true, unsigned size=1024);
+	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true);
 
 	bool write(unsigned bits);
 	bool done() const;

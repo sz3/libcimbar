@@ -69,14 +69,16 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar encoder/decoder", "Demonstration program for cimbar codes");
 
-	int compressionLevel = cimbar::Config::compression_level();
+	unsigned colorBits = cimbar::Config::color_bits();
+	unsigned compressionLevel = cimbar::Config::compression_level();
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	options.add_options()
 	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory.", cxxopts::value<string>())
-	    ("c,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
+	    ("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
 	    ("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
@@ -99,6 +101,8 @@ int main(int argc, char** argv)
 
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
+
+	colorBits = std::min(3, result["colorbits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
@@ -107,7 +111,7 @@ int main(int argc, char** argv)
 
 	if (encode)
 	{
-		Encoder en(ecc);
+		Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);
 		for (const string& f : infiles)
 		{
 			if (fountain)
@@ -123,7 +127,7 @@ int main(int argc, char** argv)
 	bool undistort = result.count("undistort");
 	int preprocess = result["preprocess"].as<int>();
 
-	Decoder d(ecc);
+	Decoder d(ecc, colorBits);
 
 	if (fountain)
 	{
