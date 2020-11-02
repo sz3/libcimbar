@@ -19,7 +19,7 @@ TEST_CASE( "ExtractorTest/testExtract", "[unit]" )
 
 	cv::Mat out = cv::imread(imgPath);
 	cv::cvtColor(out, out, cv::COLOR_BGR2RGB);
-	assertEquals( 0x2cab6b9cfa72624, image_hash::average_hash(out) );
+	assertEquals( 0x2cab639cfa72624, image_hash::average_hash(out) );
 }
 
 TEST_CASE( "ExtractorTest/testExtractMid", "[unit]" )
@@ -32,7 +32,7 @@ TEST_CASE( "ExtractorTest/testExtractMid", "[unit]" )
 
 	cv::Mat out = cv::imread(imgPath);
 	cv::cvtColor(out, out, cv::COLOR_BGR2RGB);
-	assertEquals( 0xc5f8225b6c6bc02, image_hash::average_hash(out) );
+	assertEquals( 0xc7f8205e686bc02, image_hash::average_hash(out) );
 }
 
 TEST_CASE( "ExtractorTest/testExtractUpscale", "[unit]" )
@@ -45,6 +45,6 @@ TEST_CASE( "ExtractorTest/testExtractUpscale", "[unit]" )
 
 	cv::Mat out = cv::imread(imgPath);
 	cv::cvtColor(out, out, cv::COLOR_BGR2RGB);
-	assertEquals( 0x29c64eac233f6394, image_hash::average_hash(out) );
+	assertEquals( 0x29c64eaca3356394, image_hash::average_hash(out) );
 }
 

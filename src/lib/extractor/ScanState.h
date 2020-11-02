@@ -64,7 +64,7 @@ protected:
 			if (_tally[i] == 0)
 				return NOOP;
 
-		int center = _tally[3];
+		float center = _tally[3];
 		for (int i = 1; i <= 5; ++i)
 		{
 			if (i == 3)

@@ -17,13 +17,19 @@ class Scanner
 {
 public: // public inline methods
 	template <typename MAT>
-	Scanner(const MAT& img, bool dark=true, int skip=0);
+	Scanner(const MAT& img, bool fast=true, bool dark=true, int skip=0);
+
+	template <typename MAT, typename MAT2>
+	static void threshold_fast(const MAT& img, MAT2& out);
+
+	template <typename MAT, typename MAT2>
+	static void threshold_adaptive(const MAT& img, MAT2& out);
 
 	template <typename MAT>
-	static cv::Mat threshold_fast(const MAT& img);
+	static cv::Mat preprocess_image(const MAT& img, bool fast);
 
-	template <typename MAT>
-	static cv::Mat preprocess_image(const MAT& img);
+	template <typename MAT, typename MAT2>
+	static void preprocess_image(const MAT& img, MAT2& out, bool fast);
 
 	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
 
@@ -92,40 +98,55 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 	return std::max(3U, v + 2);
 }
 
-template <typename MAT>
-inline cv::Mat Scanner::threshold_fast(const MAT& img)
+template <typename MAT, typename MAT2>
+inline void Scanner::threshold_fast(const MAT& img, MAT2& out)
+{
+	cv::threshold(img, out, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+}
+
+template <typename MAT, typename MAT2>
+inline void Scanner::threshold_adaptive(const MAT& img, MAT2& out)
 {
 	unsigned unit = std::min(img.cols, img.rows);
 	unit = nextPowerOfTwoPlusOne((unsigned)(unit * 0.05));
-	cv::Mat res;
-	cv::adaptiveThreshold(img, res, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
-	return res;
+	cv::adaptiveThreshold(img, out, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, unit, -10);
 }
 
 template <typename MAT>
-inline cv::Mat Scanner::preprocess_image(const MAT& img)
+inline cv::Mat Scanner::preprocess_image(const MAT& img, bool fast)
 {
-	unsigned unitX = nextPowerOfTwoPlusOne((unsigned)(img.cols * 0.002));
-	unsigned unitY = nextPowerOfTwoPlusOne((unsigned)(img.rows * 0.002));
+	cv::Mat out;
+	preprocess_image(img, out, fast);
+	return out;
+}
 
-	MAT out;
+template <typename MAT, typename MAT2>
+inline void Scanner::preprocess_image(const MAT& img, MAT2& out, bool fast)
+{
+	MAT temp;
 	if (img.channels() >= 3)
-		cv::cvtColor(img, out, cv::COLOR_RGB2GRAY);
+		cv::cvtColor(img, temp, cv::COLOR_RGB2GRAY);
 	else
-		out = img.clone();
+		temp = img.clone();
 
-	cv::GaussianBlur(out, out, cv::Size(unitY, unitX), 0);
-	return threshold_fast(out);
+	unsigned unit = std::min(img.cols, img.rows);
+	unit = std::max(nextPowerOfTwoPlusOne((unsigned)(unit * 0.002)), 3U);
+	cv::GaussianBlur(temp, temp, cv::Size(unit, unit), 0);
+
+	if (fast)
+		threshold_fast(temp, out);
+	else
+		threshold_adaptive(temp, out);
 }
 
 template <typename MAT>
-inline Scanner::Scanner(const MAT& img, bool dark, int skip)
+inline Scanner::Scanner(const MAT& img, bool fast, bool dark, int skip)
     : _dark(dark)
     , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
     , _mergeCutoff(img.cols / 30)
     , _anchorSize(30)
 {
-	_img = preprocess_image(img);
+	_img = preprocess_image(img, fast);
 }
 
 template <typename SCANTYPE>
