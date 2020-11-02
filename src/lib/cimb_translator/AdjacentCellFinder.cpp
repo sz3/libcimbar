@@ -44,7 +44,7 @@ int AdjacentCellFinder::in_row_with_margin(int index) const
 int AdjacentCellFinder::right(int index) const
 {
 	int next = index+1;
-	if (next >= _positions.size())
+	if (next >= (int)_positions.size())
 		return -1;
 	if (_positions[next].first < _positions[index].first)  // loop
 		return -1;
@@ -70,7 +70,7 @@ int AdjacentCellFinder::bottom(int index) const
 	if (in_row_with_margin(next))
 		next -= _markerSize;
 
-	if (next >= _positions.size())
+	if (next >= (int)_positions.size())
 		return -1;
 	if (_positions[next].first != _positions[index].first)  // near anchor
 		return -1;
