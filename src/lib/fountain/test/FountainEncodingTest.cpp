@@ -54,7 +54,7 @@ TEST_CASE( "FountainEncodingTest/testEncodingAndDecoding", "[unit]" )
 	FountainDecoder::init();
 	FountainEncoder::init();
 
-	int messageSize = 10000;
+	unsigned messageSize = 10000;
 	std::string message;
 	while (message.size() < messageSize)
 		message += "0123456789";
@@ -68,7 +68,7 @@ TEST_CASE( "FountainEncodingTest/testEncodingAndDecoding", "[unit]" )
 
 	std::array<uint8_t,packetSize> block;
 	int block_id = 0;
-	int decoded_blocks = 0;
+	unsigned decoded_blocks = 0;
 	for (; block_id < 50; ++block_id)
 	{
 		if (block_id % 3 == 0)  // 33% packet loss
@@ -106,7 +106,7 @@ TEST_CASE( "FountainEncodingTest/testConsistency", "[unit]" )
 	static const unsigned packetSize = 626;
 	FountainEncoder::init();
 
-	int messageSize = 1000;
+	unsigned messageSize = 1000;
 	std::string message;
 	while (message.size() < messageSize)
 		message += "0123456789";
@@ -147,7 +147,7 @@ TEST_CASE( "FountainEncodingTest/testWhichN", "[unit]" )
 	static const unsigned packetSize = 624;
 	FountainEncoder::init();
 
-	int messageSize = 6000;
+	unsigned messageSize = 6000;
 	std::string message;
 	while (message.size() < messageSize)
 		message += "0123456789";

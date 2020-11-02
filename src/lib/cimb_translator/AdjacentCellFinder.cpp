@@ -3,8 +3,8 @@
 
 AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size)
     : _positions(positions)
-    , _markerSize(marker_size)
     , _dimensions(dimensions)
+    , _markerSize(marker_size)
 {
 	int midDimensions = dimensions - marker_size - marker_size;
 	int midCells = dimensions * midDimensions;

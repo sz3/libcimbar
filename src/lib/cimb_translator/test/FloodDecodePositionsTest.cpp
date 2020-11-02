@@ -14,7 +14,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 
 	FloodDecodePositions cells(9, 112, 8, 6);
 	std::set<unsigned> remainingPos;
-	for (int i = 0; i < posCount; ++i)
+	for (unsigned i = 0; i < posCount; ++i)
 		remainingPos.insert(i);
 
 	// test a handful of coordinates. We'll just make sure we go through the rest in some order.

@@ -18,7 +18,7 @@ void FloodDecodePositions::reset()
 	_index = 0;
 	_count = 0;
 	_remaining.clear();
-	for (int i = 0; i < _positions.size(); ++i)
+	for (unsigned i = 0; i < _positions.size(); ++i)
 	{
 		_remaining.push_back(true);
 		_instructions.push_back({CellDrift(), ~0UL});
