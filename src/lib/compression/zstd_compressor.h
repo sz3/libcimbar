@@ -72,7 +72,7 @@ public:
 		return totalBytesRead;
 	}
 
-	int pad(int len)
+	unsigned pad(unsigned len)
 	{
 		if (len < 9)
 			len = 9;

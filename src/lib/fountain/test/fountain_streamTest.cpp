@@ -54,7 +54,7 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 	assertTrue( fes->good() );
 
 	std::array<char, 636> buff;
-	for (int i = 0; i < 20; ++i)
+	for (unsigned i = 0; i < 20; ++i)
 	{
 		unsigned res = fes->readsome(buff.data(), buff.size());
 		assertEquals( res, buff.size() );
@@ -70,9 +70,9 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 		// block_id
 		assertEquals( 0, buff[4] );
 		if (i+1 >= fes->blocks_required())
-			assertEquals( i+1, buff[5] );
+			assertEquals( i+1, (unsigned)buff[5] );
 		else
-			assertEquals( i, buff[5] );
+			assertEquals( i, (unsigned)buff[5] );
 	}
 
 	assertEquals( 21, fes->block_count() );

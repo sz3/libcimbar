@@ -30,7 +30,7 @@ namespace {
 	{
 		int longest = 0;
 		int max_d = 0;
-		for (int i = 0; i < edges.size(); ++i)
+		for (unsigned i = 0; i < edges.size(); ++i)
 		{
 			int d = edges[i].dot(edges[i]);
 			if (d > max_d)
@@ -78,19 +78,19 @@ std::vector<Anchor> Scanner::deduplicate_candidates(const std::vector<Anchor>& c
 	return merged;
 }
 
-int Scanner::filter_candidates(std::vector<Anchor>& candidates) const
+unsigned Scanner::filter_candidates(std::vector<Anchor>& candidates) const
 {
 	// returns the best 3 candidates
 	if (candidates.size() < 3)
 		return 0;
 
 	std::sort(candidates.begin(), candidates.end(), size_sort());
-	int cutoff = 0;
+	unsigned cutoff = 0;
 	for (int i = 0; i < 3; ++i)
 		cutoff += candidates[i].size();
 	cutoff /= 8; // avg / 2
 
-	int i = 0;
+	unsigned i = 0;
 	for (; i < candidates.size(); ++i)
 		if (candidates[i].size() < cutoff)
 			break;
@@ -116,7 +116,6 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	// because of how we ordered our edges, the index of the longest edge is also the index of the anchor opposite it.
 	int top_left = get_longest_edge(edges);
 	int top_right;
-	int bottom_left;
 
 	// now, we need to find the order of the other two:
 	const point<int>& departing_edge = edges[fix_index<3>(top_left - 1)];
@@ -125,15 +124,9 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	point<int> overlap = departing_edge - incoming_edge;
 
 	if (overlap.dot(overlap) < edges[departing_edge].dot(edges[departing_edge]))
-	{
 		top_right = fix_index<3>(top_left + 1);
-		bottom_left = fix_index<3>(top_left - 1);
-	}
 	else
-	{
 		top_right = fix_index<3>(top_left - 1);
-		bottom_left = fix_index<3>(top_left + 1);
-	}
 
 	// apply the order.
 	if (&anchors[0] != &anchors[top_left])
@@ -143,7 +136,7 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	return true;
 }
 
-bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
+bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, unsigned cutoff)
 {
 	double topScalar = anchors[2].max_range() / std::max<double>(anchors[1].max_range(), anchors[0].max_range());
 	point<int> topEdge = (anchors[1].center() - anchors[0].center()) * topScalar;
@@ -184,13 +177,13 @@ bool Scanner::add_bottom_right_corner(std::vector<Anchor>& anchors, int cutoff)
 	return false;
 }
 
-int Scanner::scan_primary(std::vector<Anchor>& candidates)
+unsigned Scanner::scan_primary(std::vector<Anchor>& candidates)
 {
 	t1_scan_rows<ScanState_114>([&] (const Anchor& p) {
 		on_t1_scan<ScanState_114>(p, candidates, true);
 	});
 
-	int cutoff = filter_candidates(candidates);
+	unsigned cutoff = filter_candidates(candidates);
 	sort_top_to_bottom(candidates);
 	return cutoff;
 }
@@ -198,7 +191,7 @@ int Scanner::scan_primary(std::vector<Anchor>& candidates)
 std::vector<Anchor> Scanner::scan()
 {
 	std::vector<Anchor> candidates;
-	int cutoff = scan_primary(candidates);
+	unsigned cutoff = scan_primary(candidates);
 
 	if (candidates.size() == 3 and cutoff != 0)
 		add_bottom_right_corner(candidates, cutoff);

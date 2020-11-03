@@ -14,7 +14,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 
 	FloodDecodePositions cells(9, 112, 8, 6);
 	std::set<unsigned> remainingPos;
-	for (int i = 0; i < posCount; ++i)
+	for (unsigned i = 0; i < posCount; ++i)
 		remainingPos.insert(i);
 
 	// test a handful of coordinates. We'll just make sure we go through the rest in some order.
@@ -26,8 +26,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 
 	// validate seed points
 	unsigned count = 0;
-
-	for (int c : {0, 1, 2, 3})
+	for (int c = 0; c < 4; ++c)
 	{
 		// 0
 		std::tie(i, xy, drift) = cells.next();
@@ -67,7 +66,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 	}
 
 	// we did "update(..., 1) for index=1. So the next cells should be the ones adjacent to 0: 1, 100.
-	for (int c : {0, 1})
+	for (int c = 0; c < 2; ++c)
 	{
 		std::tie(i, xy, drift) = cells.next();
 		if (i == 1)

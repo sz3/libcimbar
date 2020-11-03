@@ -28,7 +28,7 @@ unsigned Config::ecc_bytes()
 	return 30;
 }
 
-unsigned Config::image_size()
+int Config::image_size()
 {
 	return 1024;
 }
