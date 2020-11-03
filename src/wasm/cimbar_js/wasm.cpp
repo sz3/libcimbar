@@ -17,6 +17,10 @@ namespace {
 	std::shared_ptr<fountain_encoder_stream> _fes;
 	int _renders = 0;
 	uint8_t _encodeId = 0;
+
+	// settings
+	unsigned _ecc = 30;
+	unsigned _colorBits = 2;
 }
 
 extern "C" {
@@ -50,7 +54,7 @@ int render()
 		_window->rotate(0);
 	}
 
-	SimpleEncoder enc(30);
+	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
 	std::optional<cv::Mat> img = enc.encode_next(*_fes);
@@ -72,7 +76,7 @@ int encode(uint8_t* buffer, size_t size)
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
-	SimpleEncoder enc(30);
+	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
@@ -81,6 +85,18 @@ int encode(uint8_t* buffer, size_t size)
 	if (!_fes)
 		return 0;
 	return 1;
+}
+
+int configure(unsigned color_bits)
+{
+	if (color_bits != _colorBits and color_bits <= 3)
+	{
+		_colorBits = color_bits;
+		// TODO: what if the data is too small? do we just destroy the _fes and start over? Don't we kinda have to?
+		if (_fes)
+			_fes->reset_and_resize_buffer(cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits));
+	}
+	return 0;
 }
 
 }
