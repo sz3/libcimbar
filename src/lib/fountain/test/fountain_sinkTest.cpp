@@ -22,7 +22,7 @@ namespace {
 	stringstream dummyContents(unsigned size)
 	{
 		stringstream input;
-		for (int i = 0; i < (size/10); ++i)
+		for (unsigned i = 0; i < (size/10); ++i)
 			input << "0123456789";
 		return input;
 	}
