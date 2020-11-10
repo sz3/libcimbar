@@ -1,0 +1,57 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: "linux gcc7"
+          os: ubuntu-18.04
+          env: CXX="g++-7" CC="gcc-7"
+          cmake-flags: "-DUSE_GLFW=1"
+          extra-packages: "libglfw3-dev libgles2-mesa-dev"
+
+        - name: "linux clang"
+          os: ubuntu-18.04
+          env: CXX="clang++-6.0" CC="clang-6.0"
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Install dependencies
+      run: sudo apt-get install libopencv-dev ${{ matrix.config.extra-packages }}
+
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: Configure CMake
+      working-directory: ${{runner.workspace}}/build
+      run: ${{ matrix.config.env }} cmake $GITHUB_WORKSPACE ${{ matrix.config.cmake-flags }}
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/build
+      run: make -j2 && make install
+
+    - name: Test
+      working-directory: ${{runner.workspace}}/build
+      run: make test CTEST_OUTPUT_ON_FAILURE=TRUE
+
+  cppcheck:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: sudo apt-get install cppcheck
+
+    - name: run cppcheck
+      run: cppcheck src/
+
