@@ -40,19 +40,17 @@ public:
 		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id & 0x7F) );
 	}
 
-	// this resets the stream!
-	// but you might need to do if you change other parameters
-	// ex: different ECC settings -> different payload size -> different buffer size
-	void reset_and_resize_buffer(unsigned buffer_size)
+	// invalidates `this`!
+	fountain_encoder_stream::ptr replace(unsigned buffer_size)
 	{
-		_buffer.resize(buffer_size);
-		_encoder = FountainEncoder((uint8_t*)_data.data(), _data.size(), block_size());
-		reset();
+		if (buffer_size > _data.size())
+			return NULL;
+		return fountain_encoder_stream::ptr( new fountain_encoder_stream(std::move(_data), buffer_size, _encodeId) );
 	}
 
 	bool good() const
 	{
-		return _encoder.good();
+		return _encoder.good() and !_data.empty();
 	}
 
 	void reset()

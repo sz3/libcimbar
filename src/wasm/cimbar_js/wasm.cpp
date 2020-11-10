@@ -47,7 +47,7 @@ int render()
 	// we generate 2x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
 	if (required > cimbar::Config::fountain_chunks_per_frame())
-		required = required*2;
+		required = required*4;
 	if (_fes->block_count() > required)
 	{
 		_fes->reset();
@@ -92,9 +92,17 @@ int configure(unsigned color_bits)
 	if (color_bits != _colorBits and color_bits <= 3)
 	{
 		_colorBits = color_bits;
-		// TODO: what if the data is too small? do we just destroy the _fes and start over? Don't we kinda have to?
-		if (_fes)
-			_fes->reset_and_resize_buffer(cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits));
+
+		if (_window and _fes)
+		{
+			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
+			_fes = _fes->replace(buff_size_new);
+			_window->rotate(0);
+
+			// if the data is too small, _fes will be nullptr -- clear the canvas.
+			if (!_fes)
+				_window->show(cv::Mat(0, 0, CV_8UC3), 0);
+		}
 	}
 	return 0;
 }
