@@ -45,7 +45,10 @@ public:
 	{
 		if (buffer_size > _data.size())
 			return NULL;
-		return fountain_encoder_stream::ptr( new fountain_encoder_stream(std::move(_data), buffer_size, _encodeId) );
+
+		fountain_encoder_stream::ptr temp = fountain_encoder_stream::ptr( new fountain_encoder_stream(std::move(_data), buffer_size, _encodeId) );
+		_data.clear();
+		return temp;
 	}
 
 	bool good() const
