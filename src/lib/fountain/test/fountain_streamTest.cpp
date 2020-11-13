@@ -131,22 +131,23 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 	assertEquals( 13, fes->blocks_required() );
 	assertTrue( fes->good() );
 
-	fountain_encoder_stream::ptr newhotness = fes->replace(600);
-	assertEquals( 0, newhotness->block_count() );
-	assertEquals( 17, newhotness->blocks_required() );
-	assertTrue( newhotness->good() );
-	assertFalse( fes->good() );
+	assertTrue( fes->reset_and_resize_buffer(600) );
+
+	// changes block params (and internal buffer size)
+	assertEquals( 0, fes->block_count() );
+	assertEquals( 17, fes->blocks_required() );
+	assertTrue( fes->good() );
 
 	std::array<char, 140> buff;
 	for (int i = 0; i < 1000; ++i)
 	{
-		unsigned res = newhotness->readsome(buff.data(), buff.size());
+		unsigned res = fes->readsome(buff.data(), buff.size());
 		assertEquals( res, buff.size() );
 	}
 
-	assertEquals( 235, newhotness->block_count() );
-	assertEquals( 17, newhotness->blocks_required() );
-	assertTrue( newhotness->good() );
+	assertEquals( 235, fes->block_count() );
+	assertEquals( 17, fes->blocks_required() );
+	assertTrue( fes->good() );
 }
 
 TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
@@ -162,9 +163,12 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 	assertEquals( 2, fes->blocks_required() );
 	assertTrue( fes->good() );
 
-	fountain_encoder_stream::ptr bigfail = fes->replace(1200); // larger than the buffer
-	assertFalse( bigfail );
-	assertTrue( fes->good() ); // old stream left unchanged
+	assertFalse( fes->reset_and_resize_buffer(1200) ); // larger than the buffer
+
+	// stream left unchanged
+	assertEquals( 0, fes->block_count() );
+	assertEquals( 2, fes->blocks_required() );
+	assertTrue( fes->good() );
 }
 
 

@@ -3,12 +3,6 @@
 
 #include "FountainInit.h"
 #include "wirehair/wirehair.h"
-#include <array>
-#include <cassert>
-#include <vector>
-#include <iostream>
-
-// will need to split large files
 
 class FountainEncoder
 {
@@ -16,6 +10,13 @@ public:
 	static bool init()
 	{
 		return FountainInit::init();
+	}
+
+protected:
+	void swap(FountainEncoder& other) throw()
+	{
+		std::swap(_codec, other._codec);
+		std::swap(_packetSize, other._packetSize);
 	}
 
 public:
@@ -28,6 +29,12 @@ public:
 	~FountainEncoder()
 	{
 		wirehair_free(_codec);
+	}
+
+	FountainEncoder& operator=(FountainEncoder temp)
+	{
+		temp.swap(*this);
+		return *this;
 	}
 
 	bool good() const

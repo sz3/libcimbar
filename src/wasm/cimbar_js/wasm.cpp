@@ -96,12 +96,13 @@ int configure(unsigned color_bits)
 		if (_window and _fes)
 		{
 			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
-			_fes = _fes->replace(buff_size_new);
-			_window->rotate(0);
-
-			// if the data is too small, _fes will be nullptr -- clear the canvas.
-			if (!_fes)
+			if (!_fes->reset_and_resize_buffer(buff_size_new))
+			{
+				// if the data is too small, we should throw out _fes -- and clear the canvas.
+				_fes = nullptr;
 				_window->show(cv::Mat(0, 0, CV_8UC3), 0);
+			}
+			_window->rotate(0);
 		}
 	}
 	return 0;
