@@ -17,6 +17,8 @@ function importFile(f)
     dataOnHeap.set(imageData);
     Main.encode(f.name, dataOnHeap);
     Module._free(dataPtr);
+
+    Main.setHTML("current-file", f.name);
   };
   fileReader.onerror = () => {
     console.error('Unable to read file ' + f.name + '.');
@@ -109,6 +111,16 @@ return {
   setColorBits : function(color_bits)
   {
     Module._configure(color_bits);
+
+    var l = document.getElementsByClassName("color_bits");
+    var token = 'color_bits' + color_bits;
+    for (var i = 0; i < l.length; i++) {
+      if (l[i].id == token) {
+        l[i].classList.add("active");
+      } else {
+        l[i].classList.remove("active");
+      }
+    }
   },
 
   setHTML : function(id, msg)
