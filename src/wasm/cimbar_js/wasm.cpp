@@ -100,7 +100,7 @@ int configure(unsigned color_bits)
 			{
 				// if the data is too small, we should throw out _fes -- and clear the canvas.
 				_fes = nullptr;
-				_window->show(cv::Mat(0, 0, CV_8UC3), 0);
+				_window->clear();
 			}
 			_window->rotate(0);
 		}

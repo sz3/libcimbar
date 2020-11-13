@@ -31,6 +31,12 @@ public:
 		glGenVertexArrays(1, &_vao);
 	}
 
+	void clear()
+	{
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f );
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
 	void draw(GLuint texture)
 	{
 		GLuint prog = program();

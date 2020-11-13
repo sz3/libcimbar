@@ -61,6 +61,15 @@ public:
 			_display->rotate(i);
 	}
 
+	void clear()
+	{
+		if (_display)
+		{
+			_display->clear();
+			swap();
+		}
+	}
+
 	void show(const cv::Mat& img, unsigned delay)
 	{
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
