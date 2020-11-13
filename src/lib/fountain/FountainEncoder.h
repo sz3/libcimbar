@@ -3,6 +3,7 @@
 
 #include "FountainInit.h"
 #include "wirehair/wirehair.h"
+#include <cassert>
 
 class FountainEncoder
 {
