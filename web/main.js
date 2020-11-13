@@ -35,6 +35,7 @@ return {
 
     Module._initialize_GL(1024, 1024);
     Main.scaleCanvas(canvas, width, height);
+    Main.alignInvisibleClick(canvas);
   },
 
   scaleCanvas : function(canvas, width, height)
@@ -49,6 +50,16 @@ return {
     }
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
+  },
+
+  alignInvisibleClick : function(canvas)
+  {
+     var cpos = canvas.getBoundingClientRect();
+     var invisible_click = document.getElementById("invisible_click");
+     invisible_click.style.width = canvas.style.width;
+     invisible_click.style.height = canvas.style.height;
+     invisible_click.style.top = cpos.top + "px";
+     invisible_click.style.left = cpos.left + "px";
   },
 
   encode : function(filename, data)

@@ -52,6 +52,16 @@ body {
 	z-index: -1;
 }
 
+#invisible_click {
+	position: fixed;
+	opacity: 0;
+	pointer-events: auto;
+}
+#nav-container:focus-within + #invisible_click {
+	pointer-events: none;
+	display: none;
+}
+
 /* options */
 #nav-container a.color_bits {
   color: #555;
@@ -66,6 +76,7 @@ body {
   position: fixed;
   top: 0;
   width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 #nav-container .bg {
@@ -161,7 +172,7 @@ body {
 }
 
 #nav-content hr {
-  color: #444;
+  border: 1px solid #444;
 }
 
 #nav-content li a {
@@ -222,6 +233,7 @@ body {
       </ul>
     </div>
 </div>
+<a id="invisible_click" href="javascript:void(0)" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
 	var mobileAndTabletCheck = function() {
@@ -236,13 +248,6 @@ body {
 	var canvas = document.getElementById('canvas');
 	var width = window.outerWidth;
 	var height = window.outerHeight;
-	if (mobileAndTabletCheck()) {
-		width = window.innerWidth;
-		height = window.innerHeight;
-	}
-
-	var navCont = document.getElementById('nav-container');
-	navCont.style.height = height + "px";
 
 	var Module = {};
 	Module.canvas = canvas;
