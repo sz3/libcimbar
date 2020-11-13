@@ -80,6 +80,11 @@ return {
     }
   },
 
+  clickNav : function()
+  {
+    document.getElementById("nav-button").focus();
+  },
+
   clickFileInput : function()
   {
     document.getElementById("file_input").click();

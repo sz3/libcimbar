@@ -55,6 +55,11 @@ body {
 #invisible_click {
 	position: fixed;
 	opacity: 0;
+  pointer-events: auto;
+}
+#nav-container:focus-within + #invisible_click {
+  pointer-events: none;
+  display: none;
 }
 
 /* options */
@@ -69,7 +74,7 @@ body {
 /* built off of https://codepen.io/dannievinther/pen/NvZjvz */
 #nav-container {
   position: fixed;
-  height: 100vh;
+  top: 0;
   width: 100%;
   pointer-events: none;
 }
@@ -91,15 +96,15 @@ body {
   visibility: visible;
 }
 
-.button {
+#nav-button {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   z-index: 1;
-  height: 70px;
+  height: 60px;
   width: 30px;
-  margin-left: 25px;
+  margin-left: 15px;
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
@@ -115,19 +120,19 @@ body {
 }
 #nav-container .icon-bar:nth-of-type(1) {
   background-color: #00ffff;
+  box-shadow: 0px 0px 5px #00ffff, 0px 0px 2px #00ffff;
 }
 #nav-container .icon-bar:nth-of-type(2) {
   background-color: #ffff00;
+  box-shadow: 0px 0px 5px #ffff00, 0px 0px 2px #ffff00;
 }
 #nav-container .icon-bar:nth-of-type(3) {
   background-color: #00ff00;
+  box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
 }
 
-#nav-container:focus-within .button {
+#nav-container:focus-within #nav-button {
   pointer-events: none;
-}
-#nav-container:focus-within .icon-bar {
-  background-color: #aaa;
 }
 #nav-container:focus-within .icon-bar:nth-of-type(1) {
   transform: translate3d(0,8px,0) rotate(45deg);
@@ -140,13 +145,13 @@ body {
 }
 
 #nav-content {
-  margin-top: 70px;
+  margin-top: 60px;
   padding: 20px;
-  max-width: 300px;
+  max-width: 200px;
   position: absolute;
   top: 0;
   left: 0;
-  height: calc(100% - 70px);
+  height: calc(100% - 60px);
   width: 90%;
   background-color: #282C34;
   text-align: center;
@@ -158,7 +163,7 @@ body {
 }
 
 #nav-content ul {
-  height: calc(100% - 70px);
+  height: calc(100% - 60px);
   display: flex;
   flex-direction: column;
   list-style: none;
@@ -204,12 +209,12 @@ body {
 <div id="dragdrop" class="dragdrop" title="Drag and drop a file">
 	<canvas id="canvas" class="canvas"></canvas>
 </div>
-<a id="invisible_click" href="javascript:void(0)" onclick="Main.clickFileInput()"></a>
+
 <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 
 <div id="nav-container">
     <div class="bg"></div>
-    <div class="button" tabindex="0">
+    <div id="nav-button" tabindex="0">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -225,8 +230,8 @@ body {
         <li class="small"><a href="https://github.com/sz3/cfc/releases">android app</a></li>
       </ul>
     </div>
-  </div>
 </div>
+<a id="invisible_click" href="javascript:void(0)" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
 	var mobileAndTabletCheck = function() {
@@ -245,6 +250,9 @@ body {
 		width = window.innerWidth;
 		height = window.innerHeight;
 	}
+
+  var navCont = document.getElementById('nav-container');
+  navCont.style.height = height + "px";
 
 	var Module = {};
 	Module.canvas = canvas;
