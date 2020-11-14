@@ -17,6 +17,10 @@ namespace {
 	std::shared_ptr<fountain_encoder_stream> _fes;
 	int _renders = 0;
 	uint8_t _encodeId = 0;
+
+	// settings
+	unsigned _ecc = 30;
+	unsigned _colorBits = 2;
 }
 
 extern "C" {
@@ -43,14 +47,14 @@ int render()
 	// we generate 2x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
 	if (required > cimbar::Config::fountain_chunks_per_frame())
-		required = required*2;
+		required = required*4;
 	if (_fes->block_count() > required)
 	{
 		_fes->reset();
 		_window->rotate(0);
 	}
 
-	SimpleEncoder enc(30);
+	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
 	std::optional<cv::Mat> img = enc.encode_next(*_fes);
@@ -72,7 +76,7 @@ int encode(uint8_t* buffer, size_t size)
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
-	SimpleEncoder enc(30);
+	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
@@ -81,6 +85,27 @@ int encode(uint8_t* buffer, size_t size)
 	if (!_fes)
 		return 0;
 	return 1;
+}
+
+int configure(unsigned color_bits)
+{
+	if (color_bits != _colorBits and color_bits <= 3)
+	{
+		_colorBits = color_bits;
+
+		if (_window and _fes)
+		{
+			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
+			if (!_fes->reset_and_resize_buffer(buff_size_new))
+			{
+				// if the data is too small, we should throw out _fes -- and clear the canvas.
+				_fes = nullptr;
+				_window->clear();
+			}
+			_window->rotate(0);
+		}
+	}
+	return 0;
 }
 
 }

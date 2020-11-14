@@ -31,7 +31,6 @@ protected:
 	}
 
 public:
-
 	template <typename STREAM>
 	static fountain_encoder_stream::ptr create(STREAM& stream, unsigned buffer_size, uint8_t encode_id=0)
 	{
@@ -41,9 +40,23 @@ public:
 		return fountain_encoder_stream::ptr( new fountain_encoder_stream(buffs.str(), buffer_size, encode_id & 0x7F) );
 	}
 
+	// this resets the stream!
+	// but you might need to do if you change other parameters
+	// ex: different ECC settings => different payload size => different fountain buffer size
+	bool reset_and_resize_buffer(unsigned buffer_size)
+	{
+		if (buffer_size > _data.size())
+			return false;
+
+		_buffer.resize(buffer_size);
+		_encoder = FountainEncoder((uint8_t*)_data.data(), _data.size(), block_size());
+		reset();
+		return true;
+	}
+
 	bool good() const
 	{
-		return _encoder.good();
+		return _encoder.good() and _data.size() > _encoder.packet_size();
 	}
 
 	void reset()

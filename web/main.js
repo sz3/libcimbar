@@ -106,6 +106,11 @@ return {
     }
   },
 
+  setColorBits : function(color_bits)
+  {
+    Module._configure(color_bits);
+  },
+
   setHTML : function(id, msg)
   {
     document.getElementById(id).innerHTML = msg;
