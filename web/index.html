@@ -118,7 +118,7 @@ body {
   transition: .3s;
 }
 .icon-bar + .icon-bar {
-  margin-top: 5px;
+  margin-top: 3px;
 }
 #nav-container .icon-bar:nth-of-type(1) {
   background-color: #00ffff;
@@ -132,18 +132,26 @@ body {
   background-color: #00ff00;
   box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
 }
+#nav-container .icon-bar:nth-of-type(4) {
+  background-color: #ff00ff;
+  box-shadow: 0px 0px 5px #ff00ff, 0px 0px 2px #ff00ff;
+}
 
 #nav-container:focus-within #nav-button {
   pointer-events: none;
 }
-#nav-container:focus-within .icon-bar:nth-of-type(1) {
-  transform: translate3d(0,8px,0) rotate(45deg);
+#nav-container:focus-within .icon-bar {
+  background-color: #aaa;
+  box-shadow: none;
 }
-#nav-container:focus-within .icon-bar:nth-of-type(2) {
+#nav-container:focus-within .icon-bar:nth-of-type(1) {
+  transform: translate3d(0,9px,0) rotate(45deg);
+}
+#nav-container:focus-within .icon-bar:nth-of-type(2), #nav-container:focus-within .icon-bar:nth-of-type(3) {
   opacity: 0;
 }
-#nav-container:focus-within .icon-bar:nth-of-type(3) {
-  transform: translate3d(0,-8px,0) rotate(-45deg);
+#nav-container:focus-within .icon-bar:nth-of-type(4) {
+  transform: translate3d(0,-9px,0) rotate(-45deg);
 }
 
 #nav-content {
@@ -217,6 +225,7 @@ body {
 <div id="nav-container">
     <div class="bg"></div>
     <div id="nav-button" tabindex="0">
+      <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
