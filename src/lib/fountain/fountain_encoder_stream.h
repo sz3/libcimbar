@@ -56,7 +56,7 @@ public:
 
 	bool good() const
 	{
-		return _encoder.good() and !_data.empty();
+		return _encoder.good() and _data.size() > _encoder.packet_size();
 	}
 
 	void reset()
