@@ -117,14 +117,16 @@ return {
   {
     Module._configure(color_bits);
 
-    var l = document.getElementsByClassName("color_bits");
-    var token = 'color_bits' + color_bits;
-    for (var i = 0; i < l.length; i++) {
-      if (l[i].id == token) {
-        l[i].classList.add("active");
-      } else {
-        l[i].classList.remove("active");
-      }
+    var nav = document.getElementById("nav-container");
+    if (color_bits == 2) {
+      nav.classList.remove("c8");
+      nav.classList.add("c4");
+    } else if (color_bits >= 3) {
+      nav.classList.add("c8");
+      nav.classList.remove("c4");
+    } else {
+      nav.classList.remove("c4");
+      nav.classList.remove("c8");
     }
   },
 
