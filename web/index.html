@@ -63,10 +63,10 @@ body {
 }
 
 /* options */
-#nav-container a.color4, #nav-container a.color8 {
+#nav-container a.c4, #nav-container a.c8 {
   color: #555;
 }
-#nav-container.c4 a.color4, #nav-container.c8 a.color8 {
+#nav-container.c4 a.c4, #nav-container.c8 a.c8 {
   color: #9fa6b2;
 }
 
@@ -159,6 +159,7 @@ body {
 }
 #nav-container:focus-within .icon-bar {
   background-color: #aaa;
+  background-image: none !important;
   box-shadow: none !important;
 }
 #nav-container:focus-within .icon-bar:nth-of-type(1) {
@@ -252,8 +253,8 @@ body {
       <ul>
         <li><a href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a></li>
         <hr>
-        <li><a class="color4" href="javascript:void(0)" onclick="Main.setColorBits(2)">4-color</a></li>
-        <li><a class="color8" href="javascript:void(0)" onclick="Main.setColorBits(3)">8-color</a></li>
+        <li><a class="c4" href="javascript:void(0)" onclick="Main.setColorBits(2)">4-color</a></li>
+        <li><a class="c8" href="javascript:void(0)" onclick="Main.setColorBits(3)">8-color</a></li>
         <li class="small"><a href="https://github.com/sz3/cimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases">android app</a></li>
       </ul>
