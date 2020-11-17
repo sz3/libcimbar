@@ -17,6 +17,8 @@ function importFile(f)
     dataOnHeap.set(imageData);
     Main.encode(f.name, dataOnHeap);
     Module._free(dataPtr);
+
+    Main.setHTML("current-file", f.name);
   };
   fileReader.onerror = () => {
     console.error('Unable to read file ' + f.name + '.');
@@ -78,6 +80,11 @@ return {
     }
   },
 
+  clickNav : function()
+  {
+    document.getElementById("nav-button").focus();
+  },
+
   clickFileInput : function()
   {
     document.getElementById("file_input").click();
@@ -109,6 +116,18 @@ return {
   setColorBits : function(color_bits)
   {
     Module._configure(color_bits);
+
+    var nav = document.getElementById("nav-container");
+    if (color_bits == 2) {
+      nav.classList.remove("c8");
+      nav.classList.add("c4");
+    } else if (color_bits >= 3) {
+      nav.classList.add("c8");
+      nav.classList.remove("c4");
+    } else {
+      nav.classList.remove("c4");
+      nav.classList.remove("c8");
+    }
   },
 
   setHTML : function(id, msg)
