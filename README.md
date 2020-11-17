@@ -2,7 +2,7 @@
 ### [DETAILS](DETAILS.md) | [PERFORMANCE](PERFORMANCE.md) | [TODO](TODO.md)
 
 ## libcimbar: Color Icon Matrix Barcodes
-And the quest for 100 kb/s over the air gap...
+770 kilobits/s over the air gap...
 
 ## What is it?
 

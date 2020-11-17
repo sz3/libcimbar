@@ -11,20 +11,20 @@
 	* The default ecc setting is 30/155, which is how we go from 9300 -> 7500 bytes of real data for a 4-color cimbar image.
 		* Reed Solomon is not an ideal for this use case -- specifically, it corrects byte errors, and cimbar errors tend to involve 1-3 bits at a time. However, since Reed Solomon implementations are ubiquitous, I used it for this prototype.
 
-## Are we 100 kb/s yet?
+## Current sustained benchmark
 
-* No. :|
-	* well, if you include compression, yes! Nailed it! :sunglasses:
+* 4-color cimbar with ecc=30:
+	* 2,980,556 bytes (after compression) in 36s -> 662 kilobits/s
 
-* 43 seconds to transfer a 3.0 MB file == 69 kb/s. This is the current benchmark on my old Android phone.
-	* specifically, this is using https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625
+* 8-color cimbar with ecc=30:
+	* 2,980,556 bytes in 31s -> 769 kilobits/s
+
+* details:
+	* these numbers are use https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625
 		* perhaps I will buy a new cell phone to inflate the benchmark numbers.
-	* for smaller (~1MB) files, I've seen 75 kb/s.
-		* for artificial benchmark numbers, a decent strategy is to turn down the ecc settings and say a prayer to your prefered deity
-			* this is neither reliable, nor representative of the usable case, however.
+	* the sender commandline is `./cimbar_send /path/to/file -s`
+		* the `shakycam` option allows cfc to quickly discard ghosted frames, and spend more time decoding real data.
+	* burst rate can be higher (or lower)
+		* to this end, lower ecc settings *can* provide better burst rates
+	* 8-color cimbar is considerably more sensitive to lighting conditions. Notably, decoding has some issues with dim screens.
 
-* we have semi-reasonable excuses:
-	* the android app (cfc) doesn't do anything useful with camera settings. We capture at ~25 fps, and are forced to discard a full 60% of the images due various ghosting and auto-focus issues. A 100% success rate won't happen -- some auto-focus will always be useful, and camera capture rate and the screen display rate are not going to be perfectly aligned, resulting in some number of screen-torn frames. But I'm pretty confident we can do better than 40%!
-		* editorial comment: the android camera APIs are, to put it charitably, a raging tire fire
-		* cfc is currently using the legacy "camera" API. The camera2 API has eluded my comprehension.
-	* cfc is not currently using the GPU effectively. OpenCV on Android can code on the GPU via OpenCL (though you need a custom build), but... it's complicated...
