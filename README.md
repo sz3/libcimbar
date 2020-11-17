@@ -2,13 +2,16 @@
 ### [DETAILS](DETAILS.md) | [PERFORMANCE](PERFORMANCE.md) | [TODO](TODO.md)
 
 ## libcimbar: Color Icon Matrix Barcodes
-And the quest for 100 kb/s over the air gap...
+770 kilobits/s over the air gap!
 
 ## What is it?
 
 `cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
 
 `libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 33MB can be encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
+
+* Encoder web app: https://cimbar.org
+* Decoder android app: https://github.com/sz3/cfc
 
 ## Platforms
 

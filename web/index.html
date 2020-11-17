@@ -21,10 +21,6 @@ body {
 	align-items: center;
 	transition: opacity 0.4s ease-in;
 }
-:root {
-  /* Set neon color */
-  --neon-text-color: #F0F0F0;
-}
 
 #status {
 	position: fixed;
@@ -240,15 +236,8 @@ body {
 }
 
 @keyframes glowing {
-
     0% {
-        color: var(--neon-text-color);
-        text-shadow:
-            0.2rem 0.2rem 1rem var(--neon-text-color);
-    }
-
-    100% {
-        text-shadow: none;
+        color: #00ffff;
     }
 }
 </style>
