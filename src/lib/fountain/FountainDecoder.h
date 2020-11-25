@@ -14,16 +14,11 @@
 class FountainDecoder
 {
 public:
-	static bool init()
-	{
-		return FountainInit::init();
-	}
-
-public:
 	FountainDecoder(size_t length, size_t packet_size)
-	    : _codec(wirehair_decoder_create(nullptr, length, packet_size))
-	    , _length(length)
+	    : _length(length)
 	{
+		FountainInit::init();
+		_codec = wirehair_decoder_create(nullptr, length, packet_size);
 	}
 
 	~FountainDecoder()

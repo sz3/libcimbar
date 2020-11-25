@@ -28,8 +28,6 @@ namespace {
 
 TEST_CASE( "FountainEncodingTest/testEncoder", "[unit]" )
 {
-	FountainEncoder::init();
-
 	std::string content;
 	for (int i = 0; i < 1000; ++i)
 		content += "0123456789";
@@ -51,8 +49,6 @@ TEST_CASE( "FountainEncodingTest/testEncoder", "[unit]" )
 TEST_CASE( "FountainEncodingTest/testEncodingAndDecoding", "[unit]" )
 {
 	static const unsigned packetSize = 1400;
-	FountainDecoder::init();
-	FountainEncoder::init();
 
 	unsigned messageSize = 10000;
 	std::string message;
@@ -104,7 +100,6 @@ TEST_CASE( "FountainEncodingTest/testConsistency", "[unit]" )
 {
 	const std::vector<std::string> precomputed = blocks();
 	static const unsigned packetSize = 626;
-	FountainEncoder::init();
 
 	unsigned messageSize = 1000;
 	std::string message;
@@ -145,7 +140,6 @@ TEST_CASE( "FountainEncodingTest/testWhichN", "[unit]" )
 {
 	const std::vector<std::string> precomputed = blocks();
 	static const unsigned packetSize = 624;
-	FountainEncoder::init();
 
 	unsigned messageSize = 6000;
 	std::string message;

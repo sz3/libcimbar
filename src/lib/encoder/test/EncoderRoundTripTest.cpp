@@ -6,7 +6,6 @@
 #include "encoder/Encoder.h"
 
 #include "compression/zstd_decompressor.h"
-#include "fountain/FountainInit.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "image_hash/average_hash.h"
 #include "serialize/format.h"
@@ -18,7 +17,6 @@
 
 TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	std::string inputFile = tempdir.path() / "hello.txt";
@@ -52,7 +50,6 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 
 TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	//input

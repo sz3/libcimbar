@@ -15,8 +15,6 @@ using namespace std;
 
 TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -41,8 +39,6 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -82,8 +78,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_DifferentBuffSizes", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -121,8 +115,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_DifferentBuffSizes", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 100; ++i)
 		input << "0123456789";
@@ -144,8 +136,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -176,8 +166,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 100; ++i)
 		input << "0123456789";
@@ -198,8 +186,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -242,8 +228,6 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
