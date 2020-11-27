@@ -2,16 +2,26 @@
 ### [DETAILS](DETAILS.md) | [PERFORMANCE](PERFORMANCE.md) | [TODO](TODO.md)
 
 ## libcimbar: Color Icon Matrix Barcodes
-770 kilobits/s over the air gap!
 
-## What is it?
+An experimental barcode format for air-gapped data transfer.
 
-`cimbar` is a proof-of-concept high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
+770 kilobits/s through the camera!
 
-`libcimbar`, the optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 33MB can be encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
+## Explain?
 
+The encoder outputs an animated barcode to a computer or smartphone screen:
 * Encoder web app: https://cimbar.org
+
+While the decoder is a cell phone app that uses the phone camera to read the animated barcode:
 * Decoder android app: https://github.com/sz3/cfc
+
+No internet/bluetooth/NFC/etc is used. All data is transmitted through the camera lens. You can try it out yourself, or take my word that it works. :)
+
+## How does it work?
+
+`cimbar` is a high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
+
+`libcimbar`, this optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 33MB can be encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
 
 ## Platforms
 
@@ -49,7 +59,7 @@ make install
 
 By default, libcimbar will try to install build products under `./dist/bin/`.
 
-There is also a beta emscripten+WASM build for the encoder. See [WASM](WASM.md).
+To build the emscripten+WASM encoder (what cimbar.org uses), see [WASM](WASM.md).
 
 ## Usage
 
