@@ -106,9 +106,6 @@ int main(int argc, char** argv)
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
-	if (fountain)
-		FountainInit::init();
-
 	if (encode)
 	{
 		Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);

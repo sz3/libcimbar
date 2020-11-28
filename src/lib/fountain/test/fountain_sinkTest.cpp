@@ -52,7 +52,6 @@ namespace {
 
 TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
@@ -85,7 +84,6 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 
 TEST_CASE( "FountainSinkTest/testMultipart", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);
@@ -117,7 +115,6 @@ TEST_CASE( "FountainSinkTest/testSameFrameManyTimes", "[unit]" )
 {
 	// if you give wirehair the same frame (under certain circumstances), you get a seg fault
 	// sometimes it's fine. The docs say "don't do it", so FountainDecoder acts as the bouncer.
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 690);

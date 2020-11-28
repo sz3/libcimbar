@@ -7,12 +7,6 @@
 
 class FountainEncoder
 {
-public:
-	static bool init()
-	{
-		return FountainInit::init();
-	}
-
 protected:
 	void swap(FountainEncoder& other) throw()
 	{
@@ -22,9 +16,10 @@ protected:
 
 public:
 	FountainEncoder(const uint8_t* data, size_t length, size_t packet_size)
-	    : _codec(wirehair_encoder_create(nullptr, data, length, packet_size))
-	    , _packetSize(packet_size)
+	    : _packetSize(packet_size)
 	{
+		FountainInit::init();
+		_codec = wirehair_encoder_create(nullptr, data, length, packet_size);
 	}
 
 	~FountainEncoder()

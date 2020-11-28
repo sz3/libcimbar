@@ -15,8 +15,6 @@ using namespace std;
 
 TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -41,8 +39,6 @@ TEST_CASE( "FountainStreamTest/testEncoder", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -80,10 +76,8 @@ TEST_CASE( "FountainStreamTest/testEncoder_BlockHeader", "[unit]" )
 	assertTrue( fes->good() );
 }
 
-TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
+TEST_CASE( "FountainStreamTest/testEncoder_DifferentBuffSizes", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -118,10 +112,30 @@ TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
 	assertEquals( 15, fes2->block_count() );
 }
 
+
+TEST_CASE( "FountainStreamTest/testEncoder_Consistency", "[unit]" )
+{
+	stringstream input;
+	for (int i = 0; i < 100; ++i)
+		input << "0123456789";
+
+	fountain_encoder_stream::ptr fes = fountain_encoder_stream::create(input, 400);
+
+	stringstream full;
+	std::array<char, 400> buff;
+
+	unsigned res = fes->readsome(buff.data(), buff.size());
+	assertEquals( res, buff.size() );
+	full << string(buff.begin(), buff.end());
+
+	std::string expected = {0, 0, 0x03, (char)0xe8, 0, 0};
+	expected += input.str().substr(0, 394);
+
+	assertEquals( expected, full.str() );
+}
+
 TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -152,8 +166,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 100; ++i)
 		input << "0123456789";
@@ -174,8 +186,6 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";
@@ -218,8 +228,6 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 
 TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 {
-	FountainInit::init();
-
 	stringstream input;
 	for (int i = 0; i < 1000; ++i)
 		input << "0123456789";

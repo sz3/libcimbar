@@ -41,7 +41,6 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 
 TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
@@ -65,7 +64,6 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 
 TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 {
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
@@ -84,7 +82,6 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 {
 	// use the fountain_encoder_stream directly on a char*,int pair
-	FountainInit::init();
 	MakeTempDirectory tempdir;
 	Encoder enc(40, 4, 2);
 

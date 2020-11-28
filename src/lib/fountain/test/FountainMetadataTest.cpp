@@ -26,6 +26,14 @@ TEST_CASE( "FountainMetadataTest/testFromBytes.Short", "[unit]" )
 	assertEquals( 0x070809, inmd.file_size() );
 }
 
+TEST_CASE( "FountainMetadataTest/testFromBytes.BigFile", "[unit]" )
+{
+	std::string buff = {(char)0x81, 7, 8, 9};
+	FountainMetadata inmd(buff.data(), buff.size());
+	assertEquals( 1, inmd.encode_id() );
+	assertEquals( 0x1070809, inmd.file_size() );
+}
+
 TEST_CASE( "FountainMetadataTest/testThings", "[unit]" )
 {
 	FountainMetadata inmd(0_uchar, 0xd0731f);
