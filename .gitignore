@@ -5,7 +5,7 @@ dist/
 web/cimbar_js.js
 web/cimbar_js.wasm
 CMakeCache.txt
-CMakeLists.txt.user
+CMakeLists.txt.*
 CTestTestfile.cmake
 Makefile
 callgrind.out*
