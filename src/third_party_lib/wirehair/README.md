@@ -25,8 +25,21 @@ projects.  No external dependencies are required.
 The source code in this folder (gf256 and wirehair code) can be incorporated
 into your project without any other external dependencies.
 
-The proj folder contains Visual Studio project files for Windows builds.
-There is a CMakeLists file to build it on other platforms.
+To build the software in this repo:
+
+On Windows, make sure CMake and Git Bash are installed.  Open up git bash and then:
+
+~~~
+git clone git@github.com:catid/wirehair.git
+cd wirehair
+mkdir build
+cd build
+cmake .. -G "Visual Studio 16 2019"
+ls
+explorer .
+~~~
+
+Then you can use Visual Studio Community Edition to open up the `wirehair.sln` file and build the software.
 
 
 #### Example Usage
@@ -34,6 +47,8 @@ There is a CMakeLists file to build it on other platforms.
 Here's an example program using Wirehair.  It's included in the UnitTest project and demonstrates both the sender and receiver, which are normally separate programs.  For example the data sender might be a file server and the data receiver might be downloading a file from the sender.
 
 ~~~
+#include <wirehair/wirehair.h>
+
 static bool ReadmeExample()
 {
     // Size of packets to produce

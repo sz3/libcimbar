@@ -37,6 +37,17 @@
 #endif
 
 //------------------------------------------------------------------------------
+// Detect host byte order.
+// This check works with GCC and LLVM; assume little-endian byte order when
+// using any other compiler.
+// The result is verified during initialization.
+//
+#if defined(__BYTE_ORDER__) && defined(__ORDER_BIG_ENDIAN__) \
+    && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define GF256_IS_BIG_ENDIAN
+#endif
+
+//------------------------------------------------------------------------------
 // Workaround for ARMv7 that doesn't provide vqtbl1_*
 // This comes from linux-raid (https://www.spinics.net/lists/raid/msg58403.html)
 //
@@ -588,7 +599,11 @@ static void gf256_mul_mem_init()
 //------------------------------------------------------------------------------
 // Initialization
 
-static unsigned char kLittleEndianTestData[4] = { 4, 3, 2, 1 };
+#ifdef GF256_IS_BIG_ENDIAN
+static unsigned char kEndianTestData[4] = { 1, 2, 3, 4 };
+#else
+static unsigned char kEndianTestData[4] = { 4, 3, 2, 1 };
+#endif
 
 union UnionType
 {
@@ -596,11 +611,11 @@ union UnionType
     char CharArray[4];
 };
 
-static bool IsLittleEndian()
+static bool IsExpectedEndian()
 {
     UnionType type;
     for (unsigned i = 0; i < 4; ++i)
-        type.CharArray[i] = kLittleEndianTestData[i];
+        type.CharArray[i] = kEndianTestData[i];
     return 0x01020304 == type.IntValue;
 }
 
@@ -614,8 +629,8 @@ extern "C" int gf256_init_(int version)
         return 0;
     Initialized = true;
 
-    if (!IsLittleEndian())
-        return -2; // Architecture is not supported (code won't work without mods).
+    if (!IsExpectedEndian())
+        return -2; // Unexpected byte order.
 
     gf256_architecture_init();
     gf256_poly_init(kDefaultPolynomialIndex);
@@ -1195,6 +1210,16 @@ extern "C" void gf256_mul_mem(void * GF256_RESTRICT vz, const void * GF256_RESTR
     while (bytes >= 8)
     {
         uint64_t * GF256_RESTRICT z8 = reinterpret_cast<uint64_t *>(z1);
+#ifdef GF256_IS_BIG_ENDIAN
+        uint64_t word = (uint64_t)table[x1[0]] << 56;
+        word |= (uint64_t)table[x1[1]] << 48;
+        word |= (uint64_t)table[x1[2]] << 40;
+        word |= (uint64_t)table[x1[3]] << 32;
+        word |= (uint64_t)table[x1[4]] << 24;
+        word |= (uint64_t)table[x1[5]] << 16;
+        word |= (uint64_t)table[x1[6]] << 8;
+        word |= (uint64_t)table[x1[7]];
+#else
         uint64_t word = table[x1[0]];
         word |= (uint64_t)table[x1[1]] << 8;
         word |= (uint64_t)table[x1[2]] << 16;
@@ -1203,6 +1228,7 @@ extern "C" void gf256_mul_mem(void * GF256_RESTRICT vz, const void * GF256_RESTR
         word |= (uint64_t)table[x1[5]] << 40;
         word |= (uint64_t)table[x1[6]] << 48;
         word |= (uint64_t)table[x1[7]] << 56;
+#endif
         *z8 = word;
 
         bytes -= 8, x1 += 8, z1 += 8;
@@ -1213,10 +1239,17 @@ extern "C" void gf256_mul_mem(void * GF256_RESTRICT vz, const void * GF256_RESTR
     if (four)
     {
         uint32_t * GF256_RESTRICT z4 = reinterpret_cast<uint32_t *>(z1);
+#ifdef GF256_IS_BIG_ENDIAN
+        uint32_t word = (uint32_t)table[x1[0]] << 24;
+        word |= (uint32_t)table[x1[1]] << 16;
+        word |= (uint32_t)table[x1[2]] << 8;
+        word |= (uint32_t)table[x1[3]];
+#else
         uint32_t word = table[x1[0]];
         word |= (uint32_t)table[x1[1]] << 8;
         word |= (uint32_t)table[x1[2]] << 16;
         word |= (uint32_t)table[x1[3]] << 24;
+#endif
         *z4 = word;
     }
 
@@ -1406,6 +1439,16 @@ extern "C" void gf256_muladd_mem(void * GF256_RESTRICT vz, uint8_t y,
     while (bytes >= 8)
     {
         uint64_t * GF256_RESTRICT z8 = reinterpret_cast<uint64_t *>(z1);
+#ifdef GF256_IS_BIG_ENDIAN
+        uint64_t word = (uint64_t)table[x1[0]] << 56;
+        word |= (uint64_t)table[x1[1]] << 48;
+        word |= (uint64_t)table[x1[2]] << 40;
+        word |= (uint64_t)table[x1[3]] << 32;
+        word |= (uint64_t)table[x1[4]] << 24;
+        word |= (uint64_t)table[x1[5]] << 16;
+        word |= (uint64_t)table[x1[6]] << 8;
+        word |= (uint64_t)table[x1[7]];
+#else
         uint64_t word = table[x1[0]];
         word |= (uint64_t)table[x1[1]] << 8;
         word |= (uint64_t)table[x1[2]] << 16;
@@ -1414,6 +1457,7 @@ extern "C" void gf256_muladd_mem(void * GF256_RESTRICT vz, uint8_t y,
         word |= (uint64_t)table[x1[5]] << 40;
         word |= (uint64_t)table[x1[6]] << 48;
         word |= (uint64_t)table[x1[7]] << 56;
+#endif
         *z8 ^= word;
 
         bytes -= 8, x1 += 8, z1 += 8;
@@ -1424,10 +1468,17 @@ extern "C" void gf256_muladd_mem(void * GF256_RESTRICT vz, uint8_t y,
     if (four)
     {
         uint32_t * GF256_RESTRICT z4 = reinterpret_cast<uint32_t *>(z1);
+#ifdef GF256_IS_BIG_ENDIAN
+        uint32_t word = (uint32_t)table[x1[0]] << 24;
+        word |= (uint32_t)table[x1[1]] << 16;
+        word |= (uint32_t)table[x1[2]] << 8;
+        word |= (uint32_t)table[x1[3]];
+#else
         uint32_t word = table[x1[0]];
         word |= (uint32_t)table[x1[1]] << 8;
         word |= (uint32_t)table[x1[2]] << 16;
         word |= (uint32_t)table[x1[3]] << 24;
+#endif
         *z4 ^= word;
     }
 
@@ -1459,6 +1510,7 @@ extern "C" void gf256_memswap(void * GF256_RESTRICT vx, void * GF256_RESTRICT vy
 
     x16 += count;
     y16 += count;
+    bytes -= count * 8;
 #else
     GF256_M128 * GF256_RESTRICT x16 = reinterpret_cast<GF256_M128 *>(vx);
     GF256_M128 * GF256_RESTRICT y16 = reinterpret_cast<GF256_M128 *>(vy);

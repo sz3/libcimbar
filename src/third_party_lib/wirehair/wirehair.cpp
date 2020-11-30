@@ -26,7 +26,7 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "wirehair.h"
+#include <wirehair/wirehair.h>
 #include "WirehairCodec.h"
 
 #include <new> // std::nothrow

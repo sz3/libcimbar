@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(wirehair)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
-
 set(CMAKE_CXX_STANDARD 11)
 
 set(LIB_SOURCE_FILES
         wirehair.cpp
-        wirehair.h
+        include/wirehair/wirehair.h
         gf256.cpp
         gf256.h
         WirehairCodec.cpp
@@ -56,19 +54,43 @@ set(GEN_TABLES
         gf256.h
         )
 
-if(NOT ANDROID)
-    set(ARCH_NATIVE "-march=native")
-endif()
-
 if(MSVC)
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_NATIVE}")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -march=native")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        add_definitions(-DLINUX_ARM=1)
+    endif()
 endif()
 
-include_directories(.)
+add_library(wirehair ${LIB_SOURCE_FILES})
+set_target_properties(wirehair PROPERTIES VERSION 2)
+set_target_properties(wirehair PROPERTIES SOVERSION 2)
+target_include_directories(wirehair PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-add_library(wirehair STATIC ${LIB_SOURCE_FILES})
-set_target_properties(wirehair PROPERTIES PUBLIC_HEADER wirehair.h)
+add_executable(unit_test ${UNIT_TEST_SOURCE_FILES})
+target_link_libraries(unit_test wirehair)
+
+add_executable(gen_small_dseeds ${GEN_SMALL_DSEEDS})
+target_link_libraries(gen_small_dseeds wirehair)
+
+add_executable(gen_peel_seeds ${GEN_PEEL_SEEDS})
+target_link_libraries(gen_peel_seeds wirehair)
+
+add_executable(gen_most_dseeds ${GEN_MOST_DSEEDS})
+target_link_libraries(gen_most_dseeds wirehair)
+
+add_executable(gen_dcounts ${GEN_DCOUNTS})
+target_link_libraries(gen_dcounts wirehair)
+
+add_executable(gen_tables ${GEN_TABLES})
 
 include(GNUInstallDirs)
 
+install(TARGETS wirehair
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY python DESTINATION ${CMAKE_INSTALL_PREFIX})
