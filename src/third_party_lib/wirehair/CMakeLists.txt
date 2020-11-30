@@ -69,28 +69,5 @@ set_target_properties(wirehair PROPERTIES VERSION 2)
 set_target_properties(wirehair PROPERTIES SOVERSION 2)
 target_include_directories(wirehair PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-add_executable(unit_test ${UNIT_TEST_SOURCE_FILES})
-target_link_libraries(unit_test wirehair)
-
-add_executable(gen_small_dseeds ${GEN_SMALL_DSEEDS})
-target_link_libraries(gen_small_dseeds wirehair)
-
-add_executable(gen_peel_seeds ${GEN_PEEL_SEEDS})
-target_link_libraries(gen_peel_seeds wirehair)
-
-add_executable(gen_most_dseeds ${GEN_MOST_DSEEDS})
-target_link_libraries(gen_most_dseeds wirehair)
-
-add_executable(gen_dcounts ${GEN_DCOUNTS})
-target_link_libraries(gen_dcounts wirehair)
-
-add_executable(gen_tables ${GEN_TABLES})
-
 include(GNUInstallDirs)
 
-install(TARGETS wirehair
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY include DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(DIRECTORY python DESTINATION ${CMAKE_INSTALL_PREFIX})
