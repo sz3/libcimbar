@@ -210,7 +210,7 @@ body {
   transition: color .1s;
 }
 
-#nav-content li.attention a {
+#nav-content li a.attention {
     animation: glowing 1.5s infinite alternate;
 }
 #nav-content li a {
@@ -258,10 +258,10 @@ body {
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </div>
-    <div id="nav-content" tabindex="0">
+    <div id="nav-content" tabindex="-1">
       <span id="current-file">No file selected</span>
       <ul>
-        <li class="attention"><a href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a></li>
+        <li><a class="attention" href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a></li>
         <hr>
         <li><a class="c4" href="javascript:void(0)" onclick="Main.setColorBits(2)">4-color</a></li>
         <li><a class="c8" href="javascript:void(0)" onclick="Main.setColorBits(3)">8-color</a></li>
