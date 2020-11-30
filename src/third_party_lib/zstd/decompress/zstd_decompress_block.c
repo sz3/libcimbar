@@ -499,8 +499,7 @@ size_t ZSTD_decodeSeqHeaders(ZSTD_DCtx* dctx, int* nbSeqPtr,
     if (nbSeq > 0x7F) {
         if (nbSeq == 0xFF) {
             RETURN_ERROR_IF(ip+2 > iend, srcSize_wrong, "");
-            nbSeq = MEM_readLE16(ip) + LONGNBSEQ;
-            ip+=2;
+            nbSeq = MEM_readLE16(ip) + LONGNBSEQ, ip+=2;
         } else {
             RETURN_ERROR_IF(ip >= iend, srcSize_wrong, "");
             nbSeq = ((nbSeq-0x80)<<8) + *ip++;
@@ -949,7 +948,7 @@ ZSTD_decodeSequence(seqState_t* seqState, const ZSTD_longOffset_e longOffsets, c
 }
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
-MEM_STATIC int ZSTD_dictionaryIsActive(ZSTD_DCtx const* dctx, BYTE const* prefixStart, BYTE const* oLitEnd)
+static int ZSTD_dictionaryIsActive(ZSTD_DCtx const* dctx, BYTE const* prefixStart, BYTE const* oLitEnd)
 {
     size_t const windowSize = dctx->fParams.windowSize;
     /* No dictionary used. */
@@ -970,7 +969,6 @@ MEM_STATIC void ZSTD_assertValidSequence(
         seq_t const seq,
         BYTE const* prefixStart, BYTE const* virtualStart)
 {
-#if DEBUGLEVEL >= 1
     size_t const windowSize = dctx->fParams.windowSize;
     size_t const sequenceSize = seq.litLength + seq.matchLength;
     BYTE const* const oLitEnd = op + seq.litLength;
@@ -988,9 +986,6 @@ MEM_STATIC void ZSTD_assertValidSequence(
         /* Offset must be within our window. */
         assert(seq.offset <= windowSize);
     }
-#else
-    (void)dctx, (void)op, (void)oend, (void)seq, (void)prefixStart, (void)virtualStart;
-#endif
 }
 #endif
 

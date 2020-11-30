@@ -1,4 +1,4 @@
-#include "../wirehair.h"
+#include <wirehair/wirehair.h>
 
 #include "SiameseTools.h"
 

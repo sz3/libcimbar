@@ -483,11 +483,6 @@ MEM_STATIC size_t ZSTD_cwksp_sizeof(const ZSTD_cwksp* ws) {
     return (size_t)((BYTE*)ws->workspaceEnd - (BYTE*)ws->workspace);
 }
 
-MEM_STATIC size_t ZSTD_cwksp_used(const ZSTD_cwksp* ws) {
-    return (size_t)((BYTE*)ws->tableEnd - (BYTE*)ws->workspace)
-         + (size_t)((BYTE*)ws->workspaceEnd - (BYTE*)ws->allocStart);
-}
-
 MEM_STATIC int ZSTD_cwksp_reserve_failed(const ZSTD_cwksp* ws) {
     return ws->allocFailed;
 }

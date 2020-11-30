@@ -30,7 +30,7 @@
 #ifndef WIREHAIR_TOOLS_H
 #define WIREHAIR_TOOLS_H
 
-#include "wirehair.h"
+#include <wirehair/wirehair.h>
 #include "gf256.h"
 #include <new> // std::nothrow
 

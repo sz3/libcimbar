@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(wirehair)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
-
 set(CMAKE_CXX_STANDARD 11)
 
 set(LIB_SOURCE_FILES
         wirehair.cpp
-        wirehair.h
+        include/wirehair/wirehair.h
         gf256.cpp
         gf256.h
         WirehairCodec.cpp
@@ -63,12 +61,15 @@ endif()
 if(MSVC)
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_NATIVE}")
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+        add_definitions(-DLINUX_ARM=1)
+    endif()
 endif()
 
-include_directories(.)
-
-add_library(wirehair STATIC ${LIB_SOURCE_FILES})
-set_target_properties(wirehair PROPERTIES PUBLIC_HEADER wirehair.h)
+add_library(wirehair ${LIB_SOURCE_FILES})
+set_target_properties(wirehair PROPERTIES VERSION 2)
+set_target_properties(wirehair PROPERTIES SOVERSION 2)
+target_include_directories(wirehair PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 include(GNUInstallDirs)
 

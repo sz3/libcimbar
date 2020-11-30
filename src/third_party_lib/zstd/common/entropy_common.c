@@ -54,7 +54,8 @@ size_t FSE_readNCount (short* normalizedCounter, unsigned* maxSVPtr, unsigned* t
 
     if (hbSize < 4) {
         /* This function only works when hbSize >= 4 */
-        char buffer[4] = {0};
+        char buffer[4];
+        memset(buffer, 0, sizeof(buffer));
         memcpy(buffer, headerBuffer, hbSize);
         {   size_t const countSize = FSE_readNCount(normalizedCounter, maxSVPtr, tableLogPtr,
                                                     buffer, sizeof(buffer));

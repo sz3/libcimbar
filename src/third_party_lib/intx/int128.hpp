@@ -14,7 +14,26 @@
 #include <type_traits>
 
 #ifdef _MSC_VER
-#include <intrin.h>
+    #include <intrin.h>
+#endif
+
+#ifdef _MSC_VER
+    #define INTX_UNREACHABLE __assume(0)
+#else
+    #define INTX_UNREACHABLE __builtin_unreachable()
+#endif
+
+#ifdef _MSC_VER
+    #define INTX_UNLIKELY(EXPR) (bool{EXPR})
+#else
+    #define INTX_UNLIKELY(EXPR) __builtin_expect(bool{EXPR}, false)
+#endif
+
+#ifdef NDEBUG
+    #define INTX_REQUIRE(X) (X) ? (void)0 : INTX_UNREACHABLE
+#else
+    #include <cassert>
+    #define INTX_REQUIRE assert
 #endif
 
 namespace intx
@@ -44,8 +63,8 @@ struct uint<128>
     {}
 
 #ifdef __SIZEOF_INT128__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
     constexpr uint(unsigned __int128 x) noexcept  // NOLINT
       : lo{uint64_t(x)}, hi{uint64_t(x >> 64)}
     {}
@@ -54,7 +73,7 @@ struct uint<128>
     {
         return (static_cast<unsigned __int128>(hi) << 64) | lo;
     }
-#pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 #endif
 
     constexpr explicit operator bool() const noexcept { return hi | lo; }
@@ -179,11 +198,11 @@ inline uint128 operator--(uint128& x, int) noexcept
 constexpr uint128 fast_add(uint128 x, uint128 y) noexcept
 {
 #ifdef __SIZEOF_INT128__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
     using uint128_native = unsigned __int128;
     return uint128_native{x} + uint128_native{y};
-#pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 #else
     // Fallback to regular addition.
     return x + y;
@@ -336,11 +355,11 @@ constexpr uint128 constexpr_umul(uint64_t x, uint64_t y) noexcept
 inline uint128 umul(uint64_t x, uint64_t y) noexcept
 {
 #if defined(__SIZEOF_INT128__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
     const auto p = static_cast<unsigned __int128>(x) * y;
     return {uint64_t(p >> 64), uint64_t(p)};
-#pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
     unsigned __int64 hi;
     const auto lo = _umul128(x, y, &hi);
@@ -530,6 +549,8 @@ constexpr uint16_t reciprocal_table[] = {REPEAT256()};
 /// Based on Algorithm 2 from "Improved division by invariant integers".
 inline uint64_t reciprocal_2by1(uint64_t d) noexcept
 {
+    INTX_REQUIRE(d & 0x8000000000000000);  // Must be normalized.
+
     const uint64_t d9 = d >> 55;
     const uint32_t v0 = internal::reciprocal_table[d9 - 256];
 
@@ -569,8 +590,11 @@ inline uint64_t reciprocal_3by2(uint128 d) noexcept
     if (p < t.hi)
     {
         --v;
-        if (uint128{p, t.lo} >= d)
-            --v;
+        if (p >= d.hi)
+        {
+            if (p > d.hi || t.lo >= d.lo)
+                --v;
+        }
     }
     return v;
 }
@@ -633,55 +657,43 @@ inline div_result<uint128> udivrem(uint128 x, uint128 y) noexcept
 {
     if (y.hi == 0)
     {
-        uint64_t xn_ex, xn_hi, xn_lo, yn;
+        INTX_REQUIRE(y.lo != 0);  // Division by 0.
 
-        auto lsh = clz(y.lo);
-        if (lsh != 0)
-        {
-            auto rsh = 64 - lsh;
-            xn_ex = x.hi >> rsh;
-            xn_hi = (x.lo >> rsh) | (x.hi << lsh);
-            xn_lo = x.lo << lsh;
-            yn = y.lo << lsh;
-        }
-        else
-        {
-            xn_ex = 0;
-            xn_hi = x.hi;
-            xn_lo = x.lo;
-            yn = y.lo;
-        }
+        const auto lsh = clz(y.lo);
+        const auto rsh = (64 - lsh) % 64;
+        const auto rsh_mask = uint64_t{lsh == 0} - 1;
 
-        auto v = reciprocal_2by1(yn);
+        const auto yn = y.lo << lsh;
+        const auto xn_lo = x.lo << lsh;
+        const auto xn_hi = (x.hi << lsh) | ((x.lo >> rsh) & rsh_mask);
+        const auto xn_ex = (x.hi >> rsh) & rsh_mask;
 
-        auto res = udivrem_2by1({xn_ex, xn_hi}, yn, v);
-        auto q1 = res.quot;
-
-        res = udivrem_2by1({res.rem, xn_lo}, yn, v);
-
-        return {{q1, res.quot}, res.rem >> lsh};
+        const auto v = reciprocal_2by1(yn);
+        const auto res1 = udivrem_2by1({xn_ex, xn_hi}, yn, v);
+        const auto res2 = udivrem_2by1({res1.rem, xn_lo}, yn, v);
+        return {{res1.quot, res2.quot}, res2.rem >> lsh};
     }
 
     if (y.hi > x.hi)
         return {0, x};
 
-    auto lsh = clz(y.hi);
+    const auto lsh = clz(y.hi);
     if (lsh == 0)
     {
         const auto q = unsigned{y.hi < x.hi} | unsigned{y.lo <= x.lo};
         return {q, x - (q ? y : 0)};
     }
 
-    auto rsh = 64 - lsh;
+    const auto rsh = 64 - lsh;
 
-    auto yn_lo = y.lo << lsh;
-    auto yn_hi = (y.lo >> rsh) | (y.hi << lsh);
-    auto xn_ex = x.hi >> rsh;
-    auto xn_hi = (x.lo >> rsh) | (x.hi << lsh);
-    auto xn_lo = x.lo << lsh;
+    const auto yn_lo = y.lo << lsh;
+    const auto yn_hi = (y.hi << lsh) | (y.lo >> rsh);
+    const auto xn_lo = x.lo << lsh;
+    const auto xn_hi = (x.hi << lsh) | (x.lo >> rsh);
+    const auto xn_ex = x.hi >> rsh;
 
-    auto v = reciprocal_3by2({yn_hi, yn_lo});
-    auto res = udivrem_3by2(xn_ex, xn_hi, xn_lo, {yn_hi, yn_lo}, v);
+    const auto v = reciprocal_3by2({yn_hi, yn_lo});
+    const auto res = udivrem_3by2(xn_ex, xn_hi, xn_lo, {yn_hi, yn_lo}, v);
 
     return {res.quot, res.rem >> lsh};
 }
@@ -772,10 +784,22 @@ struct numeric_limits<intx::uint<N>>
 
 namespace intx
 {
+template <typename T>
+[[noreturn]] inline void throw_(const char* what)
+{
+#if __cpp_exceptions
+    throw T{what};
+#else
+    std::fputs(what, stderr);
+    std::abort();
+#endif
+}
+
 constexpr inline int from_dec_digit(char c)
 {
-    return (c >= '0' && c <= '9') ? c - '0' :
-                                    throw std::invalid_argument{std::string{"Invalid digit: "} + c};
+    if (c < '0' || c > '9')
+        throw_<std::invalid_argument>("invalid digit");
+    return c - '0';
 }
 
 constexpr inline int from_hex_digit(char c)
@@ -788,8 +812,9 @@ constexpr inline int from_hex_digit(char c)
 }
 
 template <typename Int>
-constexpr Int from_string(const char* s)
+constexpr Int from_string(const char* str)
 {
+    auto s = str;
     auto x = Int{};
     int num_digits = 0;
 
@@ -799,7 +824,7 @@ constexpr Int from_string(const char* s)
         while (const auto c = *s++)
         {
             if (++num_digits > int{sizeof(x) * 2})
-                throw std::overflow_error{"Integer overflow"};
+                throw_<std::out_of_range>(str);
             x = (x << 4) | from_hex_digit(c);
         }
         return x;
@@ -808,12 +833,12 @@ constexpr Int from_string(const char* s)
     while (const auto c = *s++)
     {
         if (num_digits++ > std::numeric_limits<Int>::digits10)
-            throw std::overflow_error{"Integer overflow"};
+            throw_<std::out_of_range>(str);
 
         const auto d = from_dec_digit(c);
         x = constexpr_mul(x, Int{10}) + d;
         if (x < d)
-            throw std::overflow_error{"Integer overflow"};
+            throw_<std::out_of_range>(str);
     }
     return x;
 }
@@ -833,7 +858,7 @@ template <unsigned N>
 inline std::string to_string(uint<N> x, int base = 10)
 {
     if (base < 2 || base > 36)
-        throw std::invalid_argument{"invalid base: " + std::to_string(base)};
+        throw_<std::invalid_argument>("invalid base");
 
     if (x == 0)
         return "0";

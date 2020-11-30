@@ -53,7 +53,7 @@
 //------------------------------------------------------------------------------
 // Platform/Architecture
 
-#if defined(ANDROID) || defined(IOS) || defined(LINUX_ARM)
+#if defined(ANDROID) || defined(IOS) || defined(LINUX_ARM) || defined(__powerpc__) || defined(__s390__)
     #define GF256_TARGET_MOBILE
 #endif // ANDROID
 
