@@ -54,11 +54,13 @@ set(GEN_TABLES
         gf256.h
         )
 
+if(NOT ANDROID)
+    set(ARCH_NATIVE "-march=native")
+endif()
+
 if(MSVC)
 else()
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -march=native")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_NATIVE}")
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
         add_definitions(-DLINUX_ARM=1)
     endif()
