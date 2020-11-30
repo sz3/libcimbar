@@ -171,24 +171,37 @@ window.addEventListener('keydown', function(e) {
     else if (e.key == 'Tab' || e.keyCode == 9 ||
              e.key == 'ArrowDown' || e.keyCode == 40
     ) {
+      var nav = document.getElementById('nav-button');
       var links = document.getElementById('nav-content').getElementsByTagName('a');
+      if (nav.classList.contains('attention')) {
+        nav.classList.remove('attention');
+        links[0].classList.add('attention');
+        return;
+      }
       for (var i = 0; i < links.length; i++) {
         if (links[i].classList.contains('attention')) {
-          var next = i+1 == links.length? 0 : i+1;
+          var next = i+1 == links.length? nav : links[i+1];
           links[i].classList.remove('attention');
-          links[next].classList.add('attention');
+          next.classList.add('attention');
           break;
         }
       }
     }
     else if (e.key == 'ArrowUp' || e.keyCode == 38)
     {
+      var nav = document.getElementById('nav-button');
       var links = document.getElementById('nav-content').getElementsByTagName('a');
+      if (nav.classList.contains('attention')) {
+        nav.classList.remove('attention');
+        links[links.length-1].classList.add('attention');
+        return;
+      }
+
       for (var i = 0; i < links.length; i++) {
         if (links[i].classList.contains('attention')) {
-          var next = i == 0? links.length-1 : i-1;
+          var next = i == 0? nav : links[i-1];
           links[i].classList.remove('attention');
-          links[next].classList.add('attention');
+          next.classList.add('attention');
           break;
         }
       }
@@ -196,6 +209,11 @@ window.addEventListener('keydown', function(e) {
     else if (e.key == 'Enter' || e.keyCode == 13 ||
              e.key == ' ' || e.keyCode == 32
     ) {
+      var nav = document.getElementById('nav-button');
+      if (nav.classList.contains('attention')) {
+        Main.blurNav();
+        return;
+      }
       var links = document.getElementById('nav-content').getElementsByTagName('a');
       for (var i = 0; i < links.length; i++) {
         if (links[i].classList.contains('attention')) {
