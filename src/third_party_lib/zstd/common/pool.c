@@ -301,7 +301,7 @@ int POOL_tryAdd(POOL_ctx* ctx, POOL_function function, void* opaque)
 struct POOL_ctx_s {
     int dummy;
 };
-static POOL_ctx g_poolCtx;
+static POOL_ctx g_ctx;
 
 POOL_ctx* POOL_create(size_t numThreads, size_t queueSize) {
     return POOL_create_advanced(numThreads, queueSize, ZSTD_defaultCMem);
@@ -311,11 +311,11 @@ POOL_ctx* POOL_create_advanced(size_t numThreads, size_t queueSize, ZSTD_customM
     (void)numThreads;
     (void)queueSize;
     (void)customMem;
-    return &g_poolCtx;
+    return &g_ctx;
 }
 
 void POOL_free(POOL_ctx* ctx) {
-    assert(!ctx || ctx == &g_poolCtx);
+    assert(!ctx || ctx == &g_ctx);
     (void)ctx;
 }
 
@@ -337,7 +337,7 @@ int POOL_tryAdd(POOL_ctx* ctx, POOL_function function, void* opaque) {
 
 size_t POOL_sizeof(POOL_ctx* ctx) {
     if (ctx==NULL) return 0;  /* supports sizeof NULL */
-    assert(ctx == &g_poolCtx);
+    assert(ctx == &g_ctx);
     return sizeof(*ctx);
 }
 
