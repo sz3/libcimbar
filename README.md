@@ -3,9 +3,9 @@
 
 ## libcimbar: Color Icon Matrix Barcodes
 
-An experimental barcode format for air-gapped data transfer.
+Behold: an experimental barcode format for air-gapped data transfer.
 
-770 kilobits/s through a smartphone camera!
+It can sustain speeds of 770+ kilobits/s using nothing but a smartphone camera!
 
 ## Explain?
 
