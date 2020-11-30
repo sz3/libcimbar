@@ -5,7 +5,7 @@
 
 An experimental barcode format for air-gapped data transfer.
 
-770 kilobits/s through the camera!
+770 kilobits/s through a smartphone camera!
 
 ## Explain?
 
