@@ -89,6 +89,7 @@ return {
   {
     document.getElementById("nav-button").blur();
     document.getElementById("nav-content").blur();
+    document.getElementById("nav-find-file-link").blur();
   },
 
   clickFileInput : function()
