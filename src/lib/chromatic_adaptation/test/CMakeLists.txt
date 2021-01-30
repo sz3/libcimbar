@@ -4,7 +4,7 @@ project(chromatic_adaptation_test)
 
 set (SOURCES
 	test.cpp
-	von_kriesTest.cpp
+	color_correctionTest.cpp
 )
 
 include_directories(

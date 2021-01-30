@@ -63,6 +63,11 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, u
 	load_tiles();
 }
 
+void CimbDecoder::update_color_correction(cv::Matx<double, 3, 3>&& ccm)
+{
+	_ccm.update(std::move(ccm));
+}
+
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
 {
 	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark, _numColors);
@@ -133,6 +138,15 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 
 unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 {
+	// transform color with ccm
+	if (_ccm.active())
+	{
+		std::tuple<double, double, double> color = _ccm.transform(r, g, b);
+		r = std::get<0>(color);
+		g = std::get<1>(color);
+		b = std::get<2>(color);
+	}
+
 	unsigned char max = std::max({r, g, b, 1_uchar});
 	unsigned char min = std::min({r, g, b, 48_uchar});
 	float adjust = 255.0;
@@ -165,8 +179,7 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell, const std::pair<int, 
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	Cell center = color_cell;
 	center.crop(2+drift.first, 2+drift.second, color_cell.cols()-4, color_cell.rows()-4);
-	uchar r,g,b;
-	std::tie(r, g, b) = center.mean_rgb(Cell::SKIP);
+	auto [r, g, b] = center.mean_rgb(Cell::SKIP);
 	return get_best_color(r, g, b);
 }
 

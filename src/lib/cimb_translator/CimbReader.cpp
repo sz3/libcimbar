@@ -2,9 +2,12 @@
 #include "CimbReader.h"
 
 #include "CellDrift.h"
+#include "Common.h"
 #include "Config.h"
 
 #include "bit_file/bitmatrix.h"
+#include "chromatic_adaptation/color_correction.h"
+#include "chromatic_adaptation/von_kries.h"
 #include <opencv2/opencv.hpp>
 
 using namespace cimbar;
@@ -43,9 +46,41 @@ namespace {
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
+
+	void updateMaxColor(std::tuple<double, double, double>& max_color, const cv::Scalar& c)
+	{
+		std::get<0>(max_color) = std::max(std::get<0>(max_color), c[2]);
+		std::get<1>(max_color) = std::max(std::get<1>(max_color), c[1]);
+		std::get<2>(max_color) = std::max(std::get<2>(max_color), c[0]);
+	}
+
+	std::tuple<double, double, double> calculateWhite(const cv::Mat& img, bool dark)
+	{
+		std::tuple<double, double, double> bestColor({1, 1, 1});
+		if (dark)
+		{
+			unsigned tl = Config::anchor_size() - 2;
+			unsigned br = Config::image_size() - Config::anchor_size() - 2;
+			std::array<std::pair<unsigned, unsigned>, 3> anchors = {{ {tl, tl}, {tl, br}, {br, tl} }};
+			for (auto [x, y] : anchors)
+			{
+				cv::Rect crop(x, y, 4, 4);
+				cv::Scalar avgColor = cv::mean(img(crop));
+				updateMaxColor(bestColor, avgColor);
+			}
+		}
+		return bestColor;
+	}
+
+	bool updateColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
+	{
+		std::tuple<double, double, double> white = calculateWhite(img, Config::dark());
+		decoder.update_color_correction(von_kries::get_adaptation_matrix(white, {255, 255, 255}));
+		return true;
+	}
 }
 
-CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool needs_sharpen)
+CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
     : _image(img)
     , _cellSize(Config::cell_size() + 2)
     , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
@@ -53,10 +88,12 @@ CimbReader::CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool need
     , _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
+	if (_good and color_correction)
+		updateColorCorrection(_image, decoder);
 }
 
-CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen)
-    : CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen)
+CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
+    : CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
 {
 }
 

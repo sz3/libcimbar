@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CellDrift.h"
+#include "chromatic_adaptation/color_correction.h"
 #include "image_hash/ahash_result.h"
 #include "image_hash/average_hash.h"
 #include <opencv2/opencv.hpp>
@@ -13,6 +14,8 @@ class CimbDecoder
 public:
 	CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark=true, uchar ahashThreshold=0);
 
+	void update_color_correction(cv::Matx<double, 3, 3>&& ccm);
+
 	unsigned decode(const cv::Mat& color_cell) const;
 	template <typename MAT, typename CMAT>
 	unsigned decode(const MAT& cell, const CMAT& color_cell, unsigned& drift_offset, unsigned& best_distance) const;
@@ -22,10 +25,10 @@ public:
 	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;
-	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
 	unsigned decode_color(const Cell& cell, const std::pair<int, int>& drift) const;
 
 	bool expects_binary_threshold() const;
+	// store stats here?
 
 protected:
 	uint64_t get_tile_hash(unsigned symbol) const;
@@ -41,6 +44,7 @@ protected:
 	unsigned _numColors;
 	bool _dark;
 	uchar _ahashThreshold;
+	color_correction _ccm;
 };
 
 template <typename MAT, typename CMAT>

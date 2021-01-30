@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
 
+#include "color_correction.h"
 #include "von_kries.h"
 
 #include <sstream>
@@ -10,7 +11,7 @@
 
 using std::string;
 
-TEST_CASE( "von_kriesTest/testGetAdaptationMatrix", "[unit]" )
+TEST_CASE( "color_correctionTest/testGetAdaptationMatrix", "[unit]" )
 {
 	cv::Matx<double, 3, 3> mat = von_kries::get_adaptation_matrix({192, 255, 255}, {255, 255, 255});
 
@@ -22,7 +23,7 @@ TEST_CASE( "von_kriesTest/testGetAdaptationMatrix", "[unit]" )
 		              " 0, 0, 1]", ss.str() );
 	}
 
-	std::tuple<double, double, double> c = von_kries::transform(mat, 180, 98, 255);
+	std::tuple<double, double, double> c = color_correction(std::move(mat)).transform(180, 98, 255);
 	assertAlmostEquals( 209.09822971, std::get<0>(c) );
 	assertAlmostEquals( 99.72629027, std::get<1>(c) );
 	assertAlmostEquals( 255, std::get<2>(c) );
