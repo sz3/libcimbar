@@ -12,13 +12,13 @@ using std::string;
 
 TEST_CASE( "von_kriesTest/testGetAdaptationMatrix", "[unit]" )
 {
-	cv::Mat mat = von_kries::get_adaptation_matrix({192, 255, 255}, {255, 255, 255});
+	cv::Matx<double, 3, 3> mat = von_kries::get_adaptation_matrix({192, 255, 255}, {255, 255, 255});
 
 	{
 		std::stringstream ss;
 		ss << mat;
-		assertEquals( "[1.065577644398845, 0.2109225385610203, -0.01323982375544508;\n"
-		              " 0.02316834486251532, 0.9872336916455101, -0.004678092483168828;\n"
+		assertEquals( "[1.065577644398845, 0.2109225385610203, -0.01323982375544511;\n"
+		              " 0.02316834486251534, 0.9872336916455102, -0.00467809248316883;\n"
 		              " 0, 0, 1]", ss.str() );
 	}
 

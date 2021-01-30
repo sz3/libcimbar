@@ -10,36 +10,33 @@
 namespace von_kries
 {
 
-cv::Mat MA()
+cv::Matx<double, 3, 3> MA()
 {
-	static cv::Mat transform = (cv::Mat1d(3, 3) <<
-	                            0.40024, 0.70760, -0.08081,
-	                            -0.22630, 1.16532, 0.04570,
-	                            0.00000, 0.00000, 0.91822
+	static cv::Matx<double, 3, 3> transform(
+	    0.40024, 0.70760, -0.08081,
+	    -0.22630, 1.16532, 0.04570,
+	    0.00000, 0.00000, 0.91822
 	);
 	return transform;
 }
 
 
-cv::Mat get_adaptation_matrix(const std::tuple<double, double, double>& actual, const std::tuple<double, double, double>& desired)
+cv::Matx<double, 3, 3> get_adaptation_matrix(const std::tuple<double, double, double>& actual, const std::tuple<double, double, double>& desired)
 {
-	std::array<double, 3> a = { std::get<0>(actual), std::get<1>(actual), std::get<2>(actual)};
-	cv::Mat src = cv::Mat(3, 1, CV_64F, a.data());
-	std::array<double, 3> b = { std::get<0>(desired), std::get<1>(desired), std::get<2>(desired)};
-	cv::Mat dst = cv::Mat(3, 1, CV_64F, b.data());
+	cv::Matx<double, 3, 1> src(std::get<0>(actual), std::get<1>(actual), std::get<2>(actual));
+	cv::Matx<double, 3, 1> dst(std::get<0>(desired), std::get<1>(desired), std::get<2>(desired));
 
-	cv::Mat m1 = MA() * src;
-	cv::Mat m2 = MA() * dst;
+	cv::Matx<double, 3, 1> m1 = MA() * src;
+	cv::Matx<double, 3, 1> m2 = MA() * dst;
 
-	cv::Mat d = cv::Mat::diag(m2 / m1);
+	cv::Matx<double, 3, 3> d = cv::Matx<double, 3, 3>::diag(m2.div(m1));
 	return MA().inv() * d * MA();
 }
 
-std::tuple<double, double, double> transform(const cv::Mat& m, double r, double g, double b)
+std::tuple<double, double, double> transform(const cv::Matx<double, 3, 3>& m, double r, double g, double b)
 {
-	std::array<double, 3> a = { r, g, b };
-	cv::Mat temp = m * cv::Mat(3, 1, CV_64F, a.data());
-	return {temp.at<double>(0), temp.at<double>(1), temp.at<double>(2)};
+	cv::Matx<double, 3, 1> temp = m * cv::Matx<double, 3, 1>(r, g, b);
+	return {temp(0), temp(1), temp(2)};
 }
 
 
