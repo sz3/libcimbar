@@ -49,9 +49,9 @@ namespace {
 
 	void updateMaxColor(std::tuple<double, double, double>& max_color, const cv::Scalar& c)
 	{
-		std::get<0>(max_color) = std::max(std::get<0>(max_color), c[2]);
+		std::get<0>(max_color) = std::max(std::get<0>(max_color), c[0]);
 		std::get<1>(max_color) = std::max(std::get<1>(max_color), c[1]);
-		std::get<2>(max_color) = std::max(std::get<2>(max_color), c[0]);
+		std::get<2>(max_color) = std::max(std::get<2>(max_color), c[2]);
 	}
 
 	std::tuple<double, double, double> calculateWhite(const cv::Mat& img, bool dark)
@@ -87,7 +87,7 @@ namespace {
 	bool updateColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
 	{
 		std::tuple<double, double, double> white = calculateWhite(img, Config::dark());
-		decoder.update_color_correction(von_kries::get_adaptation_matrix(white, {255, 255, 255}));
+		decoder.update_color_correction(von_kries::get_adaptation_matrix(white, {255.0, 255.0, 255.0}));
 		return true;
 	}
 }

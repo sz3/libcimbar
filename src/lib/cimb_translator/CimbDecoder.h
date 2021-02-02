@@ -24,7 +24,7 @@ public:
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const;
 	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
-	unsigned get_best_color(uchar r, uchar g, uchar b) const;
+	unsigned get_best_color(double r, double g, double b) const;
 	unsigned decode_color(const Cell& cell, const std::pair<int, int>& drift) const;
 
 	bool expects_binary_threshold() const;
@@ -35,7 +35,7 @@ protected:
 	bool load_tiles();
 
 	unsigned check_color_distance(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b) const;
-	std::tuple<uchar,uchar,uchar> fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const;
+	std::tuple<uchar,uchar,uchar> fix_color(std::tuple<double,double,double> c, double adjustUp, double down) const;
 
 protected:
 	std::vector<uint64_t> _tileHashes;

@@ -24,13 +24,15 @@ namespace {
 		return std::pow(a - b, 2);
 	}
 
-	uchar fix_single_color(uchar c, float adjustUp, uchar down)
+	uchar fix_single_color(double c, double adjustUp, double down)
 	{
 		c -= down;
-		c = (uchar)(c * adjustUp);
+		c *= adjustUp;
 		if (c > (245 - down))
 			c = 255;
-		return c;
+		if (c < 0)
+			c = 0;
+		return (uchar)c;
 	}
 
 	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
@@ -122,7 +124,7 @@ unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offse
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
-std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<double,double,double> c, double adjustUp, double down) const
 {
 	return {
 		fix_single_color(std::get<0>(c), adjustUp, down),
@@ -136,7 +138,7 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
-unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
+unsigned CimbDecoder::get_best_color(double r, double g, double b) const
 {
 	// transform color with ccm
 	if (_ccm.active())
@@ -147,9 +149,9 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 		b = std::get<2>(color);
 	}
 
-	unsigned char max = std::max({r, g, b, 1_uchar});
-	unsigned char min = std::min({r, g, b, 48_uchar});
-	float adjust = 255.0;
+	double max = std::max({r, g, b, 1.0});
+	double min = std::min({r, g, b, 48.0});
+	double adjust = 255.0;
 	if (min >= max)
 		min = 0;
 	adjust /= (max - min);
