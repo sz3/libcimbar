@@ -69,6 +69,18 @@ namespace {
 				updateMaxColor(bestColor, avgColor);
 			}
 		}
+		else // light
+		{
+			unsigned tl = (Config::anchor_size() << 1) + 6;
+			unsigned br = Config::image_size() - tl - 4;
+			std::array<std::pair<unsigned, unsigned>, 4> anchors = {{ {0, tl}, {tl, 0}, {0, br}, {br, 0} }};
+			for (auto [x, y] : anchors)
+			{
+				cv::Rect crop(x, y, 4, 4);
+				cv::Scalar avgColor = cv::mean(img(crop));
+				updateMaxColor(bestColor, avgColor);
+			}
+		}
 		return bestColor;
 	}
 
