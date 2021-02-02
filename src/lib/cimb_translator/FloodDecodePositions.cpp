@@ -21,12 +21,12 @@ void FloodDecodePositions::reset()
 	for (unsigned i = 0; i < _positions.size(); ++i)
 	{
 		_remaining.push_back(true);
-		_instructions.push_back({CellDrift(), ~0UL});
+		_instructions.push_back({CellDrift(), 0xFF});
 	}
 
 	// seed
-	int smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size()) - 1;
-	int lastElem = _positions.size()-1;
+	uint16_t smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size()) - 1;
+	uint16_t lastElem = _positions.size()-1;
 	_heap.push({0, 0});
 	_heap.push({smallRowLen, 0});
 	_heap.push({lastElem, 0});
