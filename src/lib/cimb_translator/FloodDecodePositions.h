@@ -4,6 +4,7 @@
 #include "AdjacentCellFinder.h"
 #include "CellDrift.h"
 #include "CellPositions.h"
+#include <cstdint>
 #include <queue>
 #include <set>
 #include <tuple>
