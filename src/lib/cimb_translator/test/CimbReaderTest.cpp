@@ -37,6 +37,9 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 		position_data pos;
 		unsigned bits = cr.read(pos);
 		res[pos.i] = bits;
+
+		unsigned color_bits = cr.read_color(pos);
+		res[pos.i] |= color_bits << 4;
 		++count;
 	}
 
@@ -70,6 +73,9 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		position_data pos;
 		unsigned bits = cr.read(pos);
 		res[pos.i] = bits;
+
+		unsigned color_bits = cr.read_color(pos);
+		res[pos.i] |= color_bits << 4;
 		++count;
 	}
 

@@ -22,6 +22,7 @@ public:
 	CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen=false);
 
 	unsigned read(position_data& pos);
+	unsigned read_color(const position_data& pos);
 	bool done() const;
 
 	unsigned num_reads() const;

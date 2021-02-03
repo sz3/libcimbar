@@ -22,7 +22,6 @@ public:
 	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const;
 
 	unsigned get_best_color(uchar r, uchar g, uchar b) const;
-	unsigned decode_color(const cv::Mat& cell, const std::pair<int, int>& drift) const;
 	unsigned decode_color(const Cell& cell, const std::pair<int, int>& drift) const;
 
 	bool expects_binary_threshold() const;
