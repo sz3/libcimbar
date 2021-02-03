@@ -86,8 +86,8 @@ unsigned CimbReader::read(position_data& pos)
 	_positions.update(i, drift, error_distance);
 
 	pos.i = i;
-	pos.x = xy.first + best_drift.first;
-	pos.y = xy.second + best_drift.second;
+	pos.x = x + best_drift.first;
+	pos.y = y + best_drift.second;
 	return bits;
 }
 

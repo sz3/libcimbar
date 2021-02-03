@@ -46,3 +46,15 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 	assertEquals( "382c76644a4dff475c5793c5fe061e35e47be252010d29aeaf8d93ee6a3f7045", get_hash(decodedFile) );
 }
 
+TEST_CASE( "DecoderTest/testDecode.Sample", "[unit]" )
+{
+	// regression test -- useful for now, but is very brittle
+	MakeTempDirectory tempdir;
+
+	Decoder dec(0);
+	std::string decodedFile = tempdir.path() / "testDecode.txt";
+	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg"), decodedFile);
+	assertEquals( 9300, bytesDecoded );
+
+	assertEquals( "3de927c8aa0221807a2784210160cdc17567eb587bf01233d166900aadf14bf5", get_hash(decodedFile) );
+}
