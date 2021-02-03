@@ -162,9 +162,10 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell, const std::pair<int, 
 	if (_numColors <= 1)
 		return 0;
 
+	// TODO: should this check dimensions of color_cell?
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	Cell center = color_cell;
-	center.crop(2+drift.first, 2+drift.second, color_cell.cols()-4, color_cell.rows()-4);
+	center.crop(1+drift.first, 1+drift.second, color_cell.cols()-2, color_cell.rows()-2);
 	uchar r,g,b;
 	std::tie(r, g, b) = center.mean_rgb(Cell::SKIP);
 	return get_best_color(r, g, b);
