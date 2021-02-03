@@ -8,13 +8,20 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 
+struct position_data
+{
+	unsigned i = 0;
+	int x = 0;
+	int y = 0;
+};
+
 class CimbReader
 {
 public:
 	CimbReader(const cv::Mat& img, const CimbDecoder& decoder, bool needs_sharpen=false);
 	CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool needs_sharpen=false);
 
-	unsigned read(unsigned& bits);
+	unsigned read(position_data& pos);
 	bool done() const;
 
 	unsigned num_reads() const;

@@ -120,14 +120,14 @@ decoded_data = error_correct(results)
 * `i`: the cell position
 * `bits`: the decoded bits for this decode
 * `distance`: the distance, or confidence, from the image hash when it selected a suitable symbol. Lower is better.
-* `drift`: an (x,y) offset that tracks local distortion for this decode. It is capped at 2px in all directions.
+* `drift`: an (x,y) offset that tracks local distortion for this decode. It is capped at 7px in all directions.
 * `deinterleave(i)` will return the "real" bit index of the bits, based on our interleave scheme -- the reverse of the encoder.
 * `position_tracker.update()` here informs `next_decode()` which cells it should prioritize next. Imagine a priority_queue based on `distance`.
 * `error_correct(results)` will reassemble the file, if error correction succeeds.
 
 The reason for complexity is multi-fold:
 * we have to reverse the interleave, to reassemble the file contents in the right order
-* we also decode the cells out of order, because the image hash's `distance` metric is also a (inverted) *confidence* metric. To minimize errors, we want to decode cells we are more confident about before cells we are less confident about.
+* we *decode* the cells out of order, using the image hash's `distance` metric as a (inverted) *confidence* metric. To minimize errors, we want to decode cells we are more confident about before cells we are less confident about.
 * the distance/confidence is used in combination with `drift` -- an (x,y) offset -- that tracks the local distortion for upcoming decodes. When we have higher confidence in a cell, its drift is preferred.
 
 ### Reasons for errors
@@ -138,9 +138,9 @@ There are a number of small problems that can conspire to create large problems 
 * some tiles might be too dark
 * the image might be misaligned
 * the image might suffer from lens distortion
-* the image might be too small, meaning the tiles have lost too much definition
+* the image might be too small, meaning the tiles have lost too much definition (see: blurry)
 
-Notably, these problems can also be *localized* in an image, meaning that while the right half is easy enough to decode, the left half becomes a disaster of misalignments and bad-guesses leading to worse misalignments and worse guesses. Interleaving and error correction can solve some of these problems, but at a certain point it becomes too much to deal with -- short of increasing the ECC level or input image resolution.
+Notably, these problems can also be *localized* in an image, meaning that while the right half might be easy enough to decode, the left half becomes a disaster of misalignments and bad-guesses leading to worse misalignments and worse guesses. Interleaving and error correction can solve some of these problems, but at a certain point it becomes too much to deal with -- short of increasing the ECC level or input image resolution.
 
 ### Example decode
 

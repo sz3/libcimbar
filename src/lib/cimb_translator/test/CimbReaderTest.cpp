@@ -34,9 +34,9 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
-		unsigned bits;
-		unsigned index = cr.read(bits);
-		res[index] = bits;
+		position_data pos;
+		unsigned bits = cr.read(pos);
+		res[pos.i] = bits;
 		++count;
 	}
 
@@ -45,10 +45,10 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	        "12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
-	unsigned bits;
+	position_data pos;
 	while (!cr.done())
 	{
-		cr.read(bits);
+		cr.read(pos);
 		++count;
 	}
 	assertTrue(cr.done());
@@ -67,9 +67,9 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
-		unsigned bits;
-		unsigned index = cr.read(bits);
-		res[index] = bits;
+		position_data pos;
+		unsigned bits = cr.read(pos);
+		res[pos.i] = bits;
 		++count;
 	}
 
@@ -77,9 +77,9 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 	        "12201=0 12202=33 12297=46 12298=32 12299=34 12300=30 12301=32 12302=32 12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
-	unsigned bits;
+	position_data pos;
 	while (!cr.done())
-		cr.read(bits);
+		cr.read(pos);
 	assertTrue(cr.done());
 }
 
@@ -95,8 +95,8 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 	// refuse to do anything
 	assertTrue( cr.done() );
 
-	unsigned bits;
-	assertEquals( 0, cr.read(bits) );
+	position_data pos;
+	assertEquals( 0, cr.read(pos) );
 
 	assertTrue( cr.done() );
 }

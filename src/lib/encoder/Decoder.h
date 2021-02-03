@@ -64,13 +64,16 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer bb(_bitsPerOp * 1550);
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
+
+	// tuple(xpos, ypos, bitPos)
+	//std::vector<>;
 	while (!reader.done())
 	{
 		// reader should probably be in charge of the cell index (i) calculation
 		// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
-		unsigned bits = 0;
-		unsigned i = reader.read(bits);
-		unsigned bitPos = interleaveLookup[i] * _bitsPerOp;
+		position_data pos;
+		unsigned bits = reader.read(pos);
+		unsigned bitPos = interleaveLookup[pos.i] * _bitsPerOp;
 		bb.write(bits, bitPos, _bitsPerOp);
 	}
 
