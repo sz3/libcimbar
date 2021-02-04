@@ -14,10 +14,10 @@
 ## Current sustained benchmark
 
 * 4-color cimbar with ecc=30:
-	* 2,980,556 bytes (after compression) in 36s -> 662 kilobits/s
+	* 2,980,556 bytes (after compression) in 36s -> 662 kilobits/s (~82 KB/s)
 
 * 8-color cimbar with ecc=30:
-	* 2,980,556 bytes in 31s -> 769 kilobits/s
+	* 2,980,556 bytes in 31s -> 769 kilobits/s (~96 KB/s)
 
 * details:
 	* these numbers are use https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625

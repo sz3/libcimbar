@@ -4,6 +4,7 @@
 #include "AdjacentCellFinder.h"
 #include "CellDrift.h"
 #include "CellPositions.h"
+#include <cstdint>
 #include <queue>
 #include <set>
 #include <tuple>
@@ -12,8 +13,8 @@ class FloodDecodePositions
 {
 public:
 	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift>;
-	using decode_instructions = std::pair<CellDrift, unsigned>; // drift, best_prio
-	using decode_prio = std::tuple<unsigned, unsigned>; // index, prio
+	using decode_instructions = std::pair<CellDrift, uint8_t>; // drift, best_prio
+	using decode_prio = std::tuple<uint16_t, uint8_t>; // index, prio
 
 	class PrioCompare
 	{

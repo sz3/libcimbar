@@ -22,6 +22,29 @@ namespace {
 }
 #include "serialize/str_join.h"
 
+TEST_CASE( "CimbReaderTest/testReadOnce", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
+
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder);
+
+	assertFalse(cr.done());
+
+	// read. The top left of the sample image happens to be 0, so it's not very exciting...
+	PositionData pos;
+	unsigned bits = cr.read(pos);
+	assertEquals(0, bits);
+	assertEquals(0, pos.i);
+	assertEquals(62, pos.x);
+	assertEquals(8, pos.y);
+
+	unsigned color_bits = cr.read_color(pos);
+	assertEquals(0, color_bits);
+
+	assertFalse(cr.done());
+}
+
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
 	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
@@ -34,9 +57,12 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
-		unsigned bits;
-		unsigned index = cr.read(bits);
-		res[index] = bits;
+		PositionData pos;
+		unsigned bits = cr.read(pos);
+		res[pos.i] = bits;
+
+		unsigned color_bits = cr.read_color(pos);
+		res[pos.i] |= color_bits << decoder.symbol_bits();
 		++count;
 	}
 
@@ -45,10 +71,10 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	        "12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
-	unsigned bits;
+	PositionData pos;
 	while (!cr.done())
 	{
-		cr.read(bits);
+		cr.read(pos);
 		++count;
 	}
 	assertTrue(cr.done());
@@ -67,9 +93,12 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 	std::map<unsigned, unsigned> res;
 	for (int c = 0; c < 22; ++c)
 	{
-		unsigned bits;
-		unsigned index = cr.read(bits);
-		res[index] = bits;
+		PositionData pos;
+		unsigned bits = cr.read(pos);
+		res[pos.i] = bits;
+
+		unsigned color_bits = cr.read_color(pos);
+		res[pos.i] |= color_bits << decoder.symbol_bits();
 		++count;
 	}
 
@@ -77,9 +106,9 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 	        "12201=0 12202=33 12297=46 12298=32 12299=34 12300=30 12301=32 12302=32 12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
-	unsigned bits;
+	PositionData pos;
 	while (!cr.done())
-		cr.read(bits);
+		cr.read(pos);
 	assertTrue(cr.done());
 }
 
@@ -95,8 +124,8 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 	// refuse to do anything
 	assertTrue( cr.done() );
 
-	unsigned bits;
-	assertEquals( 0, cr.read(bits) );
+	PositionData pos;
+	assertEquals( 0, cr.read(pos) );
 
 	assertTrue( cr.done() );
 }

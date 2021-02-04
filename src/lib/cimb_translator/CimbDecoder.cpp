@@ -173,26 +173,25 @@ unsigned CimbDecoder::get_best_color(double r, double g, double b) const
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const Cell& color_cell, const std::pair<int, int>& drift) const
+unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 {
 	if (_numColors <= 1)
 		return 0;
 
+	// TODO: check/enforce dimensions of color_cell?
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	Cell center = color_cell;
-	center.crop(2+drift.first, 2+drift.second, color_cell.cols()-4, color_cell.rows()-4);
+	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
 	auto [r, g, b] = center.mean_rgb(Cell::SKIP);
 	return get_best_color(r, g, b);
-}
-
-unsigned CimbDecoder::decode(const cv::Mat& color_cell) const
-{
-	unsigned drift_offset;
-	unsigned distance;
-	return decode(color_cell, Cell(color_cell), drift_offset, distance);
 }
 
 bool CimbDecoder::expects_binary_threshold() const
 {
 	return _ahashThreshold >= 0xFE;
+}
+
+unsigned CimbDecoder::symbol_bits() const
+{
+	return _symbolBits;
 }
