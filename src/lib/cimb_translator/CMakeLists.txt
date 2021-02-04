@@ -25,6 +25,7 @@ set(SOURCES
 	FloodDecodePositions.h
 	Interleave.h
 	LinearDecodePositions.h
+	PositionData.h
 )
 
 add_library(cimb_translator STATIC ${SOURCES})

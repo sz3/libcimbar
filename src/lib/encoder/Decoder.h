@@ -64,14 +64,14 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer bb(_bitsPerOp * 1550);
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
-	std::array<position_data, 12400> colorPositions; // 12400 = 1500 * 8, aka the number of cells. This should probably be determined at runtime
+	std::array<PositionData, 12400> colorPositions; // 12400 = 1500 * 8, aka the number of cells. This should probably be determined at runtime
 
 	// read symbols first
 	while (!reader.done())
 	{
 		// reader is in charge of the cell index (i) calculation
 		// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
-		position_data pos;
+		PositionData pos;
 		unsigned bits = reader.read(pos);
 
 		unsigned bitPos = interleaveLookup[pos.i] * _bitsPerOp;
@@ -82,7 +82,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 
 	// then decode colors.
 	// the symbol+color decode could be done as one pass, but doing it as two gives us more control of the caches
-	for (const position_data& p : colorPositions)
+	for (const PositionData& p : colorPositions)
 	{
 		unsigned bits = reader.read_color(p);
 		bb.write(bits, p.i, _colorBits);
