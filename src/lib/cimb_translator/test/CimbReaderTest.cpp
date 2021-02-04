@@ -22,6 +22,29 @@ namespace {
 }
 #include "serialize/str_join.h"
 
+TEST_CASE( "CimbReaderTest/testReadOnce", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
+
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder);
+
+	assertFalse(cr.done());
+
+	// read. The top left of the sample image happens to be 0, so it's not very exciting...
+	position_data pos;
+	unsigned bits = cr.read(pos);
+	assertEquals(0, bits);
+	assertEquals(0, pos.i);
+	assertEquals(62, pos.x);
+	assertEquals(8, pos.y);
+
+	unsigned color_bits = cr.read_color(pos);
+	assertEquals(0, color_bits);
+
+	assertFalse(cr.done());
+}
+
 TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 {
 	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
@@ -39,7 +62,7 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 		res[pos.i] = bits;
 
 		unsigned color_bits = cr.read_color(pos);
-		res[pos.i] |= color_bits << 4;
+		res[pos.i] |= color_bits << decoder.symbol_bits();
 		++count;
 	}
 
@@ -75,7 +98,7 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		res[pos.i] = bits;
 
 		unsigned color_bits = cr.read_color(pos);
-		res[pos.i] |= color_bits << 4;
+		res[pos.i] |= color_bits << decoder.symbol_bits();
 		++count;
 	}
 
