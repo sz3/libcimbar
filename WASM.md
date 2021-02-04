@@ -4,7 +4,7 @@
 
 ## Releases
 
-Both wasm and asm.js releases are available [here](https://github.com/sz3/libcimbar/releases/tag/latest). The wasm build is what cimbar.org uses. The asm.js build can be downloaded, extracted, and run locally.
+wasm and asm.js releases are available [here](https://github.com/sz3/libcimbar/releases/latest). The wasm build is what cimbar.org uses. The asm.js build can be downloaded, extracted, and run in a local web browser.
 
 ## Build
 
