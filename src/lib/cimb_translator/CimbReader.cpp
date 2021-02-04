@@ -60,9 +60,15 @@ CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool nee
 {
 }
 
-unsigned CimbReader::read(unsigned& bits)
+unsigned CimbReader::read_color(const PositionData& pos)
 {
-	if (_positions.done())
+	Cell color_cell(_image, pos.x, pos.y, Config::cell_size(), Config::cell_size());
+	return _decoder.decode_color(color_cell);
+}
+
+unsigned CimbReader::read(PositionData& pos)
+{
+	if (done())
 		return 0;
 
 	// need coordinate, index, and drift from next position
@@ -70,16 +76,19 @@ unsigned CimbReader::read(unsigned& bits)
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
 	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
-	Cell color_cell(_image, x-1, y-1, _cellSize, _cellSize);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;
-	bits = _decoder.decode(cell, color_cell, drift_offset, error_distance);
+	unsigned bits = _decoder.decode_symbol(cell, drift_offset, error_distance);
 
 	std::pair<int, int> best_drift = CellDrift::driftPairs[drift_offset];
 	drift.updateDrift(best_drift.first, best_drift.second);
 	_positions.update(i, drift, error_distance);
-	return i;
+
+	pos.i = i;
+	pos.x = x + best_drift.first;
+	pos.y = y + best_drift.second;
+	return bits;
 }
 
 bool CimbReader::done() const

@@ -5,7 +5,7 @@
 
 Behold: an experimental barcode format for air-gapped data transfer.
 
-It can sustain speeds of 770+ kilobits/s using nothing but a smartphone camera!
+It can sustain speeds of 770+ kilobits/s (~96 KB/s) using nothing but a smartphone camera!
 
 ## Explain?
 
@@ -41,7 +41,7 @@ The code is written in C++, and developed/tested on amd64+linux, arm64+android, 
 * libcorrect - https://github.com/quiet/libcorrect
 * libpopcnt - https://github.com/kimwalisch/libpopcnt
 * PicoSHA2 - https://github.com/okdshin/PicoSHA2 (used for testing)
-* stb_image - https://github.com/nothings/stb (for the png loader)
+* stb_image - https://github.com/nothings/stb (for loading embedded pngs)
 * wirehair - https://github.com/catid/wirehair
 * zstd - https://github.com/facebook/zstd
 

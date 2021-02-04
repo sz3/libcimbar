@@ -111,3 +111,36 @@ TEST_CASE( "bitbufferTest/testWriter.8", "[unit]" )
 	assertEquals( 225, bb.read(16, 8) );
 	assertEquals( 4, bb.read(24, 8) );
 }
+
+TEST_CASE( "bitbufferTest/testOverwrite", "[unit]" )
+{
+	bitbuffer bb;
+
+	bb.write(13,8064,6);
+	bb.write(7,8070,6);
+	bb.write(1,8076,6);
+	bb.write(5,8082,6);
+	bb.write(13,8088,6);
+	bb.write(7,8094,6);
+	bb.write(12,8100,6);
+	bb.write(14,8106,6);
+	bb.write(13,8112,6);
+	bb.write(7,8118,6);
+
+	bb.write(1,8064,2);
+	bb.write(0,8070,2);
+	bb.write(0,8076,2);
+	bb.write(3,8082,2);
+	bb.write(1,8088,2);
+	bb.write(0,8094,2);
+	bb.write(0,8100,2);
+	bb.write(2,8106,2);
+	bb.write(1,8112,2);
+	bb.write(0,8118,2);
+
+	assertEquals( 'u', bb.buffer()[0x3f2] );
+	assertEquals( 't', bb.buffer()[0x3f3] );
+	assertEquals( 's', (unsigned)bb.buffer()[0x3f4] );
+	assertEquals( '.', bb.buffer()[0x3f5] );
+	assertEquals( 't', bb.buffer()[0x3f6] );
+}
