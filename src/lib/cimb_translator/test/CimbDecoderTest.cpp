@@ -13,10 +13,25 @@
 #include <vector>
 using std::string;
 
+namespace {
+	// for performance reasons, the high level Decoder/CimbReader does the decode in 2 parts. This is the one-shot version.
+	unsigned decode(CimbDecoder& cd, const cv::Mat& tile10)
+	{
+		unsigned drift_offset;
+		unsigned distance;
+		unsigned bits = cd.decode_symbol(tile10, drift_offset, distance);
+
+		auto [x,y] = CellDrift::driftPairs[drift_offset];
+		cv::Rect crop(1+x, 1+y, tile10.cols-2, tile10.rows-2);
+		cv::Mat tile8 = tile10(crop);
+
+		bits |= cd.decode_color(tile8) << cd.symbol_bits();
+		return bits;
+	}
+}
+
 TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 {
-	// a resize test would be good too, but funnily enough... it fails on symbol 6->5 right now...
-	// it's as if the tile set is not optimal!
 	CimbDecoder cd(4, 0);
 
 	for (unsigned i = 0; i < 16; ++i)
@@ -24,7 +39,7 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 		cv::Mat tile = cimbar::getTile(4, i, true);
 		cv::Mat tenxten(10, 10, tile.type());
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
-		unsigned res = cd.decode(tenxten);
+		unsigned res = decode(cd, tenxten);
 		assertEquals(i, res);
 	}
 }
@@ -48,8 +63,12 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 		cv::cvtColor(tenxten, tenxten, cv::COLOR_RGB2GRAY);
 		cv::adaptiveThreshold(tenxten, tenxten, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
 
-		unsigned res = cd.decode(tenxten);
+		unsigned drift_offset;
+		unsigned distance;
+		unsigned res = cd.decode_symbol(tenxten, drift_offset, distance);
 		assertEquals(i, res);
+		assertEquals(4, drift_offset);
+		assertEquals(0, distance);
 	}
 }
 
@@ -88,9 +107,9 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 	cv::Mat tile = cimbar::getTile(4, 2, true, 4, 2);
 	cv::resize(tile, tile, cv::Size(10, 10));
 
-	unsigned color = cd.decode_color(Cell(tile), {0, 0});
+	unsigned color = cd.decode_color(Cell(tile));
 	assertEquals(2, color);
-	unsigned res = cd.decode(tile);
+	unsigned res = decode(cd, tile);
 	assertEquals(34, res);
 }
 
@@ -107,9 +126,9 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 				cv::Mat tenxten(10, 10, tile.type());
 				tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
-				unsigned color = cd.decode_color(Cell(tenxten), {0, 0});
+				unsigned color = cd.decode_color(Cell(tenxten));
 				assertEquals(c, color);
-				unsigned res = cd.decode(tenxten);
+				unsigned res = decode(cd, tenxten);
 				assertEquals(i+16*c, res);
 			}
 		}

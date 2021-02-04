@@ -63,7 +63,7 @@ CimbReader::CimbReader(const cv::UMat& img, const CimbDecoder& decoder, bool nee
 unsigned CimbReader::read_color(const position_data& pos)
 {
 	Cell color_cell(_image, pos.x, pos.y, Config::cell_size(), Config::cell_size());
-	return _decoder.decode_color(color_cell, {0,0});
+	return _decoder.decode_color(color_cell);
 }
 
 unsigned CimbReader::read(position_data& pos)
