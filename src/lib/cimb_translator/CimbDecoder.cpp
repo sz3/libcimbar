@@ -13,11 +13,6 @@ using std::get;
 using std::string;
 
 namespace {
-	inline constexpr unsigned char operator"" _uchar(unsigned long long arg) noexcept
-	{
-		return static_cast<unsigned char>(arg);
-	}
-
 	template <typename T>
 	unsigned squared_difference(T a, T b)
 	{
