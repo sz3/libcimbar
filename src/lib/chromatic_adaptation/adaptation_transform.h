@@ -7,12 +7,12 @@ namespace adaptation_transform
 {
 	struct bradford
 	{
-		cv::Matx<double, 3, 3> operator()() const
+		const cv::Matx<double, 3, 3>& operator()() const
 		{
 			static cv::Matx<double, 3, 3> transform(
-				0.8951000,  0.2664000, -0.1614000,
-			   -0.7502000,  1.7135000,  0.0367000,
-				0.0389000, -0.0685000,  1.0296000
+				 0.8951000,  0.2664000, -0.1614000,
+				-0.7502000,  1.7135000,  0.0367000,
+				 0.0389000, -0.0685000,  1.0296000
 			);
 			return transform;
 		}
@@ -20,12 +20,12 @@ namespace adaptation_transform
 
 	struct von_kries
 	{
-		cv::Matx<double, 3, 3> operator()() const
+		const cv::Matx<double, 3, 3>& operator()() const
 		{
 			static cv::Matx<double, 3, 3> transform(
-				0.40024, 0.70760, -0.08081,
-				-0.22630, 1.16532, 0.04570,
-				0.00000, 0.00000, 0.91822
+				 0.4002400,  0.7076000, -0.0808100,
+				-0.2263000,  1.1653200,  0.0457000,
+				 0.0000000,  0.0000000,  0.9182200
 			);
 			return transform;
 		}
