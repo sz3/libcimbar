@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
+	adaptation_transform.h
 	color_correction.h
-	von_kries.h
 )
 
 add_library(chromatic_adaptation INTERFACE)

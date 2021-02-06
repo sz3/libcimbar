@@ -1,8 +1,8 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
 
+#include "adaptation_transform.h"
 #include "color_correction.h"
-#include "von_kries.h"
 
 #include <sstream>
 #include <string>
@@ -11,9 +11,9 @@
 
 using std::string;
 
-TEST_CASE( "color_correctionTest/testGetAdaptationMatrix", "[unit]" )
+TEST_CASE( "color_correctionTest/testTransform", "[unit]" )
 {
-	cv::Matx<double, 3, 3> mat = von_kries::get_adaptation_matrix({192, 255, 255}, {255, 255, 255});
+	cv::Matx<double, 3, 3> mat = color_correction::get_adaptation_matrix<adaptation_transform::von_kries>({192, 255, 255}, {255, 255, 255});
 
 	{
 		std::stringstream ss;

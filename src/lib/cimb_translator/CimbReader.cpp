@@ -6,8 +6,8 @@
 #include "Config.h"
 
 #include "bit_file/bitmatrix.h"
+#include "chromatic_adaptation/adaptation_transform.h"
 #include "chromatic_adaptation/color_correction.h"
-#include "chromatic_adaptation/von_kries.h"
 #include <opencv2/opencv.hpp>
 
 using namespace cimbar;
@@ -87,7 +87,7 @@ namespace {
 	bool updateColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
 	{
 		std::tuple<double, double, double> white = calculateWhite(img, Config::dark());
-		decoder.update_color_correction(von_kries::get_adaptation_matrix(white, {255.0, 255.0, 255.0}));
+		decoder.update_color_correction(color_correction::get_adaptation_matrix<adaptation_transform::von_kries>(white, {255.0, 255.0, 255.0}));
 		return true;
 	}
 }
