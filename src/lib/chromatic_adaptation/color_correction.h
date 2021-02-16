@@ -49,6 +49,11 @@ public:
 		return {temp(0), temp(1), temp(2)};
 	}
 
+	const cv::Matx<float, 3, 3> mat() const
+	{
+		return _m;
+	}
+
 protected:
 	cv::Matx<float, 3, 3> _m;
 	bool _active;

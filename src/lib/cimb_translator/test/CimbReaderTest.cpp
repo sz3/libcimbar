@@ -19,6 +19,13 @@ namespace {
 		s << p.first << "=" << p.second;
 		return s;
 	}
+
+	class TestableCimbDecoder : public CimbDecoder
+	{
+	public:
+		using CimbDecoder::CimbDecoder;
+		using CimbDecoder::_ccm;
+	};
 }
 #include "serialize/str_join.h"
 
@@ -128,4 +135,52 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 	assertEquals( 0, cr.read(pos) );
 
 	assertTrue( cr.done() );
+}
+
+TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
+
+	TestableCimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder);
+
+	assertTrue( decoder._ccm.active() );
+
+	std::stringstream ss;
+	ss << decoder._ccm.mat();
+	assertEquals("[1.5489368, 0.050406694, -0.016417533;\n"
+	             " 0.0055368096, 1.5302141, -0.0011175937;\n"
+	             " 0, 0, 1.4676259]", ss.str());
+
+	std::array<unsigned, 6> expectedColors = {0, 0, 1, 0, 2, 0};
+	for (unsigned i = 0; i < expectedColors.size(); ++i)
+	{
+		PositionData pos;
+		cr.read(pos);
+		unsigned color_bits = cr.read_color(pos);
+		SECTION( fmt::format("color {}", i) ) {
+			assertEquals(expectedColors[i], color_bits);
+		}
+	}
+}
+
+TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
+
+	TestableCimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder, false, false);
+
+	assertFalse( decoder._ccm.active() );
+
+	std::array<unsigned, 6> expectedColors = {0, 0, 1, 0, 2, 0};
+	for (unsigned i = 0; i < expectedColors.size(); ++i)
+	{
+		PositionData pos;
+		cr.read(pos);
+		unsigned color_bits = cr.read_color(pos);
+		SECTION( fmt::format("color {}", i) ) {
+			assertEquals(expectedColors[i], color_bits);
+		}
+	}
 }
