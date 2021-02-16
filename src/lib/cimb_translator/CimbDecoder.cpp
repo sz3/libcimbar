@@ -19,7 +19,7 @@ namespace {
 		return std::pow(a - b, 2);
 	}
 
-	uchar fix_single_color(double c, double adjustUp, double down)
+	uchar fix_single_color(float c, float adjustUp, float down)
 	{
 		c -= down;
 		c *= adjustUp;
@@ -60,7 +60,7 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, u
 	load_tiles();
 }
 
-void CimbDecoder::update_color_correction(cv::Matx<double, 3, 3>&& ccm)
+void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 {
 	_ccm.update(std::move(ccm));
 }
@@ -119,7 +119,7 @@ unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offse
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
-std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<double,double,double> c, double adjustUp, double down) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<float,float,float> c, float adjustUp, float down) const
 {
 	return {
 		fix_single_color(std::get<0>(c), adjustUp, down),
@@ -133,20 +133,20 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
-unsigned CimbDecoder::get_best_color(double r, double g, double b) const
+unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 {
 	// transform color with ccm
 	if (_ccm.active())
 	{
-		std::tuple<double, double, double> color = _ccm.transform(r, g, b);
+		std::tuple<float, float, float> color = _ccm.transform(r, g, b);
 		r = std::get<0>(color);
 		g = std::get<1>(color);
 		b = std::get<2>(color);
 	}
 
-	double max = std::max({r, g, b, 1.0});
-	double min = std::min({r, g, b, 48.0});
-	double adjust = 255.0;
+	float max = std::max({r, g, b, 1.0f});
+	float min = std::min({r, g, b, 48.0f});
+	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
 	adjust /= (max - min);
@@ -154,7 +154,7 @@ unsigned CimbDecoder::get_best_color(double r, double g, double b) const
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
 	unsigned best_fit = 0;
-	double best_distance = 1000000;
+	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
 		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);

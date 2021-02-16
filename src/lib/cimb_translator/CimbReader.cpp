@@ -47,16 +47,16 @@ namespace {
 		return bb;
 	}
 
-	void updateMaxColor(std::tuple<double, double, double>& max_color, const cv::Scalar& c)
+	void updateMaxColor(std::tuple<float, float, float>& max_color, const cv::Scalar& c)
 	{
-		std::get<0>(max_color) = std::max(std::get<0>(max_color), c[0]);
-		std::get<1>(max_color) = std::max(std::get<1>(max_color), c[1]);
-		std::get<2>(max_color) = std::max(std::get<2>(max_color), c[2]);
+		std::get<0>(max_color) = std::max(std::get<0>(max_color), static_cast<float>(c[0]));
+		std::get<1>(max_color) = std::max(std::get<1>(max_color), static_cast<float>(c[1]));
+		std::get<2>(max_color) = std::max(std::get<2>(max_color), static_cast<float>(c[2]));
 	}
 
-	std::tuple<double, double, double> calculateWhite(const cv::Mat& img, bool dark)
+	std::tuple<float, float, float> calculateWhite(const cv::Mat& img, bool dark)
 	{
-		std::tuple<double, double, double> bestColor({1, 1, 1});
+		std::tuple<float, float, float> bestColor({1, 1, 1});
 		if (dark)
 		{
 			unsigned tl = Config::anchor_size() - 2;
@@ -86,7 +86,7 @@ namespace {
 
 	bool updateColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
 	{
-		std::tuple<double, double, double> white = calculateWhite(img, Config::dark());
+		std::tuple<float, float, float> white = calculateWhite(img, Config::dark());
 		decoder.update_color_correction(color_correction::get_adaptation_matrix<adaptation_transform::von_kries>(white, {255.0, 255.0, 255.0}));
 		return true;
 	}
