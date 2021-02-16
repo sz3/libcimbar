@@ -184,3 +184,30 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 		}
 	}
 }
+
+TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_177_ccm.jpg");
+
+	TestableCimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder);
+
+	assertTrue( decoder._ccm.active() );
+
+	std::stringstream ss;
+	ss << decoder._ccm.mat();
+	assertEquals("[1.0675567, 0.21678841, -0.013292357;\n"
+	             " 0.023812667, 0.98703396, -0.0048082001;\n"
+	             " 0, 0, 1.0017186]", ss.str());
+
+	std::array<unsigned, 6> expectedColors = {0, 0, 0, 0, 2, 2}; // it's wrong, but it's consistent!
+	for (unsigned i = 0; i < expectedColors.size(); ++i)
+	{
+		PositionData pos;
+		cr.read(pos);
+		unsigned color_bits = cr.read_color(pos);
+		SECTION( fmt::format("color {}", i) ) {
+			assertEquals(expectedColors[i], color_bits);
+		}
+	}
+}
