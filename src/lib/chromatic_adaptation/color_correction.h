@@ -3,6 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 
+// transforms are in adaptation_transform.h
+// http://brucelindbloom.com/Eqn_ChromAdapt.html
+
 class color_correction
 {
 public:
