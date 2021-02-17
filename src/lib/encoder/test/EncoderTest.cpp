@@ -47,9 +47,9 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
 	Encoder enc(40, 4, 2);
-	assertEquals( 5, enc.encode_fountain(inputFile, outPrefix, 0) );
+	assertEquals( 3, enc.encode_fountain(inputFile, outPrefix, 0) );
 
-	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x8c2f0f40e6ecb08b, 0x93a3830d042966e1, 0x21f4ef48d3ed685e};
+	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x8c2f0f40e6ecb08b};
 	for (unsigned i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
