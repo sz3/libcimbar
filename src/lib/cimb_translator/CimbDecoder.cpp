@@ -13,24 +13,21 @@ using std::get;
 using std::string;
 
 namespace {
-	inline constexpr unsigned char operator"" _uchar(unsigned long long arg) noexcept
-	{
-		return static_cast<unsigned char>(arg);
-	}
-
 	template <typename T>
 	unsigned squared_difference(T a, T b)
 	{
 		return std::pow(a - b, 2);
 	}
 
-	uchar fix_single_color(uchar c, float adjustUp, uchar down)
+	uchar fix_single_color(float c, float adjustUp, float down)
 	{
 		c -= down;
-		c = (uchar)(c * adjustUp);
+		c *= adjustUp;
 		if (c > (245 - down))
 			c = 255;
-		return c;
+		if (c < 0)
+			c = 0;
+		return (uchar)c;
 	}
 
 	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
@@ -61,6 +58,11 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, u
     , _ahashThreshold(ahashThreshold)
 {
 	load_tiles();
+}
+
+void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
+{
+	_ccm.update(std::move(ccm));
 }
 
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
@@ -117,7 +119,7 @@ unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offse
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
-std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<uchar,uchar,uchar> c, float adjustUp, uchar down) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<float,float,float> c, float adjustUp, float down) const
 {
 	return {
 		fix_single_color(std::get<0>(c), adjustUp, down),
@@ -131,10 +133,19 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
-unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
+unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 {
-	unsigned char max = std::max({r, g, b, 1_uchar});
-	unsigned char min = std::min({r, g, b, 48_uchar});
+	// transform color with ccm
+	if (_ccm.active())
+	{
+		std::tuple<float, float, float> color = _ccm.transform(r, g, b);
+		r = std::get<0>(color);
+		g = std::get<1>(color);
+		b = std::get<2>(color);
+	}
+
+	float max = std::max({r, g, b, 1.0f});
+	float min = std::min({r, g, b, 48.0f});
 	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
@@ -143,7 +154,7 @@ unsigned CimbDecoder::get_best_color(uchar r, uchar g, uchar b) const
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
 	unsigned best_fit = 0;
-	double best_distance = 1000000;
+	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
 		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);
@@ -166,8 +177,7 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	uchar r,g,b;
-	std::tie(r, g, b) = center.mean_rgb(Cell::SKIP);
+	auto [r, g, b] = center.mean_rgb(Cell::SKIP);
 	return get_best_color(r, g, b);
 }
 

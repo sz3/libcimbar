@@ -19,7 +19,7 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool)>& decode, bool no_deskew, bool undistort, int preprocess)
+int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool, bool)>& decode, bool no_deskew, bool undistort, int preprocess, bool color_correct)
 {
 	int err = 0;
 	for (const string& inf : infiles)
@@ -50,7 +50,7 @@ int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool
 				shouldPreprocess = true;
 		}
 
-		int bytes = decode(img, shouldPreprocess);
+		int bytes = decode(img, shouldPreprocess, color_correct);
 		if (!bytes)
 			err |= 4;
 	}
@@ -58,10 +58,10 @@ int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool
 }
 
 template <typename SINK>
-std::function<int(cv::UMat,bool)> fountain_decode_fun(SINK& sink, Decoder& d)
+std::function<int(cv::UMat,bool,bool)> fountain_decode_fun(SINK& sink, Decoder& d)
 {
-	return [&sink, &d] (cv::UMat m, bool pre) {
-		return d.decode_fountain(m, sink, pre);
+	return [&sink, &d] (cv::UMat m, bool pre, bool cc) {
+		return d.decode_fountain(m, sink, pre, cc);
 	};
 }
 
@@ -75,10 +75,11 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
 	    ("o,out", "Output file or directory.", cxxopts::value<string>())
-	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
+	    ("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
 	    ("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+	    ("color-correct", "Toggle decoding color correction. 1 == on. 0 == off.", cxxopts::value<int>()->default_value("1"))
 	    ("encode", "Run the encoder!", cxxopts::value<bool>())
 	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
 	    ("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
@@ -102,7 +103,7 @@ int main(int argc, char** argv)
 	bool encode = result.count("encode");
 	bool fountain = result.count("fountain");
 
-	colorBits = std::min(3, result["colorbits"].as<int>());
+	colorBits = std::min(3, result["color-bits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
@@ -122,6 +123,7 @@ int main(int argc, char** argv)
 	// else, decode
 	bool no_deskew = result.count("no-deskew");
 	bool undistort = result.count("undistort");
+	int color_correct = result["color-correct"].as<int>();
 	int preprocess = result["preprocess"].as<int>();
 
 	Decoder d(ecc, colorBits);
@@ -132,18 +134,18 @@ int main(int argc, char** argv)
 		if (compressionLevel <= 0)
 		{
 			fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize);
-			return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
+			return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
 		}
 
 		// else -- default case, all bells and whistles
 		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
-		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess);
+		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
 	}
 
 	// else
 	std::ofstream f(outpath);
-	std::function<int(cv::UMat,bool)> fun = [&f, &d] (cv::UMat m, bool pre) {
-		return d.decode(m, f, pre);
+	std::function<int(cv::UMat,bool,bool)> fun = [&f, &d] (cv::UMat m, bool pre, bool cc) {
+		return d.decode(m, f, pre, cc);
 	};
-	return decode(infiles, fun, no_deskew, undistort, preprocess);
+	return decode(infiles, fun, no_deskew, undistort, preprocess, color_correct);
 }

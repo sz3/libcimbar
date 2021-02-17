@@ -47,6 +47,7 @@ endif()
 
 set (PROJECTS
 	src/lib/bit_file
+	src/lib/chromatic_adaptation
 	src/lib/cimb_translator
 	src/lib/compression
 	src/lib/encoder

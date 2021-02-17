@@ -17,10 +17,10 @@ public:
 	Decoder(int ecc_bytes=-1, int color_bits=-1, bool interleave=true);
 
 	template <typename MAT, typename STREAM>
-	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false);
+	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false, bool color_correction=true);
 
 	template <typename MAT, typename STREAM>
-	unsigned decode_fountain(const MAT& img, STREAM& ostream, bool should_preprocess=false);
+	unsigned decode_fountain(const MAT& img, STREAM& ostream, bool should_preprocess=false, bool color_correction=true);
 
 	unsigned decode(std::string filename, std::string output);
 
@@ -99,16 +99,16 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 // which would either be a filestream, or a multi-channel fountain sink
 
 template <typename MAT, typename STREAM>
-inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess)
+inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess, bool color_correction)
 {
-	CimbReader reader(img, _decoder, should_preprocess);
+	CimbReader reader(img, _decoder, should_preprocess, color_correction);
 	return do_decode(reader, ostream);
 }
 
 template <typename MAT, typename FOUNTAINSTREAM>
-inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess)
+inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess, bool color_correction)
 {
-	CimbReader reader(img, _decoder, should_preprocess);
+	CimbReader reader(img, _decoder, should_preprocess, color_correction);
 
 	aligned_stream aligner(ostream, ostream.chunk_size());
 	return do_decode(reader, aligner);

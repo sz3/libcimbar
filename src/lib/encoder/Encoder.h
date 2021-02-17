@@ -15,8 +15,8 @@ public:
 	using SimpleEncoder::SimpleEncoder;
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
-	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6);
-	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6);
+	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6, double redundancy=1.2);
+	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6, double redundancy=4.0);
 };
 
 inline unsigned Encoder::encode(const std::string& filename, std::string output_prefix)
@@ -39,7 +39,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level)
+inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level, double redundancy)
 {
 	std::ifstream infile(filename);
 	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, compression_level);
@@ -49,9 +49,9 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
 	// the fountain_chunk_size will be 690.
 	// fountain_chunks_per_frame() is currently a constant (10).
-	unsigned requiredFrames = fes->blocks_required() * 2 / cimbar::Config::fountain_chunks_per_frame();
+	unsigned requiredFrames = fes->blocks_required() * redundancy / cimbar::Config::fountain_chunks_per_frame();
 	if (requiredFrames == 0)
-		requiredFrames = 1; // could also do +1 on the division above?
+		requiredFrames = 1;
 
 	unsigned i = 0;
 	while (i < requiredFrames)
@@ -67,7 +67,7 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix, int compression_level)
+inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix, int compression_level, double redundancy)
 {
 	std::function<bool(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
@@ -75,5 +75,5 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, std::strin
 		cv::cvtColor(frame, bgr, cv::COLOR_RGB2BGR);
 		return cv::imwrite(output, bgr);
 	};
-	return encode_fountain(filename, fun, compression_level);
+	return encode_fountain(filename, fun, compression_level, redundancy);
 }
