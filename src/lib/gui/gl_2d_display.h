@@ -3,6 +3,7 @@
 
 #include "gl_program.h"
 #include "gl_shader.h"
+#include "util/loop_iterator.h"
 
 #include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
@@ -23,9 +24,20 @@ protected:
 	    -1.0f,  1.0f, 0.0f
 	};
 
+	// just using sin and cos is probably better?
+	static constexpr std::array<std::array<GLfloat, 4>, 4> ROTATIONS = {{
+	    {-1, 0, 0, 1},
+	    {1, 0, 0, -1}, // right 180
+	    {0, 1, 1, 0},  // right 90
+	    {0, -1, -1, 0} // right 270
+	}};
+
 public:
-	gl_2d_display()
+	gl_2d_display(float shake=0)
 	    : _p(create())
+	    , _shakePos{{ {0, 0}, {-shake, -shake}, {0, 0}, {shake, shake}, {0, 0}, {-shake, shake}, {0, 0}, {shake, -shake} }}
+	    , _shake(_shakePos)
+	    , _rotation(ROTATIONS)
 	{
 		glGenBuffers(3, _vbo.data());
 		glGenVertexArrays(1, &_vao);
@@ -60,12 +72,12 @@ public:
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
-		std::array<GLfloat, 4> rot = rotation_matrix();
+		std::array<GLfloat, 4> rot = *_rotation;
 		glUniformMatrix2fv(rotateUniform, 1, false, rot.data());
 
 		// pass in transform vector
 		GLuint transformUniform = glGetUniformLocation(prog, "tform");
-		std::pair<float, float> tform = shake_transform();
+		std::pair<GLfloat, GLfloat> tform = *_shake;
 		glUniform2f(transformUniform, tform.first, tform.second);
 
 		// Draw
@@ -88,40 +100,18 @@ public:
 
 	void rotate(unsigned i=1)
 	{
-		if (i == 0 or ++_rotation >= 4)
-			_rotation = 0;
+		if (i == 0)
+			_rotation.reset();
+		else
+			++_rotation;
 	}
 
 	void shake(unsigned i=1)
 	{
-		if (i == 0 or ++_shake >= 8)
-			_shake = 0;
-	}
-
-	std::array<GLfloat, 4> rotation_matrix() const
-	{
-		// just using sin and cos is probably better?
-		switch (_rotation)
-		{
-			default:
-			case 0:
-				return {-1, 0, 0, 1};
-			case 1: // right 180
-				return {1, 0, 0, -1};
-			case 2: // right 90
-				return {0, 1, 1, 0};
-			case 3: // right 270
-				return {0, -1, -1, 0};
-		}
-	}
-
-	std::pair<float, float> shake_transform() const
-	{
-		const float step = .007407407f;  // 8 / 1080
-		static constexpr std::array<std::pair<float, float>, 8> SHAKE_POS = {{
-		    {0, 0}, {-step, -step}, {0, 0}, {step, step}, {0, 0}, {-step, step}, {0, 0}, {step, -step}
-		}};
-		return SHAKE_POS[_shake];
+		if (i == 0)
+			_shake.reset();
+		else
+			++_shake;
 	}
 
 protected:
@@ -166,8 +156,10 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
-	unsigned _rotation = 0;
-	unsigned _shake = 0;
+
+	std::array<std::pair<GLfloat, GLfloat>, 8> _shakePos;
+	loop_iterator<decltype(_shakePos)> _shake;
+	loop_iterator<decltype(ROTATIONS)> _rotation;
 };
 
 }
