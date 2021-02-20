@@ -32,10 +32,16 @@ protected:
 	    {0, -1, -1, 0} // right 270
 	}};
 
+	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(unsigned dim)
+	{
+		float shake = 8.0f / dim;
+		return {{ {0, 0}, {-shake, -shake}, {0, 0}, {shake, shake}, {0, 0}, {-shake, shake}, {0, 0}, {shake, -shake} }};
+	}
+
 public:
-	gl_2d_display(float shake=0)
+	gl_2d_display(unsigned width, unsigned height)
 	    : _p(create())
-	    , _shakePos{{ {0, 0}, {-shake, -shake}, {0, 0}, {shake, shake}, {0, 0}, {-shake, shake}, {0, 0}, {shake, -shake} }}
+	    , _shakePos(computeShakePos(std::min(width, height)))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{

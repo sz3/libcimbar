@@ -32,8 +32,7 @@ public:
 		glfwMakeContextCurrent(_w);
 		glfwSwapInterval(1);
 
-		float shake = 8.0 / std::min(width, height);
-		_display = std::make_shared<cimbar::gl_2d_display>(shake);
+		_display = std::make_shared<cimbar::gl_2d_display>(width, height);
 		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}
