@@ -33,7 +33,7 @@ return {
   {
     console.log("init for canvas " + canvas);
 
-    Module._initialize_GL(1024, 1024);
+    Module._initialize_GL(1040, 1040);
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);
   },
@@ -45,8 +45,8 @@ return {
       dim = height;
     }
     console.log(dim);
-    if (dim > 1024) {
-      dim = 1024;
+    if (dim > 1040) {
+      dim = 1040;
     }
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";

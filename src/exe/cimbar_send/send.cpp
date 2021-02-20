@@ -59,10 +59,7 @@ int main(int argc, char** argv)
 	bool use_rotatecam = result.count("rotatecam");
 	bool use_shakycam = result.count("shakycam");
 
-	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
-	cam.toggle();
-
-	cimbar::window w(cam.width(), cam.height(), "cimbar_send");
+	cimbar::window w(1080, 1080, "cimbar_send");
 	if (!w.is_good())
 	{
 		std::cerr << "failed to create window :(" << std::endl;
@@ -72,13 +69,12 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool start = true;
 
-	auto draw = [&w, &cam, use_rotatecam, use_shakycam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
+	auto draw = [&w, use_rotatecam, use_shakycam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
-		cv::Mat& windowImg = cam.draw(frame);
-		w.show(windowImg, delay);
+		w.show(frame, delay);
 		if (use_rotatecam)
 			w.rotate();
 		if (use_shakycam)

@@ -65,7 +65,7 @@ int render()
 	}
 
 	_window->show(*img, 0);
-	_window->rotate();
+	_window->shake();
 	return ++_renders;
 }
 

@@ -8,6 +8,7 @@
 #include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
 
+#include <iostream>
 #include <memory>
 
 namespace cimbar {
@@ -32,16 +33,27 @@ protected:
 	    {0, -1, -1, 0} // right 270
 	}};
 
-	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(unsigned dim)
+	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float dim)
 	{
-		float shake = 8.0f / dim;
-		return {{ {0, 0}, {-shake, -shake}, {0, 0}, {shake, shake}, {0, 0}, {-shake, shake}, {0, 0}, {shake, -shake} }};
+		float shake = 8.0f / dim; // 1080
+		float zero = (dim - 1000.0) / (dim*2);
+		return {{
+			{zero, zero},
+			{zero-shake, zero-shake},
+			{zero, zero},
+			{zero+shake, zero+shake},
+			{zero, zero},
+			{zero-shake, zero+shake},
+			{zero, zero},
+			{zero+shake, zero-shake}
+		}};
 	}
 
 public:
 	gl_2d_display(unsigned width, unsigned height)
 	    : _p(create())
-	    , _shakePos(computeShakePos(std::min(width, height)))
+	    , _dimension(std::min(width, height))
+	    , _shakePos(computeShakePos(_dimension))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
@@ -75,6 +87,10 @@ public:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniform1i(textureUniform, 0);
+
+		// scaling
+		GLuint scalingUniform = glGetUniformLocation(prog, "scaling");
+		glUniform1f(scalingUniform, 2 * (1008 / _dimension));
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
@@ -133,14 +149,15 @@ protected:
 		static const std::string VERTEX_SHADER_SRC = R"(#version 300 es
 		uniform mat2 rot;
 		uniform vec2 tform;
+		uniform float scaling;
 		in vec4 vert;
 		out vec2 texCoord;
 		void main() {
 		   gl_Position = vec4(vert.x, vert.y, 0.0f, 1.0f);
 		   vec2 ori = vec2(vert.x, vert.y);
 		   ori *= rot;
-		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
-		   texCoord += tform;
+		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / scaling;
+		   texCoord -= tform;
 		})";
 
 		static const std::string FRAGMENT_SHADER_SRC = R"(#version 300 es
@@ -162,6 +179,7 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
+	float _dimension;
 
 	std::array<std::pair<GLfloat, GLfloat>, 8> _shakePos;
 	loop_iterator<decltype(_shakePos)> _shake;
