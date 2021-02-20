@@ -60,11 +60,7 @@ int main(int argc, char** argv)
 	bool use_shakycam = result.count("shakycam");
 
 	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
-	// if we don't need the shakycam, we'll just turn it off
-	// we could use a separate code path (just do a mat copyTo),
-	// but this is fine.
-	if (!use_shakycam)
-		cam.toggle();
+	cam.toggle();
 
 	cimbar::window w(cam.width(), cam.height(), "cimbar_send");
 	if (!w.is_good())
@@ -76,7 +72,7 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool start = true;
 
-	auto draw = [&w, &cam, use_rotatecam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
+	auto draw = [&w, &cam, use_rotatecam, use_shakycam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
 			return running = false;
 		start = false;
@@ -85,6 +81,8 @@ int main(int argc, char** argv)
 		w.show(windowImg, delay);
 		if (use_rotatecam)
 			w.rotate();
+		if (use_shakycam)
+			w.shake();
 		return true;
 	};
 

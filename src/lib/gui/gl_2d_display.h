@@ -117,8 +117,9 @@ public:
 
 	std::pair<float, float> shake_transform() const
 	{
+		const float step = .007407407f;  // 8 / 1080
 		static constexpr std::array<std::pair<float, float>, 8> SHAKE_POS = {{
-		    {0, 0}, {-.008, -.008}, {0, 0}, {.008, .008}, {0, 0}, {-.008, .008}, {0, 0}, {.008, -.008}
+		    {0, 0}, {-step, -step}, {0, 0}, {step, step}, {0, 0}, {-step, step}, {0, 0}, {step, -step}
 		}};
 		return SHAKE_POS[_shake];
 	}

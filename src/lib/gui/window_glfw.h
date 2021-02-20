@@ -30,6 +30,7 @@ public:
 			return;
 		}
 		glfwMakeContextCurrent(_w);
+		glfwSwapInterval(1);
 
 		_display = std::make_shared<cimbar::gl_2d_display>();
 		glGenTextures(1, &_texid);
