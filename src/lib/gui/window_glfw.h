@@ -32,7 +32,7 @@ public:
 		glfwMakeContextCurrent(_w);
 		glfwSwapInterval(1);
 
-		_display = std::make_shared<cimbar::gl_2d_display>(width, height);
+		_display = std::make_shared<cimbar::gl_2d_display>(1024, std::min(width, height));
 		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}

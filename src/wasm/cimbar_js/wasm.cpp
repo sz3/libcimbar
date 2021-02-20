@@ -51,7 +51,7 @@ int render()
 	if (_fes->block_count() > required)
 	{
 		_fes->reset();
-		_window->rotate(0);
+		_window->shake(0);
 	}
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
@@ -102,7 +102,7 @@ int configure(unsigned color_bits)
 				_fes = nullptr;
 				_window->clear();
 			}
-			_window->rotate(0);
+			_window->shake(0);
 		}
 	}
 	return 0;

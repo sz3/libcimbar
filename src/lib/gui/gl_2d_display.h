@@ -33,10 +33,10 @@ protected:
 	    {0, -1, -1, 0} // right 270
 	}};
 
-	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float dim)
+	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float src_dim, float target_dim)
 	{
-		float shake = 8.0f / dim; // 1080
-		float zero = (dim - 1000.0) / (dim*2);
+		float shake = 8.0f / target_dim;
+		float zero = (target_dim - src_dim + 3) / (target_dim*2);
 		return {{
 			{zero, zero},
 			{zero-shake, zero-shake},
@@ -50,10 +50,11 @@ protected:
 	}
 
 public:
-	gl_2d_display(unsigned width, unsigned height)
+	gl_2d_display(unsigned src_dim, unsigned target_dim)
 	    : _p(create())
-	    , _dimension(std::min(width, height))
-	    , _shakePos(computeShakePos(_dimension))
+	    , _srcDim(src_dim)
+	    , _targetDim(target_dim)
+	    , _shakePos(computeShakePos(_srcDim, _targetDim))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
@@ -90,7 +91,7 @@ public:
 
 		// scaling
 		GLuint scalingUniform = glGetUniformLocation(prog, "scaling");
-		glUniform1f(scalingUniform, 2 * (1008 / _dimension));
+		glUniform1f(scalingUniform, 2 * (_srcDim / _targetDim));
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
@@ -179,7 +180,8 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
-	float _dimension;
+	float _srcDim;
+	float _targetDim;
 
 	std::array<std::pair<GLfloat, GLfloat>, 8> _shakePos;
 	loop_iterator<decltype(_shakePos)> _shake;
