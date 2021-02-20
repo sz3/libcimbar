@@ -44,10 +44,10 @@ int render()
 	if (!_window or !_fes)
 		return 0;
 
-	// we generate 2x the amount of required blocks -- unless everything fits in a single frame.
+	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
 	if (required > cimbar::Config::fountain_chunks_per_frame())
-		required = required*4;
+		required = required*8;
 	if (_fes->block_count() > required)
 	{
 		_fes->reset();
@@ -57,7 +57,7 @@ int render()
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
-	std::optional<cv::Mat> img = enc.encode_next(*_fes);
+	std::optional<cv::Mat> img = enc.encode_next(*_fes, _window->width());
 	if (!img)
 	{
 		std::cerr << "no image :(" << std::endl;

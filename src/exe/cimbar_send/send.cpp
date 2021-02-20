@@ -58,8 +58,9 @@ int main(int argc, char** argv)
 	bool dark = true;
 	bool use_rotatecam = result.count("rotatecam");
 	bool use_shakycam = result.count("shakycam");
+	int window_size = 1080;
 
-	cimbar::window w(1080, 1080, "cimbar_send");
+	cimbar::window w(window_size, window_size, "cimbar_send");
 	if (!w.is_good())
 	{
 		std::cerr << "failed to create window :(" << std::endl;
@@ -85,6 +86,6 @@ int main(int argc, char** argv)
 	Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);
 	while (running)
 		for (const string& f : infiles)
-			en.encode_fountain(f, draw, compressionLevel);
+			en.encode_fountain(f, draw, compressionLevel, 8.0, window_size);
 	return 0;
 }

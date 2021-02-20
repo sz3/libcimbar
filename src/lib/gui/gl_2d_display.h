@@ -33,10 +33,10 @@ protected:
 	    {0, -1, -1, 0} // right 270
 	}};
 
-	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float src_dim, float target_dim)
+	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float dim)
 	{
-		float shake = 8.0f / target_dim;
-		float zero = (target_dim - src_dim + 3) / (target_dim*2);
+		float shake = 8.0f / dim; // 1080
+		float zero = 0.0f;
 		return {{
 			{zero, zero},
 			{zero-shake, zero-shake},
@@ -50,11 +50,10 @@ protected:
 	}
 
 public:
-	gl_2d_display(unsigned src_dim, unsigned target_dim)
+	gl_2d_display(unsigned width, unsigned height)
 	    : _p(create())
-	    , _srcDim(src_dim)
-	    , _targetDim(target_dim)
-	    , _shakePos(computeShakePos(_srcDim, _targetDim))
+	    , _dimension(std::min(width, height))
+	    , _shakePos(computeShakePos(_dimension))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
@@ -88,10 +87,6 @@ public:
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniform1i(textureUniform, 0);
-
-		// scaling
-		GLuint scalingUniform = glGetUniformLocation(prog, "scaling");
-		glUniform1f(scalingUniform, 2 * (_srcDim / _targetDim));
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
@@ -150,14 +145,13 @@ protected:
 		static const std::string VERTEX_SHADER_SRC = R"(#version 300 es
 		uniform mat2 rot;
 		uniform vec2 tform;
-		uniform float scaling;
 		in vec4 vert;
 		out vec2 texCoord;
 		void main() {
 		   gl_Position = vec4(vert.x, vert.y, 0.0f, 1.0f);
 		   vec2 ori = vec2(vert.x, vert.y);
 		   ori *= rot;
-		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / scaling;
+		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
 		   texCoord -= tform;
 		})";
 
@@ -180,8 +174,7 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
-	float _srcDim;
-	float _targetDim;
+	float _dimension;
 
 	std::array<std::pair<GLfloat, GLfloat>, 8> _shakePos;
 	loop_iterator<decltype(_shakePos)> _shake;
