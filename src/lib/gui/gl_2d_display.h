@@ -60,8 +60,13 @@ public:
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
-		std::array<GLfloat, 4> vals = rotation_matrix();
-		glUniformMatrix2fv(rotateUniform, 1, false, vals.data());
+		std::array<GLfloat, 4> rot = rotation_matrix();
+		glUniformMatrix2fv(rotateUniform, 1, false, rot.data());
+
+		// pass in transform vector
+		GLuint transformUniform = glGetUniformLocation(prog, "tform");
+		std::pair<float, float> tform = shake_transform();
+		glUniform2f(transformUniform, tform.first, tform.second);
 
 		// Draw
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -87,6 +92,12 @@ public:
 			_rotation = 0;
 	}
 
+	void shake(unsigned i=1)
+	{
+		if (i == 0 or ++_shake >= 8)
+			_shake = 0;
+	}
+
 	std::array<GLfloat, 4> rotation_matrix() const
 	{
 		// just using sin and cos is probably better?
@@ -95,13 +106,21 @@ public:
 			default:
 			case 0:
 				return {-1, 0, 0, 1};
-			case 1: // right 90
-				return {0, 1, 1, 0};
-			case 2: // right 180
+			case 1: // right 180
 				return {1, 0, 0, -1};
+			case 2: // right 90
+				return {0, 1, 1, 0};
 			case 3: // right 270
 				return {0, -1, -1, 0};
 		}
+	}
+
+	std::pair<float, float> shake_transform() const
+	{
+		static constexpr std::array<std::pair<float, float>, 8> SHAKE_POS = {{
+		    {0, 0}, {-.008, -.008}, {0, 0}, {.008, .008}, {0, 0}, {-.008, .008}, {0, 0}, {.008, -.008}
+		}};
+		return SHAKE_POS[_shake];
 	}
 
 protected:
@@ -116,6 +135,7 @@ protected:
 		*/
 		static const std::string VERTEX_SHADER_SRC = R"(#version 300 es
 		uniform mat2 rot;
+		uniform vec2 tform;
 		in vec4 vert;
 		out vec2 texCoord;
 		void main() {
@@ -123,6 +143,7 @@ protected:
 		   vec2 ori = vec2(vert.x, vert.y);
 		   ori *= rot;
 		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
+		   texCoord += tform;
 		})";
 
 		static const std::string FRAGMENT_SHADER_SRC = R"(#version 300 es
@@ -145,6 +166,7 @@ protected:
 	GLuint _vao;
 	unsigned _i = 0;
 	unsigned _rotation = 0;
+	unsigned _shake = 0;
 };
 
 }

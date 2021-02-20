@@ -61,6 +61,12 @@ public:
 			_display->rotate(i);
 	}
 
+	void shake(unsigned i=1)
+	{
+		if (_display)
+			_display->shake(i);
+	}
+
 	void clear()
 	{
 		if (_display)
