@@ -10,13 +10,13 @@ class shaky_cam
 {
 public:
 	static constexpr std::array<std::pair<int, int>, 8> SHAKE_POS = {{
-		{0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
+	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
 	}};
 
 public:
 	shaky_cam(unsigned img_size, unsigned w, unsigned h, bool dark)
-		: _shakycam(true)
-		, _shakePos(SHAKE_POS)
+	    : _shakycam(true)
+	    , _shakePos(SHAKE_POS)
 	{
 		unsigned minFrameSize = img_size + 16;
 		w = std::max(w, minFrameSize);
@@ -45,6 +45,12 @@ public:
 		_shakePos.reset();
 	}
 
+	void shake()
+	{
+		if (_shakycam)
+			++_shakePos;
+	}
+
 	cv::Mat& draw(const cv::Mat& img)
 	{
 		_frame = _bgcolor;
@@ -59,7 +65,6 @@ public:
 				offsetX += (*_shakePos).first;
 				offsetY += (*_shakePos).second;
 			}
-			++_shakePos;
 		}
 
 		img.copyTo(_frame(cv::Rect(offsetX, offsetY, img.cols, img.rows)));
