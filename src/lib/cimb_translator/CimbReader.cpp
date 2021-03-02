@@ -30,15 +30,12 @@ namespace {
 		int blockSize = 3; // default: no preprocessing
 
 		cv::Mat symbols;
+		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
 		if (needs_sharpen)
 		{
-			sharpenSymbolGrid(img, symbols);
-			cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+			sharpenSymbolGrid(symbols, symbols);
 			blockSize = 7;
 		}
-		else
-			cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
-
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
 		bitbuffer bb(1024*128);
