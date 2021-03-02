@@ -55,7 +55,6 @@ int main(int argc, char** argv)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
-	bool dark = true;
 	bool use_rotatecam = result.count("rotatecam");
 	bool use_shakycam = result.count("shakycam");
 	int window_size = 1080;
