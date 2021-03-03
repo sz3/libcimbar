@@ -9,8 +9,8 @@ namespace cimbar {
 class shaky_cam
 {
 public:
-	static constexpr std::array<std::pair<int, int>, 8> SHAKE_POS = {{
-	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}, {0, 0}, {-8, 8}, {0, 0}, {8, -8}
+	static constexpr std::array<std::pair<int, int>, 4> SHAKE_POS = {{
+	    {0, 0}, {-8, -8}, {0, 0}, {8, 8}
 	}};
 
 public:

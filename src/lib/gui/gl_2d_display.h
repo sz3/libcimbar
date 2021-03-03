@@ -33,7 +33,7 @@ protected:
 	    {0, -1, -1, 0} // right 270
 	}};
 
-	static std::array<std::pair<GLfloat, GLfloat>, 8> computeShakePos(float dim)
+	static std::array<std::pair<GLfloat, GLfloat>, 4> computeShakePos(float dim)
 	{
 		float shake = 8.0f / dim; // 1080
 		float zero = 0.0f;
@@ -41,11 +41,7 @@ protected:
 			{zero, zero},
 			{zero-shake, zero-shake},
 			{zero, zero},
-			{zero+shake, zero+shake},
-			{zero, zero},
-			{zero-shake, zero+shake},
-			{zero, zero},
-			{zero+shake, zero-shake}
+			{zero+shake, zero+shake}
 		}};
 	}
 
@@ -176,7 +172,7 @@ protected:
 	unsigned _i = 0;
 	float _dimension;
 
-	std::array<std::pair<GLfloat, GLfloat>, 8> _shakePos;
+	std::array<std::pair<GLfloat, GLfloat>, 4> _shakePos;
 	loop_iterator<decltype(_shakePos)> _shake;
 	loop_iterator<decltype(ROTATIONS)> _rotation;
 };
