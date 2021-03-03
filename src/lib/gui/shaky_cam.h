@@ -68,6 +68,7 @@ public:
 		}
 
 		img.copyTo(_frame(cv::Rect(offsetX, offsetY, img.cols, img.rows)));
+		cv::cvtColor(_frame, _frame, cv::COLOR_BGR2RGB);
 		return _frame;
 	}
 
