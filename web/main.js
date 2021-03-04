@@ -6,6 +6,17 @@ var _showStats = false;
 var _renders = 0;
 var _renderTime = 0;
 
+function toggleFullscreen()
+{
+  var elem = document.body;
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+  else {
+    elem.requestFullscreen();
+  }
+}
+
 function importFile(f)
 {
   const fileReader = new FileReader();
@@ -36,6 +47,11 @@ return {
     Module._initialize_GL(1040, 1040);
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);
+  },
+
+  toggleFullscreen : function()
+  {
+    toggleFullscreen();
   },
 
   scaleCanvas : function(canvas, width, height)
