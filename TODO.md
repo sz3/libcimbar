@@ -31,9 +31,10 @@ Performance optimizations aside, there are a number of paths that might be inter
 	* a smaller grid would be less information dense, but more resilient to errors. Probably.
 * optimal grid shape?
 	* it's a square because QR codes are square. That's it. Should it be?
+	* I'm strongly considering 4:3 for the next revision
 * more efficient ECC?
-	* LDPC?
-	* Reed Solomon operates on bytes. Most decode errors tend to average out at 1-3 bits. It's not a total disaster, because it works. However, it would be nice to have denser error correction codes.
+	* QC-LDPC?
+	* Reed Solomon operates on bytes. Most decode errors tend to average out at 1-3 bits. In the pathological case, such a bit error will span two bytes. It's not a total disaster, because it works. However, it would be nice to use state of the art ECC.
 * proper GPU support (OpenCV + openCL) on android?
 * ???
 	* still reading? Of course there's more! There's always more!
