@@ -68,6 +68,7 @@ return {
     var res = Module._encode(data.byteOffset, data.length);
     console.log(res);
     Main.setTitle(filename);
+    Main.setActive(true);
   },
 
   dragDrop : function(event)
@@ -119,6 +120,14 @@ return {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + renderCount + " : " + Math.ceil(_renderTime/renderCount));
     }
+  },
+
+  setActive : function(active)
+  {
+    // hide cursor when there's a barcode active
+    var invisi = document.getElementById("invisible_click");
+    invisi.classList.remove("active");
+    invisi.classList.add("active");
   },
 
   setColorBits : function(color_bits)
