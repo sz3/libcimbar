@@ -17,7 +17,7 @@ namespace {
 	std::shared_ptr<fountain_encoder_stream> _fes;
 	std::optional<cv::Mat> _next;
 
-	int _renders = 0;
+	int _numFrames = 0;
 	uint8_t _encodeId = 0;
 
 	// settings
@@ -51,7 +51,15 @@ int render()
 	{
 		_window->show(*_next, 0);
 		_window->shake();
+		return 1;
 	}
+	return 0;
+}
+
+int next_frame()
+{
+	if (!_window or !_fes)
+		return 0;
 
 	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
@@ -67,7 +75,7 @@ int render()
 	enc.set_encode_id(_encodeId);
 
 	_next = enc.encode_next(*_fes, _window->width());
-	return ++_renders;
+	return ++_numFrames;
 }
 
 int encode(uint8_t* buffer, size_t size)

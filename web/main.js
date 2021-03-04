@@ -110,7 +110,8 @@ return {
   nextFrame : function()
   {
     var start = performance.now();
-    var renderCount = Module._render();
+    Module._render();
+    var frameCount = Module._next_frame();
 
     var elapsed = performance.now() - start;
     var nextInterval = _interval>elapsed? _interval-elapsed : 0;
@@ -118,7 +119,7 @@ return {
 
     if (_showStats && renderCount) {
       _renderTime += elapsed;
-      Main.setHTML( "status", elapsed + " : " + renderCount + " : " + Math.ceil(_renderTime/renderCount));
+      Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
     }
   },
 
