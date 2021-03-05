@@ -8,12 +8,11 @@ var _renderTime = 0;
 
 function toggleFullscreen()
 {
-  var elem = document.body;
   if (document.fullscreenElement) {
     document.exitFullscreen();
   }
   else {
-    elem.requestFullscreen();
+    document.documentElement.requestFullscreen();
   }
 }
 
