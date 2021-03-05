@@ -14,10 +14,10 @@
 ## Current sustained benchmark
 
 * 4-color cimbar with ecc=30:
-	* 2,980,556 bytes (after compression) in 31s -> 769 kilobits/s (~96 KB/s)
+	* 4,717,525 bytes (after compression) in 45s -> 838 kilobits/s (~104 KB/s)
 
 * 8-color cimbar with ecc=30:
-	* 2,980,556 bytes in 29s -> 822 kilobits/s (~102 KB/s)
+	* 4,717,525 bytes in 40s -> 943 kilobits/s (~118 KB/s)
 
 * details:
 	* these numbers are using https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625
@@ -26,9 +26,14 @@
 		* cimbar.org uses the `shakycam` option to allow the receiver to detect/discard "in between" frames as part of the scan step. This allows it to spend more processing time decoding real data.
 	* burst rate can be higher (or lower)
 		* to this end, lower ecc settings *can* provide better burst rates
-	* 8-color cimbar is considerably more sensitive to lighting conditions and color tints. When in doubt, fall back to 4-color.
+	* 4-color cimbar is currently preferred, and will give more consistent transfer speeds.
+	* 8-color cimbar should be considered a prototype within a prototype. It is considerably more sensitive to lighting conditions and color tints.
 
 * other notes:
-		* having better lighting in the frame often leads to better results -- this is why cimbar.org has a (mostly) white background. cfc uses android's auto-exposure, auto-focus, etc (it's a very simple app). So good ambient light -- or a white background -- can lead to more consitent quality frame capture.
+		* having better lighting in the frame often leads to better results -- this is why cimbar.org has a (mostly) white background. cfc uses android's auto-exposure, auto-focus, etc (it's a very simple app). Good ambient light -- or a white background -- can lead to more consitent quality frame capture.
+		* because of the lighting/exposure question, I usually "shoot" in landscape instead of portrait.
 		* cfc currently has a low resolution, so the cimbar frame should take up as much of the display as possible (trust the guide brackets)
-		* similarly, it's best to keep the camera angle as straight-on as possible, to decode the whole image successfully. Decodes should still happen at higher angles, but the "smaller" part of the image may have more errors than the error correction can deal with.
+		* similarly, it's best to keep the camera angle straight-on -- instead of at an angle -- to decode the whole image successfully. Decodes should still happen at higher angles, but the "smaller" part of the image may have more errors than the ECC can deal with.
+		* other things to be wary of:
+			* glare from light sources.
+			* shaky hands.

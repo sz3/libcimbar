@@ -5,7 +5,7 @@
 
 Behold: an experimental barcode format for air-gapped data transfer.
 
-It can sustain speeds of 770+ kilobits/s (~96 KB/s) using nothing but a smartphone camera!
+It can sustain speeds of 943+ kilobits/s (~118 KB/s) using just a computer monitor and a smartphone camera!
 
 ## Explain?
 
@@ -25,7 +25,9 @@ No internet/bluetooth/NFC/etc is used. All data is transmitted through the camer
 
 ## Platforms
 
-The code is written in C++, and developed/tested on amd64+linux, arm64+android, and emscripten+wasm. It probably works, or can be made to work, on other platforms.
+The code is written in C++, and developed/tested on amd64+linux, arm64+android (decoder only), and emscripten+WASM (encoder only). It probably works, or can be made to work, on other platforms.
+
+Crucially, because the encoder compiles to asmjs and wasm, it can run on anything with a modern web browser. There are [releases](https://github.com/sz3/libcimbar/releases/latest) if you wish to run the encoder locally instead of via cimbar.org.
 
 ## Library dependencies
 
