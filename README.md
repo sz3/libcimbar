@@ -23,7 +23,7 @@ No internet/bluetooth/NFC/etc is used. All data is transmitted through the camer
 
 `cimbar` is a high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
 
-`libcimbar`, this optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 33MB can be encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
+`libcimbar`, this optimized implementation, includes a simple protocol for file encoding built on fountain codes (`wirehair`) and zstd compression. Files of up to 33MB (after compression!) are encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed and decompressed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
 
 ## Platforms
 
