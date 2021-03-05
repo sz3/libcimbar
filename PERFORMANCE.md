@@ -20,6 +20,7 @@
 	* 4,717,525 bytes in 40s -> 943 kilobits/s (~118 KB/s)
 
 * details:
+	* cimbar has built-in compression using zstd. What's being measured here is bits over the wire, e.g. data after compression is applied.
 	* these numbers are using https://github.com/sz3/cfc, running with 4 CPU threads on a Qualcomm Snapdragon 625
 		* perhaps I will buy a new cell phone to inflate the benchmark numbers.
 	* the sender is the cimbar.org wasm implementation. An equivalent command line is `./cimbar_send /path/to/file -s`
