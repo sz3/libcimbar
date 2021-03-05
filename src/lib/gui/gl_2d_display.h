@@ -7,8 +7,6 @@
 
 #include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
-
-#include <iostream>
 #include <memory>
 
 namespace cimbar {
@@ -48,8 +46,7 @@ protected:
 public:
 	gl_2d_display(unsigned width, unsigned height)
 	    : _p(create())
-	    , _dimension(std::min(width, height))
-	    , _shakePos(computeShakePos(_dimension))
+	    , _shakePos(computeShakePos(std::min(width, height)))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
@@ -170,7 +167,6 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
-	float _dimension;
 
 	std::array<std::pair<GLfloat, GLfloat>, 4> _shakePos;
 	loop_iterator<decltype(_shakePos)> _shake;

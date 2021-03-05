@@ -41,12 +41,14 @@ int initialize_GL(int width, int height)
 	return 1;
 }
 
+// render() and next_frame() could be put in the same function,
+// but it seems cleaner to split them.
+// in any case, we're concerned with frame pacing (some encodes take longer than others)
 int render()
 {
 	if (!_window or !_fes)
 		return 0;
 
-	// render frame first to minimize frame pacing issues
 	if (_next)
 	{
 		_window->show(*_next, 0);

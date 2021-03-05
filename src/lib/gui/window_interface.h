@@ -27,11 +27,6 @@ struct window_interface
 	{
 		static_cast<T*>(this)->show(img, delay);
 	}
-
-	unsigned width() const
-	{
-		return static_cast<T*>(this)->width();
-	}
 };
 
 }
