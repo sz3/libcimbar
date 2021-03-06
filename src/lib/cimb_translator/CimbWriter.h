@@ -7,7 +7,7 @@
 class CimbWriter
 {
 public:
-	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true);
+	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true, int size=0);
 
 	bool write(unsigned bits);
 	bool done() const;
@@ -15,7 +15,11 @@ public:
 	cv::Mat image() const;
 
 protected:
+	void paste(const cv::Mat& img, int x, int y);
+
+protected:
 	cv::Mat _image;
 	CellPositions _positions;
 	CimbEncoder _encoder;
+	unsigned _offset = 0;
 };

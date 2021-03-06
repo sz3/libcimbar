@@ -15,7 +15,9 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
-	int _renders = 0;
+	std::optional<cv::Mat> _next;
+
+	int _numFrames = 0;
 	uint8_t _encodeId = 0;
 
 	// settings
@@ -39,34 +41,43 @@ int initialize_GL(int width, int height)
 	return 1;
 }
 
+// render() and next_frame() could be put in the same function,
+// but it seems cleaner to split them.
+// in any case, we're concerned with frame pacing (some encodes take longer than others)
 int render()
 {
 	if (!_window or !_fes)
 		return 0;
 
-	// we generate 2x the amount of required blocks -- unless everything fits in a single frame.
+	if (_next)
+	{
+		_window->show(*_next, 0);
+		_window->shake();
+		return 1;
+	}
+	return 0;
+}
+
+int next_frame()
+{
+	if (!_window or !_fes)
+		return 0;
+
+	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
 	if (required > cimbar::Config::fountain_chunks_per_frame())
-		required = required*4;
+		required = required*8;
 	if (_fes->block_count() > required)
 	{
 		_fes->reset();
-		_window->rotate(0);
+		_window->shake(0);
 	}
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
-	std::optional<cv::Mat> img = enc.encode_next(*_fes);
-	if (!img)
-	{
-		std::cerr << "no image :(" << std::endl;
-		return 0;
-	}
-
-	_window->show(*img, 0);
-	_window->rotate();
-	return ++_renders;
+	_next = enc.encode_next(*_fes, _window->width());
+	return ++_numFrames;
 }
 
 int encode(uint8_t* buffer, size_t size)
@@ -84,6 +95,8 @@ int encode(uint8_t* buffer, size_t size)
 
 	if (!_fes)
 		return 0;
+
+	_next.reset();
 	return 1;
 }
 
@@ -101,8 +114,9 @@ int configure(unsigned color_bits)
 				// if the data is too small, we should throw out _fes -- and clear the canvas.
 				_fes = nullptr;
 				_window->clear();
+				_next.reset();
 			}
-			_window->rotate(0);
+			_window->shake(0);
 		}
 	}
 	return 0;

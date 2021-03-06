@@ -14,7 +14,8 @@
 }
 
 body {
-	background-color: black;
+	background-color: white;
+	background-image: radial-gradient(circle at top left, rgb(7,0,0),rgb(244,244,244),rgb(255,255,255));
 	color: gray;
 	height: 100vh;
 	display: grid;
@@ -39,6 +40,8 @@ body {
 	margin: 0 auto;
 	z-index: -1;
 	color: #F0F0F0;
+	outline: 6px solid black;
+	box-shadow: 0px 0px 12px black, 0px 0px 18px black;
 }
 
 #dragdrop::before {
@@ -56,6 +59,9 @@ body {
 	position: fixed;
 	opacity: 0;
 	pointer-events: auto;
+}
+#invisible_click.active {
+	cursor: none;
 }
 #nav-container:focus-within + #invisible_click {
 	pointer-events: none;
@@ -110,6 +116,7 @@ body {
   pointer-events: auto;
   touch-action: manipulation;
   outline: 0;
+  background-image: linear-gradient(180deg, rgb(0,0,0,0) 10%, rgb(0,0,0) 40%, rgb(0,0,0) 60%, rgb(0,0,0,0) 90%);
 }
 .icon-bar {
   display: block;
@@ -265,6 +272,7 @@ body {
       <span id="current-file">No file selected</span>
       <ul>
         <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a></li>
+        <li><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
         <hr>
         <li><a class="c4" href="javascript:void(0)" onclick="Main.setColorBits(2)">4-color</a></li>
         <li><a class="c8" href="javascript:void(0)" onclick="Main.setColorBits(3)">8-color</a></li>
@@ -273,7 +281,7 @@ body {
       </ul>
     </div>
 </div>
-<a id="invisible_click" href="javascript:void(0)" onclick="Main.clickNav()"></a>
+<a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
 	// reset zoom

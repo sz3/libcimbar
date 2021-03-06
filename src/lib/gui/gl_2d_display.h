@@ -3,10 +3,10 @@
 
 #include "gl_program.h"
 #include "gl_shader.h"
+#include "util/loop_iterator.h"
 
 #include <GLES3/gl3.h>
 #include <GLES2/gl2ext.h>
-
 #include <memory>
 
 namespace cimbar {
@@ -23,9 +23,32 @@ protected:
 	    -1.0f,  1.0f, 0.0f
 	};
 
+	// just using sin and cos is probably better?
+	static constexpr std::array<std::array<GLfloat, 4>, 4> ROTATIONS = {{
+	    {-1, 0, 0, 1},
+	    {1, 0, 0, -1}, // right 180
+	    {0, 1, 1, 0},  // right 90
+	    {0, -1, -1, 0} // right 270
+	}};
+
+	static std::array<std::pair<GLfloat, GLfloat>, 4> computeShakePos(float dim)
+	{
+		float shake = 8.0f / dim; // 1080
+		float zero = 0.0f;
+		return {{
+			{zero, zero},
+			{zero-shake, zero-shake},
+			{zero, zero},
+			{zero+shake, zero+shake}
+		}};
+	}
+
 public:
-	gl_2d_display()
+	gl_2d_display(unsigned width, unsigned height)
 	    : _p(create())
+	    , _shakePos(computeShakePos(std::min(width, height)))
+	    , _shake(_shakePos)
+	    , _rotation(ROTATIONS)
 	{
 		glGenBuffers(3, _vbo.data());
 		glGenVertexArrays(1, &_vao);
@@ -60,8 +83,13 @@ public:
 
 		// pass in rotation matrix
 		GLuint rotateUniform = glGetUniformLocation(prog, "rot");
-		std::array<GLfloat, 4> vals = rotation_matrix();
-		glUniformMatrix2fv(rotateUniform, 1, false, vals.data());
+		std::array<GLfloat, 4> rot = *_rotation;
+		glUniformMatrix2fv(rotateUniform, 1, false, rot.data());
+
+		// pass in transform vector
+		GLuint transformUniform = glGetUniformLocation(prog, "tform");
+		std::pair<GLfloat, GLfloat> tform = *_shake;
+		glUniform2f(transformUniform, tform.first, tform.second);
 
 		// Draw
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -83,25 +111,18 @@ public:
 
 	void rotate(unsigned i=1)
 	{
-		if (i == 0 or ++_rotation >= 4)
-			_rotation = 0;
+		if (i == 0)
+			_rotation.reset();
+		else
+			++_rotation;
 	}
 
-	std::array<GLfloat, 4> rotation_matrix() const
+	void shake(unsigned i=1)
 	{
-		// just using sin and cos is probably better?
-		switch (_rotation)
-		{
-			default:
-			case 0:
-				return {-1, 0, 0, 1};
-			case 1: // right 90
-				return {0, 1, 1, 0};
-			case 2: // right 180
-				return {1, 0, 0, -1};
-			case 3: // right 270
-				return {0, -1, -1, 0};
-		}
+		if (i == 0)
+			_shake.reset();
+		else
+			++_shake;
 	}
 
 protected:
@@ -116,6 +137,7 @@ protected:
 		*/
 		static const std::string VERTEX_SHADER_SRC = R"(#version 300 es
 		uniform mat2 rot;
+		uniform vec2 tform;
 		in vec4 vert;
 		out vec2 texCoord;
 		void main() {
@@ -123,6 +145,7 @@ protected:
 		   vec2 ori = vec2(vert.x, vert.y);
 		   ori *= rot;
 		   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
+		   texCoord -= tform;
 		})";
 
 		static const std::string FRAGMENT_SHADER_SRC = R"(#version 300 es
@@ -144,7 +167,10 @@ protected:
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
 	unsigned _i = 0;
-	unsigned _rotation = 0;
+
+	std::array<std::pair<GLfloat, GLfloat>, 4> _shakePos;
+	loop_iterator<decltype(_shakePos)> _shake;
+	loop_iterator<decltype(ROTATIONS)> _rotation;
 };
 
 }

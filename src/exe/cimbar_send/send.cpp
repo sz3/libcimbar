@@ -55,18 +55,11 @@ int main(int argc, char** argv)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
-	bool dark = true;
 	bool use_rotatecam = result.count("rotatecam");
 	bool use_shakycam = result.count("shakycam");
+	int window_size = 1080;
 
-	cimbar::shaky_cam cam(cimbar::Config::image_size(), 1080, 1080, dark);
-	// if we don't need the shakycam, we'll just turn it off
-	// we could use a separate code path (just do a mat copyTo),
-	// but this is fine.
-	if (!use_shakycam)
-		cam.toggle();
-
-	cimbar::window w(cam.width(), cam.height(), "cimbar_send");
+	cimbar::window w(window_size, window_size, "cimbar_send");
 	if (!w.is_good())
 	{
 		std::cerr << "failed to create window :(" << std::endl;
@@ -76,21 +69,22 @@ int main(int argc, char** argv)
 	bool running = true;
 	bool start = true;
 
-	auto draw = [&w, &cam, use_rotatecam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
+	auto draw = [&w, use_rotatecam, use_shakycam, delay, &running, &start] (const cv::Mat& frame, unsigned) {
 		if (!start and w.should_close())
 			return running = false;
 		start = false;
 
-		cv::Mat& windowImg = cam.draw(frame);
-		w.show(windowImg, delay);
+		w.show(frame, delay);
 		if (use_rotatecam)
 			w.rotate();
+		if (use_shakycam)
+			w.shake();
 		return true;
 	};
 
 	Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);
 	while (running)
 		for (const string& f : infiles)
-			en.encode_fountain(f, draw, compressionLevel);
+			en.encode_fountain(f, draw, compressionLevel, 8.0, window_size);
 	return 0;
 }

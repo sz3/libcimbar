@@ -20,5 +20,23 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 	}
 
 	cv::Mat img = cw.image();
+	assertEquals(1024, img.cols);
+	assertEquals(1024, img.rows);
 	assertEquals( 0xeecc8800efce8c08, image_hash::average_hash(img) );
+}
+
+TEST_CASE( "CimbWriterTest/testCustomSize", "[unit]" )
+{
+	CimbWriter cw(4, 2, true, 1040);
+
+	while (1)
+	{
+		if (!cw.write(0))
+			break;
+	}
+
+	cv::Mat img = cw.image();
+	assertEquals(1040, img.cols);
+	assertEquals(1040, img.rows);
+	assertEquals( 0xab00ab02af0abfab, image_hash::average_hash(img) );
 }

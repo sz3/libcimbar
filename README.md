@@ -5,7 +5,11 @@
 
 Behold: an experimental barcode format for air-gapped data transfer.
 
-It can sustain speeds of 770+ kilobits/s (~96 KB/s) using nothing but a smartphone camera!
+It can sustain speeds of 943+ kilobits/s (~118 KB/s) using just a computer monitor and a smartphone camera!
+
+<p align="center">
+<img src="https://github.com/sz3/cimbar-samples/blob/v0.5/6bit/4cecc30f.png" width="70%" title="A non-animated cimbar code" >
+</p>
 
 ## Explain?
 
@@ -21,11 +25,13 @@ No internet/bluetooth/NFC/etc is used. All data is transmitted through the camer
 
 `cimbar` is a high-density 2D barcode format. Data is stored in a grid of colored tiles -- bits are encoded based on which tile is chosen, and which color is chosen to draw the tile. Reed Solomon error correction is applied on the data, to account for the lossy nature of the video -> digital decoding. Sub-1% error rates are expected, and corrected.
 
-`libcimbar`, this optimized implementation, includes a simple protocol for file encoding based on fountain codes (`wirehair`). Files of up to 33MB can be encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
+`libcimbar`, this optimized implementation, includes a simple protocol for file encoding built on fountain codes (`wirehair`) and zstd compression. Files of up to 33MB (after compression!) are encoded in a series of cimbar codes, which can be output as images or a live video feed. Once enough distinct image frames have been decoded successfully, the file will be reconstructed and decompressed successfully. This is true even if the images are received out of order, or if some have been corrupted or are missing.
 
 ## Platforms
 
-The code is written in C++, and developed/tested on amd64+linux, arm64+android, and emscripten+wasm. It probably works, or can be made to work, on other platforms.
+The code is written in C++, and developed/tested on amd64+linux, arm64+android (decoder only), and emscripten+WASM (encoder only). It probably works, or can be made to work, on other platforms.
+
+Crucially, because the encoder compiles to asmjs and wasm, it can run on anything with a modern web browser. There are [releases](https://github.com/sz3/libcimbar/releases/latest) if you wish to run the encoder locally instead of via cimbar.org.
 
 ## Library dependencies
 
