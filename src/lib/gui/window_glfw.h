@@ -16,6 +16,7 @@ class window_glfw : public window_interface<window_glfw>
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
+	    : _width(width)
 	{
 		if (!glfwInit())
 		{
@@ -30,8 +31,9 @@ public:
 			return;
 		}
 		glfwMakeContextCurrent(_w);
+		glfwSwapInterval(1);
 
-		_display = std::make_shared<cimbar::gl_2d_display>();
+		_display = std::make_shared<cimbar::gl_2d_display>(width, height);
 		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}
@@ -61,6 +63,12 @@ public:
 			_display->rotate(i);
 	}
 
+	void shake(unsigned i=1)
+	{
+		if (_display)
+			_display->shake(i);
+	}
+
 	void clear()
 	{
 		if (_display)
@@ -88,6 +96,11 @@ public:
 			std::this_thread::sleep_for(std::chrono::milliseconds(delay-millis));
 	}
 
+	unsigned width() const
+	{
+		return _width;
+	}
+
 protected:
 	void init_opengl(int width, int height)
 	{
@@ -110,8 +123,8 @@ protected:
 	GLFWwindow* _w;
 	GLuint _texid;
 	std::shared_ptr<cimbar::gl_2d_display> _display;
+	unsigned _width;
 	bool _good = true;
 };
 
 }
-

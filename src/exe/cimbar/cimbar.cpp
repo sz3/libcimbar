@@ -74,7 +74,7 @@ int main(int argc, char** argv)
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	options.add_options()
 	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
-	    ("o,out", "Output file or directory.", cxxopts::value<string>())
+	    ("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
 	    ("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())

@@ -15,8 +15,8 @@ public:
 	using SimpleEncoder::SimpleEncoder;
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
-	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6, double redundancy=1.2);
-	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6, double redundancy=4.0);
+	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6, double redundancy=1.2, int canvas_size=0);
+	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6, double redundancy=4.0, int canvas_size=0);
 };
 
 inline unsigned Encoder::encode(const std::string& filename, std::string output_prefix)
@@ -39,7 +39,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level, double redundancy)
+inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level, double redundancy, int canvas_size)
 {
 	std::ifstream infile(filename);
 	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, compression_level);
@@ -56,7 +56,7 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	unsigned i = 0;
 	while (i < requiredFrames)
 	{
-		auto frame = encode_next(*fes);
+		auto frame = encode_next(*fes, canvas_size);
 		if (!frame)
 			break;
 
@@ -67,7 +67,7 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	return i;
 }
 
-inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix, int compression_level, double redundancy)
+inline unsigned Encoder::encode_fountain(const std::string& filename, std::string output_prefix, int compression_level, double redundancy, int canvas_size)
 {
 	std::function<bool(const cv::Mat&, unsigned)> fun = [output_prefix] (const cv::Mat& frame, unsigned i) {
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
@@ -75,5 +75,5 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, std::strin
 		cv::cvtColor(frame, bgr, cv::COLOR_RGB2BGR);
 		return cv::imwrite(output, bgr);
 	};
-	return encode_fountain(filename, fun, compression_level, redundancy);
+	return encode_fountain(filename, fun, compression_level, redundancy, canvas_size);
 }

@@ -33,7 +33,6 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 		{
 			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
-			cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
 	}
@@ -56,7 +55,6 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 		{
 			std::string path = fmt::format("{}_{}.png", outPrefix, i);
 			cv::Mat img = cv::imread(path);
-			cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 			assertEquals( hashes[i], image_hash::average_hash(img) );
 		}
 	}
@@ -69,13 +67,12 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
-	Encoder enc(40, 4, 2);
+	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xf8cde200e90582e4;
+	uint64_t hash = 0x4fd34f01ee80a28d;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
-	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 	assertEquals( hash, image_hash::average_hash(img) );
 }
 
@@ -101,4 +98,22 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 
 	uint64_t hash = 0xf8cde200e90582e4;
 	assertEquals( hash, image_hash::average_hash(*frame) );
+}
+
+TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
+{
+	MakeTempDirectory tempdir;
+
+	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
+	std::string outPrefix = tempdir.path() / "encoder.fountain";
+
+	Encoder enc(30, 4, 2);
+	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 10, 2.0, 1080) );
+
+	uint64_t hash = 0x8985b70d93675786;
+	std::string path = fmt::format("{}_0.png", outPrefix);
+	cv::Mat img = cv::imread(path);
+	assertEquals( 1080, img.rows );
+	assertEquals( 1080, img.cols );
+	assertEquals( hash, image_hash::average_hash(img) );
 }
