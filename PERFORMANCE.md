@@ -31,10 +31,10 @@
 	* 8-color cimbar should be considered a prototype within a prototype. It is considerably more sensitive to lighting conditions and color tints.
 
 * other notes:
-		* having better lighting in the frame often leads to better results -- this is why cimbar.org has a (mostly) white background. cfc uses android's auto-exposure, auto-focus, etc (it's a very simple app). Good ambient light -- or a white background -- can lead to more consitent quality frame capture.
-		* because of the lighting/exposure question, I usually "shoot" in landscape instead of portrait.
-		* cfc currently has a low resolution, so the cimbar frame should take up as much of the display as possible (trust the guide brackets)
-		* similarly, it's best to keep the camera angle straight-on -- instead of at an angle -- to decode the whole image successfully. Decodes should still happen at higher angles, but the "smaller" part of the image may have more errors than the ECC can deal with.
-		* other things to be wary of:
-			* glare from light sources.
-			* shaky hands.
+	* having better lighting in the frame often leads to better results -- this is why cimbar.org has a (mostly) white background. cfc uses android's auto-exposure, auto-focus, etc (it's a very simple app). Good ambient light -- or a white background -- can lead to more consitent quality frame capture.
+	* because of the lighting/exposure question, landscape *may* be better than portrait.
+	* cfc currently has a low resolution, so the cimbar frame should take up as much of the display as possible (trust the guide brackets)
+	* similarly, it's best to keep the camera angle straight-on -- instead of at an angle -- to decode the whole image successfully. Decodes should still happen at higher angles, but the "smaller" part of the image may have more errors than the ECC can deal with.
+	* other things to be wary of:
+		* glare from light sources.
+		* shaky hands.
