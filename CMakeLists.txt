@@ -49,6 +49,7 @@ set (PROJECTS
 	src/lib/bit_file
 	src/lib/chromatic_adaptation
 	src/lib/cimb_translator
+	src/lib/cimbar_js
 	src/lib/compression
 	src/lib/encoder
 	src/lib/fountain
@@ -75,13 +76,6 @@ set(PROJECTS
 	src/exe/cimbar_extract
 	src/exe/cimbar_send
 	src/exe/build_image_assets
-)
-endif()
-
-if (DEFINED USE_WASM OR USE_GLFW)
-set(PROJECTS
-	${PROJECTS}
-	src/wasm/cimbar_js
 )
 endif()
 

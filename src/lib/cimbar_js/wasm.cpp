@@ -34,7 +34,7 @@ int initialize_GL(int width, int height)
 
 	std::cerr << "initializing " << width << " by " << height << " window";
 
-	_window = std::make_shared<cimbar::window_glfw>(width, height, "OpenGL test");
+	_window = std::make_shared<cimbar::window_glfw>(width, height, "Cimbar Encoder");
 	if (!_window or !_window->is_good())
 		return 0;
 

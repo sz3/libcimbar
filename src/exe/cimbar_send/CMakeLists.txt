@@ -13,13 +13,7 @@ add_executable (
 
 target_link_libraries(cimbar_send
 
-	cimb_translator
-
-	correct_static
-	wirehair
-	zstd
-	${OPENCV_LIBS}
-	${libcimbar_UI_LIB}
+	cimbar_js
 )
 
 add_custom_command(

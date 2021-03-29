@@ -65,7 +65,7 @@ make install
 
 By default, libcimbar will try to install build products under `./dist/bin/`.
 
-To build the emscripten+WASM encoder (what cimbar.org uses), see [WASM](WASM.md).
+To build cimbar.js (what cimbar.org uses), see [WASM](WASM.md).
 
 ## Usage
 
@@ -85,6 +85,8 @@ Encode and animate to window:
 ```
 ./cimbar_send inputfile.pdf
 ```
+
+You can also encode a file using [cimbar.org](https://cimbar.org), or the latest [release](https://github.com/sz3/libcimbar/releases/latest).
 
 ## Performance numbers
 
