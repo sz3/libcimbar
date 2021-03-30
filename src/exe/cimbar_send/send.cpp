@@ -81,6 +81,8 @@ int main(int argc, char** argv)
 		{
 			// delay, then try to read file
 			start = wait_for_frame_time(delay, start);
+			// TODO: maybe delay is the wrong thing to do here. Might be best to just kick out any files that fail to read?
+			// we can then error out properly if all inputs are bad, which would be nice.
 			{
 				string contents = File(f).read_all();
 				if (contents.empty())
@@ -89,6 +91,8 @@ int main(int argc, char** argv)
 					continue;
 				}
 
+				// TODO: encode bumps the encode_id each time.. that's a problem for looping through the files like this..
+				// should track file index and use it as encode_id?
 				if (!encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size()))
 				{
 					std::cerr << "failed to encode file " << f << std::endl;

@@ -86,8 +86,7 @@ int next_frame()
 
 int encode(unsigned char* buffer, unsigned size)
 {
-	std::cerr << "encode buff size " << size << std::endl;
-
+	_frameCount = 0;
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
@@ -142,6 +141,7 @@ int configure(unsigned color_bits, unsigned ecc, int compression)
 				_window->clear();
 				_next.reset();
 			}
+			_frameCount = 0;
 			_window->shake(0);
 		}
 	}
