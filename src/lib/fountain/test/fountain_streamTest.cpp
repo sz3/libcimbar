@@ -145,7 +145,7 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize", "[unit]" )
 	assertEquals( 13, fes->blocks_required() );
 	assertTrue( fes->good() );
 
-	assertTrue( fes->reset_and_resize_buffer(600) );
+	assertTrue( fes->restart_and_resize_buffer(600) );
 
 	// changes block params (and internal buffer size)
 	assertEquals( 0, fes->block_count() );
@@ -175,7 +175,7 @@ TEST_CASE( "FountainStreamTest/testEncoder_ChangeBufferSize_Fails", "[unit]" )
 	assertEquals( 2, fes->blocks_required() );
 	assertTrue( fes->good() );
 
-	assertFalse( fes->reset_and_resize_buffer(1200) ); // larger than the buffer
+	assertFalse( fes->restart_and_resize_buffer(1200) ); // larger than the buffer
 
 	// stream left unchanged
 	assertEquals( 0, fes->block_count() );

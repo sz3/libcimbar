@@ -72,7 +72,7 @@ int next_frame()
 		required = required*8;
 	if (_fes->block_count() > required)
 	{
-		_fes->reset();
+		_fes->restart();
 		_window->shake(0);
 		_frameCount = 0;
 	}
@@ -106,6 +106,7 @@ int encode(unsigned char* buffer, unsigned size)
 
 int configure(unsigned color_bits, unsigned ecc, int compression)
 {
+	// defaults
 	if (color_bits > 3)
 		color_bits = 2;
 	if (ecc < 0 or ecc >= 150)
@@ -113,6 +114,7 @@ int configure(unsigned color_bits, unsigned ecc, int compression)
 	if (compression < 0 or compression > 22)
 		compression = 6;
 
+	// check if we need to refresh the stream
 	bool refresh = false;
 	if (color_bits != _colorBits)
 	{
@@ -127,12 +129,13 @@ int configure(unsigned color_bits, unsigned ecc, int compression)
 	if (compression != _compressionLevel)
 		_compressionLevel = compression;
 
+	// try to refresh the stream
 	if (refresh)
 	{
 		if (_window and _fes)
 		{
 			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
-			if (!_fes->reset_and_resize_buffer(buff_size_new))
+			if (!_fes->restart_and_resize_buffer(buff_size_new))
 			{
 				// if the data is too small, we should throw out _fes -- and clear the canvas.
 				_fes = nullptr;
