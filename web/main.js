@@ -80,7 +80,7 @@ return {
   encode : function(filename, data)
   {
     console.log("encoding " + filename);
-    var res = Module._encode(data.byteOffset, data.length);
+    var res = Module._encode(data.byteOffset, data.length, -1);
     console.log(res);
     Main.setTitle(filename);
     Main.setActive(true);

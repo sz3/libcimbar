@@ -84,14 +84,17 @@ int next_frame()
 	return ++_frameCount;
 }
 
-int encode(unsigned char* buffer, unsigned size)
+int encode(unsigned char* buffer, unsigned size, int encode_id)
 {
 	_frameCount = 0;
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
-	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
+	if (encode_id < 0)
+		enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
+	else
+		enc.set_encode_id(static_cast<uint8_t>(encode_id));
 
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
 	_fes = enc.create_fountain_encoder(bis, _compressionLevel);

@@ -77,25 +77,23 @@ int main(int argc, char** argv)
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)
-		for (const string& f : infiles)
+		for (unsigned i = 0; i < infiles.size(); ++i)
 		{
 			// delay, then try to read file
 			start = wait_for_frame_time(delay, start);
 			// TODO: maybe delay is the wrong thing to do here. Might be best to just kick out any files that fail to read?
 			// we can then error out properly if all inputs are bad, which would be nice.
 			{
-				string contents = File(f).read_all();
+				string contents = File(infiles[i]).read_all();
 				if (contents.empty())
 				{
-					std::cerr << "failed to read file " << f << std::endl;
+					std::cerr << "failed to read file " << infiles[i] << std::endl;
 					continue;
 				}
 
-				// TODO: encode bumps the encode_id each time.. that's a problem for looping through the files like this..
-				// should track file index and use it as encode_id?
-				if (!encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size()))
+				if (!encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i)))
 				{
-					std::cerr << "failed to encode file " << f << std::endl;
+					std::cerr << "failed to encode file " << infiles[i] << std::endl;
 					continue;
 				}
 			}
