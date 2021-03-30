@@ -19,13 +19,13 @@ namespace {
 	std::shared_ptr<fountain_encoder_stream> _fes;
 	std::optional<cv::Mat> _next;
 
-	int _numFrames = 0;
+	int _frameCount = 0;
 	uint8_t _encodeId = 0;
 
 	// settings
 	unsigned _ecc = 30;
 	unsigned _colorBits = 2;
-	unsigned _compressionLevel = 6;
+	int _compressionLevel = 6;
 }
 
 extern "C" {
@@ -49,8 +49,8 @@ int initialize_GL(int width, int height)
 // in any case, we're concerned with frame pacing (some encodes take longer than others)
 int render()
 {
-	if (!_window or !_fes)
-		return 0;
+	if (!_window or !_fes or _window->should_close())
+		return -1;
 
 	if (_next)
 	{
@@ -74,13 +74,14 @@ int next_frame()
 	{
 		_fes->reset();
 		_window->shake(0);
+		_frameCount = 0;
 	}
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
 	_next = enc.encode_next(*_fes, _window->width());
-	return ++_numFrames;
+	return ++_frameCount;
 }
 
 int encode(unsigned char* buffer, unsigned size)

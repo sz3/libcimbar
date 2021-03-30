@@ -7,7 +7,7 @@
 namespace cimbar {
 namespace mat_to_gl {
 
-	void load_gl_texture(GLuint texid, const cv::Mat& mat)
+	inline void load_gl_texture(GLuint texid, const cv::Mat& mat)
 	{
 		glBindTexture(GL_TEXTURE_2D, texid);
 
