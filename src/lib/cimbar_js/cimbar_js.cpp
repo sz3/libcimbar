@@ -1,4 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
+#include "cimbar_js.h"
+
 #include "encoder/SimpleEncoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
@@ -23,6 +25,7 @@ namespace {
 	// settings
 	unsigned _ecc = 30;
 	unsigned _colorBits = 2;
+	unsigned _compressionLevel = 6;
 }
 
 extern "C" {
@@ -80,7 +83,7 @@ int next_frame()
 	return ++_numFrames;
 }
 
-int encode(uint8_t* buffer, size_t size)
+int encode(unsigned char* buffer, unsigned size)
 {
 	std::cerr << "encode buff size " << size << std::endl;
 
@@ -91,7 +94,7 @@ int encode(uint8_t* buffer, size_t size)
 	enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 
 	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
-	_fes = enc.create_fountain_encoder(bis);
+	_fes = enc.create_fountain_encoder(bis, _compressionLevel);
 
 	if (!_fes)
 		return 0;
@@ -100,12 +103,31 @@ int encode(uint8_t* buffer, size_t size)
 	return 1;
 }
 
-int configure(unsigned color_bits)
+int configure(unsigned color_bits, unsigned ecc, int compression)
 {
-	if (color_bits != _colorBits and color_bits <= 3)
+	if (color_bits > 3)
+		color_bits = 2;
+	if (ecc < 0 or ecc >= 150)
+		ecc = 30;
+	if (compression < 0 or compression > 22)
+		compression = 6;
+
+	bool refresh = false;
+	if (color_bits != _colorBits)
 	{
 		_colorBits = color_bits;
+		refresh = true;
+	}
+	if (ecc != _ecc)
+	{
+		_ecc = ecc;
+		refresh = true;
+	}
+	if (compression != _compressionLevel)
+		_compressionLevel = compression;
 
+	if (refresh)
+	{
 		if (_window and _fes)
 		{
 			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);

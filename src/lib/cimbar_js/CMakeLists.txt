@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 project(cimbar_js)
 
 set (SOURCES
-	wasm.cpp
+	cimbar_js.h
+	cimbar_js.cpp
 )
 
 if(DEFINED USE_WASM)
@@ -13,7 +14,7 @@ if(DEFINED USE_WASM)
 	)
 else()
 	add_library (
-		cimbar_js SHARED
+		cimbar_js STATIC
 		${SOURCES}
 	)
 endif()
