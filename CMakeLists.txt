@@ -38,13 +38,6 @@ if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
 endif()
 
-if(DEFINED USE_GLFW)
-	set(libcimbar_UI_LIB "glfw" "GL")
-	add_definitions("-DLIBCIMBAR_USE_GLFW=${USE_GLFW}")
-else()
-	set(libcimbar_UI_LIB "opencv_highgui")
-endif()
-
 set (PROJECTS
 	src/lib/bit_file
 	src/lib/chromatic_adaptation

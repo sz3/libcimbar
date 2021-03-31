@@ -3,7 +3,6 @@
 
 #include "gl_2d_display.h"
 #include "mat_to_gl.h"
-#include "window_interface.h"
 
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -12,7 +11,7 @@
 
 namespace cimbar {
 
-class window_glfw : public window_interface<window_glfw>
+class window_glfw
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)

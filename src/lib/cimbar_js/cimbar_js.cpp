@@ -5,11 +5,6 @@
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
 
-#include <GLES3/gl3.h>
-#include <GLES2/gl2ext.h>
-#define GLFW_INCLUDE_ES2
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <sstream>
 

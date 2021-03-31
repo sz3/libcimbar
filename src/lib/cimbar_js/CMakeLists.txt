@@ -67,5 +67,8 @@ if(DEFINED USE_WASM)
 	endif()
 
 else()  # if no wasm, ignore all that and add in GLFW libraries
-	target_link_libraries(cimbar_js ${libcimbar_UI_LIB})
+	target_link_libraries(cimbar_js
+		GL
+		glfw
+	)
 endif()
