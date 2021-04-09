@@ -47,6 +47,8 @@ namespace {
 
 namespace cimbar {
 
+// want a load_texture for raylib?
+
 cv::Mat load_img(string path)
 {
 	auto it = cimbar::bitmaps.find(path);

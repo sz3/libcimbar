@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
 	bitmaps.h
+	image.h
 	AdjacentCellFinder.cpp
 	AdjacentCellFinder.h
 	Cell.h

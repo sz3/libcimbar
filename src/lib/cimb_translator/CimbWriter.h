@@ -3,6 +3,7 @@
 
 #include "CellPositions.h"
 #include "CimbEncoder.h"
+#include "image.h"
 
 class CimbWriter
 {
@@ -15,10 +16,10 @@ public:
 	cv::Mat image() const;
 
 protected:
-	void paste(const cv::Mat& img, int x, int y);
+	void paste(const cimbar::image& img, int x, int y);
 
 protected:
-	cv::Mat _image;
+	cimbar::image _image;
 	CellPositions _positions;
 	CimbEncoder _encoder;
 	unsigned _offset = 0;
