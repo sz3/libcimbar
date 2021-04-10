@@ -1,5 +1,3 @@
-#pragma once
-
 #include "render_texture.h"
 
 #include "texture.h"
@@ -14,6 +12,11 @@ render_texture::render_texture(unsigned width, unsigned height, Color bgcolor)
     , _bg(bgcolor)
 {
 	clear();
+}
+
+render_texture::render_texture(int width, int height, int, cv::Scalar color)
+    : render_texture(width, height, {color[0], color[1], color[2], 255})
+{
 }
 
 void render_texture::clear()
@@ -38,6 +41,11 @@ void render_texture::draw()
 render_texture::slice render_texture::operator()(std::tuple<int,int,int,int> params) // matching cv::Mat interface for now...
 {
 	return slice({*this, std::get<0>(params), std::get<1>(params)});
+}
+
+Image render_texture::screenshot() const
+{
+	GetTextureData(_rtex.texture);
 }
 
 }
