@@ -1,7 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
 
-#include "RenderTextureMat.h"
+#include "render_texture.h"
 
 #include "raylib.h"
 
@@ -9,10 +9,10 @@
 #include <string>
 using std::string;
 
-TEST_CASE( "RenderTextureMatTest/testDefault", "[unit]" )
+TEST_CASE( "render_textureTest/testDefault", "[unit]" )
 {
 	InitWindow(500, 500, "test raylib");
 
-	cimbar::RenderTextureMat rtm(1024, 1024, BLACK);
+	cimbar::render_texture rt(1024, 1024, BLACK);
 	assertEquals(true, false);
 }

@@ -4,7 +4,7 @@ project(rayliberation_test)
 
 set (SOURCES
 	test.cpp
-	RenderTextureMatTest.cpp
+	render_textureTest.cpp
 )
 
 include_directories(

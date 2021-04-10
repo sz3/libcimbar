@@ -2,16 +2,16 @@
 
 namespace cimbar {
 
-class TextureMat
+class texture
 {
 public:
-	TextureMat(const Image& img, Color tint)
-	    : _tx(LoadTextureFromImage(img))
-	    , _tint(tint)
+	texture(const Image& img, Color tint)
+		: _tx(LoadTextureFromImage(img))
+		, _tint(tint)
 	{
 	}
 
-	const Texture2D& texture() const
+	const Texture2D& tx() const
 	{
 		return _tx;
 	}

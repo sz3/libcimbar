@@ -12,7 +12,7 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
-	std::optional<cv::Mat> _next;
+	std::optional<cimbar::image> _next;
 
 	int _frameCount = 0;
 	uint8_t _encodeId = 0;
