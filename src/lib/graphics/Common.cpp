@@ -81,7 +81,7 @@ RGB getColor(unsigned index, unsigned num_colors)
 
 cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
 {
-	static cv::Vec3b background({0xFF, 0xFF, 0xFF});
+	static cv::Vec3b background({0, 0, 0});
 
 	string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
 	cv::Mat tile = load_img(imgPath);
@@ -96,6 +96,8 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 		{
 			if (dark)
 				c = {0, 0, 0};
+			else
+				c = {255, 255, 255};
 			continue;
 		}
 		c = {r, g, b};

@@ -13,7 +13,7 @@ CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
     , _numColors(1 << color_bits)
     , _dark(dark)
 {
-	load_tiles(symbol_bits);
+	load_tiles(symbol_bits); // TODO: probably should be cached?
 }
 
 cimbar::image CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
@@ -23,7 +23,6 @@ cimbar::image CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
 	return cimbar::getTile(symbol_bits, symbol, _dark, _numColors, color);
 }
 
-// dir will need to be passed via env? Doesn't make sense to compile it in, and doesn't *really* make sense to use cwd
 bool CimbEncoder::load_tiles(unsigned symbol_bits)
 {
 	unsigned numTiles = _numColors * _numSymbols;
