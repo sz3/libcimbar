@@ -10,13 +10,25 @@ using std::string;
 
 namespace cimbar {
 
-cimbar::texture load_texture(string path)
+cimbar::texture load_img(string path)
 {
 	string bytes = load_file(path);
 	if (bytes.empty())
 		return cimbar::texture();
 
 	return cimbar::texture(LoadImageFromMemory("png", reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size()), WHITE);
+}
+
+cimbar::texture getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0)
+{
+	string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
+	cimbar::texture tile = load_img(imgPath);
+
+	uchar r, g, b;
+	std::tie(r, g, b) = getColor(color, num_colors);
+
+	tile.set_tint({r, g, b, 255});
+	return tile;
 }
 
 }

@@ -17,7 +17,7 @@ public:
 	const cimbar::tile& encode(unsigned bits) const;
 
 protected:
-	std::vector<cimbar::tile> _tiles; // should this be cached?
+	std::vector<cimbar::tile>& _tiles;
 	unsigned _numSymbols;
 	unsigned _numColors;
 	bool _dark;
