@@ -38,6 +38,11 @@ if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
 endif()
 
+find_library(RAYLIB
+	NAMES raylib
+	HINTS "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/lib/"
+)
+
 set (PROJECTS
 	src/lib/bit_file
 	src/lib/chromatic_adaptation
@@ -48,6 +53,7 @@ set (PROJECTS
 	src/lib/fountain
 	src/lib/gui
 	src/lib/image_hash
+	src/lib/rayliberation
 	src/lib/serialize
 	src/lib/util
 
@@ -75,6 +81,7 @@ endif()
 include_directories(
 	${libcimbar_SOURCE_DIR}/src/lib
 	${libcimbar_SOURCE_DIR}/src/third_party_lib
+	${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/include/
 )
 
 foreach(proj ${PROJECTS})
