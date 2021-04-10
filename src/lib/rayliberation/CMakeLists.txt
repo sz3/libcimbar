@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
+	render_texture.cpp
 	render_texture.h
+	texture.cpp
 	texture.h
 	RayCommon.h
 	RayCommon.cpp

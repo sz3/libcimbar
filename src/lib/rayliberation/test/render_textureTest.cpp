@@ -2,6 +2,7 @@
 #include "unittest.h"
 
 #include "render_texture.h"
+#include "texture.h"
 #include "RayCommon.h"
 
 #include "raylib.h"
@@ -18,13 +19,11 @@ TEST_CASE( "render_textureTest/testDefault", "[unit]" )
 
 	rt.paste(tx, 10, 10);
 
-
+	tx.copyTo(rt({20, 20, tx.cols, tx.rows}));
 
 	BeginDrawing();
 	ClearBackground(BLACK);
 	rt.draw();
-
-	DrawTexture(tx.tx(), 100, 10, tx.tint());
 
 	EndDrawing();
 

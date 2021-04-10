@@ -69,9 +69,9 @@ CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, int
 	paste(vg, size-4, (size/2) - (vg.rows/2));
 }
 
-void CimbWriter::paste(const cimbar::image& img, int x, int y)
+void CimbWriter::paste(const cimbar::tile& img, int x, int y)
 {
-	img.copyTo(_image(cv::Rect(x+_offset, y+_offset, img.cols, img.rows)));
+	img.copyTo(_image({x+_offset, y+_offset, img.cols, img.rows}));
 }
 
 bool CimbWriter::write(unsigned bits)
@@ -82,7 +82,7 @@ bool CimbWriter::write(unsigned bits)
 		return false;
 
 	CellPositions::coordinate xy = _positions.next();
-	cimbar::image cell = _encoder.encode(bits);
+	cimbar::tile cell = _encoder.encode(bits);
 	paste(cell, xy.first, xy.second);
 	return true;
 }

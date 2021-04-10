@@ -6,5 +6,6 @@
 namespace cimbar {
 
 	using image = cv::Mat;
+	using tile = cv::Mat;
 
 }

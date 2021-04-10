@@ -16,7 +16,7 @@ CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
 	load_tiles(symbol_bits); // TODO: probably should be cached?
 }
 
-cimbar::image CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
+cimbar::tile CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
 {
 	unsigned symbol = index % _numSymbols;
 	unsigned color = index / _numSymbols;
@@ -31,7 +31,7 @@ bool CimbEncoder::load_tiles(unsigned symbol_bits)
 	return true;
 }
 
-const cimbar::image& CimbEncoder::encode(unsigned bits) const
+const cimbar::tile& CimbEncoder::encode(unsigned bits) const
 {
 	bits = bits % _tiles.size();
 	return _tiles[bits];

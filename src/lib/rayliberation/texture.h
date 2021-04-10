@@ -1,45 +1,31 @@
 #include "raylib.h"
 
+#include "render_texture.h"
+
 namespace cimbar {
 
 class texture
 {
 public:
-	texture()
-		: _tx{0, 0, 0, 0, 0}
-		, _tint(WHITE)
-	{
-	}
+	texture();
+	texture(const Image& img, Color tint);
 
-	texture(const Image& img, Color tint)
-		: _tx(LoadTextureFromImage(img))
-		, _tint(tint)
-	{
-	}
+	operator bool() const;
 
-	operator bool() const
-	{
-		return _tx.width > 0;
-	}
+	const Texture2D& tx() const;
 
-	const Texture2D& tx() const
-	{
-		return _tx;
-	}
+	void set_tint(Color c);
+	const Color& tint() const;
 
-	void set_tint(Color c)
-	{
-		_tint = c;
-	}
-
-	const Color& tint() const
-	{
-		return _tint;
-	}
+	void copyTo(render_texture::slice slice);
 
 protected:
 	Texture2D _tx;
 	Color _tint;
+
+public:
+	int rows = 0; // matching cv::Mat interface for now..
+	int cols = 0;
 };
 
 }

@@ -16,11 +16,11 @@ public:
 	cv::Mat image() const;
 
 protected:
-	void paste(const cimbar::image& img, int x, int y);
+	void paste(const cimbar::tile& img, int x, int y);
 
 protected:
 	cimbar::image _image;
 	CellPositions _positions;
 	CimbEncoder _encoder;
-	unsigned _offset = 0;
+	int _offset = 0; // TODO: get rid of this?
 };
