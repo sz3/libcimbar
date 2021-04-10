@@ -6,7 +6,7 @@
 #include "bit_file/bitbuffer.h"
 #include "bit_file/bitmatrix.h"
 #include "cimb_translator/CellDrift.h"
-#include "graphics/Common.h"
+#include "cimb_translator/Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>

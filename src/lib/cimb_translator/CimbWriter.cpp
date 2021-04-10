@@ -2,7 +2,7 @@
 #include "CimbWriter.h"
 
 #include "Config.h"
-#include "graphics/Common.h"
+#include "Common.h"
 #include "serialize/format.h"
 #include <string>
 using std::string;

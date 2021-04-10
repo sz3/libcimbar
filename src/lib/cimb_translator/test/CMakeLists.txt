@@ -32,7 +32,6 @@ add_test(cimb_translator_test cimb_translator_test)
 
 target_link_libraries(cimb_translator_test
 	cimb_translator
-	graphics
 
 	${OPENCV_LIBS}
 )

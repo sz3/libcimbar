@@ -27,7 +27,6 @@ add_test(encoder_test encoder_test)
 target_link_libraries(encoder_test
 
 	cimb_translator
-	graphics
 
 	correct_static
 	wirehair

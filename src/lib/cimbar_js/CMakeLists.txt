@@ -22,7 +22,6 @@ endif()
 target_link_libraries(cimbar_js
 
 	cimb_translator
-	graphics
 
 	correct_static
 	wirehair

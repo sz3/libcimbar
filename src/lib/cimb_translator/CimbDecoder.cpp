@@ -2,7 +2,7 @@
 #include "CimbDecoder.h"
 
 #include "Cell.h"
-#include "graphics/Common.h"
+#include "Common.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 

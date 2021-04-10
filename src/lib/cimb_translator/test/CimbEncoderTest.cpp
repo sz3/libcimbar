@@ -3,7 +3,7 @@
 
 #include "CimbEncoder.h"
 
-#include "graphics/Common.h"
+#include "Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>

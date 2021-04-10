@@ -15,7 +15,6 @@ target_link_libraries(cimbar
 
 	cimb_translator
 	extractor
-	graphics
 
 	correct_static
 	wirehair

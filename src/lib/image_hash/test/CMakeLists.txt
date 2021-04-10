@@ -23,7 +23,7 @@ add_executable (
 add_test(image_hash_test image_hash_test)
 
 target_link_libraries(image_hash_test
-	graphics
+	cimb_translator
 
 	${OPENCV_LIBS}
 )

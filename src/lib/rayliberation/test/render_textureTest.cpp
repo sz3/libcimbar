@@ -2,7 +2,7 @@
 #include "unittest.h"
 
 #include "render_texture.h"
-#include "graphics/RayCommon.h"
+#include "RayCommon.h"
 
 #include "raylib.h"
 #include "serialize/format.h"
