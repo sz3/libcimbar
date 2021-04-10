@@ -27,6 +27,11 @@ public:
 		return _tx;
 	}
 
+	void set_tint(Color c)
+	{
+		_tint = c;
+	}
+
 	const Color& tint() const
 	{
 		return _tint;

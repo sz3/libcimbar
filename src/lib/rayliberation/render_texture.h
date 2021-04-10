@@ -2,6 +2,7 @@
 
 #include "texture.h"
 #include <tuple>
+#include <iostream>
 
 namespace cimbar {
 
@@ -15,19 +16,26 @@ public:
 		: _rtex(LoadRenderTexture(width, height))
 		, _bg(bgcolor)
 	{
-		BeginTextureMode(_rtex);
-		ClearBackground(_bg);
+		clear();
 	}
 
-	void paste(const texture& tx, int x, int y, Color tint)
+	void clear()
 	{
+		BeginTextureMode(_rtex);
+		ClearBackground(_bg);
+		EndTextureMode();
+	}
+
+	void paste(const texture& tx, int x, int y)
+	{
+		BeginTextureMode(_rtex);
 		DrawTexture(tx.tx(), x, y, tx.tint());
+		EndTextureMode();
 	}
 
 	void draw()
 	{
-		EndTextureMode();
-		DrawTexture(_rtex.texture, 0, 0, WHITE);
+		DrawTextureRec(_rtex.texture, {0, 0, static_cast<float>(_rtex.texture.width), static_cast<float>(-_rtex.texture.height)}, {0, 0}, WHITE);
 	}
 
 protected:

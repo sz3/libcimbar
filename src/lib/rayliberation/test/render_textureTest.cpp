@@ -12,27 +12,26 @@ using std::string;
 
 TEST_CASE( "render_textureTest/testDefault", "[unit]" )
 {
-	InitWindow(500, 500, "test raylib");
-	BeginDrawing();
-	ClearBackground(BLACK);
-
-	//cimbar::render_texture rt(1024, 1024, BLACK);
-
+	InitWindow(1024, 1024, "test raylib");
+	cimbar::render_texture rt(1024, 1024, BLACK);
 	cimbar::texture tx = cimbar::load_texture("bitmap/4/00.png");
 
-	/*rt.paste(tx, 10, 10, WHITE);
-	rt.paste(tx, 20, 20, WHITE);
-	rt.draw();*/
+	rt.paste(tx, 10, 10);
 
-	std::cout << fmt::format("what? {},{},{}", tx.tx().id, tx.tx().width, tx.tx().height) << std::endl;
 
-	DrawTexture(tx.tx(), 10, 10, WHITE);
+
+	BeginDrawing();
+	ClearBackground(BLACK);
+	rt.draw();
+
+	DrawTexture(tx.tx(), 100, 10, tx.tint());
+
 	EndDrawing();
 
 	assertEquals(true, true);
 
-	//*
-	for (int i = 0; i < 100000; ++i)
+	/*
+	for (int i = 0; i < 1000000; ++i)
 		std::cout << "hello" << i << std::endl;
 	//*/
 }
