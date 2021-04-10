@@ -43,26 +43,27 @@ namespace {
 		};
 		return colors[index];
 	}
+
+	string load_file(string path)
+	{
+		auto it = cimbar::bitmaps.find(path);
+		if (it == cimbar::bitmaps.end())
+			return "";
+
+		return base91::decode(it->second);
+	}
 }
 
 namespace cimbar {
 
-// want a load_texture for raylib?
-
 cv::Mat load_img(string path)
 {
-	auto it = cimbar::bitmaps.find(path);
-	if (it == cimbar::bitmaps.end())
+	string bytes = load_file(path);
+	if (bytes.empty())
 		return cv::Mat();
-
-	string bytes = base91::decode(it->second);
-	vector<unsigned char> data(bytes.data(), bytes.data() + bytes.size());
 
 	int width, height, channels;
-	std::unique_ptr<uint8_t[]> imgdata(stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &width, &height, &channels, STBI_rgb_alpha));
-	if (!imgdata)
-		return cv::Mat();
-
+	std::unique_ptr<uint8_t[]> imgdata(stbi_load_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<int>(bytes.size()), &width, &height, &channels, STBI_rgb_alpha));
 	size_t len = width * height * channels;
 	cv::Mat mat(height, width, CV_MAKETYPE(CV_8U, channels));
 	std::copy(imgdata.get(), imgdata.get()+len, mat.data);

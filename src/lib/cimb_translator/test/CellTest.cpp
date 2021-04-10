@@ -3,7 +3,7 @@
 #include "TestHelpers.h"
 
 #include "Cell.h"
-#include "Common.h"
+#include "graphics/Common.h"
 
 #include <opencv2/opencv.hpp>
 #include <iostream>

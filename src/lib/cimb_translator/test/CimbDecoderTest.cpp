@@ -4,7 +4,7 @@
 
 #include "CimbDecoder.h"
 
-#include "cimb_translator/Common.h"
+#include "graphics/Common.h"
 #include "serialize/format.h"
 #include <opencv2/opencv.hpp>
 

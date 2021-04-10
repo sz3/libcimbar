@@ -51,6 +51,7 @@ set (PROJECTS
 	src/lib/compression
 	src/lib/encoder
 	src/lib/fountain
+	src/lib/graphics
 	src/lib/gui
 	src/lib/image_hash
 	src/lib/rayliberation

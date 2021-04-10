@@ -3,7 +3,7 @@
 
 #include "CellPositions.h"
 #include "CimbEncoder.h"
-#include "image.h"
+#include "graphics/image.h"
 
 class CimbWriter
 {
