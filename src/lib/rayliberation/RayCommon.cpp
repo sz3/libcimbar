@@ -19,7 +19,7 @@ cimbar::texture load_img(string path)
 	return cimbar::texture(LoadImageFromMemory("png", reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size()), WHITE);
 }
 
-cimbar::texture getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0)
+cimbar::texture getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
 {
 	string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
 	cimbar::texture tile = load_img(imgPath);
