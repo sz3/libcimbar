@@ -1,18 +1,16 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "CimbEncoder.h"
 
-// ifdef here?
-#include "Common.h"
+#include "graphics/image.h"
 #include "serialize/format.h"
 #include <cmath>
 #include <iostream>
-using cv::Vec3b;
 using std::string;
 
 namespace {
-	std::vector<cimbar::tile>& tiles()
+	std::vector<cimbar::image>& tiles()
 	{
-		static std::vector<cimbar::tile> ts;
+		static std::vector<cimbar::image> ts;
 		return ts;
 	}
 }
@@ -26,11 +24,10 @@ CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
 	load_tiles(symbol_bits); // TODO: smarter caching?
 }
 
-cimbar::tile CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
+cimbar::image CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
 {
 	unsigned symbol = index % _numSymbols;
 	unsigned color = index / _numSymbols;
-	// or ifdef here?
 	return cimbar::getTile(symbol_bits, symbol, _dark, _numColors, color);
 }
 
@@ -46,7 +43,7 @@ bool CimbEncoder::load_tiles(unsigned symbol_bits)
 	return true;
 }
 
-const cimbar::tile& CimbEncoder::encode(unsigned bits) const
+const cimbar::image& CimbEncoder::encode(unsigned bits) const
 {
 	bits = bits % _tiles.size();
 	return _tiles[bits];

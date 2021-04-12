@@ -22,6 +22,7 @@ endif()
 target_link_libraries(cimbar_js
 
 	cimb_translator
+	rayliberation
 
 	correct_static
 	wirehair
@@ -68,7 +69,8 @@ if(DEFINED USE_WASM)
 
 else()  # if no wasm, ignore all that and add in GLFW libraries
 	target_link_libraries(cimbar_js
-		GL
-		glfw
+		${RAYLIB}
+		dl
+		pthread
 	)
 endif()

@@ -7,6 +7,6 @@ namespace cimbar
 {
 	class texture;
 
-	cimbar::texture load_img(std::string path);
-	cimbar::texture getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0);
+	texture load_img(std::string path);
+	texture getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0);
 }

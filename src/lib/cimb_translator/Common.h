@@ -7,7 +7,7 @@
 
 namespace cimbar {
 
-	cv::Mat load_img(std::string path);
-	cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0);
+	::cv::Mat load_img(std::string path);
+	::cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0);
 
 }

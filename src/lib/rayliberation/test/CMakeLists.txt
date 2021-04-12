@@ -23,9 +23,5 @@ add_test(rayliberation_test rayliberation_test)
 target_link_libraries(rayliberation_test
 
 	rayliberation
-
-	${RAYLIB}
-	dl
-	pthread
 )
 

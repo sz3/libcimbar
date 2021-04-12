@@ -19,6 +19,8 @@ texture::texture(const Image& img, Color tint)
 {
 }
 
+// TODO: destructor!
+
 texture::operator bool() const
 {
 	return _tx.width > 0;
@@ -39,7 +41,7 @@ const Color& texture::tint() const
 	return _tint;
 }
 
-void texture::copyTo(render_texture::slice slice)
+void texture::copyTo(render_view slice) const
 {
 	slice.rtx.paste(*this, slice.x, slice.y);
 }

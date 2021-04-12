@@ -7,12 +7,17 @@ set(SOURCES
 	texture.h
 	RayCommon.h
 	RayCommon.cpp
+	window_raylib.h
 )
 
 add_library(rayliberation STATIC ${SOURCES})
 
 target_link_libraries(rayliberation
 	cimb_translator
+
+	${RAYLIB}
+	dl
+	pthread
 )
 
 if(NOT DEFINED DISABLE_TESTS)

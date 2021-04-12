@@ -13,13 +13,13 @@ public:
 	bool write(unsigned bits);
 	bool done() const;
 
-	cv::Mat image() const;
+	cimbar::frame image() const;
 
 protected:
-	void paste(const cimbar::tile& img, int x, int y);
+	void paste(const cimbar::image& img, int x, int y);
 
 protected:
-	cimbar::image _image;
+	cimbar::frame _image;
 	CellPositions _positions;
 	CimbEncoder _encoder;
 	int _offset = 0; // TODO: get rid of this?

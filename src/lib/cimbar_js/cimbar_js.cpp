@@ -2,7 +2,7 @@
 #include "cimbar_js.h"
 
 #include "encoder/SimpleEncoder.h"
-#include "gui/window_glfw.h"
+#include "gui/window.h"
 #include "util/byte_istream.h"
 
 #include <iostream>
@@ -10,9 +10,9 @@
 
 
 namespace {
-	std::shared_ptr<cimbar::window_glfw> _window;
+	std::shared_ptr<cimbar::window> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
-	std::optional<cimbar::image> _next;
+	std::optional<cimbar::frame> _next;
 
 	int _frameCount = 0;
 	uint8_t _encodeId = 0;
@@ -32,7 +32,7 @@ int initialize_GL(int width, int height)
 
 	std::cerr << "initializing " << width << " by " << height << " window";
 
-	_window = std::make_shared<cimbar::window_glfw>(width, height, "Cimbar Encoder");
+	_window = std::make_shared<cimbar::window>(width, height, "Cimbar Encoder");
 	if (!_window or !_window->is_good())
 		return 0;
 

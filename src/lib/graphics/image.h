@@ -1,13 +1,16 @@
 #pragma once
 
-// env-ify
-#include "rayliberation/render_texture.h"
 #include <opencv2/opencv.hpp>
+
+#ifdef LIBCIMBAR_USE_GLFW
+
+#include "cimb_translator/Common.h"
+#include "gui/window_glfw.h"
 
 namespace cimbar {
 
+	using frame = cv::Mat;
 	using image = cv::Mat;
-	using tile = cv::Mat;
 
 	inline bool imwrite(std::string filename, cv::Mat img)
 	{
@@ -16,6 +19,18 @@ namespace cimbar {
 		return cv::imwrite(filename, img);
 	}
 
+}
+#else
+
+#include "rayliberation/RayCommon.h"
+#include "rayliberation/render_texture.h"
+#include "rayliberation/texture.h"
+
+namespace cimbar {
+
+	using frame = cimbar::render_texture;
+	using image = cimbar::texture;
+
 	inline bool imwrite(std::string filename, const cimbar::render_texture& img)
 	{
 		// TODO: something
@@ -23,3 +38,5 @@ namespace cimbar {
 	}
 
 }
+#endif
+

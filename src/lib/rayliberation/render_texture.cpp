@@ -19,6 +19,9 @@ render_texture::render_texture(int width, int height, int, cv::Scalar color)
 {
 }
 
+// TODO: destructor!
+// need to figure out lifecycle...
+
 void render_texture::clear()
 {
 	BeginTextureMode(_rtex);
@@ -33,14 +36,14 @@ void render_texture::paste(const texture& tx, int x, int y)
 	EndTextureMode();
 }
 
-void render_texture::draw()
+void render_texture::draw(int x, int y) const
 {
-	DrawTextureRec(_rtex.texture, {0, 0, static_cast<float>(_rtex.texture.width), static_cast<float>(-_rtex.texture.height)}, {0, 0}, WHITE);
+	DrawTextureRec(_rtex.texture, {x, y, static_cast<float>(_rtex.texture.width), static_cast<float>(-_rtex.texture.height)}, {0, 0}, WHITE);
 }
 
-render_texture::slice render_texture::operator()(std::tuple<int,int,int,int> params) // matching cv::Mat interface for now...
+render_view render_texture::operator()(std::tuple<int,int,int,int> params) // matching cv::Mat interface for now...
 {
-	return slice({*this, std::get<0>(params), std::get<1>(params)});
+	return render_view({*this, std::get<0>(params), std::get<1>(params)});
 }
 
 Image render_texture::screenshot() const

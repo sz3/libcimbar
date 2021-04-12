@@ -2,7 +2,7 @@
 #include "Common.h"
 
 #include "serialize/format.h"
-#define STB_IMAGE_IMPLEMENTATION
+// if no raylib, define stb image?
 #include "stb/stb_image.h"
 #include <opencv2/opencv.hpp>
 

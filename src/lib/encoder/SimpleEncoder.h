@@ -19,7 +19,7 @@ public:
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
-	std::optional<cimbar::image> encode_next(STREAM& stream, int canvas_size=0);
+	std::optional<cimbar::frame> encode_next(STREAM& stream, int canvas_size=0);
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
@@ -58,7 +58,7 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
  * */
 
 template <typename STREAM>
-inline std::optional<cimbar::image> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
+inline std::optional<cimbar::frame> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
 {
 	if (!stream.good())
 		return std::nullopt;
