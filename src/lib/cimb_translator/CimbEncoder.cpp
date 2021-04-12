@@ -6,17 +6,8 @@
 #include <iostream>
 using std::string;
 
-namespace {
-	std::vector<cimbar::image>& tiles()
-	{
-		static std::vector<cimbar::image> ts;
-		return ts;
-	}
-}
-
 CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
-    : _tiles(tiles())
-    , _numSymbols(1 << symbol_bits)
+    : _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
     , _dark(dark)
 {

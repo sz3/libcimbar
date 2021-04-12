@@ -10,11 +10,9 @@ set(SOURCES
 	CellPositions.h
 	CimbDecoder.cpp
 	CimbDecoder.h
-	CimbEncoder.cpp
 	CimbEncoder.h
 	CimbReader.cpp
 	CimbReader.h
-	CimbWriter.cpp
 	CimbWriter.h
 	Common.cpp
 	Common.h
