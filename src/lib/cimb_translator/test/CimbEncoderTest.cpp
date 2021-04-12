@@ -11,7 +11,7 @@ using std::string;
 
 TEST_CASE( "CimbEncoderTest/testSimple", "[unit]" )
 {
-	CimbEncoder cw(4, 0);
+	CimbEncoder<cv::Mat> cw(4, 0);
 	cv::Mat res = cw.encode(14);
 
 	cv::Mat expected = cimbar::getTile(4, 14, true);
@@ -20,7 +20,7 @@ TEST_CASE( "CimbEncoderTest/testSimple", "[unit]" )
 
 TEST_CASE( "CimbEncoderTest/testColor", "[unit]" )
 {
-	CimbEncoder cw(4, 3);
+	CimbEncoder<cv::Mat> cw(4, 3);
 	cv::Mat res = cw.encode(55);
 
 	cv::Mat expected = cimbar::getTile(4, 7, true, 8, 3); // 3*16 + 7 == 55

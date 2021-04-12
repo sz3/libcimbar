@@ -18,8 +18,8 @@ public:
 	SimpleEncoder(int ecc_bytes=-1, unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
-	template <typename STREAM>
-	std::optional<cimbar::frame> encode_next(STREAM& stream, int canvas_size=0);
+	template <typename STREAM, typename IMG, typename FRAME=IMG>
+	std::optional<FRAME> encode_next(STREAM& stream, int canvas_size=0);
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
@@ -57,14 +57,14 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
  *
  * */
 
-template <typename STREAM>
-inline std::optional<cimbar::frame> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
+template <typename STREAM, typename IMG, typename FRAME>
+inline std::optional<FRAME> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
 {
 	if (!stream.good())
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, canvas_size);
+	CimbWriter<IMG, FRAME> writer(_bitsPerSymbol, _bitsPerColor, _dark, canvas_size);
 
 	reed_solomon_stream rss(stream, _eccBytes);
 	bitreader br;

@@ -75,7 +75,7 @@ int next_frame()
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
-	_next = enc.encode_next(*_fes, _window->width());
+	_next = enc.encode_next<fountain_encoder_stream, cimbar::image, cimbar::frame>(*_fes, _window->width());
 	return ++_frameCount;
 }
 

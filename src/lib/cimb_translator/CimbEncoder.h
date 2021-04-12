@@ -2,10 +2,10 @@
 #pragma once
 
 #include "image.h"
-
 #include <string>
 #include <vector>
 
+template <typename IMG>
 class CimbEncoder
 {
 public:
@@ -17,7 +17,7 @@ public:
 		load_tiles(symbol_bits); // TODO: smarter caching?
 	}
 
-	cimbar::image load_tile(unsigned symbol_bits, unsigned index)
+	IMG load_tile(unsigned symbol_bits, unsigned index)
 	{
 		unsigned symbol = index % _numSymbols;
 		unsigned color = index / _numSymbols;
@@ -36,7 +36,7 @@ public:
 		return true;
 	}
 
-	const cimbar::image& encode(unsigned bits) const
+	const IMG& encode(unsigned bits) const
 	{
 		bits = bits % _tiles.size();
 		return _tiles[bits];
@@ -44,7 +44,7 @@ public:
 
 
 protected:
-	std::vector<cimbar::image> _tiles;
+	std::vector<IMG> _tiles;
 	unsigned _numSymbols;
 	unsigned _numColors;
 	bool _dark;

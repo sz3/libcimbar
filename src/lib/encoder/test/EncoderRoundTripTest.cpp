@@ -68,7 +68,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	// encode frames, then pass to decoder
 	for (int i = 0; i < 100; ++i)
 	{
-		std::optional<cv::Mat> frame = enc.encode_next(*fes);
+		std::optional<cv::Mat> frame = enc.encode_next<fountain_encoder_stream, cv::Mat>(*fes);
 		assertTrue( frame );
 
 		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);

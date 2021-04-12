@@ -4,34 +4,34 @@
 #include "CellPositions.h"
 #include "CimbEncoder.h"
 #include "Config.h"
-#include "image.h"
 #include "serialize/format.h"
 
 #include <string>
 
+template <typename IMG, typename FRAME=IMG>
 class CimbWriter
 {
 // static helpers
 protected:
-	static cimbar::image getAnchor(bool dark)
+	static IMG getAnchor(bool dark)
 	{
 		std::string name = dark? "anchor-dark" : "anchor-light";
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
-	static cimbar::image getSecondaryAnchor(bool dark)
+	static IMG getSecondaryAnchor(bool dark)
 	{
 		std::string name = dark? "anchor-secondary-dark" : "anchor-secondary-light";
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
-	static cimbar::image getHorizontalGuide(bool dark)
+	static IMG getHorizontalGuide(bool dark)
 	{
 		std::string name = dark? "guide-horizontal-dark" : "guide-horizontal-light";
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
-	static cimbar::image getVerticalGuide(bool dark)
+	static IMG getVerticalGuide(bool dark)
 	{
 		std::string name = dark? "guide-vertical-dark" : "guide-vertical-light";
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
@@ -58,21 +58,21 @@ public:
 		// from here on, we only care about the internal size
 		size = cimbar::Config::image_size();
 
-		cimbar::image anchor = getAnchor(dark);
+		IMG anchor = getAnchor(dark);
 		paste(anchor, 0, 0);
 		paste(anchor, 0, size - anchor.cols);
 		paste(anchor, size - anchor.rows, 0);
 
-		cimbar::image secondaryAnchor = getSecondaryAnchor(dark);
+		IMG secondaryAnchor = getSecondaryAnchor(dark);
 		paste(secondaryAnchor, size - anchor.rows, size - anchor.cols);
 
-		cimbar::image hg = getHorizontalGuide(dark);
+		IMG hg = getHorizontalGuide(dark);
 		paste(hg, (size/2) - (hg.cols/2), 2);
 		paste(hg, (size/2) - (hg.cols/2), size-4);
 		paste(hg, (size/2) - (hg.cols/2) - hg.cols, size-4);
 		paste(hg, (size/2) - (hg.cols/2) + hg.cols, size-4);
 
-		cimbar::image vg = getVerticalGuide(dark);
+		IMG vg = getVerticalGuide(dark);
 		paste(vg, 2, (size/2) - (vg.rows/2));
 		paste(vg, size-4, (size/2) - (vg.rows/2));
 	}
@@ -85,7 +85,7 @@ public:
 			return false;
 
 		CellPositions::coordinate xy = _positions.next();
-		cimbar::image cell = _encoder.encode(bits);
+		IMG cell = _encoder.encode(bits);
 		paste(cell, xy.first, xy.second);
 		return true;
 	}
@@ -95,20 +95,20 @@ public:
 		return _positions.done();
 	}
 
-	cimbar::frame image() const
+	FRAME image() const
 	{
 		return _image;
 	}
 
 protected:
-	void paste(const cimbar::image& img, int x, int y)
+	void paste(const IMG& img, int x, int y)
 	{
 		img.copyTo(_image({x+_offset, y+_offset, img.cols, img.rows}));
 	}
 
 protected:
-	cimbar::frame _image;
+	FRAME _image;
 	CellPositions _positions;
-	CimbEncoder _encoder;
+	CimbEncoder<IMG> _encoder;
 	int _offset = 0; // TODO: get rid of this?
 };
