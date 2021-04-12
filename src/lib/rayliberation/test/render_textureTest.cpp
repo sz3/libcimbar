@@ -1,6 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 #include "render_texture.h"
 #include "texture.h"
 #include "RayCommon.h"
@@ -25,12 +28,14 @@ TEST_CASE( "render_textureTest/testDefault", "[unit]" )
 	ClearBackground(BLACK);
 	rt.draw();
 
+	DrawTexture(tx.tx(), 100, 90, WHITE);
+
 	EndDrawing();
 
 	assertEquals(true, true);
 
-	/*
-	for (int i = 0; i < 1000000; ++i)
+	//*
+	for (int i = 0; i < 100000; ++i)
 		std::cout << "hello" << i << std::endl;
 	//*/
 }

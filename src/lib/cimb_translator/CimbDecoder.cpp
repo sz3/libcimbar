@@ -3,6 +3,7 @@
 
 #include "Cell.h"
 #include "Common.h"
+#include "res/res.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 

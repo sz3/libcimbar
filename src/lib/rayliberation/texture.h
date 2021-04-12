@@ -1,8 +1,11 @@
+#pragma once
+
 #include "raylib.h"
 
-#include "render_texture.h"
-
 namespace cimbar {
+
+class render_texture;
+class render_view;
 
 class texture
 {
@@ -17,7 +20,9 @@ public:
 	void set_tint(Color c);
 	const Color& tint() const;
 
-	void copyTo(render_texture::slice slice);
+	void copyTo(render_view slice) const;
+
+	Image screenshot() const;
 
 protected:
 	Texture2D _tx;

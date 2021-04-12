@@ -2,7 +2,6 @@
 #include "CimbWriter.h"
 
 #include "Config.h"
-#include "Common.h"
 #include "serialize/format.h"
 #include <string>
 using std::string;
@@ -33,19 +32,29 @@ namespace {
 		string name = dark? "guide-vertical-dark" : "guide-vertical-light";
 		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
 	}
+
+	int calc_size(int size)
+	{
+		if (size < cimbar::Config::image_size())
+			return cimbar::Config::image_size();
+		return size;
+	}
+
+	cv::Scalar calc_color(bool dark)
+	{
+		if (dark)
+			return cv::Scalar(0, 0, 0);
+		return cv::Scalar(0xFF, 0xFF, 0xFF);
+	}
 }
 
 CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, int size)
-    : _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding(), Config::interleave_blocks(), Config::interleave_partitions())
+    : _image(calc_size(size), calc_size(size), CV_8UC3, calc_color(dark))
+    , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding(), Config::interleave_blocks(), Config::interleave_partitions())
     , _encoder(symbol_bits, color_bits)
 {
 	if (size > cimbar::Config::image_size())
 		_offset = (size - cimbar::Config::image_size()) / 2;
-	else
-		size = cimbar::Config::image_size();
-
-	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
-	_image = cimbar::image(size, size, CV_8UC3, bgcolor);
 
 	// from here on, we only care about the internal size
 	size = cimbar::Config::image_size();
@@ -69,7 +78,7 @@ CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, int
 	paste(vg, size-4, (size/2) - (vg.rows/2));
 }
 
-void CimbWriter::paste(const cimbar::tile& img, int x, int y)
+void CimbWriter::paste(const cimbar::image& img, int x, int y)
 {
 	img.copyTo(_image({x+_offset, y+_offset, img.cols, img.rows}));
 }
@@ -82,7 +91,7 @@ bool CimbWriter::write(unsigned bits)
 		return false;
 
 	CellPositions::coordinate xy = _positions.next();
-	cimbar::tile cell = _encoder.encode(bits);
+	cimbar::image cell = _encoder.encode(bits);
 	paste(cell, xy.first, xy.second);
 	return true;
 }
@@ -92,7 +101,7 @@ bool CimbWriter::done() const
 	return _positions.done();
 }
 
-cimbar::image CimbWriter::image() const
+cimbar::frame CimbWriter::image() const
 {
 	return _image;
 }

@@ -2,8 +2,6 @@
 #include "unittest.h"
 
 #include "CimbEncoder.h"
-
-#include "Common.h"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
