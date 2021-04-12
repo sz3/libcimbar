@@ -38,10 +38,20 @@ if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
 endif()
 
-find_library(RAYLIB
-	NAMES raylib
-	HINTS "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/lib/"
-)
+if(DEFINED USE_RAYLIB)
+	add_definitions("-DLIBCIMBAR_USE_RAYLIB=${USE_RAYLIB}")
+
+	find_library(RAYLIB
+		NAMES raylib
+		HINTS "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/lib/"
+	)
+
+	set(libcimbar_UI_LIB "dl" "pthread" "${RAYLIB}")
+else()
+	set(libcimbar_UI_LIB "glfw" "GL")
+endif()
+
+
 
 set (PROJECTS
 	src/lib/bit_file

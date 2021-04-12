@@ -16,8 +16,8 @@ namespace {
 }
 
 CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
-    : _tiles(tiles())
-    , _numSymbols(1 << symbol_bits)
+    //: _tiles(tiles())
+    : _numSymbols(1 << symbol_bits)
     , _numColors(1 << color_bits)
     , _dark(dark)
 {
@@ -26,6 +26,7 @@ CimbEncoder::CimbEncoder(unsigned symbol_bits, unsigned color_bits, bool dark)
 
 cimbar::image CimbEncoder::load_tile(unsigned symbol_bits, unsigned index)
 {
+	std::cout << fmt::format("load tile {} {}", symbol_bits, index) << std::endl;
 	unsigned symbol = index % _numSymbols;
 	unsigned color = index / _numSymbols;
 	return cimbar::getTile(symbol_bits, symbol, _dark, _numColors, color);
@@ -40,6 +41,7 @@ bool CimbEncoder::load_tiles(unsigned symbol_bits)
 	_tiles.clear();
 	for (unsigned i = 0; i < numTiles; ++i)
 		_tiles.push_back(load_tile(symbol_bits, i));
+	std::cout << "loaded all tiles?" << std::endl;
 	return true;
 }
 

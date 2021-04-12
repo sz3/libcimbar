@@ -17,7 +17,7 @@ public:
 	const cimbar::image& encode(unsigned bits) const;
 
 protected:
-	std::vector<cimbar::image>& _tiles;
+	std::vector<cimbar::image> _tiles;
 	unsigned _numSymbols;
 	unsigned _numColors;
 	bool _dark;

@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
-add_library(graphics INTERFACE ${SOURCES})
+set(SOURCES
+	bitmaps.h
+	res.cpp
+	res.h
+)
+
+add_library(graphics STATIC ${SOURCES})
 

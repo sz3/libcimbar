@@ -15,6 +15,7 @@ target_link_libraries(cimbar
 
 	cimb_translator
 	extractor
+	rayliberation
 
 	correct_static
 	wirehair

@@ -48,7 +48,7 @@ render_view render_texture::operator()(std::tuple<int,int,int,int> params) // ma
 
 Image render_texture::screenshot() const
 {
-	GetTextureData(_rtex.texture);
+	return GetTextureData(_rtex.texture);
 }
 
 }

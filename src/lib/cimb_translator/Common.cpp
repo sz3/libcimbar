@@ -1,8 +1,10 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "Common.h"
 
+#include "graphics/res.h"
 #include "serialize/format.h"
 // if no raylib, define stb image?
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 #include <opencv2/opencv.hpp>
 

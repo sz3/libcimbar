@@ -16,6 +16,21 @@
 #include <vector>
 
 
+namespace {
+	cv::Mat to_mat(cv::Mat img)
+	{
+		return img;
+	}
+
+	cv::Mat to_mat(cimbar::render_texture img)
+	{
+		std::string filename = "/tmp/cimbar_test_out.png";
+		cimbar::imwrite(filename, img);
+		return cv::imread(filename);
+	}
+}
+
+
 TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 {
 	MakeTempDirectory tempdir;
@@ -93,11 +108,11 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis);
 	assertTrue( fes );
 
-	std::optional<cv::Mat> frame = enc.encode_next(*fes);
+	std::optional<cimbar::frame> frame = enc.encode_next(*fes);
 	assertTrue( frame );
 
 	uint64_t hash = 0xf8cde200e90582e4;
-	assertEquals( hash, image_hash::average_hash(*frame) );
+	assertEquals( hash, image_hash::average_hash(to_mat(*frame)) );
 }
 
 TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )

@@ -22,6 +22,8 @@ public:
 
 	void copyTo(render_view slice) const;
 
+	Image screenshot() const;
+
 protected:
 	Texture2D _tx;
 	Color _tint;

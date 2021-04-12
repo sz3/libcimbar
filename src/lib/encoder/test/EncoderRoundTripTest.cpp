@@ -15,6 +15,21 @@
 #include <iostream>
 #include <string>
 
+namespace {
+	cv::Mat to_mat(cv::Mat img)
+	{
+		return img;
+	}
+
+	cv::Mat to_mat(cimbar::render_texture img)
+	{
+		std::string filename = "/tmp/cimbar_test_out.png";
+		cimbar::imwrite(filename, img);
+		return cv::imread(filename);
+	}
+}
+
+
 TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 {
 	MakeTempDirectory tempdir;
@@ -68,10 +83,10 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	// encode frames, then pass to decoder
 	for (int i = 0; i < 100; ++i)
 	{
-		std::optional<cv::Mat> frame = enc.encode_next(*fes);
+		std::optional<cimbar::frame> frame = enc.encode_next(*fes);
 		assertTrue( frame );
 
-		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
+		unsigned bytesDecoded = dec.decode_fountain(to_mat(*frame), fds);
 		assertEquals( 7500, bytesDecoded );
 
 		if (fds.num_done())

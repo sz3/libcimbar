@@ -27,6 +27,7 @@ add_test(encoder_test encoder_test)
 target_link_libraries(encoder_test
 
 	cimb_translator
+	rayliberation
 
 	correct_static
 	wirehair

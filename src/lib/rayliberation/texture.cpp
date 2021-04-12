@@ -2,6 +2,10 @@
 
 #include "texture.h"
 #include "render_texture.h"
+#include "serialize/format.h"
+
+#include "raylib.h"
+#include <iostream>
 
 namespace cimbar {
 
@@ -33,6 +37,7 @@ const Texture2D& texture::tx() const
 
 void texture::set_tint(Color c)
 {
+	std::cout << fmt::format("set tint {},{},{},{}", c.a, c.r, c.g, c.b) << std::endl;
 	_tint = c;
 }
 
@@ -45,5 +50,11 @@ void texture::copyTo(render_view slice) const
 {
 	slice.rtx.paste(*this, slice.x, slice.y);
 }
+
+Image texture::screenshot() const
+{
+	return GetTextureData(_tx);
+}
+
 
 }

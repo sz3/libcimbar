@@ -13,7 +13,7 @@ set(SOURCES
 add_library(rayliberation STATIC ${SOURCES})
 
 target_link_libraries(rayliberation
-	cimb_translator
+	graphics
 
 	${RAYLIB}
 	dl
