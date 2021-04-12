@@ -22,8 +22,12 @@ struct render_view
 class render_texture
 {
 public:
-	render_texture(unsigned width, unsigned height, Color bgcolor);
+	render_texture(int width, int height, Color bgcolor);
 	render_texture(int width, int height, int, std::tuple<unsigned char, unsigned char, unsigned char> color); // match cv::Mat
+	~render_texture();
+
+	void begin();
+	void end();
 
 	void clear();
 	void paste(const texture& tx, int x, int y);

@@ -2,11 +2,18 @@
 #pragma once
 
 #include "res/load.h"
+#include <memory>
 #include <string>
+
+namespace raylibpp {
+	struct render_texture;
+}
 
 namespace cimbar {
 
 class texture;
+
+std::shared_ptr<raylibpp::render_texture> init_frame(int width, int height);
 
 template <>
 struct load<texture>

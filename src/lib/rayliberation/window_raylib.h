@@ -4,9 +4,8 @@
 #include "rayliberation/render_texture.h"
 #include "util/loop_iterator.h"
 
-#include <chrono>
+#include <iostream>
 #include <string>
-#include <thread>
 
 namespace cimbar {
 
@@ -20,6 +19,7 @@ protected:
 public:
 	window_raylib(unsigned width, unsigned height, std::string title)
 	    : _shake(SHAKE_POS)
+	    , _offset({(width - 1024)/2, (height - 1024)/2})
 	{
 		InitWindow(width, height, title.c_str());
 	}
@@ -54,11 +54,11 @@ public:
 		EndDrawing();
 	}
 
-	void show(const cimbar::render_texture& img, unsigned delay)
+	void show(cimbar::render_texture& img, unsigned delay)
 	{
 		BeginDrawing();
-		ClearBackground(BLACK);
-		img.draw((*_shake).first, (*_shake).second);
+		ClearBackground(BLACK); // locked into dark mode for now?
+		img.draw((*_shake).first + _offset.first, (*_shake).second + _offset.second);
 		EndDrawing();
 	}
 
@@ -69,6 +69,7 @@ public:
 
 protected:
 	loop_iterator<decltype(SHAKE_POS)> _shake;
+	std::pair<int, int> _offset;
 };
 
 }
