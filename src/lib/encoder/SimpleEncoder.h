@@ -12,13 +12,14 @@
 #include <optional>
 #include <string>
 
+template <typename IMG, typename FRAME=IMG>
 class SimpleEncoder
 {
 public:
 	SimpleEncoder(int ecc_bytes=-1, unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
-	template <typename STREAM, typename IMG, typename FRAME=IMG>
+	template <typename STREAM>
 	std::optional<FRAME> encode_next(STREAM& stream, int canvas_size=0);
 
 	template <typename STREAM>
@@ -32,7 +33,8 @@ protected:
 	uint8_t _encodeId = 0;
 };
 
-inline SimpleEncoder::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int bits_per_color)
+template <typename IMG, typename FRAME>
+inline SimpleEncoder<IMG, FRAME>::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int bits_per_color)
     : _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
     , _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
     , _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
@@ -40,7 +42,8 @@ inline SimpleEncoder::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int
 {
 }
 
-inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
+template <typename IMG, typename FRAME>
+inline void SimpleEncoder<IMG, FRAME>::set_encode_id(uint8_t encode_id)
 {
 	_encodeId = encode_id;
 }
@@ -57,8 +60,9 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
  *
  * */
 
-template <typename STREAM, typename IMG, typename FRAME>
-inline std::optional<FRAME> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
+template <typename IMG, typename FRAME>
+template <typename STREAM>
+inline std::optional<FRAME> SimpleEncoder<IMG, FRAME>::encode_next(STREAM& stream, int canvas_size)
 {
 	if (!stream.good())
 		return std::nullopt;
@@ -87,8 +91,9 @@ inline std::optional<FRAME> SimpleEncoder::encode_next(STREAM& stream, int canva
 	return writer.image();
 }
 
+template <typename IMG, typename FRAME>
 template <typename STREAM>
-inline fountain_encoder_stream::ptr SimpleEncoder::create_fountain_encoder(STREAM& stream, int compression_level)
+inline fountain_encoder_stream::ptr SimpleEncoder<IMG, FRAME>::create_fountain_encoder(STREAM& stream, int compression_level)
 {
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol);
 

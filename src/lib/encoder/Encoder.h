@@ -9,7 +9,7 @@
 #include <functional>
 #include <string>
 
-class Encoder : public SimpleEncoder
+class Encoder : public SimpleEncoder<cv::Mat>
 {
 public:
 	using SimpleEncoder::SimpleEncoder;
@@ -26,7 +26,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 	unsigned i = 0;
 	while (true)
 	{
-		auto frame = encode_next<std::ifstream, cv::Mat>(f);
+		auto frame = encode_next(f);
 		if (!frame)
 			break;
 
@@ -54,7 +54,7 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	unsigned i = 0;
 	while (i < requiredFrames)
 	{
-		auto frame = encode_next<fountain_encoder_stream, cv::Mat>(*fes, canvas_size);
+		auto frame = encode_next(*fes, canvas_size);
 		if (!frame)
 			break;
 

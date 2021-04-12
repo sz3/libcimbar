@@ -93,7 +93,7 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis);
 	assertTrue( fes );
 
-	std::optional<cv::Mat> frame = enc.encode_next<fountain_encoder_stream, cv::Mat>(*fes);
+	std::optional<cv::Mat> frame = enc.encode_next(*fes);
 	assertTrue( frame );
 
 	uint64_t hash = 0xf8cde200e90582e4;
