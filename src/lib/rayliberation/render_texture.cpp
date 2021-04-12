@@ -47,7 +47,7 @@ void render_texture::paste(const texture& tx, int x, int y)
 	DrawTexture(tx.tx(), x, y, tx.tint());
 }
 
-void render_texture::draw(int x, int y) const
+void render_texture::draw(float x, float y) const
 {
 	DrawTextureRec(_rtex->tx.texture, {0, 0, static_cast<float>(_rtex->tx.texture.width), static_cast<float>(-_rtex->tx.texture.height)}, {x, y}, WHITE);
 }

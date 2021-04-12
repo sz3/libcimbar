@@ -4,6 +4,7 @@
 #include "base91/base.hpp"
 #include "serialize/format.h"
 
+#include <array>
 #include <map>
 #include <string>
 #include "bitmaps.h"

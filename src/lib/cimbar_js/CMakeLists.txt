@@ -19,7 +19,7 @@ else()
 	)
 endif()
 
-if(USE_RAYLIB)
+if(USE_RAYLIB OR USE_WASM)
 target_link_libraries(cimbar_js
 	${RAYLIB}
 	rayliberation

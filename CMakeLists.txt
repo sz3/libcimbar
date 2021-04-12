@@ -38,13 +38,17 @@ if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
 endif()
 
-if(DEFINED USE_RAYLIB)
+if(DEFINED USE_RAYLIB OR USE_WASM)
 	add_definitions("-DLIBCIMBAR_USE_RAYLIB=${USE_RAYLIB}")
 
+	if(DEFINED USE_WASM)
+	set(RAYLIB "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/wasm/lib/libraylib.a")
+	else()
 	find_library(RAYLIB
 		NAMES raylib
 		HINTS "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/lib/"
 	)
+	endif()
 
 	set(libcimbar_UI_LIB "dl" "pthread")
 else()
@@ -74,7 +78,7 @@ set (PROJECTS
 	src/third_party_lib/zstd
 )
 
-if(DEFINED USE_RAYLIB)
+if(DEFINED USE_RAYLIB OR USE_WASM)
 set(PROJECTS
 	${PROJECTS}
 	src/lib/rayliberation

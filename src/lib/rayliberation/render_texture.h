@@ -31,7 +31,7 @@ public:
 
 	void clear();
 	void paste(const texture& tx, int x, int y);
-	void draw(int x=0, int y=0) const;
+	void draw(float x=0, float y=0) const;
 
 	Image screenshot() const;
 
