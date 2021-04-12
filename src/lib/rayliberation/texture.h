@@ -1,6 +1,9 @@
 #pragma once
 
+#include "types.h"
+
 #include "raylib.h"
+#include <memory>
 
 namespace cimbar {
 
@@ -25,7 +28,7 @@ public:
 	Image screenshot() const;
 
 protected:
-	Texture2D _tx;
+	std::shared_ptr<raylibpp::texture> _tx;
 	Color _tint;
 
 public:

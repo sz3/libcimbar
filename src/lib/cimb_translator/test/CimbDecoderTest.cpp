@@ -36,7 +36,7 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 
 	for (unsigned i = 0; i < 16; ++i)
 	{
-		cv::Mat tile = cimbar::getTile(4, i, true);
+		cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, i, true);
 		cv::Mat tenxten(10, 10, tile.type());
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 		unsigned res = decode(cd, tenxten);
@@ -55,7 +55,7 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 
 	for (unsigned i = 0; i < 16; ++i)
 	{
-		cv::Mat tile = cimbar::getTile(4, i, true);
+		cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, i, true);
 		cv::Mat tenxten(10, 10, tile.type());
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
@@ -104,7 +104,7 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
-	cv::Mat tile = cimbar::getTile(4, 2, true, 4, 2);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 2, true, 4, 2);
 	cv::resize(tile, tile, cv::Size(10, 10));
 
 	unsigned color = cd.decode_color(Cell(tile));
@@ -122,7 +122,7 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 		{
 			DYNAMIC_SECTION( "testColor " << c << ":" << i )
 			{
-				cv::Mat tile = cimbar::getTile(4, i, true, 4, c);
+				cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, i, true, 4, c);
 				cv::Mat tenxten(10, 10, tile.type());
 				tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 

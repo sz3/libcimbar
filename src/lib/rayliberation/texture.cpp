@@ -10,34 +10,31 @@
 namespace cimbar {
 
 texture::texture()
-    : _tx{0, 0, 0, 0, 0}
+    : _tx(nullptr)
     , _tint(WHITE)
 {
 }
 
 texture::texture(const Image& img, Color tint)
-    : _tx(LoadTextureFromImage(img))
+    : _tx(std::make_shared<raylibpp::texture>(LoadTextureFromImage(img)))
     , _tint(tint)
-    , rows(_tx.height)
-    , cols(_tx.width)
+    , rows(_tx->tx.height)
+    , cols(_tx->tx.width)
 {
 }
 
-// TODO: destructor!
-
 texture::operator bool() const
 {
-	return _tx.width > 0;
+	return !!_tx;
 }
 
 const Texture2D& texture::tx() const
 {
-	return _tx;
+	return _tx->tx;
 }
 
 void texture::set_tint(Color c)
 {
-	std::cout << fmt::format("set tint {},{},{},{}", c.a, c.r, c.g, c.b) << std::endl;
 	_tint = c;
 }
 
@@ -53,7 +50,7 @@ void texture::copyTo(render_view slice) const
 
 Image texture::screenshot() const
 {
-	return GetTextureData(_tx);
+	return GetTextureData(_tx->tx);
 }
 
 

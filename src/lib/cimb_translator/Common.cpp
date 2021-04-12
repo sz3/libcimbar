@@ -12,7 +12,7 @@ using std::string;
 
 namespace cimbar {
 
-cv::Mat load_img(string path)
+cv::Mat load<cv::Mat>::load_img(string path)
 {
 	string bytes = load_file(path);
 	if (bytes.empty())
@@ -27,7 +27,7 @@ cv::Mat load_img(string path)
 	return mat;
 }
 
-cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
+cv::Mat load<cv::Mat>::getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
 {
 	static cv::Vec3b background({0, 0, 0});
 

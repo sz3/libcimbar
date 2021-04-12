@@ -68,7 +68,7 @@ void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
 {
-	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark, _numColors);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(_symbolBits, symbol, _dark, _numColors);
 	return image_hash::average_hash(tile);
 }
 

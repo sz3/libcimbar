@@ -21,16 +21,12 @@ public:
 	{
 		unsigned symbol = index % _numSymbols;
 		unsigned color = index / _numSymbols;
-		return cimbar::getTile(symbol_bits, symbol, _dark, _numColors, color);
+		return cimbar::load<IMG>::getTile(symbol_bits, symbol, _dark, _numColors, color);
 	}
 
 	bool load_tiles(unsigned symbol_bits)
 	{
 		unsigned numTiles = _numColors * _numSymbols;
-		if (numTiles == _tiles.size())
-			return false;
-
-		_tiles.clear();
 		for (unsigned i = 0; i < numTiles; ++i)
 			_tiles.push_back(load_tile(symbol_bits, i));
 		return true;

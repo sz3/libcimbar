@@ -46,12 +46,10 @@ if(DEFINED USE_RAYLIB)
 		HINTS "${libcimbar_SOURCE_DIR}/src/third_party_lib/raylib/dist/lib/"
 	)
 
-	set(libcimbar_UI_LIB "dl" "pthread" "${RAYLIB}")
+	set(libcimbar_UI_LIB "dl" "pthread")
 else()
 	set(libcimbar_UI_LIB "glfw" "GL")
 endif()
-
-
 
 set (PROJECTS
 	src/lib/bit_file
@@ -61,9 +59,9 @@ set (PROJECTS
 	src/lib/compression
 	src/lib/encoder
 	src/lib/fountain
-	src/lib/res
 	src/lib/gui
 	src/lib/image_hash
+	src/lib/res
 	src/lib/serialize
 	src/lib/util
 
@@ -75,6 +73,13 @@ set (PROJECTS
 	src/third_party_lib/wirehair
 	src/third_party_lib/zstd
 )
+
+if(DEFINED USE_RAYLIB)
+set(PROJECTS
+	${PROJECTS}
+	src/lib/rayliberation
+)
+endif()
 
 if(NOT DEFINED USE_WASM)
 set(PROJECTS

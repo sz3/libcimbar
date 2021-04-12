@@ -12,7 +12,7 @@ using std::string;
 
 namespace cimbar {
 
-texture load_img(string path)
+texture load<texture>::load_img(string path)
 {
 	std::string bytes = load_file(path);
 	if (bytes.empty())
@@ -24,7 +24,7 @@ texture load_img(string path)
 	return tx;
 }
 
-texture getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
+texture load<texture>::getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
 {
 	std::string imgPath = fmt::format("bitmap/{}/{:02x}.png", symbol_bits, symbol);
 	cimbar::texture tile = load_img(imgPath);

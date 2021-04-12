@@ -31,7 +31,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 			break;
 
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
-		cimbar::imwrite(output, *frame);
+		cv::imwrite(output, *frame);
 		++i;
 	}
 	return i;

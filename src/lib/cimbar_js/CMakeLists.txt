@@ -19,6 +19,13 @@ else()
 	)
 endif()
 
+if(USE_RAYLIB)
+target_link_libraries(cimbar_js
+	${RAYLIB}
+	rayliberation
+)
+endif()
+
 target_link_libraries(cimbar_js
 
 	cimb_translator

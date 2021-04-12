@@ -18,7 +18,7 @@ TEST_CASE( "render_textureTest/testDefault", "[unit]" )
 {
 	InitWindow(1024, 1024, "test raylib");
 	cimbar::render_texture rt(1024, 1024, BLACK);
-	cimbar::texture tx = cimbar::load_img("bitmap/4/00.png");
+	cimbar::texture tx = cimbar::load<cimbar::texture>::load_img("bitmap/4/00.png");
 
 	rt.paste(tx, 10, 10);
 

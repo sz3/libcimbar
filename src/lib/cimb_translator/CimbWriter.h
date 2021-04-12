@@ -16,25 +16,25 @@ protected:
 	static IMG getAnchor(bool dark)
 	{
 		std::string name = dark? "anchor-dark" : "anchor-light";
-		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+		return cimbar::load<IMG>::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	static IMG getSecondaryAnchor(bool dark)
 	{
 		std::string name = dark? "anchor-secondary-dark" : "anchor-secondary-light";
-		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+		return cimbar::load<IMG>::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	static IMG getHorizontalGuide(bool dark)
 	{
 		std::string name = dark? "guide-horizontal-dark" : "guide-horizontal-light";
-		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+		return cimbar::load<IMG>::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	static IMG getVerticalGuide(bool dark)
 	{
 		std::string name = dark? "guide-vertical-dark" : "guide-vertical-light";
-		return cimbar::load_img(fmt::format("bitmap/{}.png", name));
+		return cimbar::load<IMG>::load_img(fmt::format("bitmap/{}.png", name));
 	}
 
 	static int calc_size(int size)
