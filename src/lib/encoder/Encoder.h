@@ -9,7 +9,7 @@
 #include <functional>
 #include <string>
 
-class Encoder : public SimpleEncoder
+class Encoder : public SimpleEncoder<cv::Mat>
 {
 public:
 	using SimpleEncoder::SimpleEncoder;

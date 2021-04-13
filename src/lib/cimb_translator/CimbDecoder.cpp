@@ -1,8 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "CimbDecoder.h"
 
-#include "Common.h"
 #include "Cell.h"
+#include "Common.h"
+#include "res/res.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
@@ -67,7 +68,7 @@ void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
 {
-	cv::Mat tile = cimbar::getTile(_symbolBits, symbol, _dark, _numColors);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(_symbolBits, symbol, _dark, _numColors);
 	return image_hash::average_hash(tile);
 }
 

@@ -11,7 +11,7 @@
 
 TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 {
-	CimbWriter cw(4, 2);
+	CimbWriter<cv::Mat> cw(4, 2);
 
 	while (1)
 	{
@@ -27,7 +27,7 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 
 TEST_CASE( "CimbWriterTest/testCustomSize", "[unit]" )
 {
-	CimbWriter cw(4, 2, true, 1040);
+	CimbWriter<cv::Mat> cw(4, 2, true, 1040);
 
 	while (1)
 	{

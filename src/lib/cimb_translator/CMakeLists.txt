@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
-	bitmaps.h
 	AdjacentCellFinder.cpp
 	AdjacentCellFinder.h
 	Cell.h
@@ -11,11 +10,9 @@ set(SOURCES
 	CellPositions.h
 	CimbDecoder.cpp
 	CimbDecoder.h
-	CimbEncoder.cpp
 	CimbEncoder.h
 	CimbReader.cpp
 	CimbReader.h
-	CimbWriter.cpp
 	CimbWriter.h
 	Common.cpp
 	Common.h

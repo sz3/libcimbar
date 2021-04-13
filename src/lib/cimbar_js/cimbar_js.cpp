@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 
+using EncoderType = SimpleEncoder<cv::Mat>;
 
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
@@ -72,7 +73,7 @@ int next_frame()
 		_frameCount = 0;
 	}
 
-	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
+	EncoderType enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	enc.set_encode_id(_encodeId);
 
 	_next = enc.encode_next(*_fes, _window->width());
@@ -85,7 +86,7 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
-	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
+	EncoderType enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	if (encode_id < 0)
 		enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 	else

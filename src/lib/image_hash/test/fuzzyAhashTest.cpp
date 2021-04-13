@@ -32,7 +32,7 @@ namespace {
 
 TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 0, true);
 	cv::Mat tenxten = embedTile(tile);
 
 	// compute the hashes we expect
@@ -56,7 +56,7 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 0, true);
 	cv::Mat tenxten = embedTile(tile);
 
 	// compute the hashes we expect
@@ -96,7 +96,7 @@ TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 0, true);
 	cv::Mat tenxten = embedTile(tile, true);
 
 	// compute the hashes we expect
@@ -120,7 +120,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testPreThreshold.SpecialCase", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 0, true);
 	cv::Mat tenxten = embedTile(tile, true);
 
 	// compute the hashes we expect
@@ -147,7 +147,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.SpecialCase", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::load<cv::Mat>::getTile(4, 0, true);
 	cv::Mat tenxten = embedTile(tile, true);
 
 	// compute the hashes we expect
