@@ -27,7 +27,7 @@ jobs:
     - uses: openrndr/setup-opengl@v1.1
 
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install libopencv-dev libglfw3-dev libgles2-mesa-dev mesa-dri-gallium xvfb-run ${{ matrix.config.extra-packages }}
+      run: sudo apt-get update && sudo apt-get install libopencv-dev libglfw3-dev libgles2-mesa-dev mesa-utils xvfb ${{ matrix.config.extra-packages }}
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
