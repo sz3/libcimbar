@@ -2,6 +2,7 @@
 #pragma once
 
 #include "gl_2d_display.h"
+#include "read_gl.h"
 #include "mat_to_gl.h"
 
 #include <GLFW/glfw3.h>
@@ -98,6 +99,13 @@ public:
 	unsigned width() const
 	{
 		return _width;
+	}
+
+	cv::Mat capture_gl_state() const
+	{
+		if (!is_good())
+			return cv::Mat();
+		return cimbar::gl_to_mat(_w);
 	}
 
 protected:

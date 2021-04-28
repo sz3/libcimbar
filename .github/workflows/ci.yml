@@ -23,6 +23,8 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - uses: openrndr/setup-opengl@v1.1
+
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install libopencv-dev libglfw3-dev libgles2-mesa-dev
 
@@ -39,7 +41,7 @@ jobs:
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
-      run: make test CTEST_OUTPUT_ON_FAILURE=TRUE
+      run: xvfb-run make test CTEST_OUTPUT_ON_FAILURE=TRUE
 
   cppcheck:
     runs-on: ubuntu-18.04
