@@ -16,8 +16,8 @@ jobs:
 
         - name: "linux clang"
           os: ubuntu-18.04
-          env: CXX="clang++-10.0" CC="clang-10.0"
-          extra-packages: "clang10"
+          env: CXX="clang++" CC="clang"
+          extra-packages: "clang"
 
     steps:
     - uses: actions/checkout@v2
