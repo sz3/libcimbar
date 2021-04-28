@@ -22,7 +22,8 @@ add_test(gui_test gui_test)
 
 target_link_libraries(gui_test
 
-	${libcimbar_UI_LIB}
+	glfw
+	GL
 	${OPENCV_LIBS}
 	${CPPFILESYSTEM}
 )
