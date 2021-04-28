@@ -112,23 +112,15 @@ int configure(unsigned color_bits, unsigned ecc, int compression)
 		compression = 6;
 
 	// check if we need to refresh the stream
-	bool refresh = false;
-	if (color_bits != _colorBits)
-	{
-		_colorBits = color_bits;
-		refresh = true;
-	}
-	if (ecc != _ecc)
-	{
-		_ecc = ecc;
-		refresh = true;
-	}
-	if (compression != _compressionLevel)
-		_compressionLevel = compression;
-
-	// try to refresh the stream
+	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel);
 	if (refresh)
 	{
+		// update config
+		_colorBits = color_bits;
+		_ecc = ecc;
+		_compressionLevel = compression;
+
+		// try to refresh the stream
 		if (_window and _fes)
 		{
 			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
