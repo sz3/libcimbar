@@ -16,7 +16,8 @@ jobs:
 
         - name: "linux clang"
           os: ubuntu-18.04
-          env: CXX="clang++-6.0" CC="clang-6.0"
+          env: CXX="clang++-10.0" CC="clang-10.0"
+          extra-packages: "clang10"
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +27,7 @@ jobs:
     - uses: openrndr/setup-opengl@v1.1
 
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install libopencv-dev libglfw3-dev libgles2-mesa-dev
+      run: sudo apt-get update && sudo apt-get install libopencv-dev libglfw3-dev libgles2-mesa-dev ${{ matrix.config.extra-packages }}
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
