@@ -80,7 +80,7 @@ return {
   encode : function(filename, data)
   {
     console.log("encoding " + filename);
-    var res = Module._encode(data.byteOffset, data.length);
+    var res = Module._encode(data.byteOffset, data.length, -1);
     console.log(res);
     Main.setTitle(filename);
     Main.setActive(true);
@@ -132,7 +132,7 @@ return {
     var nextInterval = _interval>elapsed? _interval-elapsed : 0;
     setTimeout(Main.nextFrame, nextInterval);
 
-    if (_showStats && renderCount) {
+    if (_showStats && frameCount) {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
     }
@@ -148,7 +148,7 @@ return {
 
   setColorBits : function(color_bits)
   {
-    Module._configure(color_bits);
+    Module._configure(color_bits, 30, 6);
 
     var nav = document.getElementById("nav-container");
     if (color_bits == 2) {

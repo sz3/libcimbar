@@ -35,9 +35,11 @@ Crucially, because the encoder compiles to asmjs and wasm, it can run on anythin
 
 ## Library dependencies
 
-[OpenCV](https://opencv.org/) must be installed before building. All other dependencies are included in the source tree.
+[OpenCV](https://opencv.org/) and [GLFW](https://github.com/glfw/glfw) (+ OpenGL ES headers) must be installed before building. All other dependencies are included in the source tree.
 
-* opencv - https://opencv.org/
+* opencv - https://opencv.org/ (`libopencv-dev`)
+* GLFW - https://github.com/glfw/glfw (`libglfw3-dev`)
+* GLES3/gl3.h - `libgles2-mesa-dev`
 * base - https://github.com/r-lyeh-archived/base
 * catch2 - https://github.com/catchorg/Catch2
 * concurrentqueue - https://github.com/cameron314/concurrentqueue
@@ -51,12 +53,14 @@ Crucially, because the encoder compiles to asmjs and wasm, it can run on anythin
 * wirehair - https://github.com/catid/wirehair
 * zstd - https://github.com/facebook/zstd
 
-Optional:
-* GLFW - https://github.com/glfw/glfw or `libglfw3-dev` (for when `opencv-highgui` is not available or unwanted)
-    * the GLFW code path also needs/uses `GLES3/gl3.h` (`libgles2-mesa-dev` on ubuntu 18.04)
-
 ## Build
 
+1. install opencv and GLFW. On ubuntu/debian, this looks like:
+```
+sudo apt install libopencv-dev libglfw3-dev libgles2-mesa-dev
+```
+
+2. run the cmake + make incantation
 ```
 cmake .
 make -j7
@@ -65,7 +69,7 @@ make install
 
 By default, libcimbar will try to install build products under `./dist/bin/`.
 
-To build the emscripten+WASM encoder (what cimbar.org uses), see [WASM](WASM.md).
+To build cimbar.js (what cimbar.org uses), see [WASM](WASM.md).
 
 ## Usage
 
@@ -85,6 +89,8 @@ Encode and animate to window:
 ```
 ./cimbar_send inputfile.pdf
 ```
+
+You can also encode a file using [cimbar.org](https://cimbar.org), or the latest [release](https://github.com/sz3/libcimbar/releases/latest).
 
 ## Performance numbers
 

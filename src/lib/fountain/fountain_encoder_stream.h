@@ -43,14 +43,14 @@ public:
 	// this resets the stream!
 	// but you might need to do if you change other parameters
 	// ex: different ECC settings => different payload size => different fountain buffer size
-	bool reset_and_resize_buffer(unsigned buffer_size)
+	bool restart_and_resize_buffer(unsigned buffer_size)
 	{
 		if (buffer_size > _data.size())
 			return false;
 
 		_buffer.resize(buffer_size);
 		_encoder = FountainEncoder((uint8_t*)_data.data(), _data.size(), block_size());
-		reset();
+		restart();
 		return true;
 	}
 
@@ -59,7 +59,7 @@ public:
 		return _encoder.good() and _data.size() > _encoder.packet_size();
 	}
 
-	void reset()
+	void restart()
 	{
 		_block = 0;
 		_buffIndex = ~0U;
