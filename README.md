@@ -35,11 +35,11 @@ Crucially, because the encoder compiles to asmjs and wasm, it can run on anythin
 
 ## Library dependencies
 
-[OpenCV](https://opencv.org/) and [GLFW](https://github.com/glfw/glfw) must be installed before building. All other dependencies are included in the source tree.
+[OpenCV](https://opencv.org/) and [GLFW](https://github.com/glfw/glfw) (+ OpenGL ES headers) must be installed before building. All other dependencies are included in the source tree.
 
 * opencv - https://opencv.org/ (`libopencv-dev`)
 * GLFW - https://github.com/glfw/glfw (`libglfw3-dev`)
-	* GLFW also needs/uses `GLES3/gl3.h` (`libgles2-mesa-dev` on ubuntu 18.04)
+* GLES3/gl3.h - `libgles2-mesa-dev`
 * base - https://github.com/r-lyeh-archived/base
 * catch2 - https://github.com/catchorg/Catch2
 * concurrentqueue - https://github.com/cameron314/concurrentqueue
