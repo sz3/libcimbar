@@ -1,0 +1,12 @@
+{
+	"lang": "en",
+	"dir": "ltr",
+	"name": "Cimbar Encoder",
+	"short_name": "cimbar.org",
+	"icons": [],
+	"scope": "/",
+	"start_url": "/index.html",
+	"display": "fullscreen",
+	"theme_color": "aliceblue",
+	"background_color": "black"
+}

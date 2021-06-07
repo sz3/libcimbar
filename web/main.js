@@ -271,3 +271,10 @@ window.addEventListener("drop", function(e) {
   Main.dragDrop(e);
   document.body.style["opacity"] = 1.0;
 }, false);
+
+window.onload = function() {
+  'use strict';
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+}
