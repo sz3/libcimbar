@@ -14,11 +14,15 @@
 	padding: 0;
 }
 
+html, body {
+	height: 100vh;
+}
+
 body {
 	background-color: white;
 	background-image: radial-gradient(circle at top left, rgb(7,0,0),rgb(244,244,244),rgb(255,255,255));
+	background-size: cover;
 	color: gray;
-	height: 100vh;
 	display: grid;
 	align-items: center;
 	transition: opacity 0.4s ease-in;
@@ -116,8 +120,10 @@ body {
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
+  border: 0;
   outline: 0;
   background-image: linear-gradient(180deg, rgb(0,0,0,0) 10%, rgb(0,0,0) 40%, rgb(0,0,0) 60%, rgb(0,0,0,0) 90%);
+  background-color: initial;
 }
 .icon-bar {
   display: block;
@@ -263,12 +269,12 @@ body {
 
 <div id="nav-container" class="c4">
     <div class="bg"></div>
-    <div id="nav-button" tabindex="0">
+    <button id="nav-button" tabindex="0">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
-    </div>
+    </button>
     <div id="nav-content" tabindex="-1">
       <span id="current-file">No file selected</span>
       <ul>
@@ -285,17 +291,12 @@ body {
 <a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
-	// reset zoom
-	document.body.style.zoom = (window.innerWidth / window.outerWidth);
-
 	var canvas = document.getElementById('canvas');
-	var width = window.outerWidth;
-	var height = window.outerHeight;
 
 	var Module = {};
 	Module.canvas = canvas;
 	Module.onRuntimeInitialized = () => {
-		Main.run(canvas, width, height);
+		Main.init();
 		Main.nextFrame();
 	};
 </script>
