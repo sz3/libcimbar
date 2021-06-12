@@ -48,8 +48,8 @@ return {
   resize : function()
   {
     // reset zoom
-    document.body.style.zoom = (window.innerWidth / window.outerWidth);
     var canvas = document.getElementById('canvas');
+    canvas.style.zoom = (window.innerWidth / window.outerWidth);
     var width = window.outerWidth;
     var height = window.outerHeight;
     Main.scaleCanvas(canvas, width, height);
@@ -83,6 +83,7 @@ return {
      invisible_click.style.height = canvas.style.height;
      invisible_click.style.top = cpos.top + "px";
      invisible_click.style.left = cpos.left + "px";
+     invisible_click.style.zoom = canvas.style.zoom;
   },
 
   encode : function(filename, data)
