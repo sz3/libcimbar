@@ -3,10 +3,11 @@
 	"dir": "ltr",
 	"name": "Cimbar Encoder",
 	"short_name": "cimbar.org",
-	"icons": [],
+	"icons": [{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],
 	"scope": "/",
 	"start_url": "/index.html",
 	"display": "fullscreen",
 	"theme_color": "aliceblue",
 	"background_color": "black"
 }
+
