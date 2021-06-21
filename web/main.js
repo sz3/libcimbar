@@ -9,10 +9,10 @@ var _renderTime = 0;
 function toggleFullscreen()
 {
   if (document.fullscreenElement) {
-    document.exitFullscreen();
+    return document.exitFullscreen();
   }
   else {
-    document.documentElement.requestFullscreen();
+    return document.documentElement.requestFullscreen();
   }
 }
 
@@ -39,18 +39,26 @@ function importFile(f)
 
 // public interface
 return {
-  run : function(canvas, width, height)
+  init : function(canvas)
   {
-    console.log("init for canvas " + canvas);
-
     Module._initialize_GL(1040, 1040);
+    Main.resize();
+  },
+
+  resize : function()
+  {
+    // reset zoom
+    var canvas = document.getElementById('canvas');
+    canvas.style.zoom = (window.innerWidth / window.outerWidth);
+    var width = window.outerWidth;
+    var height = window.outerHeight;
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);
   },
 
   toggleFullscreen : function()
   {
-    toggleFullscreen();
+    toggleFullscreen().then(Main.resize);
   },
 
   scaleCanvas : function(canvas, width, height)
@@ -75,6 +83,7 @@ return {
      invisible_click.style.height = canvas.style.height;
      invisible_click.style.top = cpos.top + "px";
      invisible_click.style.left = cpos.left + "px";
+     invisible_click.style.zoom = canvas.style.zoom;
   },
 
   encode : function(filename, data)
