@@ -1,5 +1,5 @@
 
-var _cacheName = 'cimbar-js-v0.5.8.ab';
+var _cacheName = 'cimbar-js-v0.5.8.c';
 var _cacheFiles = [
   '/',
   '/index.html',
