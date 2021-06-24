@@ -6,8 +6,7 @@ var _cacheFiles = [
   '/cimbar_js.js',
   '/cimbar_js.wasm',
   '/favicon.ico',
-  '/main.js',
-  '/pwa.json'
+  '/main.js'
 ];
 
 // fetch files
