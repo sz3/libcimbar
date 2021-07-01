@@ -290,6 +290,9 @@ body {
 <a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('./sw.js');
+	}
 	var canvas = document.getElementById('canvas');
 
 	var Module = {};
