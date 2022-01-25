@@ -5,7 +5,6 @@
 #include "encoder/Encoder.h"
 #include "extractor/Extractor.h"
 #include "extractor/SimpleCameraCalibration.h"
-#include "extractor/Undistort.h"
 #include "fountain/FountainInit.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str.h"
@@ -30,14 +29,6 @@ int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool
 
 		if (!no_deskew)
 		{
-			// attempt undistort. It's currently a low-effort attempt to *reduce* distortion, not eliminate it.
-			// we rely on the decoder to power through minor distortion
-			if (undistort)
-			{
-				Undistort<SimpleCameraCalibration> und;
-				if (!und.undistort(img, img))
-					err |= 1;
-			}
 
 			Extractor ext;
 			int res = ext.extract(img, img);

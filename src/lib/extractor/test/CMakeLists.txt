@@ -10,7 +10,6 @@ set (SOURCES
 	ScanStateTest.cpp
 	ScannerTest.cpp
 	SimpleCameraCalibrationTest.cpp
-	UndistortTest.cpp
 )
 
 include_directories(

@@ -12,8 +12,8 @@ add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -fPIC")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Wall -g -O2 -fPIC")
+	set(CMAKE_C_FLAGS "-static ${CFLAGS} -Wall -std=c99 -Os -fPIC")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-static -Wall -g -O2 -fPIC")
 endif()
 
 if(DEFINED USE_WASM)
@@ -30,8 +30,12 @@ if(DEFINED USE_WASM)
 	)
 endif()
 
+if(DEFINED OPENCV_DIR)
+	include_directories(${OPENCV_DIR})
+endif()
+
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
+	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
