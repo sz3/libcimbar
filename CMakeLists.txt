@@ -31,12 +31,20 @@ if(DEFINED USE_WASM)
 endif()
 
 if(DEFINED OPENCV_DIR)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(OPENCV4 REQUIRED opencv4)
+	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
 	include_directories(${OPENCV_DIR})
 endif()
 
+# -lm -lpthread -lrt
+# /lib/libz.so /usr/lib/libopenblas.so
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
+	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core" ${OPENCV4_STATIC_LIBRARIES})
 endif()
+
+message("hello ${OPENCV_LIBS}")
+message("helloagain ${OPENCV4_STATIC_LIBRARY_DIRS}")
 
 if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
