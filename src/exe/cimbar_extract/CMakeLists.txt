@@ -21,7 +21,7 @@ target_link_libraries(cimbar_extract
 add_custom_command(
 	TARGET cimbar_extract POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:cimbar_extract> cimbar_extract.dbg
-	COMMAND ${CMAKE_STRIP} -g $<TARGET_FILE:cimbar_extract>
+	COMMAND strip -g $<TARGET_FILE:cimbar_extract>
 )
 
 install(

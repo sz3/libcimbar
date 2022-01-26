@@ -7,13 +7,12 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${libcimbar_SOURCE_DIR}/dist" CACHE PATH "..." FORCE)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
 add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-	set(CMAKE_C_FLAGS "-static ${CFLAGS} -Wall -std=c99 -Os -fPIC")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-static -Wall -g -O2 -fPIC")
+	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -fPIC")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-std=c++17 -stdlib=libc++ -Wall -g -O2 -fPIC")
 endif()
 
 if(DEFINED USE_WASM)
@@ -32,10 +31,13 @@ endif()
 
 if(DEFINED OPENCV_DIR)
 	include_directories(${OPENCV_DIR})
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(OPENCV4 REQUIRED opencv4)
+	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
+	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core" ${OPENCV4_STATIC_LIBRARIES})
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
