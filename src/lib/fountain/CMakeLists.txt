@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7)
 
 set(SOURCES
 	concurrent_fountain_decoder_sink.h
