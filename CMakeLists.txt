@@ -29,11 +29,18 @@ if(DEFINED USE_WASM)
 	)
 endif()
 
-if(DEFINED OPENCV_DIR)
-	include_directories(${OPENCV_DIR})
+if(DEFINED STATIC_OPENCV_DIR)
+	include_directories(${STATIC_OPENCV_DIR})
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(OPENCV4 REQUIRED opencv4)
-	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
+	pkg_check_modules(GLFW3 REQUIRED glfw3)
+	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS} ${GLFW3_STATIC_LIBRARY_DIRS})
+
+	# for static libc++
+	#  -lc++ -lc++abi
+	# _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -stdlib=libc++")
+	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++ /usr/lib/llvm-11/lib/libc++.a /usr/lib/llvm-11/lib/libc++abi.a")
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
