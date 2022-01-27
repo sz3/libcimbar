@@ -4,6 +4,7 @@
 #include "gl_2d_display.h"
 #include "mat_to_gl.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include <string>
@@ -30,6 +31,15 @@ public:
 			return;
 		}
 		glfwMakeContextCurrent(_w);
+
+		if (glewInit() != GLEW_OK)
+		{
+			std::cout << "Couldn't initalize OpenGL" << std::endl;
+			_good = false;
+			glfwDestroyWindow(_w);
+			return;
+		}
+
 		glfwSwapInterval(1);
 
 		_display = std::make_shared<cimbar::gl_2d_display>(width, height);

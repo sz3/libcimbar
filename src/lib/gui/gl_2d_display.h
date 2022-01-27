@@ -5,8 +5,7 @@
 #include "gl_shader.h"
 #include "util/loop_iterator.h"
 
-#include <GLES3/gl3.h>
-#include <GLES2/gl2ext.h>
+#include <GL/glew.h>
 #include <memory>
 
 namespace cimbar {
