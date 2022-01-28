@@ -12,7 +12,7 @@ add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -fPIC")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-std=c++17 -static -Wall -g -O2 -fPIC")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-std=c++17 -Wall -g -O2 -fPIC")
 endif()
 
 if(DEFINED USE_WASM)
@@ -29,11 +29,13 @@ if(DEFINED USE_WASM)
 	)
 endif()
 
-if(DEFINED OPENCV_DIR)
+if(DEFINED BUILD_STATIC_LINUX)
 	include_directories(${OPENCV_DIR})
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(OPENCV4 REQUIRED opencv4)
 	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
+
+	set(CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
