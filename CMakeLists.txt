@@ -27,10 +27,14 @@ if(DEFINED USE_WASM)
 		${OPENCV_DIR}/opencv-build-wasm/build_wasm/
 		${opencv_include_modules}
 	)
+elseif(DEFINED OPENCV_DIR)
+	include_directories(${OPENCV_DIR})
+else()
+	find_package(OpenCV 4 REQUIRED)
+	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
-if(DEFINED BUILD_STATIC_LINUX)
-	include_directories(${OPENCV_DIR})
+if(DEFINED BUILD_STATIC_LINUX)  # you probably want OPENCV_DIR too
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(OPENCV4 REQUIRED opencv4)
 	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
