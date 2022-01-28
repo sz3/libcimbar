@@ -1,7 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
-#include <GL/glew.h>
+#include <epoxy/gl.h>
 #include <opencv2/opencv.hpp>
 
 namespace cimbar {
