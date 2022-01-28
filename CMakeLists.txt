@@ -36,11 +36,9 @@ if(DEFINED STATIC_OPENCV_DIR)
 	pkg_check_modules(GLFW3 REQUIRED glfw3)
 	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS} ${GLFW3_STATIC_LIBRARY_DIRS})
 
-	# for static libc++
-	#  -lc++ -lc++abi
-	# _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS
+	# see linker flags at bottom for rest of static libc++ magic
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -stdlib=libc++")
-	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++ /usr/lib/llvm-11/lib/libc++.a /usr/lib/llvm-11/lib/libc++abi.a")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++")
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
@@ -90,8 +88,18 @@ include_directories(
 	${libcimbar_SOURCE_DIR}/src/third_party_lib
 )
 
+if(DEFINED STATIC_OPENCV_DIR)
+	# for static libc++
+	#  -lc++ -lc++abi
+	# _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS
+	link_libraries("/usr/lib/llvm-11/lib/libc++.a" "/usr/lib/llvm-11/lib/libc++abi.a" "pthread")
+endif()
+
+
 foreach(proj ${PROJECTS})
 	add_subdirectory(${proj} build/${proj})
 endforeach()
+
+
 
 
