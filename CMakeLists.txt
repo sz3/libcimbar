@@ -50,7 +50,6 @@ set (PROJECTS
 	src/lib/bit_file
 	src/lib/chromatic_adaptation
 	src/lib/cimb_translator
-	src/lib/cimbar_js
 	src/lib/compression
 	src/lib/encoder
 	src/lib/fountain
@@ -68,6 +67,15 @@ set (PROJECTS
 	src/third_party_lib/zstd
 )
 
+# GL stuff
+if(NOT DEFINED BUILD_STATIC_LINUX)
+set(PROJECTS
+	${PROJECTS}
+	src/lib/cimbar_js
+)
+endif()
+
+# command line tools (+ extractor currently disabled)
 if(NOT DEFINED USE_WASM)
 set(PROJECTS
 	${PROJECTS}
@@ -75,8 +83,15 @@ set(PROJECTS
 
 	src/exe/cimbar
 	src/exe/cimbar_extract
-	src/exe/cimbar_send
 	src/exe/build_image_assets
+)
+endif()
+
+# command line tool that does GL stuff
+if(NOT DEFINED USE_WASM AND NOT DEFINED BUILD_STATIC_LINUX)
+set(PROJECTS
+	${PROJECTS}
+	src/exe/cimbar_send
 )
 endif()
 
