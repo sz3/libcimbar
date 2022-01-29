@@ -33,16 +33,16 @@ if(DEFINED STATIC_OPENCV_DIR)
 	include_directories(${STATIC_OPENCV_DIR})
 	find_package(PkgConfig REQUIRED)
 	pkg_check_modules(OPENCV4 REQUIRED opencv4)
-	pkg_check_modules(GLFW3 REQUIRED glfw3)
-	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS} ${GLFW3_STATIC_LIBRARY_DIRS})
+	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
 
 	# see linker flags at bottom for rest of static libc++ magic
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -stdlib=libc++")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++")
+	set(CPP_CLANG_STATIC_LIBS "/usr/lib/llvm-11/lib/libc++.a" "/usr/lib/llvm-11/lib/libc++abi.a" "pthread")
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core" ${OPENCV4_STATIC_LIBRARIES})
+	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core" ${OPENCV4_STATIC_LIBRARIES} ${CPP_CLANG_STATIC_LIBS})
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
@@ -92,9 +92,8 @@ if(DEFINED STATIC_OPENCV_DIR)
 	# for static libc++
 	#  -lc++ -lc++abi
 	# _LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS
-	link_libraries("/usr/lib/llvm-11/lib/libc++.a" "/usr/lib/llvm-11/lib/libc++abi.a" "pthread")
+	link_libraries(${CPP_CLANG_STATIC_LIBS})
 endif()
-
 
 foreach(proj ${PROJECTS})
 	add_subdirectory(${proj} build/${proj})

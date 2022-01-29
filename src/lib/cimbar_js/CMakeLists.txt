@@ -70,6 +70,6 @@ else()  # if no wasm, ignore all that and add in GLFW libraries
 	target_link_libraries(cimbar_js
 
 		epoxy
-		${GLFW3_STATIC_LIBRARIES}
+		glfw
 	)
 endif()
