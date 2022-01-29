@@ -36,7 +36,7 @@ if(DEFINED STATIC_OPENCV_DIR)
 	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
 
 	# see linker flags at bottom for rest of static libc++ magic
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -stdlib=libc++")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -stdlib=libc++ -static-libgcc")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nostdlib++")
 	set(CPP_CLANG_STATIC_LIBS "/usr/lib/llvm-11/lib/libc++.a" "/usr/lib/llvm-11/lib/libc++abi.a" "pthread")
 endif()
