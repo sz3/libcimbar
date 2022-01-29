@@ -30,7 +30,7 @@ if(DEFINED USE_WASM)
 elseif(DEFINED OPENCV_DIR)
 	include_directories(${OPENCV_DIR})
 else()
-	find_package(OpenCV 3. REQUIRED)
+	find_package(OpenCV REQUIRED)
 	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
