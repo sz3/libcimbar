@@ -33,7 +33,7 @@ public:
 		to_uint8_arr(encode_id, size, d);
 	}
 
-	unsigned id() const
+	uint64_t id() const
 	{
 		return _data;
 	}
