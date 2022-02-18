@@ -60,7 +60,7 @@ public:
 	std::vector<std::string> get_done() const
 	{
 		std::vector<std::string> done;
-		for (uint64_t id : _done)
+		for (uint32_t id : _done)
 			done.push_back( get_filename(FountainMetadata(id)) );
 		return done;
 	}
@@ -77,7 +77,7 @@ public:
 		return progress;
 	}
 
-	bool is_done(uint64_t id) const
+	bool is_done(uint32_t id) const
 	{
 		return _done.find(id) != _done.end();
 	}
@@ -141,6 +141,6 @@ protected:
 	// e.g. most recent 16/8, or something?
 	// question is what happens to _done/_streams when we wrap for continuous data streaming...
 	std::unordered_map<uint8_t, fountain_decoder_stream> _streams;
-	// track the uint64_t combo of (encode_id,size) to avoid redundant work
-	std::set<uint64_t> _done;
+	// track the uint32_t combo of (encode_id,size) to avoid redundant work
+	std::set<uint32_t> _done;
 };
