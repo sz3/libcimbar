@@ -6,7 +6,7 @@
 #include "bit_file/bitmatrix.h"
 #include "cimb_translator/Cell.h"
 
-#include "intx/int128.hpp"
+#include "intx/intx.hpp"
 #include <opencv2/opencv.hpp>
 
 #include <array>

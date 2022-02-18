@@ -2,7 +2,7 @@
 #pragma once
 
 #include "bit_extractor.h"
-#include "intx/int128.hpp"
+#include "intx/intx.hpp"
 #include <array>
 #include <iostream>
 #include <utility>

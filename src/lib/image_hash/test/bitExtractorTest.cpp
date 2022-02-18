@@ -2,7 +2,7 @@
 #include "unittest.h"
 
 #include "bit_extractor.h"
-#include "intx/int128.hpp"
+#include "intx/intx.hpp"
 
 #include <bitset>
 #include <iostream>
@@ -36,7 +36,9 @@ TEST_CASE( "bitExtractorTest/testLargerValue.1", "[unit]" )
 
 TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 {
-	intx::uint128 bits{0xFFBFCFE3FULL, 0xF83C0E030080000ULL};
+	intx::uint128 bits{0xF83C0E030080000ULL, 0xFFBFCFE3FULL};
+	assertEquals( "ffbfcfe3f0f83c0e030080000", intx::hex(bits) );  // sanity check
+
 	bit_extractor<intx::uint128, 100> be(bits);
 	uint64_t res = be.extract(1, 11, 21, 31);
 	assertEquals( 0xfffefcf8, res );
