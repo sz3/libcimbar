@@ -30,6 +30,7 @@
 #include "WirehairTools.h"
 
 #include <cmath>
+#include <cstdlib>
 
 #ifdef _MSC_VER
 #include <intrin.h> // _BitScanReverse
