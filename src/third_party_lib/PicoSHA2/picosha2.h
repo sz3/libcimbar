@@ -93,7 +93,7 @@ void hash256_block(RaIter1 message_digest, RaIter2 first, RaIter2 last) {
     assert(first + 64 == last);
     static_cast<void>(last);  // for avoiding unused-variable warning
     word_t w[64];
-    std::fill(w, w + 64, 0);
+    std::fill(w, w + 64, word_t(0));
     for (std::size_t i = 0; i < 16; ++i) {
         w[i] = (static_cast<word_t>(mask_8bit(*(first + i * 4))) << 24) |
                (static_cast<word_t>(mask_8bit(*(first + i * 4 + 1))) << 16) |
@@ -185,7 +185,7 @@ class hash256_one_by_one {
 
     void init() {
         buffer_.clear();
-        std::fill(data_length_digits_, data_length_digits_ + 4, 0);
+        std::fill(data_length_digits_, data_length_digits_ + 4, word_t(0));
         std::copy(detail::initial_message_digest,
                   detail::initial_message_digest + 8, h_);
     }
@@ -204,17 +204,17 @@ class hash256_one_by_one {
 
     void finish() {
         byte_t temp[64];
-        std::fill(temp, temp + 64, 0);
+        std::fill(temp, temp + 64, byte_t(0));
         std::size_t remains = buffer_.size();
         std::copy(buffer_.begin(), buffer_.end(), temp);
         temp[remains] = 0x80;
 
         if (remains > 55) {
-            std::fill(temp + remains + 1, temp + 64, 0);
+            std::fill(temp + remains + 1, temp + 64, byte_t(0));
             detail::hash256_block(h_, temp, temp + 64);
-            std::fill(temp, temp + 64 - 4, 0);
+            std::fill(temp, temp + 64 - 4, byte_t(0));
         } else {
-            std::fill(temp + remains + 1, temp + 64 - 4, 0);
+            std::fill(temp + remains + 1, temp + 64 - 4, byte_t(0));
         }
 
         write_data_bit_length(&(temp[56]));
