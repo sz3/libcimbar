@@ -28,13 +28,13 @@ if(DEFINED USE_WASM)  # wasm build needs OPENCV_DIR defined
 		${OPENCV_DIR}/opencv-build-wasm/build_wasm/
 		${opencv_include_modules}
 	)
-else()  # if not wasm, go find opencv
+else()  # if not wasm, go find opencv. 3 or 4 should both work
 	find_package(OpenCV REQUIRED)
 	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
+	set(OPENCV_LIBS "opencv_calib3d" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
