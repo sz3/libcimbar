@@ -1,5 +1,5 @@
 #!/bin/sh
-#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk
+#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:latest
 
 cd /usr/src/app
 
