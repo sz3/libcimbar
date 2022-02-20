@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 	if (!initialize_GL(window_size, window_size))
 	{
 		std::cerr << "failed to create window :(" << std::endl;
-		return 50;
+		return 70;
 	}
 
 	configure(colorBits, ecc, compressionLevel);

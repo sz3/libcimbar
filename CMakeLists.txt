@@ -16,7 +16,7 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Wall -g -O2 -fPIC")
 endif()
 
-if(DEFINED USE_WASM)
+if(DEFINED USE_WASM)  # wasm build needs OPENCV_DIR defined
 	set(DISABLE_TESTS true)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Os")
@@ -28,10 +28,13 @@ if(DEFINED USE_WASM)
 		${OPENCV_DIR}/opencv-build-wasm/build_wasm/
 		${opencv_include_modules}
 	)
+else()  # if not wasm, go find opencv. 3 or 4 should both work
+	find_package(OpenCV REQUIRED)
+	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_core" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo")
+	set(OPENCV_LIBS "opencv_calib3d" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)

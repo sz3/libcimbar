@@ -53,11 +53,17 @@
 //------------------------------------------------------------------------------
 // Platform/Architecture
 
+#if defined(__ARM_ARCH) || defined(__ARM_NEON) || defined(__ARM_NEON__)
+    #if !defined IOS
+        #define LINUX_ARM
+    #endif
+#endif
+
 #if defined(ANDROID) || defined(IOS) || defined(LINUX_ARM) || defined(__powerpc__) || defined(__s390__)
     #define GF256_TARGET_MOBILE
 #endif // ANDROID
 
-#if defined(__AVX2__) || (defined (_MSC_VER) && _MSC_VER >= 1900)
+#if defined(__AVX2__) && (!defined (_MSC_VER) || _MSC_VER >= 1900)
     #define GF256_TRY_AVX2 /* 256-bit */
     #include <immintrin.h>
     #define GF256_ALIGN_BYTES 32
@@ -66,36 +72,28 @@
 #endif // __AVX2__
 
 #if !defined(GF256_TARGET_MOBILE)
-    // Note: MSVC currently only supports SSSE3 but not AVX2
     #include <tmmintrin.h> // SSSE3: _mm_shuffle_epi8
     #include <emmintrin.h> // SSE2
 #endif // GF256_TARGET_MOBILE
 
-#if defined(HAVE_ARM_NEON_H)
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
     #include <arm_neon.h>
-#endif // HAVE_ARM_NEON_H
-
-#if defined(GF256_TARGET_MOBILE)
-
-    #define GF256_ALIGNED_ACCESSES /* Inputs must be aligned to GF256_ALIGN_BYTES */
-
-# if defined(HAVE_ARM_NEON_H)
-    // Compiler-specific 128-bit SIMD register keyword
-    #define GF256_M128 uint8x16_t
     #define GF256_TRY_NEON
+#endif
+
+// Compiler-specific 128-bit SIMD register keyword
+#if defined(GF256_TARGET_MOBILE)
+#if defined(GF256_TRY_NEON)
+    #define GF256_M128 uint8x16_t
 #else
     #define GF256_M128 uint64_t
-# endif
-
+#endif // GF256_TRY_NEON
 #else // GF256_TARGET_MOBILE
-
-    // Compiler-specific 128-bit SIMD register keyword
     #define GF256_M128 __m128i
-
 #endif // GF256_TARGET_MOBILE
 
+// Compiler-specific 256-bit SIMD register keyword
 #ifdef GF256_TRY_AVX2
-    // Compiler-specific 256-bit SIMD register keyword
     #define GF256_M256 __m256i
 #endif
 
@@ -271,10 +269,6 @@ static GF256_FORCE_INLINE void gf256_div_mem(void * GF256_RESTRICT vz,
 
 //------------------------------------------------------------------------------
 // Misc Operations
-
-/// Swap two memory buffers in-place
-extern void gf256_memswap(void * GF256_RESTRICT vx, void * GF256_RESTRICT vy, int bytes);
-
 
 #ifdef __cplusplus
 }

@@ -200,7 +200,7 @@ static bool gf256_self_test()
 #endif
 
 #if defined(GF256_TRY_NEON)
-# if defined(IOS) && defined(__ARM_NEON__)
+# if defined(IOS) && (defined(__ARM_NEON) || defined(__ARM_NEON__))
 // Requires iPhone 5S or newer
 static const bool CpuHasNeon = true;
 static const bool CpuHasNeon64 = true;

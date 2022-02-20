@@ -32,7 +32,7 @@ public:
 			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), data, writeLen, _compressionLevel);
 			if (ZSTD_isError(compressedBytes))
 			{
-				std::cout << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
+				std::cerr << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
 				return false;
 			}
 			STREAM::write(_compBuff.data(), compressedBytes);

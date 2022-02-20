@@ -15,7 +15,7 @@ public:
 	}
 
 public:
-	FountainMetadata(uint64_t id)
+	FountainMetadata(uint32_t id)
 	    : _data(id)
 	{
 	}
@@ -33,7 +33,7 @@ public:
 		to_uint8_arr(encode_id, size, d);
 	}
 
-	unsigned id() const
+	uint32_t id() const
 	{
 		return _data;
 	}
@@ -65,5 +65,5 @@ protected:
 	}
 
 protected:
-	uint64_t _data; // might invert this and only generate the uint64_t when we need it
+	uint32_t _data; // might invert this and only generate the uint32_t when we need it
 };

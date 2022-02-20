@@ -39,10 +39,10 @@ public:
 		return true;
 	}
 
-	void mark_done(uint64_t id)
+	void mark_done(const FountainMetadata& md)
 	{
-		_done.insert(id);
-		auto it = _streams.find(id);
+		_done.insert(md.id());
+		auto it = _streams.find(stream_slot(md));
 		if (it != _streams.end())
 			_streams.erase(it);
 	}
@@ -60,7 +60,7 @@ public:
 	std::vector<std::string> get_done() const
 	{
 		std::vector<std::string> done;
-		for (uint64_t id : _done)
+		for (uint32_t id : _done)
 			done.push_back( get_filename(FountainMetadata(id)) );
 		return done;
 	}
@@ -77,7 +77,7 @@ public:
 		return progress;
 	}
 
-	bool is_done(uint64_t id) const
+	bool is_done(uint32_t id) const
 	{
 		return _done.find(id) != _done.end();
 	}
@@ -106,7 +106,7 @@ public:
 			return false;
 
 		if (store(md, *finished))
-			mark_done(md.id());
+			mark_done(md);
 		return true;
 	}
 
@@ -122,7 +122,7 @@ public:
 	}
 
 protected:
-	// streams is limited to at most 8 decoders at a time. Current, we just use the lower bits of the encode_id.
+	// streams is limited to at most 8 decoders at a time. Currently, we just use the lower bits of the encode_id.
 	uint8_t stream_slot(const FountainMetadata& md) const
 	{
 		return md.encode_id() & 0x7;
@@ -137,7 +137,10 @@ protected:
 	std::string _dataDir;
 	unsigned _chunkSize;
 
+	// maybe instead of unordered_map+set, something where we can "age out" old streams?
+	// e.g. most recent 16/8, or something?
+	// question is what happens to _done/_streams when we wrap for continuous data streaming...
 	std::unordered_map<uint8_t, fountain_decoder_stream> _streams;
-	// track the uint64_t combo of (encode_id,size) to avoid redundant work
-	std::set<uint64_t> _done;
+	// track the uint32_t combo of (encode_id,size) to avoid redundant work
+	std::set<uint32_t> _done;
 };
