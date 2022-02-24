@@ -16,6 +16,15 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Wall -g -O2 -fPIC")
 endif()
 
+# LTO. I'd like to try it unconditionally, but we'll see...
+if(DEFINED USE_LTO)
+	cmake_policy(SET CMP0069 NEW)
+	set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
+	include(CheckIPOSupported)
+	check_ipo_supported()
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 if(DEFINED USE_WASM)  # wasm build needs OPENCV_DIR defined
 	set(DISABLE_TESTS true)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGF256_TARGET_MOBILE")
