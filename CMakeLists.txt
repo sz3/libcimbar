@@ -33,8 +33,17 @@ else()  # if not wasm, go find opencv. 3 or 4 should both work
 	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
+if(DEFINED BUILD_PORTABLE_LINUX)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(OPENCV4 REQUIRED opencv4)
+	link_directories(${OPENCV4_STATIC_LIBRARY_DIRS})
+
+	# statically link c++/gcc (not libc!!)
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -static-libstdc++ -static-libgcc")
+endif()
+
 if(NOT DEFINED OPENCV_LIBS)
-	set(OPENCV_LIBS "opencv_calib3d" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core")
+	set(OPENCV_LIBS "opencv_calib3d" "opencv_imgcodecs" "opencv_imgproc" "opencv_photo" "opencv_core" ${OPENCV4_STATIC_LIBRARIES})
 endif()
 
 if(NOT DEFINED CPPFILESYSTEM)

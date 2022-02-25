@@ -51,6 +51,10 @@ namespace image_hash
 				uint64_t mval = (*hax) & 0x101010101ULL;
 				const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
 				uint8_t val = cv[0] << 4 | cv[1] << 3 | cv[2] << 2 | cv[3] << 1 | cv[4];
+				// TODO:
+				/*if (bigEndian)
+					val = cv[7] << 4 | cv[6] << 3 | cv[5] << 2 | cv[4] << 1 | cv[3];*/ // ?
+
 				res |= intx::uint128(val) << bitpos;
 			}
 		}

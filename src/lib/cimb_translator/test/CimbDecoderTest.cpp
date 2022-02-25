@@ -56,7 +56,7 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 	for (unsigned i = 0; i < 16; ++i)
 	{
 		cv::Mat tile = cimbar::getTile(4, i, true);
-		cv::Mat tenxten(10, 10, tile.type());
+		cv::Mat tenxten(10, 10, tile.type(), cv::Scalar(0, 0, 0));
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 		// grayscale and threshold, since that's what average_hash needs

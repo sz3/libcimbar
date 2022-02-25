@@ -1,0 +1,42 @@
+name: release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  package-cimbar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+
+      - name: Get openCV
+        run: |
+          wget https://github.com/opencv/opencv/archive/refs/tags/4.5.5.zip
+          unzip 4.5.5.zip
+          mv opencv-4.5.5 opencv4
+
+      - name: Run the build process with Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: emscripten/emsdk:latest
+          options: -v ${{ github.workspace }}:/usr/src/app
+          shell: bash
+          run: |
+            bash /usr/src/app/package-wasm.sh
+
+      - name: Show results
+        run: ls -l web/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            web/cimbar.asmjs.zip
+            web/cimbar.wasm.tar.gz
+

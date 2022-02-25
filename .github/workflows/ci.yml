@@ -14,6 +14,9 @@ jobs:
           os: ubuntu-18.04
           env: CXX="g++-7" CC="gcc-7"
 
+        - name: "linux gcc9"
+          os: ubuntu-latest
+
         - name: "linux clang"
           os: ubuntu-18.04
           env: CXX="clang++" CC="clang"
