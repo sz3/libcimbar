@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	vc.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 
 	//auto [width, height] = window_size();
-	int width = 1280;
+	int width = 1920;
 	int height = 1080;
 	std::cout << "got dimensions " << width << "," << height << std::endl;
 
@@ -99,6 +99,7 @@ int main(int argc, char** argv)
 		return 70;
 	}
 
+	Extractor ext;
 	Decoder dec;
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc);
@@ -111,25 +112,23 @@ int main(int argc, char** argv)
 	{
 		// delay, then try to read frame
 		start = wait_for_frame_time(delay, start);
+		if (window.should_close())
+			break;
 
 		if (!vc.read(mat))
 		{
 			std::cerr << "failed to read from cam" << std::endl;
 			continue;
 		}
+		cv::UMat img = mat.getUMat(cv::ACCESS_RW);
 
 		cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
 
 		// draw some stats on mat?
 		window.show(mat, 0);
-		if (window.should_close())
-			break;
 
 		// extract
-		cv::UMat img = mat.getUMat(cv::ACCESS_RW);
-
-		bool shouldPreprocess = false;
-		Extractor ext;
+		bool shouldPreprocess = true;
 		int res = ext.extract(img, img);
 		if (!res)
 		{
@@ -139,8 +138,8 @@ int main(int argc, char** argv)
 		else if (res == Extractor::NEEDS_SHARPEN)
 			shouldPreprocess = true;
 
-		//cv::imwrite("/tmp/foo-base.png", mat);
-		//cv::imwrite("/tmp/foo-ex.png", img);
+		cv::imwrite("/tmp/foo-base.png", mat);
+		cv::imwrite("/tmp/foo-ex.png", img);
 
 		// decode
 		int bytes = dec.decode_fountain(img, sink, shouldPreprocess);
