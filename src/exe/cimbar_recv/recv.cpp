@@ -9,8 +9,9 @@
 #include "cxxopts/cxxopts.hpp"
 #include "serialize/str.h"
 #include "util/File.h"
-#include <opencv2/videoio.hpp>
+
 #include <GLFW/glfw3.h>
+#include <opencv2/videoio.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -107,9 +108,12 @@ int main(int argc, char** argv)
 
 	cv::Mat mat;
 
+	unsigned count = 0;
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)
 	{
+		++count;
+
 		// delay, then try to read frame
 		start = wait_for_frame_time(delay, start);
 		if (window.should_close())
@@ -120,8 +124,8 @@ int main(int argc, char** argv)
 			std::cerr << "failed to read from cam" << std::endl;
 			continue;
 		}
-		cv::UMat img = mat.getUMat(cv::ACCESS_RW);
 
+		cv::UMat img = mat.getUMat(cv::ACCESS_RW);
 		cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
 
 		// draw some stats on mat?
@@ -137,9 +141,6 @@ int main(int argc, char** argv)
 		}
 		else if (res == Extractor::NEEDS_SHARPEN)
 			shouldPreprocess = true;
-
-		cv::imwrite("/tmp/foo-base.png", mat);
-		cv::imwrite("/tmp/foo-ex.png", img);
 
 		// decode
 		int bytes = dec.decode_fountain(img, sink, shouldPreprocess);
