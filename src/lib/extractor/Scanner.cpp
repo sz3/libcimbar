@@ -123,7 +123,7 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	incoming_edge = {-incoming_edge.y(), incoming_edge.x()}; // rotate
 	point<int> overlap = departing_edge - incoming_edge;
 
-	if (overlap.dot(overlap) < edges[departing_edge].dot(edges[departing_edge]))
+	if (overlap.dot(overlap) < departing_edge.dot(departing_edge))
 		top_right = fix_index<3>(top_left + 1);
 	else
 		top_right = fix_index<3>(top_left - 1);
