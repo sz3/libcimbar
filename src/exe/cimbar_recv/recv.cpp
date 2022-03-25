@@ -31,14 +31,6 @@ namespace {
 			std::this_thread::sleep_for(std::chrono::milliseconds(delay-millis));
 		return std::chrono::high_resolution_clock::now();
 	}
-
-
-	std::pair<int, int> window_size()
-	{
-		GLFWmonitor* mon = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(mon);
-		return {mode->width, mode->height};
-	}
 }
 
 
@@ -84,13 +76,16 @@ int main(int argc, char** argv)
 		std::cerr << "failed to open video device :(" << std::endl;
 		return 70;
 	}
-
 	vc.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-	vc.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+	vc.set(cv::CAP_PROP_FRAME_HEIGHT, 1200);
 
-	//auto [width, height] = window_size();
-	int width = 1920;
-	int height = 1080;
+	// set max camera res, and use aspect ratio for window size...
+
+	std::cout << fmt::format("width: {}, height {}", vc.get(cv::CAP_PROP_FRAME_WIDTH), vc.get(cv::CAP_PROP_FRAME_HEIGHT)) << std::endl;
+
+	double ratio = vc.get(cv::CAP_PROP_FRAME_WIDTH) / vc.get(cv::CAP_PROP_FRAME_HEIGHT);
+	int height = 600;
+	int width = height * ratio;
 	std::cout << "got dimensions " << width << "," << height << std::endl;
 
 	cimbar::window_glfw window(width, height, "cimbar_recv");
@@ -99,6 +94,7 @@ int main(int argc, char** argv)
 		std::cerr << "failed to create window :(" << std::endl;
 		return 70;
 	}
+	window.auto_scale_to_window();
 
 	Extractor ext;
 	Decoder dec;
@@ -136,7 +132,7 @@ int main(int argc, char** argv)
 		int res = ext.extract(img, img);
 		if (!res)
 		{
-			std::cerr << "no extract " << mat.cols << "," << mat.rows << std::endl;
+			//std::cerr << "no extract " << mat.cols << "," << mat.rows << std::endl;
 			continue;
 		}
 		else if (res == Extractor::NEEDS_SHARPEN)
@@ -144,8 +140,8 @@ int main(int argc, char** argv)
 
 		// decode
 		int bytes = dec.decode_fountain(img, sink, shouldPreprocess);
-		std::cerr << "got some bytes " << bytes << std::endl;
-
+		if (bytes > 0)
+			std::cerr << "got some bytes " << bytes << std::endl;
 	}
 
 	return 0;
