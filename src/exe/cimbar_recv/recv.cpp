@@ -37,13 +37,13 @@ int main(int argc, char** argv)
 
 	unsigned colorBits = cimbar::Config::color_bits();
 	unsigned ecc = cimbar::Config::ecc_bytes();
-	unsigned defaultFps = 15;
+	unsigned defaultFps = 60;
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())
 	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
-		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
+		("f,fps", "Target decode FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 	    ("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 	}
 	vc.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	vc.set(cv::CAP_PROP_FRAME_HEIGHT, 1200);
-	vc.set(cv::CAP_PROP_FPS, 60);
+	vc.set(cv::CAP_PROP_FPS, fps);
 
 	// set max camera res, and use aspect ratio for window size...
 
