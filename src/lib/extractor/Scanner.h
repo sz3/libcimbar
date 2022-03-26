@@ -41,7 +41,7 @@ public: // public inline methods
 public: // other interesting methods
 	std::vector<Anchor> deduplicate_candidates(const std::vector<Anchor>& candidates) const;
 	unsigned filter_candidates(std::vector<Anchor>& candidates) const;
-	bool sort_top_to_bottom(std::vector<Anchor>& anchors);
+	static bool sort_top_to_bottom(std::vector<Anchor>& anchors);
 
 	template <typename SCANTYPE>
 	void t1_scan_rows(std::function<void(const Anchor&)> fun, int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;

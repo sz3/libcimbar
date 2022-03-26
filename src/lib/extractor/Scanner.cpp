@@ -21,7 +21,7 @@ namespace {
 	{
 		if (i < 0)
 			i = N-1;
-		else if (i > N-1)
+		else if (i >= N)
 			i = 0;
 		return i;
 	}
@@ -115,7 +115,7 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 
 	// because of how we ordered our edges, the index of the longest edge is also the index of the anchor opposite it.
 	int top_left = get_longest_edge(edges);
-	int top_right;
+	int top_right, bottom_left;
 
 	// now, we need to find the order of the other two:
 	const point<int>& departing_edge = edges[fix_index<3>(top_left - 1)];
@@ -123,16 +123,19 @@ bool Scanner::sort_top_to_bottom(std::vector<Anchor>& anchors)
 	incoming_edge = {-incoming_edge.y(), incoming_edge.x()}; // rotate
 	point<int> overlap = departing_edge - incoming_edge;
 
-	if (overlap.dot(overlap) < edges[departing_edge].dot(edges[departing_edge]))
+	if (overlap.dot(overlap) < departing_edge.dot(departing_edge))
+	{
 		top_right = fix_index<3>(top_left + 1);
+		bottom_left = fix_index<3>(top_left - 1);
+	}
 	else
+	{
 		top_right = fix_index<3>(top_left - 1);
+		bottom_left = fix_index<3>(top_left + 1);
+	}
 
 	// apply the order.
-	if (&anchors[0] != &anchors[top_left])
-		std::swap(anchors[0], anchors[top_left]);
-	if (top_left != 1 and top_right != 1)
-		std::swap(anchors[1], anchors[2]);
+	anchors = {anchors[top_left], anchors[top_right], anchors[bottom_left]};
 	return true;
 }
 

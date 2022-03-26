@@ -210,34 +210,42 @@ TEST_CASE( "ScannerTest/testScanEdges", "[unit]" )
 
 TEST_CASE( "ScannerTest/testSortTopToBottom", "[unit]" )
 {
-	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
-	Scanner sc(img);
-
 	std::vector<Anchor> candidates;
 	candidates.push_back(Anchor(300, 360, 100, 160));
 	candidates.push_back(Anchor(300, 360, 300, 360));
 	candidates.push_back(Anchor(100, 160, 300, 360));
-	assertTrue( sc.sort_top_to_bottom(candidates) ); // make this a static function?
+	assertTrue( Scanner::sort_top_to_bottom(candidates) );
 
 	assertEquals(
-	    "330+-30,330+-30 330+-30,130+-30 130+-30,330+-30",
-	    turbo::str::join(candidates)
+		"330+-30,330+-30 130+-30,330+-30 330+-30,130+-30",
+		turbo::str::join(candidates)
 	);
 }
 
 TEST_CASE( "ScannerTest/testSortTopToBottom.2", "[unit]" )
 {
-	cv::Mat img = TestCimbar::loadSample("6bit/4_30_f0_627.jpg");
-	Scanner sc(img);
-
 	std::vector<Anchor> candidates;
 	candidates.push_back(Anchor(966, 1020, 966, 1020));
 	candidates.push_back(Anchor(966, 1020, 2, 56));
 	candidates.push_back(Anchor(2, 56, 966, 1020));
-	assertTrue( sc.sort_top_to_bottom(candidates) );
+	assertTrue( Scanner::sort_top_to_bottom(candidates) );
 
 	assertEquals(
 	    "993+-27,993+-27 29+-27,993+-27 993+-27,29+-27",
 	    turbo::str::join(candidates)
+	);
+}
+
+TEST_CASE( "ScannerTest/testSortTopToBottom.3", "[unit]" )
+{
+	std::vector<Anchor> candidates;
+	candidates.push_back(Anchor(383, 437, 994, 1048));
+	candidates.push_back(Anchor(395, 447, 107, 157));
+	candidates.push_back(Anchor(1250, 1296, 124, 170));
+	assertTrue( Scanner::sort_top_to_bottom(candidates) );
+
+	assertEquals(
+		"421+-26,132+-25 1273+-23,147+-23 410+-27,1021+-27",
+		turbo::str::join(candidates)
 	);
 }

@@ -56,6 +56,14 @@ public:
 		return glfwWindowShouldClose(_w);
 	}
 
+	void auto_scale_to_window()
+	{
+		if (!is_good())
+			return;
+		auto fun = [](GLFWwindow*, int w, int h){ glViewport(0, 0, w, h); };
+		glfwSetWindowSizeCallback(_w, fun);
+	}
+
 	void rotate(unsigned i=1)
 	{
 		if (_display)
