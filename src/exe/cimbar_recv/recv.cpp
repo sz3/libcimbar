@@ -8,7 +8,6 @@
 
 #include "cxxopts/cxxopts.hpp"
 #include "serialize/str.h"
-#include "util/File.h"
 
 #include <GLFW/glfw3.h>
 #include <opencv2/videoio.hpp>
@@ -17,9 +16,7 @@
 #include <iostream>
 #include <string>
 #include <thread>
-#include <vector>
 using std::string;
-using std::vector;
 
 namespace {
 
