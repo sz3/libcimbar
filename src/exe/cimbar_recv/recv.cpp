@@ -78,10 +78,11 @@ int main(int argc, char** argv)
 	}
 	vc.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	vc.set(cv::CAP_PROP_FRAME_HEIGHT, 1200);
+	vc.set(cv::CAP_PROP_FPS, 60);
 
 	// set max camera res, and use aspect ratio for window size...
 
-	std::cout << fmt::format("width: {}, height {}", vc.get(cv::CAP_PROP_FRAME_WIDTH), vc.get(cv::CAP_PROP_FRAME_HEIGHT)) << std::endl;
+	std::cout << fmt::format("width: {}, height {}, exposure {}", vc.get(cv::CAP_PROP_FRAME_WIDTH), vc.get(cv::CAP_PROP_FRAME_HEIGHT), vc.get(cv::CAP_PROP_EXPOSURE)) << std::endl;
 
 	double ratio = vc.get(cv::CAP_PROP_FRAME_WIDTH) / vc.get(cv::CAP_PROP_FRAME_HEIGHT);
 	int height = 600;
