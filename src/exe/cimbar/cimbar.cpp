@@ -12,6 +12,7 @@
 
 #include "cxxopts/cxxopts.hpp"
 
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -96,7 +97,6 @@ int decode(const FileIterable& infiles, const std::function<int(cv::UMat, bool, 
 	int err = 0;
 	for (const string& inf : infiles)
 	{
-		std::cerr << "processing " << inf << std::endl;
 		bool shouldPreprocess = (preprocess == 1);
 		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
@@ -148,7 +148,6 @@ int main(int argc, char** argv)
 	options.add_options()
 		("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
 		("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
-		("stdin", "Read input filenames from stdin.", cxxopts::value<bool>())
 		("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
@@ -165,18 +164,23 @@ int main(int argc, char** argv)
 	options.positional_help("<in...>");
 
 	auto result = options.parse(argc, argv);
-	bool useStdin = result.count("stdin");
-	bool hasInputs = result.count("in") or useStdin;
-	if (result.count("help") or !result.count("out") or !hasInputs)
+	if (result.count("help"))
 	{
-	  std::cerr << options.help() << std::endl;
-	  exit(0);
+		std::cerr << options.help() << std::endl;
+		exit(0);
 	}
 
+	string outpath = std::filesystem::current_path();
+	if (result.count("out"))
+		outpath = result["out"].as<string>();
+	std::cerr << "Output files will appear in " << outpath << std::endl;
+
+	bool useStdin = !result.count("in");
 	vector<string> infiles;
-	if (result.count("in"))
+	if (useStdin)
+		std::cerr << "Enter input filenames:" << std::endl;
+	else
 		infiles = result["in"].as<vector<string>>();
-	string outpath = result["out"].as<string>();
 
 	bool encode = result.count("encode");
 	bool no_fountain = result.count("no-fountain");
