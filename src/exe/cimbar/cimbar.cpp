@@ -91,8 +91,22 @@ namespace {
 	};
 }
 
-template <typename FileIterable>
-int decode(const FileIterable& infiles, const std::function<int(cv::UMat, bool, bool)>& decode, bool no_deskew, bool undistort, int preprocess, bool color_correct)
+template <typename FilenameIterable>
+int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc, int color_bits, int compression_level, bool no_fountain)
+{
+	Encoder en(ecc, cimbar::Config::symbol_bits(), color_bits);
+	for (const string& f : infiles)
+	{
+		if (no_fountain)
+			en.encode(f, outpath);
+		else
+			en.encode_fountain(f, outpath, compression_level);
+	}
+	return 0;
+}
+
+template <typename FilenameIterable>
+int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, bool, bool)>& decode, bool no_deskew, bool undistort, int preprocess, bool color_correct)
 {
 	int err = 0;
 	for (const string& inf : infiles)
@@ -182,24 +196,19 @@ int main(int argc, char** argv)
 	else
 		infiles = result["in"].as<vector<string>>();
 
-	bool encode = result.count("encode");
+	bool encodeFlag = result.count("encode");
 	bool no_fountain = result.count("no-fountain");
 
 	colorBits = std::min(3, result["color-bits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
-	if (encode)
+	if (encodeFlag)
 	{
-		Encoder en(ecc, cimbar::Config::symbol_bits(), colorBits);
-		for (const string& f : infiles)
-		{
-			if (no_fountain)
-				en.encode(f, outpath);
-			else
-				en.encode_fountain(f, outpath, compressionLevel);
-		}
-		return 0;
+		if (useStdin)
+			return encode(StdinLineReader(), outpath, ecc, colorBits, compressionLevel, no_fountain);
+		else
+			return encode(infiles, outpath, ecc, colorBits, compressionLevel, no_fountain);
 	}
 
 	// else, decode
