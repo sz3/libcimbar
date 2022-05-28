@@ -20,6 +20,7 @@ target_link_libraries(cimbar
 	wirehair
 	zstd
 	${OPENCV_LIBS}
+	${CPPFILESYSTEM}
 )
 
 add_custom_command(
