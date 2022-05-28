@@ -19,11 +19,84 @@
 using std::string;
 using std::vector;
 
-int decode(const vector<string>& infiles, const std::function<int(cv::UMat, bool, bool)>& decode, bool no_deskew, bool undistort, int preprocess, bool color_correct)
+namespace {
+	class stdinerator
+	{
+	public:
+		stdinerator(bool done=false)
+			: _done(done)
+		{
+			read_once();
+		}
+
+		void mark_done()
+		{
+			_done = true;
+		}
+
+		void read_once()
+		{
+			if (!_done)
+				std::getline(std::cin, _current);
+		}
+
+		std::string operator*() const
+		{
+			return _current;
+		}
+
+		stdinerator& operator++()
+		{
+			read_once();
+			return *this;
+		}
+
+		bool operator==(const stdinerator& rhs) const
+		{
+			return _done and rhs._done;
+		}
+
+		bool operator!=(const stdinerator& rhs) const
+		{
+			return !operator==(rhs);
+		}
+
+		static stdinerator begin()
+		{
+			return stdinerator();
+		}
+
+		static stdinerator end()
+		{
+			return stdinerator(true);
+		}
+
+	protected:
+		bool _done = false;
+		std::string _current;
+	};
+
+	struct StdineratorFactory
+	{
+		stdinerator begin() const
+		{
+			return stdinerator::begin();
+		}
+
+		stdinerator end() const
+		{
+			return stdinerator::end();
+		}
+	};
+}
+
+template <typename FileIterable>
+int decode(const FileIterable& infiles, const std::function<int(cv::UMat, bool, bool)>& decode, bool no_deskew, bool undistort, int preprocess, bool color_correct)
 {
 	int err = 0;
 	for (const string& inf : infiles)
 	{
+		std::cout << "file is " << inf << std::endl;
 		bool shouldPreprocess = (preprocess == 1);
 		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
@@ -73,25 +146,26 @@ int main(int argc, char** argv)
 	unsigned compressionLevel = cimbar::Config::compression_level();
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	options.add_options()
-	    ("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
-	    ("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
-	    ("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
-	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
-	    ("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
-	    ("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
-	    ("color-correct", "Toggle decoding color correction. 1 == on. 0 == off.", cxxopts::value<int>()->default_value("1"))
-	    ("encode", "Run the encoder!", cxxopts::value<bool>())
-	    ("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
-	    ("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
-	    ("preprocess", "Run sharpen filter on the input image. 1 == on. 0 == off. -1 == guess.", cxxopts::value<int>()->default_value("-1"))
-	    ("h,help", "Print usage")
+		("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
+		("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
+		("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
+		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
+		("f,fountain", "Attempt fountain encode/decode", cxxopts::value<bool>())
+		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+		("color-correct", "Toggle decoding color correction. 1 == on. 0 == off.", cxxopts::value<int>()->default_value("1"))
+		("encode", "Run the encoder!", cxxopts::value<bool>())
+		("no-deskew", "Skip the deskew step -- treat input image as already extracted.", cxxopts::value<bool>())
+		("undistort", "Attempt undistort step -- useful if image distortion is significant.", cxxopts::value<bool>())
+		("preprocess", "Run sharpen filter on the input image. 1 == on. 0 == off. -1 == guess.", cxxopts::value<int>()->default_value("-1"))
+		("h,help", "Print usage")
 	;
 	options.show_positional_help();
 	options.parse_positional({"in"});
 	options.positional_help("<in...>");
 
 	auto result = options.parse(argc, argv);
-	if (result.count("help") or !result.count("out") or !result.count("in"))
+	bool hasInputs = result.count("in") or result.count("stdin");
+	if (result.count("help") or !result.count("out") or !hasInputs)
 	{
 	  std::cout << options.help() << std::endl;
 	  exit(0);
@@ -139,7 +213,7 @@ int main(int argc, char** argv)
 
 		// else -- default case, all bells and whistles
 		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
-		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
+		return decode(StdineratorFactory(), fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
 	}
 
 	// else
