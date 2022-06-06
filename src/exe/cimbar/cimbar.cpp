@@ -12,6 +12,7 @@
 
 #include "cxxopts/cxxopts.hpp"
 
+#include <cstdio>
 #include <experimental/filesystem>
 #include <functional>
 #include <iostream>
@@ -37,8 +38,16 @@ namespace {
 
 		void read_once()
 		{
-			if (!_done)
-				std::getline(std::cin, _current);
+			if (_done)
+				return;
+
+			if (::feof(::stdin))
+			{
+				mark_done();
+				return;
+			}
+
+			std::getline(std::cin, _current);
 		}
 
 		std::string operator*() const
@@ -97,6 +106,8 @@ int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc,
 	Encoder en(ecc, cimbar::Config::symbol_bits(), color_bits);
 	for (const string& f : infiles)
 	{
+		if (f.empty())
+			continue;
 		if (no_fountain)
 			en.encode(f, outpath);
 		else
@@ -111,6 +122,8 @@ int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, bo
 	int err = 0;
 	for (const string& inf : infiles)
 	{
+		if (inf.empty())
+			continue;
 		bool shouldPreprocess = (preprocess == 1);
 		cv::UMat img = cv::imread(inf).getUMat(cv::ACCESS_RW);
 		cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
@@ -236,12 +249,12 @@ int main(int argc, char** argv)
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc);
 	if (compressionLevel <= 0)
 	{
-		fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize);
+		fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize, true);
 		return decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
 	}
 
 	// else -- default case, all bells and whistles
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize, true);
 
 	if (useStdin)
 		return decode(StdinLineReader(), fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
