@@ -45,6 +45,10 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       run: make test CTEST_OUTPUT_ON_FAILURE=TRUE
 
+    - name: Usage test
+      working-directory: ${{runner.workspace}}/libcimbar/test/py
+      run: python3 -m unittest
+
   cppcheck:
     runs-on: ubuntu-18.04
 
