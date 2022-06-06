@@ -77,12 +77,17 @@ Encode:
 * large input files may fill up your disk with pngs!
 
 ```
-./cimbar --encode -i inputfile.txt -o outputprefix -f
+./cimbar --encode -i inputfile.txt -o outputprefix
 ```
 
 Decode (extracts file into output directory):
 ```
-./cimbar outputprefix*.png -o /tmp -f
+./cimbar outputprefix*.png -o /tmp
+```
+
+Decode a series of encoded images from stdin:
+```
+echo outputprefix*.png | ./cimbar -o /tmp
 ```
 
 Encode and animate to window:

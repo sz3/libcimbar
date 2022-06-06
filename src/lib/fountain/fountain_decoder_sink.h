@@ -5,6 +5,7 @@
 #include "FountainMetadata.h"
 #include "serialize/format.h"
 
+#include <cstdio>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -15,9 +16,10 @@ template <typename OUTSTREAM>
 class fountain_decoder_sink
 {
 public:
-	fountain_decoder_sink(std::string data_dir, unsigned chunk_size)
-	    : _dataDir(data_dir)
-	    , _chunkSize(chunk_size)
+	fountain_decoder_sink(std::string data_dir, unsigned chunk_size, bool log_writes=false)
+		: _dataDir(data_dir)
+		, _chunkSize(chunk_size)
+		, _logWrites(log_writes)
 	{
 	}
 
@@ -36,6 +38,8 @@ public:
 		std::string file_path = fmt::format("{}/{}", _dataDir, get_filename(md));
 		OUTSTREAM f(file_path);
 		f.write((char*)data.data(), data.size());
+		if (_logWrites)
+			printf("%s\n", file_path.c_str());
 		return true;
 	}
 
@@ -143,4 +147,5 @@ protected:
 	std::unordered_map<uint8_t, fountain_decoder_stream> _streams;
 	// track the uint32_t combo of (encode_id,size) to avoid redundant work
 	std::set<uint32_t> _done;
+	bool _logWrites;
 };
