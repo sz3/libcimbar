@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import PIPE
 from os.path import join as path_join, getsize
 from unittest import TestCase
 from unittest.mock import patch
@@ -30,7 +31,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
         outprefix = path_join(self.working_dir.name, 'img')
         cmd = _get_command('--encode -i', infile, '-o', outprefix)
 
-        res = subprocess.run(cmd, capture_output=True)
+        res = subprocess.run(cmd, stdout=PIPE)
         self.assertEqual(0, res.returncode)
 
         encoded_img = f'{outprefix}_0.png'
@@ -38,7 +39,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
 
         # decode
         cmd = _get_command('-i', encoded_img, '-o', self.working_dir.name)
-        res = subprocess.run(cmd, capture_output=True)
+        res = subprocess.run(cmd, stdout=PIPE)
         self.assertEqual(0, res.returncode)
 
         # filename in stdout
@@ -59,7 +60,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
         cmd = _get_command('--encode -o', outprefix)
 
         res = subprocess.run(
-            cmd, input=infile.encode('utf-8'), capture_output=True
+            cmd, input=infile.encode('utf-8'), stdout=PIPE
         )
 
         self.assertEqual(0, res.returncode)
@@ -70,7 +71,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
         # decode defaults to cwd -- which should be self.working_dir
         cmd = _get_command()
         res = subprocess.run(
-            cmd, input=encoded_img.encode('utf-8'), capture_output=True,
+            cmd, input=encoded_img.encode('utf-8'), stdout=PIPE,
             cwd=self.working_dir.name,
         )
         self.assertEqual(0, res.returncode)
