@@ -4,7 +4,7 @@ def get_path(name):
         'index': 'web/index.html',
         'cimbar_js': 'web/cimbar_js.js',
         'main_js': 'web/main.js',
-        'output': 'web/cimbar.html',
+        'output': 'web/cimbar_js.html',
     }
     return fns[name]
 
