@@ -3,12 +3,15 @@
 
 #include <iostream>
 
-template<typename C, size_t N>
+template<typename C, size_t N, size_t READLEN=8>
 class bit_extractor
 {
+protected:
+	static constexpr uint64_t BITMASK = (1 << READLEN) - 1; // e.g. 0xFF, 0x1F, 0xF
+
 public:
 	bit_extractor(const C& bits)
-	    : _bits(bits)
+		: _bits(bits)
 	{}
 
 	template<typename... T>
@@ -22,7 +25,7 @@ public:
 	{
 		constexpr auto byte_offset = sizeof...(T);
 
-		uint64_t total = ((uint64_t)(_bits >> (N - bit_offset - 8)) & 0xFF) << (byte_offset << 3); // if byte_offset is 1, we want to shift 8. if 2, 16....
+		uint64_t total = ((uint64_t)(_bits >> (N - bit_offset - READLEN)) & BITMASK) << (byte_offset * READLEN); // if byte_offset is 1, we want to shift 5. if 2, 10....
 		return total | extract(t...);
 	}
 

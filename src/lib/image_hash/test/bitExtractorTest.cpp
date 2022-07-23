@@ -12,16 +12,30 @@
 
 using std::string;
 
-TEST_CASE( "bitExtractorTest/testDefault", "[unit]" )
+TEST_CASE( "bitExtractorTest/testDefault.4", "[unit]" )
 {
-	intx::uint128 bits = 0x11d07e1f;
-	bit_extractor<intx::uint128, 32> be(bits);
+	uint64_t bits = 0x11d07e1f;
+	bit_extractor<uint64_t, 32, 4> be(bits);
+
+	// we're just reading 4 bits at a time.
+	assertEquals( 0x1d, be.extract(0, 8) );    // 0001 1101
+	assertEquals( 0x71, be.extract(16, 24) );  // 0x7 0x1
+	assertEquals( 0x1e, be.extract(0, 20) );
+	assertEquals( 0x0f, be.extract(12, 28) );
+	assertEquals( 0x1d, be.extract(24, 8) );
+}
+
+TEST_CASE( "bitExtractorTest/testDefault.8", "[unit]" )
+{
+	uint64_t bits = 0x11d07e1f;
+	bit_extractor<uint64_t, 32, 8> be(bits);
 
 	assertEquals( 0x11d0, be.extract(0, 8) );
 	assertEquals( 0x7e1f, be.extract(16, 24) );
 	assertEquals( 0x111f, be.extract(0, 24) );
 	assertEquals( 0x1fd0, be.extract(24, 8) );
 }
+
 
 TEST_CASE( "bitExtractorTest/testLargerValue.1", "[unit]" )
 {
