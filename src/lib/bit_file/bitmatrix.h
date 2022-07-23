@@ -17,9 +17,11 @@ public:
 		unsigned size = img.cols * img.rows;
 		while (size >= 8)
 		{
+			// we're turning 1 uint64_t into 8 uint8_ts
 			const uint64_t* hax = reinterpret_cast<const uint64_t*>(p);
 			uint64_t mval = (*hax) & 0x101010101010101ULL;
 			const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
+			// TODO: what about endianness???
 			uint8_t val = cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 | cv[6] << 1 | cv[7];
 			writer << val;
 			p += 8;
@@ -39,11 +41,11 @@ public:
 
 public:
 	bitmatrix(const bitbuffer& buff, unsigned width, unsigned height, unsigned xstart=0, unsigned ystart=0)
-	    : _buff(buff)
-	    , _xstart(xstart)
-	    , _ystart(ystart)
-	    , _width(width)
-	    , _height(height)
+		: _buff(buff)
+		, _xstart(xstart)
+		, _ystart(ystart)
+		, _width(width)
+		, _height(height)
 	{
 	}
 
