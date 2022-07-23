@@ -27,6 +27,8 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
+		// will this need to change for smaller tiles? probably?
+
 		int blockSize = 3; // default: no preprocessing
 
 		cv::Mat symbols;
@@ -89,11 +91,11 @@ namespace {
 }
 
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
-    : _image(img)
-    , _cellSize(Config::cell_size() + 2)
-    , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
-    , _decoder(decoder)
-    , _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
+	: _image(img)
+	, _cellSize(Config::cell_size() + 2)
+	, _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_offset(), Config::corner_padding())
+	, _decoder(decoder)
+	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction)
@@ -101,7 +103,7 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_shar
 }
 
 CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
-    : CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
+	: CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
 {
 }
 

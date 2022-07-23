@@ -15,7 +15,7 @@ unsigned Config::color_bits()
 
 unsigned Config::symbol_bits()
 {
-	return 4;
+	return 2;
 }
 
 unsigned Config::bits_per_cell()
@@ -40,7 +40,7 @@ unsigned Config::anchor_size()
 
 unsigned Config::cell_size()
 {
-	return 8;
+	return 5;
 }
 
 unsigned Config::cell_spacing()
@@ -48,14 +48,19 @@ unsigned Config::cell_spacing()
 	return cell_size() + 1;
 }
 
+unsigned Config::cell_offset()
+{
+	return 9;
+}
+
 unsigned Config::num_cells()
 {
-	return 112;
+	return 168;
 }
 
 unsigned Config::corner_padding()
 {
-	return 6;
+	return 54 / cell_spacing();
 }
 
 unsigned Config::interleave_blocks()
