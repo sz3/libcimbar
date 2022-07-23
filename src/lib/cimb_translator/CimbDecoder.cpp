@@ -43,19 +43,19 @@ namespace {
 		std::tuple<int,int,int> rel1 = relative_color(a);
 		std::tuple<int,int,int> rel2 = relative_color(b);
 		return (
-		    squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
-		    squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
-		    squared_difference(std::get<2>(rel1), std::get<2>(rel2))
+			squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
+			squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
+			squared_difference(std::get<2>(rel1), std::get<2>(rel2))
 		);
 	}
 }
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
-    : _symbolBits(symbol_bits)
-    , _numSymbols(1 << symbol_bits)
-    , _numColors(1 << color_bits)
-    , _dark(dark)
-    , _ahashThreshold(ahashThreshold)
+	: _symbolBits(symbol_bits)
+	, _numSymbols(1 << symbol_bits)
+	, _numColors(1 << color_bits)
+	, _dark(dark)
+	, _ahashThreshold(ahashThreshold)
 {
 	load_tiles();
 }
@@ -174,10 +174,10 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 		return 0;
 
 	// TODO: check/enforce dimensions of color_cell?
-	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	// limit dimensions to ignore outer row/col. We want to look at the middle 3x3
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(Cell::SKIP);
+	auto [r, g, b] = center.mean_rgb();
 	return get_best_color(r, g, b);
 }
 
