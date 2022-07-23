@@ -18,6 +18,7 @@ namespace cimbar
 
 		unsigned cell_size();
 		unsigned cell_spacing();
+		unsigned cell_offset();
 		unsigned num_cells();
 		unsigned corner_padding();
 		unsigned interleave_blocks();
