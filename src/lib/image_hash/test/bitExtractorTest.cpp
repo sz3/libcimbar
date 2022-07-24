@@ -25,6 +25,18 @@ TEST_CASE( "bitExtractorTest/testDefault.4", "[unit]" )
 	assertEquals( 0x1d, be.extract(24, 8) );
 }
 
+
+TEST_CASE( "bitExtractorTest/testDefault.5", "[unit]" )
+{
+	uint64_t bits = 0x11d07e1f;
+	bit_extractor<uint64_t, 32, 5> be(bits);
+
+	assertEquals(  0x48, be.extract(0, 10) );   // 00010 01000
+	assertEquals(  0xfc, be.extract(15, 20) );  // 00111 11100
+	assertEquals(  0x9c, be.extract(1, 20) );   // 00100 11100
+	assertEquals( 0x1e7, be.extract(16, 25) );  // 01111 00111
+}
+
 TEST_CASE( "bitExtractorTest/testDefault.8", "[unit]" )
 {
 	uint64_t bits = 0x11d07e1f;
@@ -43,7 +55,7 @@ TEST_CASE( "bitExtractorTest/testLargerValue.1", "[unit]" )
 	for (int i = 0; i < 81; ++i)
 		bits = (bits << 1) | (i%3 == 0);
 
-	bit_extractor<intx::uint128, 81> be(bits);
+	bit_extractor<intx::uint128, 81, 8> be(bits);
 	uint64_t res = be.extract(0, 9, 18, 27, 36, 45, 54, 63);
 	assertEquals( 0x9292929292929292, res );
 }
@@ -53,7 +65,7 @@ TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 	intx::uint128 bits{0xF83C0E030080000ULL, 0xFFBFCFE3FULL};
 	assertEquals( "ffbfcfe3f0f83c0e030080000", intx::hex(bits) );  // sanity check
 
-	bit_extractor<intx::uint128, 100> be(bits);
+	bit_extractor<intx::uint128, 100, 8> be(bits);
 	uint64_t res = be.extract(1, 11, 21, 31);
 	assertEquals( 0xfffefcf8, res );
 

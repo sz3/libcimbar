@@ -18,7 +18,7 @@ using std::string;
 namespace {
 	cv::Mat embedTile(const cv::Mat& tile, bool binaryThresh=false)
 	{
-		cv::Mat tenxten(10, 10, tile.type(), cv::Scalar(0, 0, 0));
+		cv::Mat tenxten(7, 7, tile.type(), cv::Scalar(0, 0, 0));
 		tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 		if (binaryThresh)
@@ -32,14 +32,14 @@ namespace {
 
 TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::getTile(2, 0, true);
 	cv::Mat tenxten = embedTile(tile);
 
 	// compute the hashes we expect
 	std::vector<uint64_t> expected;
 	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Rect crop(drift.first + 1, drift.second + 1, 5, 5);
 		cv::Mat img = tenxten(crop);
 		expected.push_back(image_hash::average_hash(img, 64)); // we pass in a threshold value to match what fuzzy_ahash will compute
 	}
@@ -56,14 +56,14 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::getTile(2, 0, true);
 	cv::Mat tenxten = embedTile(tile);
 
 	// compute the hashes we expect
 	std::vector<uint64_t> expected;
 	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Rect crop(drift.first + 1, drift.second + 1, 5, 5);
 		cv::Mat img = tenxten(crop);
 		expected.push_back(image_hash::average_hash(img, 64)); // we pass in a threshold value to match what fuzzy_ahash will compute
 	}
@@ -96,14 +96,14 @@ TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 
 TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::getTile(2, 0, true);
 	cv::Mat tenxten = embedTile(tile, true);
 
 	// compute the hashes we expect
 	std::vector<uint64_t> expected;
 	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Rect crop(drift.first + 1, drift.second + 1, 5, 5);
 		cv::Mat img = tenxten(crop);
 		expected.push_back(image_hash::average_hash(img, 64));
 	}
@@ -118,43 +118,16 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 		}
 }
 
-TEST_CASE( "fuzzyAhashTest/testPreThreshold.SpecialCase", "[unit]" )
-{
-	cv::Mat tile = cimbar::getTile(4, 0, true);
-	cv::Mat tenxten = embedTile(tile, true);
-
-	// compute the hashes we expect
-	std::vector<uint64_t> expected;
-	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
-	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
-		cv::Mat img = tenxten(crop);
-		expected.push_back(image_hash::average_hash(img, 64));
-	}
-
-	// do the real work
-	// 0xFF is a special case. It says we *only* care about 0xFF values,
-	// e.g. we can make some assumptions about the input data that might help us optimize...
-	auto actual = image_hash::fuzzy_ahash(tenxten, 0xFF);
-
-	for (unsigned i = 0; i < actual.size(); ++i)
-		DYNAMIC_SECTION( "are we correct? : " << i )
-		{
-			assertEquals(expected[i], actual[i]);
-		}
-}
-
-
 TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 {
-	cv::Mat tile = cimbar::getTile(4, 0, true);
+	cv::Mat tile = cimbar::getTile(2, 0, true);
 	cv::Mat tenxten = embedTile(tile, true);
 
 	// compute the hashes we expect
 	std::vector<uint64_t> expected;
 	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
 	{
-		cv::Rect crop(drift.first + 1, drift.second + 1, 8, 8);
+		cv::Rect crop(drift.first + 1, drift.second + 1, 5, 5);
 		cv::Mat img = tenxten(crop);
 		expected.push_back(image_hash::average_hash(img, 64));
 	}
@@ -164,8 +137,43 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 	bitmatrix::mat_to_bitbuffer(tenxten, writer);
 
 	// do the real work
-	bitmatrix bm(bb, 10, 10);
+	bitmatrix bm(bb, 7, 7);
 	auto actual = image_hash::fuzzy_ahash(bm);
+
+	for (unsigned i = 0; i < actual.size(); ++i)
+		DYNAMIC_SECTION( "are we correct? : " << i )
+		{
+			assertEquals(expected[i], actual[i]);
+		}
+}
+
+TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix.Fast", "[unit]" )
+{
+	cv::Mat tile = cimbar::getTile(2, 0, true);
+	cv::Mat tenxten = embedTile(tile, true);
+
+	// compute the hashes we expect
+	std::vector<uint64_t> expected;
+	for (const std::pair<int, int>& drift : CellDrift::driftPairs)
+	{
+		cv::Rect crop(drift.first + 1, drift.second + 1, 5, 5);
+		cv::Mat img = tenxten(crop);
+		expected.push_back(image_hash::average_hash(img, 64));
+	}
+
+	bitbuffer bb;
+	bitbuffer::writer writer(bb);
+	bitmatrix::mat_to_bitbuffer(tenxten, writer);
+
+	// clear the hashes we don't care about
+	expected[0] = 0;
+	expected[2] = 0;
+	expected[6] = 0;
+	expected[8] = 0;
+
+	// do the real work
+	bitmatrix bm(bb, 7, 7);
+	auto actual = image_hash::fuzzy_ahash(bm, image_hash::ahash_result::FAST);
 
 	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "bit_extractor.h"
-#include "intx/intx.hpp"
 #include <array>
 #include <iostream>
 #include <utility>
@@ -28,8 +27,8 @@ public:
 	{
 	public:
 		iterator(const ahash_result& hr, unsigned i=0)
-		    : _hr(hr)
-		    , _i(i)
+			: _hr(hr)
+			, _i(i)
 		{}
 
 		std::pair<int, uint64_t> operator*()
@@ -55,9 +54,9 @@ public:
 	};
 
 public:
-	ahash_result(const intx::uint128& bits, unsigned mode=ALL)
-	    : _bits(bits)
-	    , _mode(mode)
+	ahash_result(const uint64_t& bits, unsigned mode=ALL)
+		: _bits(bits)
+		, _mode(mode)
 	{
 		if (mode == ALL)
 			_results = extract_all();
@@ -67,38 +66,38 @@ public:
 
 	std::array<uint64_t, 9> extract_all() const
 	{
-		bit_extractor<intx::uint128, 100> be(_bits);
+		bit_extractor<uint64_t, 49, 5> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
-			be.extract(0, 10, 20, 30, 40, 50, 60, 70), // left
-			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-			be.extract(2, 12, 22, 32, 42, 52, 62, 72), // right
+			be.extract( 0,  7, 14, 21, 28), // left
+			be.extract( 1,  8, 15, 22, 29),
+			be.extract( 2,  9, 16, 23, 30), // right
 			// middle row
-			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+			be.extract( 7, 14, 21, 28, 35),
+			be.extract( 8, 15, 22, 29, 36),
+			be.extract( 9, 16, 23, 30, 37),
 			// bottom row
-			be.extract(20, 30, 40, 50, 60, 70, 80, 90),
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-			be.extract(22, 32, 42, 52, 62, 72, 82, 92)
+			be.extract(14, 21, 28, 35, 42),
+			be.extract(15, 22, 29, 36, 43),
+			be.extract(16, 23, 30, 37, 44)
 		};
 	}
 
 	std::array<uint64_t, 9> extract_fast() const
 	{
-		bit_extractor<intx::uint128, 100> be(_bits);
+		bit_extractor<uint64_t, 49, 5> be(_bits);
 		// skip the corners
 		return {
 			0,
-			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
+			be.extract( 1,  8, 15, 22, 29),
 			0,
 			// middle row
-			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+			be.extract( 7, 14, 21, 28, 35),
+			be.extract( 8, 15, 22, 29, 36),
+			be.extract( 9, 16, 23, 30, 37),
 			// bottom row
 			0,
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
+			be.extract(15, 22, 29, 36, 43),
 			0
 		};
 	}
@@ -124,7 +123,7 @@ public:
 	}
 
 protected:
-	intx::uint128 _bits;
+	uint64_t _bits;
 	int _mode;
 	std::array<uint64_t, 9> _results;
 };

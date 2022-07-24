@@ -3,7 +3,8 @@
 
 #include <iostream>
 
-template<typename C, size_t N, size_t READLEN=8>
+// 2(?) <= READLEN <= 8
+template<typename C, size_t N, size_t READLEN>
 class bit_extractor
 {
 protected:
@@ -25,7 +26,9 @@ public:
 	{
 		constexpr auto byte_offset = sizeof...(T);
 
-		uint64_t total = ((uint64_t)(_bits >> (N - bit_offset - READLEN)) & BITMASK) << (byte_offset * READLEN); // if byte_offset is 1, we want to shift 5. if 2, 10....
+		// grab the front READLEN bits. Then put them in the right place in the uint64_t output.
+		// if byte_offset is 1, we want to shift READLEN. if 2, READLEN*2...
+		uint64_t total = ((uint64_t)(_bits >> (N - bit_offset - READLEN)) & BITMASK) << (byte_offset * READLEN);
 		return total | extract(t...);
 	}
 

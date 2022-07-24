@@ -37,34 +37,6 @@ namespace image_hash
 		return res;
 	}
 
-	inline ahash_result special_case_fuzzy_ahash(const cv::Mat& gray, unsigned mode)
-	{
-		// assert gray.rows == gray.cols?
-		// if the Mat is already 7x7 and threshold'd to (0, 0xFF), we can do some things...
-		intx::uint128 res(0);
-		int bitpos = 42; // gray.rows*gray.cols - gray.cols == 7*7 - 7
-		for (int i = 0; i < gray.rows; ++i, bitpos-=gray.cols)
-		{
-			// review -- but I think we're doing this in chunks of 5 because we *can't* do 10
-			// with our new constraints (max size == 8), we can slighly simplify this I think?
-			// just always mask by 8...
-			const uchar* p = gray.ptr<uchar>(i);
-
-			// we're turning 1 uint64_t into <=8 uint8_ts
-			const uint64_t* hax = reinterpret_cast<const uint64_t*>(p);
-			uint64_t mval = (*hax) & 0x101010101010101ULL;
-			const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
-			// and then reconstructing the uchars into a single uint8_t
-			uint8_t val = cv[0] << 6 | cv[1] << 5 | cv[2] << 4 | cv[3] << 3 | cv[4] << 2 | cv[5] << 1 | cv[6];
-			// TODO:
-			/*if (bigEndian)
-				val = cv[7] << 4 | cv[6] << 3 | cv[5] << 2 | cv[4] << 1 | cv[3];*/ // ?
-
-			res |= intx::uint128(val) << bitpos;
-		}
-		return ahash_result(res, mode);
-	}
-
 	// need something like a bitset_extractor(), with an api like:
 	// bits.extract(0, 8,  9, 17,  18, 26,  27, 35,  36, 44,  45, 53,  54, 62,  63, 71)
 	//  ... probably using template magic. For our purposes, we need >= 8 pairs of bit indices, which will sum to a total of 64 bits
@@ -84,29 +56,26 @@ namespace image_hash
 
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
-		else if (threshold == 0xFF)
-			return special_case_fuzzy_ahash(gray, mode);
 
-		intx::uint128 res(0);
-		int bitpos = gray.cols * gray.rows - 1; // 10*10 - 1
+		uint64_t res(0);
+		int bitpos = gray.cols*gray.rows - 1; // 8*8 - 1
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
 			for (int j = 0; j < gray.cols; ++j, --bitpos)
-				res |= intx::uint128(p[j] > threshold) << bitpos;
+				res |= uint64_t(p[j] > threshold) << bitpos;
 		}
 		return ahash_result(res, mode);
 	}
 
 	inline ahash_result fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result::ALL)
 	{
-		static const int STARTPOS = img.height()*img.width() - img.width(); // 7*7 - 7
-		intx::uint128 res(0);
-		int bitpos = STARTPOS;
-		for (unsigned i = 0; i < img.height(); ++i, bitpos-=static_cast<int>(img.width()))
+		uint64_t res(0);
+		int bitpos = 42; // 7*7 - 7 ... TODO: get from img somehow?
+		for (unsigned i = 0; i < 7; ++i, bitpos-=7)
 		{
-			unsigned r = img.get(0, i, img.width());
-			res |= intx::uint128(r) << bitpos;
+			uint64_t r = img.get(0, i, 7);
+			res |= r << bitpos;
 		}
 		return ahash_result(res, mode);
 	}
