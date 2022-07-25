@@ -93,7 +93,7 @@ namespace {
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
 	: _image(img)
 	, _cellSize(Config::cell_size() + 2)
-	, _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_offset(), Config::corner_padding())
+	, _positions(Config::cell_spacing(), Config::cells_per_col(), Config::cell_offset(), Config::corner_padding())
 	, _decoder(decoder)
 	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
 {

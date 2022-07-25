@@ -36,7 +36,7 @@ namespace {
 }
 
 CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, int size)
-	: _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_offset(), Config::corner_padding(), Config::interleave_blocks(), Config::interleave_partitions())
+	: _positions(Config::cell_spacing(), Config::cells_per_col(), Config::cell_offset(), Config::corner_padding(), Config::interleave_blocks(), Config::interleave_partitions())
 	, _encoder(symbol_bits, color_bits)
 {
 	if (size > cimbar::Config::image_size())
