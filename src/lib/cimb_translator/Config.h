@@ -19,7 +19,10 @@ namespace cimbar
 		unsigned cell_size();
 		unsigned cell_spacing();
 		unsigned cell_offset();
-		unsigned num_cells();
+		unsigned cells_per_col();
+		unsigned total_cells();
+		unsigned capacity(unsigned bitspercell=0);
+
 		unsigned corner_padding();
 		unsigned interleave_blocks();
 		unsigned interleave_partitions();

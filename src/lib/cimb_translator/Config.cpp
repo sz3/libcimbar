@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "Config.h"
+#include <cmath>
 
 namespace cimbar {
 
@@ -53,9 +54,21 @@ unsigned Config::cell_offset()
 	return 9;
 }
 
-unsigned Config::num_cells()
+unsigned Config::cells_per_col()
 {
 	return 168;
+}
+
+unsigned Config::total_cells()
+{
+	return std::pow(cells_per_col(), 2) - std::pow(corner_padding(), 2) * 4;
+}
+
+unsigned Config::capacity(unsigned bitspercell)
+{
+	if (!bitspercell)
+		bitspercell = bits_per_cell();
+	return total_cells() * bitspercell / 8;
 }
 
 unsigned Config::corner_padding()
@@ -75,15 +88,11 @@ unsigned Config::interleave_partitions()
 
 unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell)
 {
-	// this calculation is based off the 112x112-6 grid.
-	// in that grid, we have 155 * bits_per_cell * 10 total bytes of data.
-	// so this neatly splits into 10 chunks per frame.
-	// ex: 690=6900/10 for ecc=40.
-	if (!bitspercell)
-		bitspercell = bits_per_cell();
-
+	// TODO: sanity checks?
+	// this should neatly split into fountain_chunks_per_frame() [ex: 10] chunks per frame.
 	// the other reasonable settings for fountain_chunks_per_frame are `2` and `5`
-	return (155-ecc) * bitspercell * 10 / fountain_chunks_per_frame();
+	const unsigned eccBlockSize = 155;
+	return capacity(bitspercell) * (eccBlockSize-ecc) / eccBlockSize / fountain_chunks_per_frame();
 }
 
 unsigned Config::fountain_chunks_per_frame()
