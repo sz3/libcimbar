@@ -26,12 +26,17 @@ unsigned Config::bits_per_cell()
 
 unsigned Config::ecc_bytes()
 {
-	return 30;
+	return 28;
+}
+
+unsigned Config::ecc_block_size()
+{
+	return 148;
 }
 
 int Config::image_size()
 {
-	return 1024;
+	return 1012;
 }
 
 unsigned Config::anchor_size()
@@ -56,7 +61,7 @@ unsigned Config::cell_offset()
 
 unsigned Config::cells_per_col()
 {
-	return 168;
+	return 166;
 }
 
 unsigned Config::total_cells()
@@ -78,7 +83,7 @@ unsigned Config::corner_padding()
 
 unsigned Config::interleave_blocks()
 {
-	return 155;
+	return ecc_block_size();
 }
 
 unsigned Config::interleave_partitions()
@@ -91,7 +96,7 @@ unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell)
 	// TODO: sanity checks?
 	// this should neatly split into fountain_chunks_per_frame() [ex: 10] chunks per frame.
 	// the other reasonable settings for fountain_chunks_per_frame are `2` and `5`
-	const unsigned eccBlockSize = 155;
+	const unsigned eccBlockSize = ecc_block_size();
 	return capacity(bitspercell) * (eccBlockSize-ecc) / eccBlockSize / fountain_chunks_per_frame();
 }
 
