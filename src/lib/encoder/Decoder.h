@@ -64,7 +64,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
-	std::array<PositionData, 27900> colorPositions; // 27900 = the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
+	std::array<PositionData, 27232> colorPositions; // 27232 = the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
 
 	// read symbols first
 	while (!reader.done())
