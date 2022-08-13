@@ -14,7 +14,7 @@ namespace {
 	string exampleDecodedBlock()
 	{
 		string ex = "01234567890123456789012345678901234567890123456789012345678901234567890123456789"
-		        "012345678901234567890123456789012345678901234567890123456789";
+				"012345678901234567890123456789012345678901234567890123456789";
 		return ex;
 	}
 
@@ -33,7 +33,7 @@ TEST_CASE( "reed_solomon_streamTest/testEncodeOnce", "[unit]" )
 		input += "0123456789";
 
 	stringstream ins(input);
-	reed_solomon_stream<stringstream> rss(ins, 15);
+	reed_solomon_stream<stringstream> rss(ins, 15, 155);
 
 	assertEquals( 155, rss.readsome() );
 	assertEquals( exampleEncodedBlock(), string(rss.buffer(), 155) );
@@ -42,7 +42,7 @@ TEST_CASE( "reed_solomon_streamTest/testEncodeOnce", "[unit]" )
 TEST_CASE( "reed_solomon_streamTest/testDecodeOnce", "[unit]" )
 {
 	stringstream outs;
-	reed_solomon_stream<stringstream> rss(outs, 15);
+	reed_solomon_stream<stringstream> rss(outs, 15, 155);
 
 	string encoded = exampleEncodedBlock();
 	rss.write(encoded.data(), encoded.size());
@@ -55,7 +55,7 @@ TEST_CASE( "reed_solomon_streamTest/testDecodeOnce", "[unit]" )
 TEST_CASE( "reed_solomon_streamTest/testDecodeBad", "[unit]" )
 {
 	stringstream outs;
-	reed_solomon_stream<stringstream> rss(outs, 15);
+	reed_solomon_stream<stringstream> rss(outs, 15, 155);
 
 	string encoded = string(155, 'f');
 	rss.write(encoded.data(), encoded.size());

@@ -26,6 +26,7 @@ public:
 
 protected:
 	unsigned _eccBytes;
+	unsigned _eccBlockSize;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
 	bool _dark;
@@ -33,10 +34,11 @@ protected:
 };
 
 inline SimpleEncoder::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int bits_per_color)
-    : _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
-    , _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
-    , _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
-    , _dark(cimbar::Config::dark())
+	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
+	, _eccBlockSize(cimbar::Config::ecc_block_size())
+	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
+	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
+	, _dark(cimbar::Config::dark())
 {
 }
 
@@ -66,7 +68,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
 	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, canvas_size);
 
-	reed_solomon_stream rss(stream, _eccBytes);
+	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
 	while (rss.good())
 	{

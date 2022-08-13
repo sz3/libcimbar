@@ -11,13 +11,10 @@ template <typename STREAM>
 class reed_solomon_stream
 {
 public:
-	static const unsigned buffer_size = 155;
-
-public:
-	reed_solomon_stream(STREAM& stream, unsigned ecc)
-	    : _stream(stream)
-	    , _rs(ecc)
-	    , _good(stream.good())
+	reed_solomon_stream(STREAM& stream, unsigned ecc, unsigned buffer_size)
+		: _stream(stream)
+		, _rs(ecc)
+		, _good(stream.good())
 	{
 		_buffer.resize(buffer_size, 0);
 	}
@@ -32,10 +29,12 @@ public:
 		return _stream.tellp();
 	}
 
-	std::streamsize readsome(char* data=NULL, unsigned length=buffer_size)
+	std::streamsize readsome(char* data=NULL, unsigned length=0)
 	{
 		if (!data)
 			data = _buffer.data();
+		if (!length)
+			length = _buffer.size();
 
 		_stream.read(data, length - _rs.parity());
 		std::streamsize bytes = _stream.gcount();
@@ -49,7 +48,7 @@ public:
 
 		// else
 		_rs.encode(data, bytes, data);
-		return buffer_size;
+		return _buffer.size();
 	}
 
 	reed_solomon_stream& write(const char* data, unsigned length)
@@ -63,16 +62,16 @@ public:
 		}
 
 		// else
-		while (length >= buffer_size)
+		while (length >= _buffer.size())
 		{
-			ssize_t bytes = _rs.decode(data, buffer_size, _buffer.data());
+			ssize_t bytes = _rs.decode(data, _buffer.size(), _buffer.data());
 			if (bytes <= 0)
-				_stream << ReedSolomon::BadChunk(buffer_size - _rs.parity());
+				_stream << ReedSolomon::BadChunk(_buffer.size() - _rs.parity());
 			else
 				_stream.write(_buffer.data(), bytes);
 
-			length -= buffer_size;
-			data += buffer_size;
+			length -= _buffer.size();
+			data += _buffer.size();
 		}
 		return *this;
 	}

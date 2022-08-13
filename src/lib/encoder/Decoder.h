@@ -30,6 +30,7 @@ protected:
 
 protected:
 	unsigned _eccBytes;
+	unsigned _eccBlockSize;
 	unsigned _colorBits;
 	unsigned _bitsPerOp;
 	unsigned _interleaveBlocks;
@@ -39,6 +40,7 @@ protected:
 
 inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
 	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
+	, _eccBlockSize(cimbar::Config::ecc_block_size())
 	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
 	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
 	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
@@ -64,7 +66,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
 	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
-	std::array<PositionData, 27232> colorPositions; // 27232 = the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
+	std::array<PositionData, 25920> colorPositions; // 25920 = the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
 
 	// read symbols first
 	while (!reader.done())
@@ -88,7 +90,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		bb.write(bits, p.i, _colorBits);
 	}
 
-	reed_solomon_stream rss(ostream, _eccBytes);
+	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
 	return bb.flush(rss);
 }
 
