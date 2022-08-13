@@ -26,17 +26,17 @@ unsigned Config::bits_per_cell()
 
 unsigned Config::ecc_bytes()
 {
-	return 28;
+	return 40;
 }
 
 unsigned Config::ecc_block_size()
 {
-	return 148;
+	return 216;
 }
 
 int Config::image_size()
 {
-	return 1012;
+	return 988;
 }
 
 unsigned Config::anchor_size()
@@ -61,7 +61,7 @@ unsigned Config::cell_offset()
 
 unsigned Config::cells_per_col()
 {
-	return 166;
+	return 162;
 }
 
 unsigned Config::total_cells()

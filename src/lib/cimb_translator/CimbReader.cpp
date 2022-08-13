@@ -40,7 +40,7 @@ namespace {
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
-		bitbuffer bb(1024*128);
+		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
