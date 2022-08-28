@@ -34,16 +34,6 @@ unsigned Config::ecc_block_size()
 	return 216;
 }
 
-int Config::image_size()
-{
-	return 988;
-}
-
-unsigned Config::anchor_size()
-{
-	return 30;
-}
-
 unsigned Config::cell_size()
 {
 	return 5;

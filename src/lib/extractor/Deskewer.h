@@ -11,8 +11,8 @@
 class Deskewer
 {
 public:
-	Deskewer(unsigned total_size=1024, unsigned anchor_size=30);
-	int total_size() const;
+	Deskewer(unsigned image_size=0, unsigned anchor_size=0);
+	unsigned image_size() const;
 
 	template <typename MAT>
 	MAT deskew(const MAT& img, const Corners& corners);
@@ -21,7 +21,7 @@ public:
 	bool save(const cv::Mat& img, std::string path);
 
 protected:
-	int _totalSize;
+	int _imageSize;
 	int _anchorSize;
 };
 
@@ -30,11 +30,11 @@ inline MAT Deskewer::deskew(const MAT& img, const Corners& corners)
 {
 	std::vector<cv::Point2f> outputPoints;
 	outputPoints.push_back(cv::Point2f(_anchorSize, _anchorSize));
-	outputPoints.push_back(cv::Point2f(_totalSize - _anchorSize, _anchorSize));
-	outputPoints.push_back(cv::Point2f(_anchorSize, _totalSize - _anchorSize));
-	outputPoints.push_back(cv::Point2f(_totalSize - _anchorSize, _totalSize - _anchorSize));
+	outputPoints.push_back(cv::Point2f(_imageSize - _anchorSize, _anchorSize));
+	outputPoints.push_back(cv::Point2f(_anchorSize, _imageSize - _anchorSize));
+	outputPoints.push_back(cv::Point2f(_imageSize - _anchorSize, _imageSize - _anchorSize));
 
-	MAT output(_totalSize, _totalSize, img.type());
+	MAT output(_imageSize, _imageSize, img.type());
 	cv::Mat transform = cv::getPerspectiveTransform(corners.all(), outputPoints);
 
 	cv::warpPerspective(img, output, transform, output.size(), cv::INTER_LINEAR);
