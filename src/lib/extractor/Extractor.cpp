@@ -3,10 +3,13 @@
 
 #include "Deskewer.h"
 #include "Scanner.h"
+#include "cimb_translator/Config.h"
 #include <vector>
 using std::string;
 
-Extractor::Extractor()
+Extractor::Extractor(unsigned image_size, unsigned anchor_size)
+	: _imageSize(image_size? image_size : cimbar::Config::image_size())
+	, _anchorSize(anchor_size? anchor_size : cimbar::Config::anchor_size())
 {
 }
 
@@ -18,10 +21,10 @@ int Extractor::extract(const cv::Mat& img, cv::Mat& out)
 		return FAILURE;
 
 	Corners corners(points);
-	Deskewer de;
+	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.total_size()) )
+	if ( !corners.is_granular_scale(de.image_size()) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }
@@ -34,10 +37,10 @@ int Extractor::extract(const cv::UMat& img, cv::UMat& out)
 		return FAILURE;
 
 	Corners corners(points);
-	Deskewer de;
+	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.total_size()) )
+	if ( !corners.is_granular_scale(de.image_size()) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }

@@ -8,7 +8,7 @@ using std::string;
 
 int main(int argc, char** argv)
 {
-	cxxopts::Options options("cimbar scan", "Scan/extract cimbar code from a source image.");
+	cxxopts::Options options("cimbar_extract", "Scan/extract cimbar code from a source image.");
 
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<std::string>())

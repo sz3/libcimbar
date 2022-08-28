@@ -18,7 +18,7 @@ namespace {
 		return ex;
 	}
 
-	string exampleEncodedBlock()
+	string exampleEncodedBlock155()
 	{
 		string ex = exampleDecodedBlock() + "\xa4t\x02\x03r\xc3\xad\xf2`\xc5\xb6\x9e&xs";
 		return ex;
@@ -36,7 +36,7 @@ TEST_CASE( "reed_solomon_streamTest/testEncodeOnce", "[unit]" )
 	reed_solomon_stream<stringstream> rss(ins, 15, 155);
 
 	assertEquals( 155, rss.readsome() );
-	assertEquals( exampleEncodedBlock(), string(rss.buffer(), 155) );
+	assertEquals( exampleEncodedBlock155(), string(rss.buffer(), 155) );
 }
 
 TEST_CASE( "reed_solomon_streamTest/testDecodeOnce", "[unit]" )
@@ -44,7 +44,7 @@ TEST_CASE( "reed_solomon_streamTest/testDecodeOnce", "[unit]" )
 	stringstream outs;
 	reed_solomon_stream<stringstream> rss(outs, 15, 155);
 
-	string encoded = exampleEncodedBlock();
+	string encoded = exampleEncodedBlock155();
 	rss.write(encoded.data(), encoded.size());
 
 	string actual = outs.str();

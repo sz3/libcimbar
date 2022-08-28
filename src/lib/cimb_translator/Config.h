@@ -14,8 +14,15 @@ namespace cimbar
 		unsigned ecc_bytes();
 		unsigned ecc_block_size();
 
-		int image_size();
-		unsigned anchor_size();
+		constexpr int image_size()
+		{
+			return 988;
+		}
+
+		constexpr unsigned anchor_size()
+		{
+			return 30;
+		}
 
 		unsigned cell_size();
 		unsigned cell_spacing();
