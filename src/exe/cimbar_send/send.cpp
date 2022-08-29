@@ -38,12 +38,12 @@ int main(int argc, char** argv)
 	unsigned ecc = cimbar::Config::ecc_bytes();
 	unsigned defaultFps = 15;
 	options.add_options()
-	    ("i,in", "Source file", cxxopts::value<vector<string>>())
-	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
-	    ("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
-	    ("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
-	    ("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
-	    ("h,help", "Print usage")
+		("i,in", "Source file", cxxopts::value<vector<string>>())
+		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
+		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
+		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
+		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+		("h,help", "Print usage")
 	;
 	options.show_positional_help();
 	options.parse_positional({"in"});
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
-	int window_size = 1080;
+	int window_size = cimbar::Config::image_size() + 32;
 	if (!initialize_GL(window_size, window_size))
 	{
 		std::cerr << "failed to create window :(" << std::endl;
