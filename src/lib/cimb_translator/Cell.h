@@ -12,22 +12,22 @@ public:
 
 public:
 	Cell(const cv::Mat& img)
-	    : _img(img)
-	    , _cols(img.cols)
-	    , _rows(img.rows)
+		: _img(img)
+		, _cols(img.cols)
+		, _rows(img.rows)
 	{
 	}
 
 	Cell(const cv::Mat& img, int xstart, int ystart, int cols, int rows)
-	    : _img(img)
-	    , _xstart(xstart)
-	    , _ystart(ystart)
-	    , _cols(cols)
-	    , _rows(rows)
+		: _img(img)
+		, _xstart(xstart)
+		, _ystart(ystart)
+		, _cols(cols)
+		, _rows(rows)
 	{}
 
 	// it would be nice to use a cropped cv::Mat to get the contiguous memory pointer...
-	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip)
+	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip) const
 	{
 		uint16_t blue = 0;
 		uint16_t green = 0;
@@ -61,7 +61,7 @@ public:
 		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
 	}
 
-	std::tuple<uchar,uchar,uchar> mean_rgb(bool skip=false)
+	std::tuple<uchar,uchar,uchar> mean_rgb(bool skip=false) const
 	{
 		int channels = _img.channels();
 		if (channels < 3)
@@ -93,7 +93,7 @@ public:
 		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
 	}
 
-	uchar mean_grayscale_continuous()
+	uchar mean_grayscale_continuous() const
 	{
 		uint16_t total = 0;
 		uint16_t count = 0;
@@ -114,7 +114,7 @@ public:
 		return (uchar)(total/count);
 	}
 
-	uchar mean_grayscale()
+	uchar mean_grayscale() const
 	{
 		if (_img.channels() > 1)
 			return 0;
