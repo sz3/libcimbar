@@ -9,7 +9,7 @@ class AdjacentCellFinder
 public:
 	AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size);
 
-	std::array<int, 4> find(int index);
+	std::array<int, 4> find(int index) const;
 
 	int dimensions() const;
 	int marker_size() const;
