@@ -21,7 +21,7 @@ void FloodDecodePositions::reset()
 	for (unsigned i = 0; i < _positions.size(); ++i)
 	{
 		_remaining.push_back(true);
-		_instructions.push_back({CellDrift(), 0xFF});
+		_instructions.push_back({CellDrift(), 0xFF, 0xFF});
 	}
 
 	// seed
@@ -58,14 +58,14 @@ FloodDecodePositions::iter FloodDecodePositions::next()
 
 		needsDecode = false;
 		++_count;
-		auto [drift, __] = _instructions[i];
-		return {i, _positions[i], drift};
+		auto [drift, __, cooldown] = _instructions[i];
+		return {i, _positions[i], drift, cooldown};
 	}
 
-	return {0, {0, 0}, CellDrift()};
+	return {0, {0, 0}, CellDrift(), 0xFF};
 }
 
-int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance)
+int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
 {
 	std::array<int,4> adj = _cellFinder.find(index);
 	for (int next : adj)
@@ -73,9 +73,9 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		if (next < 0 or !_remaining[next])
 			continue;
 		decode_instructions& di = _instructions[next];
-		if (di.second <= error_distance)
+		if (std::get<1>(di) <= error_distance)
 			continue;
-		di = {drift, error_distance};
+		di = {drift, error_distance, cooldown};
 		_heap.push({next, error_distance});
 	}
 	return 0;

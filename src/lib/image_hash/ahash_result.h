@@ -20,7 +20,7 @@ public:
 	// 5, 7, 3, 1 == sides.
 	// 8, 0, 2, 6 == corners.
 	// mode=FAST will discard the corner checks.
-	static constexpr std::array<int, 9> _ORDER = {4, 5, 7, 3, 1, 8, 0, 2, 6};
+	static constexpr std::array<unsigned, 9> _ORDER = {4, 5, 7, 3, 1, 8, 0, 2, 6};
 
 public:
 	class iterator
@@ -31,9 +31,9 @@ public:
 			, _i(i)
 		{}
 
-		std::pair<int, uint64_t> operator*()
+		std::pair<unsigned, uint64_t> operator*()
 		{
-			int idx = _hr._ORDER[_i];
+			unsigned idx = _hr._ORDER[_i];
 			return {idx, _hr._results[idx]};
 		}
 

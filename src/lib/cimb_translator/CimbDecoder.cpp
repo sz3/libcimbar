@@ -79,7 +79,7 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
@@ -91,6 +91,11 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	// 8, 0, 2, 6 == corners.
 	for (auto&& [drift_idx, h] : results)
 	{
+		// skip over this drift_idx if it matches cooldown
+		// we could be more clever to check for corners, but for now this is fine
+		// ~0U is "unset"
+		if (drift_idx == cooldown and drift_idx != 4) // don't skip the center, obvs
+			continue;
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
 			unsigned distance = image_hash::hamming_distance(h, _tileHashes[i]);
@@ -107,16 +112,16 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
 	return get_best_symbol(results, drift_offset, best_distance);
 }
 
-unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
+	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<float,float,float> c, float adjustUp, float down) const

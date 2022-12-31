@@ -119,18 +119,18 @@ unsigned CimbReader::read(PositionData& pos)
 		return 0;
 
 	// need coordinate, index, and drift from next position
-	auto [i, xy, drift] = _positions.next();
+	auto [i, xy, drift, cooldown] = _positions.next();
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
 	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;
-	unsigned bits = _decoder.decode_symbol(cell, drift_offset, error_distance);
+	unsigned bits = _decoder.decode_symbol(cell, drift_offset, error_distance, cooldown);
 
 	std::pair<int, int> best_drift = CellDrift::driftPairs[drift_offset];
 	drift.updateDrift(best_drift.first, best_drift.second);
-	_positions.update(i, drift, error_distance);
+	_positions.update(i, drift, error_distance, CellDrift::calculate_cooldown(cooldown, drift_offset));
 
 	pos.i = i;
 	pos.x = x + best_drift.first;
