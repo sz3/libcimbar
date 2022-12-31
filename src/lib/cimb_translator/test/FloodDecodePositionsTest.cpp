@@ -23,13 +23,14 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 	unsigned i;
 	CellPositions::coordinate xy;
 	CellDrift drift;
+	uint8_t cooldown;
 
 	// validate seed points
 	unsigned count = 0;
 	for (int c = 0; c < 4; ++c)
 	{
 		// 0
-		std::tie(i, xy, drift) = cells.next();
+		std::tie(i, xy, drift, cooldown) = cells.next();
 		assertEquals(0, drift.x());
 		assertEquals(0, drift.y());
 
@@ -38,25 +39,25 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 			assertEquals(62, xy.first);
 			assertEquals(8, xy.second);
 			drift.updateDrift(1, 1);
-			cells.update(i, drift, 1);
+			cells.update(i, drift, 1, cooldown);
 		}
 		else if (i == 99)
 		{
 			assertEquals(953, xy.first);
 			assertEquals(8, xy.second);
-			cells.update(i, drift, 2);
+			cells.update(i, drift, 2, cooldown);
 		}
 		else if (i == 12300)
 		{
 			assertEquals(62, xy.first);
 			assertEquals(1007, xy.second);
-			cells.update(i, drift, 2);
+			cells.update(i, drift, 2, cooldown);
 		}
 		else if (i == 12399)
 		{
 			assertEquals(953, xy.first);
 			assertEquals(1007, xy.second);
-			cells.update(i, drift, 2);
+			cells.update(i, drift, 2, cooldown);
 		}
 		else
 			FAIL("i ?= " << i);
@@ -68,7 +69,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 	// we did "update(..., 1) for index=1. So the next cells should be the ones adjacent to 0: 1, 100.
 	for (int c = 0; c < 2; ++c)
 	{
-		std::tie(i, xy, drift) = cells.next();
+		std::tie(i, xy, drift, cooldown) = cells.next();
 		if (i == 1)
 		{
 			assertEquals(71, xy.first);
@@ -85,7 +86,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 		assertEquals(1, drift.x());
 		assertEquals(1, drift.y());
 
-		cells.update(i, drift, 3);
+		cells.update(i, drift, 3, cooldown);
 		remainingPos.erase(i);
 		++count;
 	}
@@ -93,8 +94,8 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 	// as for the rest... we'll just make sure we hit them all
 	while (!cells.done())
 	{
-		std::tie(i, xy, drift) = cells.next();
-		cells.update(i, drift, 1);
+		std::tie(i, xy, drift, cooldown) = cells.next();
+		cells.update(i, drift, 1, cooldown);
 		remainingPos.erase(i);
 		++count;
 	}

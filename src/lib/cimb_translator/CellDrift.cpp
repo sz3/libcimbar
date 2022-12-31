@@ -6,8 +6,8 @@ namespace {
 }
 
 CellDrift::CellDrift(int x, int y)
-    : _x(x)
-    , _y(y)
+	: _x(x)
+	, _y(y)
 {}
 
 int CellDrift::x() const
@@ -28,4 +28,19 @@ void CellDrift::updateDrift(int dx, int dy)
 	_y += dy;
 	_y = std::min(_y, _limit);
 	_y = std::max(_y, 0-_limit);
+}
+
+// static
+uint8_t CellDrift::calculate_cooldown(uint8_t previous, uint8_t idx)
+{
+	// previous xor idx == 6??
+	if (previous == 1 and idx == 7)
+		return 0xFF;
+	if (previous == 3 and idx == 5)
+		return 0xFF;
+	if (previous == 5 and idx == 3)
+		return 0xFF;
+	if (previous == 1 and idx == 7)
+		return 0xFF;
+	return idx;
 }
