@@ -16,7 +16,7 @@ unsigned Config::color_bits()
 
 unsigned Config::symbol_bits()
 {
-	return 2;
+	return 3;
 }
 
 unsigned Config::bits_per_cell()
@@ -26,17 +26,17 @@ unsigned Config::bits_per_cell()
 
 unsigned Config::ecc_bytes()
 {
-	return 40;
+	return 32;
 }
 
 unsigned Config::ecc_block_size()
 {
-	return 216;
+	return 160;
 }
 
 unsigned Config::cell_size()
 {
-	return 5;
+	return 6;
 }
 
 unsigned Config::cell_spacing()
@@ -51,7 +51,7 @@ unsigned Config::cell_offset()
 
 unsigned Config::cells_per_col()
 {
-	return 162;
+	return 144;
 }
 
 unsigned Config::total_cells()
@@ -68,7 +68,7 @@ unsigned Config::capacity(unsigned bitspercell)
 
 unsigned Config::corner_padding()
 {
-	return 54 / cell_spacing();
+	return lrint(54.0 / cell_spacing());
 }
 
 unsigned Config::interleave_blocks()

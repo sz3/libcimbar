@@ -16,7 +16,7 @@ namespace cimbar
 
 		constexpr int image_size()
 		{
-			return 988;
+			return 1024;
 		}
 
 		constexpr unsigned anchor_size()
