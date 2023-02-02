@@ -20,14 +20,12 @@ namespace image_hash
 		cv::Mat gray = img;
 		if (img.channels() != 1)
 			cv::cvtColor(gray, gray, cv::COLOR_RGB2GRAY);
-		if (gray.cols > 8 or gray.rows > 8)
-			cv::resize(gray, gray, cv::Size(8, 8));
 
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
 
 		uint64_t res = 0;
-		int bitpos = gray.rows*gray.cols - 1; // 8*8 - 1
+		int bitpos = gray.rows*gray.cols - 1; // ex: 8*8 - 1
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
@@ -71,10 +69,10 @@ namespace image_hash
 	inline ahash_result fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result::ALL)
 	{
 		uint64_t res(0);
-		int bitpos = 42; // 7*7 - 7 ... TODO: get from img somehow?
-		for (unsigned i = 0; i < 7; ++i, bitpos-=7)
+		int bitpos = 56; // 8*8 - 8 ... TODO: get from img somehow?
+		for (unsigned i = 0; i < 8; ++i, bitpos-=8)
 		{
-			uint64_t r = img.get(0, i, 7);
+			uint64_t r = img.get(0, i, 8);
 			res |= r << bitpos;
 		}
 		return ahash_result(res, mode);

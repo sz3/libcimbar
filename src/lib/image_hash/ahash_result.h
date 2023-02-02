@@ -27,8 +27,8 @@ public:
 	{
 	public:
 		iterator(const ahash_result& hr, unsigned i=0)
-			: _hr(hr)
-			, _i(i)
+		    : _hr(hr)
+		    , _i(i)
 		{}
 
 		std::pair<unsigned, uint64_t> operator*()
@@ -55,8 +55,8 @@ public:
 
 public:
 	ahash_result(const uint64_t& bits, unsigned mode=ALL)
-		: _bits(bits)
-		, _mode(mode)
+	    : _bits(bits)
+	    , _mode(mode)
 	{
 		if (mode == ALL)
 			_results = extract_all();
@@ -66,38 +66,38 @@ public:
 
 	std::array<uint64_t, 9> extract_all() const
 	{
-		bit_extractor<uint64_t, 49, 5> be(_bits);
+		bit_extractor<uint64_t, 64, 6> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
-			be.extract( 0,  7, 14, 21, 28), // left
-			be.extract( 1,  8, 15, 22, 29),
-			be.extract( 2,  9, 16, 23, 30), // right
+			be.extract( 0,  8, 16, 24, 32, 40), // left
+			be.extract( 1,  9, 17, 25, 33, 41),
+			be.extract( 2, 10, 18, 26, 34, 42), // right
 			// middle row
-			be.extract( 7, 14, 21, 28, 35),
-			be.extract( 8, 15, 22, 29, 36),
-			be.extract( 9, 16, 23, 30, 37),
+			be.extract( 8, 16, 24, 32, 40, 48),
+			be.extract( 9, 17, 25, 33, 41, 49),
+			be.extract(10, 18, 26, 34, 42, 50),
 			// bottom row
-			be.extract(14, 21, 28, 35, 42),
-			be.extract(15, 22, 29, 36, 43),
-			be.extract(16, 23, 30, 37, 44)
+			be.extract(16, 24, 32, 40, 48, 56),
+			be.extract(17, 25, 33, 41, 49, 57),
+			be.extract(18, 26, 34, 42, 50, 58)
 		};
 	}
 
 	std::array<uint64_t, 9> extract_fast() const
 	{
-		bit_extractor<uint64_t, 49, 5> be(_bits);
+		bit_extractor<uint64_t, 64, 6> be(_bits);
 		// skip the corners
 		return {
 			0,
-			be.extract( 1,  8, 15, 22, 29),
+			be.extract( 1,  9, 17, 25, 33, 41),
 			0,
 			// middle row
-			be.extract( 7, 14, 21, 28, 35),
-			be.extract( 8, 15, 22, 29, 36),
-			be.extract( 9, 16, 23, 30, 37),
+			be.extract( 8, 16, 24, 32, 40, 48),
+			be.extract( 9, 17, 25, 33, 41, 49),
+			be.extract(10, 18, 26, 34, 42, 50),
 			// bottom row
 			0,
-			be.extract(15, 22, 29, 36, 43),
+			be.extract(17, 25, 33, 41, 49, 57),
 			0
 		};
 	}

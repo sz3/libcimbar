@@ -31,6 +31,24 @@ TEST_CASE( "averageHashTest/test5x5.Dark", "[unit]" )
 	assertEquals(0x10c73df, image_hash::average_hash(tile));
 }
 
+TEST_CASE( "averageHashTest/test6x6.Light", "[unit]" )
+{
+	cv::Mat tile = cimbar::getTile(3, 0, false);
+	assertEquals(0x10c73df, image_hash::average_hash(tile));
+
+	tile = cimbar::getTile(3, 1, false);
+	assertEquals(0x7cf1c3040, image_hash::average_hash(tile));
+}
+
+TEST_CASE( "averageHashTest/test6x6.Dark", "[unit]" )
+{
+	cv::Mat tile = cimbar::getTile(3, 0, true);
+	assertEquals(0xffef38c20, image_hash::average_hash(tile));
+
+	tile = cimbar::getTile(3, 1, true);
+	assertEquals(0x830e3cfbf, image_hash::average_hash(tile));
+}
+
 TEST_CASE( "averageHashTest/test8x8.Light", "[unit]" )
 {
 	cv::Mat tile = cimbar::getTile(4, 0, false);

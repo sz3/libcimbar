@@ -29,9 +29,9 @@ map<string, string> getFileBlobs(string dir_path)
 			blobs[file_path] = base91::encode(contents);
 		}
 
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 8; ++i)
 	{
-		string file_path = fmt::format("{}/2/{:02x}.png", dir_path, i);
+		string file_path = fmt::format("{}/3/{:02x}.png", dir_path, i);
 		string contents = File(file_path).read_all();
 		blobs[file_path] = base91::encode(contents);
 	}
