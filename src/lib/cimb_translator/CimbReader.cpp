@@ -29,7 +29,7 @@ namespace {
 	{
 		// will this need to change for smaller tiles? probably?
 
-		int blockSize = 7; // default: no preprocessing
+		int blockSize = 5; // default: no preprocessing
 
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);

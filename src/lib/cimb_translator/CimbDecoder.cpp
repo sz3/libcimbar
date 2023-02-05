@@ -115,12 +115,13 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
+	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
 unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
+	int checkRule = cooldown == 0xFE? image_hash::ahash_result::ALL : image_hash::ahash_result::FAST;
+	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, checkRule);
 	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
