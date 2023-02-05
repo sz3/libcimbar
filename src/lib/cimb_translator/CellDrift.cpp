@@ -33,14 +33,17 @@ void CellDrift::updateDrift(int dx, int dy)
 // static
 uint8_t CellDrift::calculate_cooldown(uint8_t previous, uint8_t idx)
 {
-	// previous xor idx == 6??
+	if (idx % 2 == 0)
+		return 0xFF;
+	// if idx % 2 == 1 and previous xor idx == 6
+	// return 0xFF; // ?
 	if (previous == 1 and idx == 7)
 		return 0xFF;
 	if (previous == 3 and idx == 5)
 		return 0xFF;
 	if (previous == 5 and idx == 3)
 		return 0xFF;
-	if (previous == 1 and idx == 7)
+	if (previous == 7 and idx == 1)
 		return 0xFF;
 	return idx;
 }
