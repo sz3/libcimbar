@@ -68,7 +68,7 @@ unsigned Config::capacity(unsigned bitspercell)
 
 unsigned Config::corner_padding()
 {
-	return 54 / cell_spacing();
+	return lrint(54.0 / cell_spacing());
 }
 
 unsigned Config::interleave_blocks()
