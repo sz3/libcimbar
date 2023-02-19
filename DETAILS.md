@@ -34,7 +34,7 @@ The above is a 4x4(x4) cimbar grid -- encoding 64 bits of data. A real cimbar im
 
 ![an example cimbar code](https://github.com/sz3/cimbar-samples/blob/v0.5/6bit/4color_ecc30_fountain_0.png)
 
-... and contains 1550 tiles for data. For 6-bit cimbar (4 symbol bits, 2 color bits), this means 9300 bytes per image.
+... and contains 12400 tiles for data. For 6-bit cimbar (4 symbol bits, 2 color bits), this means 9300 bytes per image.
 
 ### Error Correction
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ## targeting old glibc
 # docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it ubuntu:16.04
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:latest
 
 cd /usr/src/app
@@ -21,3 +21,6 @@ mkdir build-asmjs && cd build-asmjs
 emcmake cmake .. -DUSE_WASM=2 -DOPENCV_DIR=/usr/src/app/opencv4
 make -j5 install
 (cd ../web/ && zip cimbar.asmjs.zip cimbar_js.js index.html main.js)
+
+(cd ../ && python package-cimbar-html.py)
+

@@ -39,4 +39,5 @@ jobs:
           files: |
             web/cimbar.asmjs.zip
             web/cimbar.wasm.tar.gz
+            web/cimbar_js.html
 
