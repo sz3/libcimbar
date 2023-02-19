@@ -80,7 +80,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 
 	// done
 	assertEquals( 1, fds.num_done() );
-	std::string decodedContents = File(tempdir.path() / "0.5387").read_all();
+	std::string decodedContents = File(tempdir.path() / "0.5256").read_all();
 	assertEquals( 16727, decodedContents.size() );
 	assertStringContains( "Mozilla Public License Version 2.0", decodedContents );
 }

@@ -98,7 +98,7 @@ namespace cimbar
 
 		static constexpr unsigned compression_level()
 		{
-			return 6;
+			return 16;
 		}
 	};
 }

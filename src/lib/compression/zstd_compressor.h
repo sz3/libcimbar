@@ -101,7 +101,7 @@ public:
 
 protected:
 	static const size_t CHUNK_SIZE = 0x4000;
-	int _compressionLevel = 6;
+	int _compressionLevel = 16;
 	ZSTD_CCtx* _cctx = ZSTD_createCCtx();
 	std::vector<char> _compBuff = std::vector<char>(ZSTD_compressBound(CHUNK_SIZE));
 };

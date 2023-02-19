@@ -70,7 +70,7 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0x4fd34f01ee80a28d;
+	uint64_t hash = 0x664598a460acad14;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( hash, image_hash::average_hash(img) );
@@ -96,7 +96,7 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 	std::optional<cv::Mat> frame = enc.encode_next(*fes);
 	assertTrue( frame );
 
-	uint64_t hash = 0xf8cde200e90582e4;
+	uint64_t hash = 0x423de068e4894a7f;
 	assertEquals( hash, image_hash::average_hash(*frame) );
 }
 
@@ -110,7 +110,7 @@ TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
 	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 10, 2.0, 1080) );
 
-	uint64_t hash = 0x8985b70d93675786;
+	uint64_t hash = 0xeb28da8af88de8d0;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( 1080, img.rows );
