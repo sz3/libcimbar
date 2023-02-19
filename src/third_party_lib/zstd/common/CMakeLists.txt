@@ -1,3 +1,5 @@
-set(SRCFILES bitstream.h     compiler.h  debug.c  entropy_common.c  error_private.h   fse.h  mem.h   pool.h       threading.h  xxhash.h       zstd_errors.h
-  cpu.h       debug.h  error_private.c   fse_decompress.c  huf.h  pool.c  threading.c  xxhash.c     zstd_common.c  zstd_internal.h)
+set(SRCFILES allocations.h     debug.c           error_private.c   fse.h  pool.c                threading.c  xxhash.h       zstd_internal.h
+bits.h         compiler.h      debug.h           error_private.h   huf.h  pool.h                threading.h  zstd_common.c  zstd_trace.h
+bitstream.h    cpu.h           entropy_common.c  fse_decompress.c  mem.h  portability_macros.h  xxhash.c     zstd_deps.h
+)
 add_library(zstd-common OBJECT ${SRCFILES})
