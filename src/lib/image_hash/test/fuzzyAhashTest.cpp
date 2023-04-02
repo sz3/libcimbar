@@ -45,7 +45,7 @@ TEST_CASE( "fuzzyAhashTest/testCorrectness", "[unit]" )
 	}
 
 	// do the real work
-	auto actual = image_hash::fuzzy_ahash(tenxten);
+	auto actual = image_hash::fuzzy_ahash<5>(tenxten);
 
 	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
@@ -69,7 +69,7 @@ TEST_CASE( "fuzzyAhashTest/testIterator", "[unit]" )
 	}
 
 	// do the real work
-	image_hash::ahash_result actual = image_hash::fuzzy_ahash(tenxten);
+	image_hash::ahash_result actual = image_hash::fuzzy_ahash<5>(tenxten);
 	int count = 0;
 	for (auto it : actual)
 	{
@@ -109,7 +109,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold", "[unit]" )
 	}
 
 	// do the real work
-	auto actual = image_hash::fuzzy_ahash(tenxten, 0xFE);
+	auto actual = image_hash::fuzzy_ahash<5>(tenxten, 0xFE);
 
 	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
@@ -138,7 +138,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix", "[unit]" )
 
 	// do the real work
 	bitmatrix bm(bb, 7, 7);
-	auto actual = image_hash::fuzzy_ahash(bm);
+	auto actual = image_hash::fuzzy_ahash<5>(bm);
 
 	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )
@@ -173,7 +173,7 @@ TEST_CASE( "fuzzyAhashTest/testPreThreshold.BitMatrix.Fast", "[unit]" )
 
 	// do the real work
 	bitmatrix bm(bb, 7, 7);
-	auto actual = image_hash::fuzzy_ahash(bm, image_hash::ahash_result::FAST);
+	auto actual = image_hash::fuzzy_ahash<5>(bm, image_hash::ahash_result<5>::FAST);
 
 	for (unsigned i = 0; i < actual.size(); ++i)
 		DYNAMIC_SECTION( "are we correct? : " << i )

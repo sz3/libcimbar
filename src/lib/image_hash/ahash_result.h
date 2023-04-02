@@ -3,17 +3,20 @@
 
 #include "bit_extractor.h"
 #include <array>
+#include <cmath>
 #include <iostream>
 #include <utility>
 
 namespace image_hash
 {
 
+template <unsigned CELLSIZE>
 class ahash_result
 {
 public:
 	static const int FAST = 5;
 	static const int ALL = 9;
+	static constexpr unsigned CELLAREA = std::pow(CELLSIZE+2, 2);
 
 	// out from the center.
 	// 4 == center.
@@ -66,7 +69,7 @@ public:
 
 	std::array<uint64_t, 9> extract_all() const
 	{
-		bit_extractor<uint64_t, 49, 5> be(_bits);
+		bit_extractor<uint64_t, CELLAREA, CELLSIZE> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
 			be.extract_tuple( be.pattern(0) ), // left
@@ -85,7 +88,7 @@ public:
 
 	std::array<uint64_t, 9> extract_fast() const
 	{
-		bit_extractor<uint64_t, 49, 5> be(_bits);
+		bit_extractor<uint64_t, CELLAREA, CELLSIZE> be(_bits);
 		// skip the corners
 		return {
 			0,

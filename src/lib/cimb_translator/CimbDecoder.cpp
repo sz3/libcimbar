@@ -1,8 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "CimbDecoder.h"
 
-#include "Common.h"
 #include "Cell.h"
+#include "Common.h"
+#include "Config.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
@@ -79,7 +80,7 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
+unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result<cimbar::Config::cell_size()>& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
@@ -114,14 +115,14 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 
 unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
+	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(cell, _ahashThreshold, image_hash::ahash_result<cimbar::Config::cell_size()>::FAST);
 	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
 unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	int checkRule = cooldown == 0xFE? image_hash::ahash_result::ALL : image_hash::ahash_result::FAST;
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, checkRule);
+	int checkRule = cooldown == 0xFE? image_hash::ahash_result<cimbar::Config::cell_size()>::ALL : image_hash::ahash_result<cimbar::Config::cell_size()>::FAST;
+	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(cell, checkRule);
 	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
