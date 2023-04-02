@@ -2,6 +2,7 @@
 #pragma once
 
 #include <iostream>
+#include <tuple>
 
 // 2(?) <= READLEN <= 8
 template<typename C, size_t N, size_t READLEN>
@@ -9,6 +10,16 @@ class bit_extractor
 {
 protected:
 	static constexpr uint64_t BITMASK = (1 << READLEN) - 1; // e.g. 0xFF, 0x1F, 0xF
+
+public:
+	template <size_t iterations=READLEN>
+	static constexpr auto pattern(unsigned offset)
+	{
+		if constexpr (iterations == 1)
+			return std::make_tuple(offset);
+		else
+			return std::tuple_cat(std::make_tuple(offset), pattern<iterations-1>(offset+READLEN+2));
+	}
 
 public:
 	bit_extractor(const C& bits)
@@ -31,6 +42,17 @@ public:
 		uint64_t total = ((uint64_t)(_bits >> (N - bit_offset - READLEN)) & BITMASK) << (byte_offset * READLEN);
 		return total | extract(t...);
 	}
+
+	template <typename Tuple, size_t... I>
+	constexpr uint64_t extract_tuple(Tuple const& tuple, std::index_sequence<I...>) {
+		return extract(std::get<I>(tuple)...);
+	}
+
+	template <typename Tuple>
+	constexpr uint64_t extract_tuple(Tuple const& tuple) {
+		return extract_tuple(tuple, std::make_index_sequence<std::tuple_size<Tuple>::value>());
+	}
+
 
 protected:
 	C _bits;

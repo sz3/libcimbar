@@ -69,17 +69,17 @@ public:
 		bit_extractor<uint64_t, 49, 5> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
-			be.extract( 0,  7, 14, 21, 28), // left
-			be.extract( 1,  8, 15, 22, 29),
-			be.extract( 2,  9, 16, 23, 30), // right
+			be.extract_tuple( be.pattern(0) ), // left
+			be.extract_tuple( be.pattern(1) ),
+			be.extract_tuple( be.pattern(2) ), // right
 			// middle row
-			be.extract( 7, 14, 21, 28, 35),
-			be.extract( 8, 15, 22, 29, 36),
-			be.extract( 9, 16, 23, 30, 37),
+			be.extract_tuple( be.pattern(7) ),
+			be.extract_tuple( be.pattern(8) ),
+			be.extract_tuple( be.pattern(9) ),
 			// bottom row
-			be.extract(14, 21, 28, 35, 42),
-			be.extract(15, 22, 29, 36, 43),
-			be.extract(16, 23, 30, 37, 44)
+			be.extract_tuple( be.pattern(14) ),
+			be.extract_tuple( be.pattern(15) ),
+			be.extract_tuple( be.pattern(16) )
 		};
 	}
 
@@ -89,15 +89,15 @@ public:
 		// skip the corners
 		return {
 			0,
-			be.extract( 1,  8, 15, 22, 29),
+			be.extract_tuple( be.pattern(1) ),
 			0,
 			// middle row
-			be.extract( 7, 14, 21, 28, 35),
-			be.extract( 8, 15, 22, 29, 36),
-			be.extract( 9, 16, 23, 30, 37),
+			be.extract_tuple( be.pattern(7) ),
+			be.extract_tuple( be.pattern(8) ),
+			be.extract_tuple( be.pattern(9) ),
 			// bottom row
 			0,
-			be.extract(15, 22, 29, 36, 43),
+			be.extract_tuple( be.pattern(15) ),
 			0
 		};
 	}

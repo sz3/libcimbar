@@ -3,14 +3,22 @@
 
 #include "bit_extractor.h"
 #include "intx/intx.hpp"
+#include "serialize/format.h"
 
-#include <bitset>
-#include <iostream>
-#include <sstream>
 #include <string>
-#include <vector>
+#include <tuple>
 
-using std::string;
+namespace {
+	template<typename... T>
+	std::string tuple_to_str(const std::tuple<T...>& tup)
+	{
+		std::string res;
+		std::apply([&res](auto&&... args) {((res += fmt::format("{} ", args)), ...);}, tup);
+		if (res.size() > 0)
+			res = res.substr(0, res.size()-1);
+		return res;
+	}
+}
 
 TEST_CASE( "bitExtractorTest/testDefault.4", "[unit]" )
 {
@@ -82,3 +90,62 @@ TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 	assertEquals( 0xf8f0e0c080000000ULL, res );
 }
 
+TEST_CASE( "bitExtractorTest/testTuple.5", "[unit]" )
+{
+	uint64_t bits = 0x11d07e1f;
+	bit_extractor<uint64_t, 32, 5> be(bits);
+
+	auto tup = be.pattern(0);
+	assertEquals( "0 7 14 21 28", tuple_to_str(tup) );
+
+	assertEquals(  0x2e8f00, be.extract(0, 7, 14, 21, 28) );
+	assertEquals(  0x2e8f00, be.extract_tuple(tup) );
+}
+
+TEST_CASE( "bitExtractorTest/testTuple.8", "[unit]" )
+{
+	intx::uint128 bits{0xF83C0E030080000ULL, 0xFFBFCFE3FULL};
+	bit_extractor<intx::uint128, 100, 8> be(bits);
+
+	auto tup = be.pattern(10);
+	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(tup) );
+
+	assertEquals(  0xfffefcf8f0e0c080, be.extract(10, 20, 30, 40, 50, 60, 70, 80) );
+	assertEquals(  0xfffefcf8f0e0c080, be.extract_tuple(tup) );
+}
+
+TEST_CASE( "bitExtractorTest/testTuplePatterns.5", "[unit]" )
+{
+	uint64_t bits = 0x11d07e1f;
+	bit_extractor<uint64_t, 32, 5> be(bits);
+
+	std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned> tup = be.pattern(0);
+	assertEquals( "0 7 14 21 28", tuple_to_str(tup) );
+
+	assertEquals( "1 8 15 22 29", tuple_to_str(be.pattern(1)) );
+	assertEquals( "2 9 16 23 30", tuple_to_str(be.pattern(2)) );
+	assertEquals( "7 14 21 28 35", tuple_to_str(be.pattern(7)) );
+	assertEquals( "8 15 22 29 36", tuple_to_str(be.pattern(8)) );
+	assertEquals( "9 16 23 30 37", tuple_to_str(be.pattern(9)) );
+	assertEquals( "14 21 28 35 42", tuple_to_str(be.pattern(14)) );
+	assertEquals( "15 22 29 36 43", tuple_to_str(be.pattern(15)) );
+	assertEquals( "16 23 30 37 44", tuple_to_str(be.pattern(16)) );
+}
+
+TEST_CASE( "bitExtractorTest/testTuplePatterns.8", "[unit]" )
+{
+	intx::uint128 bits{0xF83C0E030080000ULL, 0xFFBFCFE3FULL};
+	bit_extractor<intx::uint128, 100, 8> be(bits);
+
+	std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned> tup = be.pattern(0);
+	assertEquals( "0 10 20 30 40 50 60 70", tuple_to_str(tup) );
+
+	assertEquals( "1 11 21 31 41 51 61 71", tuple_to_str(be.pattern(1)) );
+	assertEquals( "2 12 22 32 42 52 62 72", tuple_to_str(be.pattern(2)) );
+	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(be.pattern(10)) );
+	assertEquals( "11 21 31 41 51 61 71 81", tuple_to_str(be.pattern(11)) );
+	assertEquals( "12 22 32 42 52 62 72 82", tuple_to_str(be.pattern(12)) );
+	assertEquals( "20 30 40 50 60 70 80 90", tuple_to_str(be.pattern(20)) );
+	assertEquals( "21 31 41 51 61 71 81 91", tuple_to_str(be.pattern(21)) );
+	assertEquals( "22 32 42 52 62 72 82 92", tuple_to_str(be.pattern(22)) );
+}
