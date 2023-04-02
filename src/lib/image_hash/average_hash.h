@@ -35,22 +35,13 @@ namespace image_hash
 		return res;
 	}
 
-	// need something like a bitset_extractor(), with an api like:
-	// bits.extract(0, 8,  9, 17,  18, 26,  27, 35,  36, 44,  45, 53,  54, 62,  63, 71)
-	//  ... probably using template magic. For our purposes, we need >= 8 pairs of bit indices, which will sum to a total of 64 bits
-	// or maybe a better api is:
-	// bits.extract(0, 9, 18, 27, 36, 45, 54, 63)
-	//  ... with each index corresponding to an 8 bit read?
-	//  ... this way, we could do compile time validation that the return value makes sense.
-	//  ... e.g. if we have 8 params, that means it's a 64 bit number being returned.
-	inline ahash_result fuzzy_ahash(const cv::Mat& img, uchar threshold=0, unsigned mode=ahash_result::ALL)
+	template <unsigned CELLSIZE>
+	inline ahash_result<CELLSIZE> fuzzy_ahash(const cv::Mat& img, uchar threshold=0, unsigned mode=ahash_result<CELLSIZE>::ALL)
 	{
-		// return 9 uint64_ts, each representing an 5x5 section of the 7x7 img
+		// return 9 uint64_ts, each representing a 5x5 section of the 7x7 img, an 8x8 section of an 10x10 img, etc
 		cv::Mat gray = img;
 		if (img.channels() != 1)
 			cv::cvtColor(gray, gray, cv::COLOR_RGB2GRAY);
-		if (gray.cols > 8 or gray.rows > 8)
-			cv::resize(gray, gray, cv::Size(8, 8));
 
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
@@ -63,18 +54,20 @@ namespace image_hash
 			for (int j = 0; j < gray.cols; ++j, --bitpos)
 				res |= uint64_t(p[j] > threshold) << bitpos;
 		}
-		return ahash_result(res, mode);
+		return ahash_result<CELLSIZE>(res, mode);
 	}
 
-	inline ahash_result fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result::ALL)
+	template <unsigned CELLSIZE>
+	inline ahash_result<CELLSIZE> fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result<CELLSIZE>::ALL)
 	{
+		const unsigned readlen = CELLSIZE+2;
 		uint64_t res(0);
-		int bitpos = 42; // 7*7 - 7 ... TODO: get from img somehow?
-		for (unsigned i = 0; i < 7; ++i, bitpos-=7)
+		int bitpos = readlen*readlen - readlen; // 7*7 - 7 ..
+		for (unsigned i = 0; i < readlen; ++i, bitpos-=readlen)
 		{
-			uint64_t r = img.get(0, i, 7);
+			uint64_t r = img.get(0, i, readlen);
 			res |= r << bitpos;
 		}
-		return ahash_result(res, mode);
+		return ahash_result<CELLSIZE>(res, mode);
 	}
 }
