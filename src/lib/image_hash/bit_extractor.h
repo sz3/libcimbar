@@ -13,12 +13,17 @@ protected:
 
 public:
 	template <size_t iterations=READLEN>
-	static constexpr auto pattern(unsigned offset)
+	static constexpr auto get_offsets(unsigned offset)
 	{
 		if constexpr (iterations == 1)
 			return std::make_tuple(offset);
 		else
-			return std::tuple_cat(std::make_tuple(offset), pattern<iterations-1>(offset+READLEN+2));
+			return std::tuple_cat(std::make_tuple(offset), get_offsets<iterations-1>(offset+READLEN+2));
+	}
+
+	static constexpr auto pattern(unsigned id)
+	{
+		return get_offsets(id%3 + (id/3)*(READLEN+2));
 	}
 
 public:

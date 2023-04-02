@@ -107,7 +107,7 @@ TEST_CASE( "bitExtractorTest/testTuple.8", "[unit]" )
 	intx::uint128 bits{0xF83C0E030080000ULL, 0xFFBFCFE3FULL};
 	bit_extractor<intx::uint128, 100, 8> be(bits);
 
-	auto tup = be.pattern(10);
+	auto tup = be.pattern(3);
 	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(tup) );
 
 	assertEquals(  0xfffefcf8f0e0c080, be.extract(10, 20, 30, 40, 50, 60, 70, 80) );
@@ -121,15 +121,31 @@ TEST_CASE( "bitExtractorTest/testTuplePatterns.5", "[unit]" )
 
 	std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned> tup = be.pattern(0);
 	assertEquals( "0 7 14 21 28", tuple_to_str(tup) );
+	assertEquals( "0 7 14 21 28", tuple_to_str(be.get_offsets(0)) );
 
 	assertEquals( "1 8 15 22 29", tuple_to_str(be.pattern(1)) );
+	assertEquals( "1 8 15 22 29", tuple_to_str(be.get_offsets(1)) );
+
 	assertEquals( "2 9 16 23 30", tuple_to_str(be.pattern(2)) );
-	assertEquals( "7 14 21 28 35", tuple_to_str(be.pattern(7)) );
-	assertEquals( "8 15 22 29 36", tuple_to_str(be.pattern(8)) );
-	assertEquals( "9 16 23 30 37", tuple_to_str(be.pattern(9)) );
-	assertEquals( "14 21 28 35 42", tuple_to_str(be.pattern(14)) );
-	assertEquals( "15 22 29 36 43", tuple_to_str(be.pattern(15)) );
-	assertEquals( "16 23 30 37 44", tuple_to_str(be.pattern(16)) );
+	assertEquals( "2 9 16 23 30", tuple_to_str(be.get_offsets(2)) );
+
+	assertEquals( "7 14 21 28 35", tuple_to_str(be.pattern(3)) );
+	assertEquals( "7 14 21 28 35", tuple_to_str(be.get_offsets(7)) );
+
+	assertEquals( "8 15 22 29 36", tuple_to_str(be.pattern(4)) );
+	assertEquals( "8 15 22 29 36", tuple_to_str(be.get_offsets(8)) );
+
+	assertEquals( "9 16 23 30 37", tuple_to_str(be.pattern(5)) );
+	assertEquals( "9 16 23 30 37", tuple_to_str(be.get_offsets(9)) );
+
+	assertEquals( "14 21 28 35 42", tuple_to_str(be.pattern(6)) );
+	assertEquals( "14 21 28 35 42", tuple_to_str(be.get_offsets(14)) );
+
+	assertEquals( "15 22 29 36 43", tuple_to_str(be.pattern(7)) );
+	assertEquals( "15 22 29 36 43", tuple_to_str(be.get_offsets(15)) );
+
+	assertEquals( "16 23 30 37 44", tuple_to_str(be.pattern(8)) );
+	assertEquals( "16 23 30 37 44", tuple_to_str(be.get_offsets(16)) );
 }
 
 TEST_CASE( "bitExtractorTest/testTuplePatterns.8", "[unit]" )
@@ -139,13 +155,29 @@ TEST_CASE( "bitExtractorTest/testTuplePatterns.8", "[unit]" )
 
 	std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned, unsigned> tup = be.pattern(0);
 	assertEquals( "0 10 20 30 40 50 60 70", tuple_to_str(tup) );
+	assertEquals( "0 10 20 30 40 50 60 70", tuple_to_str(be.get_offsets(0)) );
 
 	assertEquals( "1 11 21 31 41 51 61 71", tuple_to_str(be.pattern(1)) );
+	assertEquals( "1 11 21 31 41 51 61 71", tuple_to_str(be.get_offsets(1)) );
+
 	assertEquals( "2 12 22 32 42 52 62 72", tuple_to_str(be.pattern(2)) );
-	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(be.pattern(10)) );
-	assertEquals( "11 21 31 41 51 61 71 81", tuple_to_str(be.pattern(11)) );
-	assertEquals( "12 22 32 42 52 62 72 82", tuple_to_str(be.pattern(12)) );
-	assertEquals( "20 30 40 50 60 70 80 90", tuple_to_str(be.pattern(20)) );
-	assertEquals( "21 31 41 51 61 71 81 91", tuple_to_str(be.pattern(21)) );
-	assertEquals( "22 32 42 52 62 72 82 92", tuple_to_str(be.pattern(22)) );
+	assertEquals( "2 12 22 32 42 52 62 72", tuple_to_str(be.get_offsets(2)) );
+
+	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(be.pattern(3)) );
+	assertEquals( "10 20 30 40 50 60 70 80", tuple_to_str(be.get_offsets(10)) );
+
+	assertEquals( "11 21 31 41 51 61 71 81", tuple_to_str(be.pattern(4)) );
+	assertEquals( "11 21 31 41 51 61 71 81", tuple_to_str(be.get_offsets(11)) );
+
+	assertEquals( "12 22 32 42 52 62 72 82", tuple_to_str(be.pattern(5)) );
+	assertEquals( "12 22 32 42 52 62 72 82", tuple_to_str(be.get_offsets(12)) );
+
+	assertEquals( "20 30 40 50 60 70 80 90", tuple_to_str(be.pattern(6)) );
+	assertEquals( "20 30 40 50 60 70 80 90", tuple_to_str(be.get_offsets(20)) );
+
+	assertEquals( "21 31 41 51 61 71 81 91", tuple_to_str(be.pattern(7)) );
+	assertEquals( "21 31 41 51 61 71 81 91", tuple_to_str(be.get_offsets(21)) );
+
+	assertEquals( "22 32 42 52 62 72 82 92", tuple_to_str(be.pattern(8)) );
+	assertEquals( "22 32 42 52 62 72 82 92", tuple_to_str(be.get_offsets(22)) );
 }

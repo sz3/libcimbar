@@ -73,13 +73,13 @@ public:
 			be.extract_tuple( be.pattern(1) ),
 			be.extract_tuple( be.pattern(2) ), // right
 			// middle row
-			be.extract_tuple( be.pattern(7) ),
-			be.extract_tuple( be.pattern(8) ),
-			be.extract_tuple( be.pattern(9) ),
+			be.extract_tuple( be.pattern(3) ),
+			be.extract_tuple( be.pattern(4) ),
+			be.extract_tuple( be.pattern(5) ),
 			// bottom row
-			be.extract_tuple( be.pattern(14) ),
-			be.extract_tuple( be.pattern(15) ),
-			be.extract_tuple( be.pattern(16) )
+			be.extract_tuple( be.pattern(6) ),
+			be.extract_tuple( be.pattern(7) ),
+			be.extract_tuple( be.pattern(8) )
 		};
 	}
 
@@ -92,12 +92,12 @@ public:
 			be.extract_tuple( be.pattern(1) ),
 			0,
 			// middle row
-			be.extract_tuple( be.pattern(7) ),
-			be.extract_tuple( be.pattern(8) ),
-			be.extract_tuple( be.pattern(9) ),
+			be.extract_tuple( be.pattern(3) ),
+			be.extract_tuple( be.pattern(4) ),
+			be.extract_tuple( be.pattern(5) ),
 			// bottom row
 			0,
-			be.extract_tuple( be.pattern(15) ),
+			be.extract_tuple( be.pattern(7) ),
 			0
 		};
 	}
