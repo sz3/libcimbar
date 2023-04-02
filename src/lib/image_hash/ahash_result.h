@@ -2,6 +2,7 @@
 #pragma once
 
 #include "bit_extractor.h"
+#include "intx/intx.hpp"
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -57,7 +58,7 @@ public:
 	};
 
 public:
-	ahash_result(const uint64_t& bits, unsigned mode=ALL)
+	ahash_result(const intx::uint128& bits, unsigned mode=ALL)
 		: _bits(bits)
 		, _mode(mode)
 	{
@@ -69,7 +70,7 @@ public:
 
 	std::array<uint64_t, 9> extract_all() const
 	{
-		bit_extractor<uint64_t, CELLAREA, CELLSIZE> be(_bits);
+		bit_extractor<intx::uint128, CELLAREA, CELLSIZE> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
 			be.extract_tuple( be.pattern(0) ), // left
@@ -88,7 +89,7 @@ public:
 
 	std::array<uint64_t, 9> extract_fast() const
 	{
-		bit_extractor<uint64_t, CELLAREA, CELLSIZE> be(_bits);
+		bit_extractor<intx::uint128, CELLAREA, CELLSIZE> be(_bits);
 		// skip the corners
 		return {
 			0,
@@ -126,7 +127,7 @@ public:
 	}
 
 protected:
-	uint64_t _bits;
+	intx::uint128 _bits;
 	int _mode;
 	std::array<uint64_t, 9> _results;
 };
