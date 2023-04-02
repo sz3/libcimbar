@@ -19,7 +19,6 @@ set(SOURCES
 	CimbWriter.h
 	Common.cpp
 	Common.h
-	Config.cpp
 	Config.h
 	FloodDecodePositions.cpp
 	FloodDecodePositions.h
