@@ -46,13 +46,13 @@ namespace image_hash
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
 
-		uint64_t res(0);
+		intx::uint128 res(0);
 		int bitpos = gray.cols*gray.rows - 1; // 8*8 - 1
 		for (int i = 0; i < gray.rows; ++i)
 		{
 			const uchar* p = gray.ptr<uchar>(i);
 			for (int j = 0; j < gray.cols; ++j, --bitpos)
-				res |= uint64_t(p[j] > threshold) << bitpos;
+				res |= intx::uint128(p[j] > threshold) << bitpos;
 		}
 		return ahash_result<CELLSIZE>(res, mode);
 	}
@@ -61,11 +61,11 @@ namespace image_hash
 	inline ahash_result<CELLSIZE> fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result<CELLSIZE>::ALL)
 	{
 		const unsigned readlen = CELLSIZE+2;
-		uint64_t res(0);
+		intx::uint128 res(0);
 		int bitpos = readlen*readlen - readlen; // 7*7 - 7 ..
 		for (unsigned i = 0; i < readlen; ++i, bitpos-=readlen)
 		{
-			uint64_t r = img.get(0, i, readlen);
+			intx::uint128 r = img.get(0, i, readlen);
 			res |= r << bitpos;
 		}
 		return ahash_result<CELLSIZE>(res, mode);
