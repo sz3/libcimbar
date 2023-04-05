@@ -20,6 +20,8 @@ namespace image_hash
 		cv::Mat gray = img;
 		if (img.channels() != 1)
 			cv::cvtColor(gray, gray, cv::COLOR_RGB2GRAY);
+		if (gray.cols > 8 or gray.rows > 8)
+			cv::resize(gray, gray, cv::Size(8, 8));
 
 		if (threshold == 0)
 			threshold = Cell(gray).mean_grayscale();
