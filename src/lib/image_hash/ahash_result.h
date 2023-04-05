@@ -17,7 +17,7 @@ class ahash_result
 public:
 	static const int FAST = 5;
 	static const int ALL = 9;
-	static constexpr unsigned CELLAREA = std::pow(CELLSIZE+2, 2);
+	static constexpr unsigned CELLAREA = (CELLSIZE+2)*(CELLSIZE+2);
 
 	// out from the center.
 	// 4 == center.
