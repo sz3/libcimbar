@@ -12,6 +12,7 @@ namespace cimbar
 		static constexpr int image_size = 988;
 
 		static constexpr unsigned cell_size = 5;
+		static constexpr unsigned cell_offset = 9;
 		static constexpr unsigned cells_per_col = 162;
 	};
 
@@ -24,6 +25,7 @@ namespace cimbar
 		static constexpr int image_size = 1024;
 
 		static constexpr unsigned cell_size = 8;
+		static constexpr unsigned cell_offset = 8;
 		static constexpr unsigned cells_per_col = 112;
 	};
 }

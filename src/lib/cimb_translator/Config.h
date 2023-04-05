@@ -10,7 +10,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf5x5;
+		using GridConf = Conf8x8;
 
 	public:
 		static constexpr bool dark()
@@ -70,7 +70,7 @@ namespace cimbar
 
 		static constexpr unsigned cell_offset()
 		{
-			return 9;
+			return GridConf::cell_offset;
 		}
 
 		static constexpr unsigned cells_per_col()
