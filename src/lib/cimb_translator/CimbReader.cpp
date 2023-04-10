@@ -29,7 +29,7 @@ namespace {
 	{
 		// will this need to change for smaller tiles? probably?
 
-		int blockSize = 5; // default: no preprocessing
+		int blockSize = 3; // default: no preprocessing
 
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
@@ -38,7 +38,7 @@ namespace {
 			sharpenSymbolGrid(symbols, symbols);
 			blockSize = 3;
 		}
-		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, -10);
+		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, -5);
 
 		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
