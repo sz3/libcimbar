@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "FloodDecodePositions.h"
+#include <iostream>
 
 FloodDecodePositions::FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size)
 	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
@@ -65,9 +66,8 @@ FloodDecodePositions::iter FloodDecodePositions::next()
 	return {0, {0, 0}, CellDrift(), 0xFF};
 }
 
-int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
+int FloodDecodePositions::update_adjacents(const std::array<int,4>& adj, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
 {
-	std::array<int,4> adj = _cellFinder.find(index);
 	for (int next : adj)
 	{
 		if (next < 0 or !_remaining[next])
@@ -78,6 +78,65 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		di = {drift, error_distance, cooldown};
 		_heap.push({next, error_distance});
 	}
+
+	return 0;
+}
+
+int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
+{
+	std::array<int,4> adj = _cellFinder.find(index);
+	update_adjacents(adj, drift, error_distance, cooldown);
+
+	auto& [_, prev_error, prev_cooldown] = _instructions[index];
+	if (prev_error < 3 and cooldown == 4 and prev_cooldown == 4 and error_distance < 3) // low error, down the middle
+	{
+		unsigned rr = 0;
+		unsigned ll = 1;
+		unsigned dd = 2;
+		unsigned uu = 3;
+
+		int rridx = adj[rr];
+		int llidx = adj[ll];
+		if (rridx >= 0 and llidx >= 0)
+		{
+			std::array<int,4> horizon = {-1, -1, -1, -1};
+			horizon[0] = _cellFinder.right(rridx);
+			if (horizon[0])
+				horizon[1] = _cellFinder.right(horizon[0]);
+			horizon[2] = _cellFinder.left(llidx);
+			if (horizon[2])
+				horizon[3] = _cellFinder.left(horizon[2]);
+
+			update_adjacents(horizon, drift, error_distance, cooldown);
+		}
+
+		int uuidx = adj[uu];
+		int ddidx = adj[dd];
+		if (uuidx >= 0 and ddidx >= 0)
+		{
+			std::array<int,4> vert = {-1, -1, -1, -1};
+			vert[0] = _cellFinder.top(uuidx);
+			if (vert[0])
+				vert[1] = _cellFinder.top(vert[0]);
+			vert[2] = _cellFinder.bottom(ddidx);
+			if (vert[2])
+				vert[3] = _cellFinder.bottom(vert[2]);
+
+			update_adjacents(vert, drift, error_distance, cooldown);
+		}
+
+		/*for (int next : adj)
+		{
+			if (next < 0)
+				continue;
+			std::array<int,4> adjadj = _cellFinder.find(next);
+			// maybe strip out dups?
+			update_adjacents(adjadj, drift, error_distance, cooldown);
+		}*/
+	}
+
+	prev_error = error_distance;
+	prev_cooldown = cooldown;
 	return 0;
 }
 
