@@ -90,7 +90,6 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 	auto& [_, prev_error, prev_cooldown] = _instructions[index];
 	if (prev_error < 3 and cooldown == 4 and prev_cooldown == 4 and error_distance < 3) // low error, down the middle
 	{
-		std::cout << "we got a double adjadj! " << index << std::endl;
 		unsigned rr = 0;
 		unsigned ll = 1;
 		unsigned dd = 2;
@@ -100,36 +99,30 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		int llidx = adj[ll];
 		if (rridx >= 0 and llidx >= 0)
 		{
-			bool good = (!_remaining[rridx] and std::get<2>(_instructions[rridx]) == 4) or (!_remaining[llidx] and std::get<2>(_instructions[llidx]) == 4);
-			if (good)
-			{
-				std::array<int,4> horizon = {-1, -1, -1, -1};
-				horizon[0] = _cellFinder.right(rridx);
-				if (horizon[0])
-					horizon[1] = _cellFinder.right(horizon[0]);
-				horizon[2] = _cellFinder.left(llidx);
-				if (horizon[2])
-					horizon[3] = _cellFinder.left(horizon[2]);
-				update_adjacents(horizon, drift, error_distance, cooldown);
-			}
+			std::array<int,4> horizon = {-1, -1, -1, -1};
+			horizon[0] = _cellFinder.right(rridx);
+			if (horizon[0])
+				horizon[1] = _cellFinder.right(horizon[0]);
+			horizon[2] = _cellFinder.left(llidx);
+			if (horizon[2])
+				horizon[3] = _cellFinder.left(horizon[2]);
+
+			update_adjacents(horizon, drift, error_distance, cooldown);
 		}
 
 		int uuidx = adj[uu];
 		int ddidx = adj[dd];
 		if (uuidx >= 0 and ddidx >= 0)
 		{
-			bool good = (!_remaining[uuidx] and std::get<2>(_instructions[uuidx]) == 4) or (!_remaining[ddidx] and std::get<2>(_instructions[ddidx]) == 4);
-			if (good)
-			{
-				std::array<int,4> horizon = {-1, -1, -1, -1};
-				horizon[0] = _cellFinder.top(uuidx);
-				if (horizon[0])
-					horizon[1] = _cellFinder.top(horizon[0]);
-				horizon[2] = _cellFinder.bottom(ddidx);
-				if (horizon[2])
-					horizon[3] = _cellFinder.bottom(horizon[2]);
-				update_adjacents(horizon, drift, error_distance, cooldown);
-			}
+			std::array<int,4> vert = {-1, -1, -1, -1};
+			vert[0] = _cellFinder.top(uuidx);
+			if (vert[0])
+				vert[1] = _cellFinder.top(vert[0]);
+			vert[2] = _cellFinder.bottom(ddidx);
+			if (vert[2])
+				vert[3] = _cellFinder.bottom(vert[2]);
+
+			update_adjacents(vert, drift, error_distance, cooldown);
 		}
 
 		/*for (int next : adj)
