@@ -1,5 +1,6 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "FloodDecodePositions.h"
+#include <iostream>
 
 FloodDecodePositions::FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size)
 	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
@@ -65,9 +66,8 @@ FloodDecodePositions::iter FloodDecodePositions::next()
 	return {0, {0, 0}, CellDrift(), 0xFF};
 }
 
-int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
+int FloodDecodePositions::update_adjacents(const std::array<int,4>& adj, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
 {
-	std::array<int,4> adj = _cellFinder.find(index);
 	for (int next : adj)
 	{
 		if (next < 0 or !_remaining[next])
@@ -78,6 +78,32 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		di = {drift, error_distance, cooldown};
 		_heap.push({next, error_distance});
 	}
+
+	return 0;
+}
+
+int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown)
+{
+	// should we do _instructions[index].error = error_distance, so we have it available for later?
+	auto& [_, prev_error, prev_cooldown] = _instructions[index];
+
+	std::array<int,4> adj = _cellFinder.find(index);
+	update_adjacents(adj, drift, error_distance, cooldown);
+
+	if (prev_error < 3 and prev_cooldown == 4 and error_distance < 3) // low error, down the middle
+	{
+		std::cout << "we got a double adjadj! " << index << std::endl;
+		for (int next : adj)
+		{
+			if (next < 0)
+				continue;
+			std::array<int,4> adjadj = _cellFinder.find(next);
+			// maybe strip out dups?
+			update_adjacents(adjadj, drift, error_distance, cooldown);
+		}
+	}
+
+	prev_error = error_distance;
 	return 0;
 }
 
