@@ -74,8 +74,8 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	}
 
 	string expected = "0=0 99=8 12097=9 12100=0 12196=1 12197=25 12198=33 12200=5 12201=0 12295=32 "
-	        "12296=32 12297=46 12298=32 12299=34 12300=30 12301=32 12394=32 12395=57 "
-	        "12396=37 12397=38 12398=10 12399=15";
+			"12296=32 12297=46 12298=32 12299=34 12300=30 12301=32 12394=32 12395=57 "
+			"12396=37 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -109,8 +109,8 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		++count;
 	}
 
-	string expected = "0=0 1=28 99=8 11900=28 12000=23 12001=29 12100=0 12101=0 12102=25 12200=5 "
-	        "12201=0 12202=33 12297=46 12298=32 12299=34 12300=30 12301=32 12302=32 12396=37 12397=38 12398=10 12399=15";
+	string expected = "0=0 99=8 600=33 711=30 11462=2 11463=16 11573=33 11574=0 11575=1 11685=52 "
+			"11686=17 11687=41 11688=55 11797=30 11798=15 11799=25 12298=32 12299=34 12300=30 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -149,10 +149,10 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 	std::stringstream ss;
 	ss << decoder._ccm.mat();
 	assertEquals("[1.5489368, 0.050406694, -0.016417533;\n"
-	             " 0.0055368096, 1.5302141, -0.0011175937;\n"
-	             " 0, 0, 1.4676259]", ss.str());
+				 " 0.0055368096, 1.5302141, -0.0011175937;\n"
+				 " 0, 0, 1.4676259]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 1, 0, 2, 0};
+	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 1, 3};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -173,7 +173,7 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 
 	assertFalse( decoder._ccm.active() );
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 1, 0, 2, 0};
+	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 1, 3};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -197,10 +197,10 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 	std::stringstream ss;
 	ss << decoder._ccm.mat();
 	assertEquals("[1.0675567, 0.21678841, -0.013292357;\n"
-	             " 0.023812667, 0.98703396, -0.0048082001;\n"
-	             " 0, 0, 1.0017186]", ss.str());
+				 " 0.023812667, 0.98703396, -0.0048082001;\n"
+				 " 0, 0, 1.0017186]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 0, 0, 2, 2}; // it's wrong, but it's consistent!
+	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 0, 3}; // it's wrong, but it's consistent!
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
