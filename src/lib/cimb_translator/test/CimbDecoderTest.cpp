@@ -4,6 +4,8 @@
 
 #include "CimbDecoder.h"
 
+#include "bit_file/bitbuffer.h"
+#include "bit_file/bitmatrix.h"
 #include "cimb_translator/Common.h"
 #include "serialize/format.h"
 #include <opencv2/opencv.hpp>
@@ -46,11 +48,7 @@ TEST_CASE( "CimbDecoderTest/testSimpleDecode", "[unit]" )
 
 TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 {
-	// in practice, it can be useful to decode preprocessed symbol tiles
-	// the "0xFF" flag is passed to the average_hash function, which uses it to
-	// (1) skip computing the mean cell (threshold) value
-	// (2) compute the hash faster (exploiting that it's all 0s or all 1s)
-	// But in this test, we just want to see it get the right answer.
+	// validate the bitmatrix version acts as we expect
 	CimbDecoder cd(4, 0, true, 0xFF);
 
 	for (unsigned i = 0; i < 16; ++i)
@@ -63,9 +61,13 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 		cv::cvtColor(tenxten, tenxten, cv::COLOR_RGB2GRAY);
 		cv::adaptiveThreshold(tenxten, tenxten, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 9, 0);
 
+		bitbuffer bb((100/8) + 1);
+		bitmatrix::mat_to_bitbuffer(tenxten, bb.get_writer());
+		bitmatrix bm(bb, 10, 10);
+
 		unsigned drift_offset;
 		unsigned distance;
-		unsigned res = cd.decode_symbol(tenxten, drift_offset, distance);
+		unsigned res = cd.decode_symbol(bm, drift_offset, distance);
 		assertEquals(i, res);
 		assertEquals(4, drift_offset);
 		assertEquals(0, distance);
