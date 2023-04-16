@@ -75,16 +75,16 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 			assertEquals(71, xy.first);
 			assertEquals(8, xy.second);
 		}
-		else if (i == 100)
+		else if (i == 11799)
 		{
-			assertEquals(62, xy.first);
-			assertEquals(17, xy.second);
+			assertEquals(1007, xy.first);
+			assertEquals(953, xy.second);
 		}
 		else
 			FAIL("i ?= " << i);
 
-		assertEquals(1, drift.x());
-		assertEquals(1, drift.y());
+		assertEquals(0, drift.x());
+		assertEquals(0, drift.y());
 
 		cells.update(i, drift, 3, cooldown);
 		remainingPos.erase(i);
