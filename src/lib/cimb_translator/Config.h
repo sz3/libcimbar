@@ -2,9 +2,7 @@
 #pragma once
 
 #include "GridConf.h"
-#include <cmath>
 
-// probably defaults with a pimpl to read/cache if there's a (yaml?) config locally?
 namespace cimbar
 {
 	class Config
@@ -63,10 +61,7 @@ namespace cimbar
 			return cell_size() + 1;
 		}
 
-		static constexpr unsigned corner_padding()
-		{
-			return lrint(54.0 / cell_spacing());
-		}
+		static unsigned corner_padding();
 
 		static constexpr unsigned cell_offset()
 		{
@@ -78,22 +73,11 @@ namespace cimbar
 			return GridConf::cells_per_col;
 		}
 
-		static constexpr unsigned total_cells()
-		{
-			return std::pow(cells_per_col(), 2) - std::pow(corner_padding(), 2) * 4;
-		}
+		static unsigned total_cells();
 
-		static constexpr unsigned decode_window_bits()
-		{
-			return std::pow(cell_size() + 2, 2);
-		}
+		static unsigned decode_window_bits();
 
-		inline static unsigned capacity(unsigned bitspercell=0)
-		{
-			if (!bitspercell)
-				bitspercell = bits_per_cell();
-			return total_cells() * bitspercell / 8;
-		}
+		static unsigned capacity(unsigned bitspercell=0);
 
 		static constexpr unsigned interleave_blocks()
 		{
@@ -110,14 +94,7 @@ namespace cimbar
 			return 10;
 		}
 
-		inline static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell=0)
-		{
-			// TODO: sanity checks?
-			// this should neatly split into fountain_chunks_per_frame() [ex: 10] chunks per frame.
-			// the other reasonable settings for fountain_chunks_per_frame are `2` and `5`
-			const unsigned eccBlockSize = ecc_block_size();
-			return capacity(bitspercell) * (eccBlockSize-ecc) / eccBlockSize / fountain_chunks_per_frame();
-		}
+		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell=0);
 
 		static constexpr unsigned compression_level()
 		{
@@ -125,3 +102,4 @@ namespace cimbar
 		}
 	};
 }
+
