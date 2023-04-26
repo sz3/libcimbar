@@ -47,9 +47,15 @@ public:
 		{
 			for (int j = 0; j < _rows; ++j, ++count)
 			{
-				red += p[0];
-				green += p[1];
-				blue += p[2];
+				// only count pixel if we have enough "signal"
+				if (p[0] > 80 or p[1] > 80)
+				{
+					red += p[0];
+					green += p[1];
+					blue += p[2];
+				}
+				else
+					--count;
 				p += channels;
 			}
 			p += toNextCol;
@@ -81,9 +87,15 @@ public:
 			const uchar* p = _img.ptr<uchar>(i);
 			for (int j = 0; j < yend; j+=_img.channels(), ++count)
 			{
-				red += p[j];
-				green += p[j+1];
-				blue += p[j+2];
+				// only count pixel if we have enough "signal"
+				if (p[j] > 80 or p[j+1] > 80)
+				{
+					red += p[j];
+					green += p[j+1];
+					blue += p[j+2];
+				}
+				else
+					--count;
 			}
 		}
 
