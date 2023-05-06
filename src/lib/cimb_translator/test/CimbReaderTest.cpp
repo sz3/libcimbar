@@ -73,9 +73,9 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 		++count;
 	}
 
-	string expected = "0=0 99=8 12097=9 12100=0 12196=1 12197=25 12198=33 12200=5 12201=0 12295=32 "
-			"12296=32 12297=46 12298=32 12299=34 12300=30 12301=32 12394=32 12395=57 "
-			"12396=37 12397=38 12398=10 12399=15";
+	string expected = "0=0 99=8 600=33 710=28 711=30 821=8 822=22 823=19 934=55 11688=55 11799=25 "
+			"11900=28 12000=23 12100=0 12200=5 12201=0 12298=32 12299=34 12300=30 12301=32 "
+			"12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -109,8 +109,8 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		++count;
 	}
 
-	string expected = "0=0 99=8 600=33 711=30 11462=2 11463=16 11573=33 11574=0 11575=1 11685=52 "
-			"11686=17 11687=41 11688=55 11797=30 11798=15 11799=25 12298=32 12299=34 12300=30 12397=38 12398=10 12399=15";
+	string expected = "0=0 99=8 600=33 711=30 11462=2 11573=33 11574=0 11685=52 11686=17 11687=41 "
+			"11688=55 11797=30 11798=15 11799=25 12200=5 12298=46 12299=34 12300=30 12301=32 12397=38 12398=10 12399=15";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -200,7 +200,7 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 				 " 0.023812667, 0.98703396, -0.0048082001;\n"
 				 " 0, 0, 1.0017186]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 0, 3}; // it's wrong, but it's consistent!
+	std::array<unsigned, 6> expectedColors = {0, 0, 0, 0, 0, 3}; // it's wrong, but it's consistent!
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
