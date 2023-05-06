@@ -27,7 +27,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 
 	// validate seed points
 	unsigned count = 0;
-	for (int c = 0; c < 4; ++c)
+	for (int c = 0; c < 8; ++c)
 	{
 		// 0
 		std::tie(i, xy, drift, cooldown) = cells.next();
@@ -59,6 +59,30 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 			assertEquals(1007, xy.second);
 			cells.update(i, drift, 2, cooldown);
 		}
+		else if (i == 600)
+		{
+			assertEquals(8, xy.first);
+			assertEquals(62, xy.second);
+			cells.update(i, drift, 2, cooldown);
+		}
+		else if (i == 711)
+		{
+			assertEquals(1007, xy.first);
+			assertEquals(62, xy.second);
+			cells.update(i, drift, 2, cooldown);
+		}
+		else if (i == 11688)
+		{
+			assertEquals(8, xy.first);
+			assertEquals(953, xy.second);
+			cells.update(i, drift, 2, cooldown);
+		}
+		else if (i == 11799)
+		{
+			assertEquals(1007, xy.first);
+			assertEquals(953, xy.second);
+			cells.update(i, drift, 2, cooldown);
+		}
 		else
 			FAIL("i ?= " << i);
 
@@ -75,16 +99,17 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 			assertEquals(71, xy.first);
 			assertEquals(8, xy.second);
 		}
-		else if (i == 11799)
+		else if (i == 100)
 		{
-			assertEquals(1007, xy.first);
-			assertEquals(953, xy.second);
+			assertEquals(62, xy.first);
+			assertEquals(17, xy.second);
 		}
 		else
 			FAIL("i ?= " << i);
 
-		assertEquals(0, drift.x());
-		assertEquals(0, drift.y());
+		// we manually set drift to 1,1 -- it should be persisted
+		assertEquals(1, drift.x());
+		assertEquals(1, drift.y());
 
 		cells.update(i, drift, 3, cooldown);
 		remainingPos.erase(i);

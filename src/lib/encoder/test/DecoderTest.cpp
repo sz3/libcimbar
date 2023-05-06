@@ -56,8 +56,6 @@ TEST_CASE( "DecoderTest/testDecode.Sample", "[unit]" )
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
 
-	if (CV_VERSION_MAJOR == 3)
-		assertEquals( "3de927c8aa0221807a2784210160cdc17567eb587bf01233d166900aadf14bf5", get_hash(decodedFile) );
-	else // # cv4
-		assertEquals( "de0ecea439e4f7bddb7ffe67ee0cd5e651cd7c7efa25b42c8cf84e0dd41b9e41", get_hash(decodedFile) );
+	if (CV_VERSION_MAJOR == 4)
+		assertEquals( "0f74a76cb1f59df7a42449a3527d464d913d12a03bffa51d6f53828724c3feb1", get_hash(decodedFile) );
 }
