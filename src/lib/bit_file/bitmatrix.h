@@ -18,25 +18,31 @@ public:
 		while (size >= 8)
 		{
 			// we're turning 1 uint64_t into 8 uint8_ts
-			const uint64_t* hax = reinterpret_cast<const uint64_t*>(p);
-			uint64_t mval = (*hax) & 0x101010101010101ULL;
+			uint64_t mval;
+			memcpy(&mval, p, sizeof mval);
+			mval = mval & 0x101010101010101ULL;
 			const uint8_t* cv = reinterpret_cast<const uint8_t*>(&mval);
 			// TODO: what about endianness???
-			uint8_t val = cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 | cv[6] << 1 | cv[7];
+			uint8_t val = (
+				cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 |
+				cv[6] << 1 | cv[7]
+			);
 			writer << val;
 			p += 8;
 			size -= 8;
 		}
 
 		// remainder
-		uint8_t val = 0;
-		while (size > 0)
+		if (size > 0)
 		{
-			val |= (*p > 0) << size;
-			++p;
-			--size;
+			uint8_t val = 0;
+			while (size > 0) {
+				val |= (*p > 0) << size;
+				++p;
+				--size;
+			}
+			writer << val;
 		}
-		writer << val;
 	}
 
 public:
