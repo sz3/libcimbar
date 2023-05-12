@@ -157,7 +157,7 @@ return {
 
   setColorBits : function(color_bits)
   {
-    Module._configure(color_bits, 30, 6);
+    Module._configure(color_bits, 255, 255);
 
     var nav = document.getElementById("nav-container");
     if (color_bits == 2) {
