@@ -12,8 +12,11 @@ namespace cimbar
 		static constexpr int image_size = 988;
 
 		static constexpr unsigned cell_size = 5;
+		static constexpr unsigned cell_spacing_x = 6;
+		static constexpr unsigned cell_spacing_y = 6;
 		static constexpr unsigned cell_offset = 9;
-		static constexpr unsigned cells_per_col = 162;
+		static constexpr unsigned cells_per_col_x = 162;
+		static constexpr unsigned cells_per_col_y = 162;
 	};
 
 	struct Conf8x8
