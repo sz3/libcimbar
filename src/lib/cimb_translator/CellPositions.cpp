@@ -2,7 +2,7 @@
 #include "CellPositions.h"
 #include "Interleave.h"
 
-CellPositions::positions_list CellPositions::compute_linear(int spacing, int dimensions, int offset, int marker_size)
+CellPositions::positions_list CellPositions::compute_linear(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size)
 {
 	/*
 	 * ex: if dimensions == 128, and marker_size == 8:
@@ -16,7 +16,7 @@ CellPositions::positions_list CellPositions::compute_linear(int spacing, int dim
 	*/
 	positions_list res;
 	int offset_y = offset;
-	int marker_offset_x = spacing * marker_size;
+	int marker_offset_x = std::max(spacing_x, spacing_y) * marker_size;
 	int top_width = dimensions - marker_size - marker_size;
 	int top_cells = top_width * marker_size;
 	for (int i = 0; i < top_cells; ++i)
@@ -48,7 +48,7 @@ CellPositions::positions_list CellPositions::compute_linear(int spacing, int dim
 	return res;
 }
 
-CellPositions::positions_list CellPositions::compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
+CellPositions::positions_list CellPositions::compute(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
 {
 	CellPositions::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
 	if (interleave_blocks)
@@ -57,7 +57,7 @@ CellPositions::positions_list CellPositions::compute(int spacing, int dimensions
 }
 
 CellPositions::CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
-    : _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks, interleave_partitions))
+	: _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks, interleave_partitions))
 {
 	reset();
 }
