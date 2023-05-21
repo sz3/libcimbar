@@ -15,7 +15,7 @@ public:
 	static positions_list compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
 
 public:
-	CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
+	CellPositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
 
 	unsigned index() const;
 	size_t count() const;

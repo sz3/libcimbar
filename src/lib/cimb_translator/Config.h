@@ -8,7 +8,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf8x8;
+		using GridConf = Conf5x5;
 
 	public:
 		static constexpr bool dark()
@@ -61,9 +61,14 @@ namespace cimbar
 			return GridConf::cell_size;
 		}
 
-		static constexpr unsigned cell_spacing()
+		static constexpr unsigned cell_spacing_x()
 		{
-			return cell_size() + 1;
+			return GridConf::cell_spacing_x;
+		}
+
+		static constexpr unsigned cell_spacing_y()
+		{
+			return GridConf::cell_spacing_y;
 		}
 
 		static unsigned corner_padding();
@@ -73,9 +78,14 @@ namespace cimbar
 			return GridConf::cell_offset;
 		}
 
-		static constexpr unsigned cells_per_col()
+		static constexpr unsigned cells_per_col_x()
 		{
-			return GridConf::cells_per_col;
+			return GridConf::cells_per_col_x;
+		}
+
+		static constexpr unsigned cells_per_col_y()
+		{
+			return GridConf::cells_per_col_y;
 		}
 
 		static unsigned total_cells();
