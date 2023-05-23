@@ -8,7 +8,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf5x5;
+		using GridConf = Conf8x8;
 
 	public:
 		static constexpr bool dark()
@@ -66,7 +66,9 @@ namespace cimbar
 			return GridConf::cell_spacing_y;
 		}
 
-		static unsigned corner_padding();
+		static unsigned corner_padding_x();
+
+		static unsigned corner_padding_y();
 
 		static constexpr unsigned cell_offset()
 		{
@@ -96,12 +98,12 @@ namespace cimbar
 
 		static constexpr unsigned interleave_partitions()
 		{
-			return 2;
+			return GridConf::interleave_partitions;
 		}
 
 		static constexpr unsigned fountain_chunks_per_frame()
 		{
-			return 10;
+			return GridConf::fountain_chunks_per_frame;
 		}
 
 		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell=0);

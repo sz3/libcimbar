@@ -1,14 +1,14 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "AdjacentCellFinder.h"
 
-AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size)
+AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions_x, int dimensions_y, int marker_size_x, int marker_size_y)
 	: _positions(positions)
-	, _dimensions(dimensions)
-	, _markerSize(marker_size)
+	, _dimensionsX(dimensions_x)
+	, _markerSizeX(marker_size_x)
 {
-	int midDimensions = dimensions - marker_size - marker_size;
-	int midCells = dimensions * midDimensions;
-	int edgeCells = midDimensions * marker_size;
+	int midHeight = dimensions_y - marker_size_y - marker_size_y;
+	int midCells = dimensions_x * midHeight;
+	int edgeCells = calc_mid_width() * marker_size_y;
 	_firstMid = edgeCells;
 	_firstBottom = edgeCells + midCells;
 }
@@ -21,14 +21,24 @@ std::array<int, 4> AdjacentCellFinder::find(int index) const
 	return adj;
 }
 
-int AdjacentCellFinder::dimensions() const
+int AdjacentCellFinder::dimensions_x() const
 {
-	return _dimensions;
+	return _dimensionsX;
 }
 
-int AdjacentCellFinder::marker_size() const
+int AdjacentCellFinder::marker_size_x() const
 {
-	return _markerSize;
+	return _markerSizeX;
+}
+
+int AdjacentCellFinder::calc_mid_width() const
+{
+	return _dimensionsX - _markerSizeX - _markerSizeX;
+}
+
+int AdjacentCellFinder::first_mid() const
+{
+	return _firstMid;
 }
 
 int AdjacentCellFinder::in_row_with_margin(int index) const
@@ -63,12 +73,12 @@ int AdjacentCellFinder::left(int index) const
 
 int AdjacentCellFinder::bottom(int index) const
 {
-	int increment = _dimensions;
+	int increment = _dimensionsX;
 	if (in_row_with_margin(index))
-		increment -= _markerSize;
+		increment -= _markerSizeX;
 	int next = index + increment;
 	if (in_row_with_margin(next))
-		next -= _markerSize;
+		next -= _markerSizeX;
 
 	if (next >= (int)_positions.size())
 		return -1;
@@ -79,12 +89,12 @@ int AdjacentCellFinder::bottom(int index) const
 
 int AdjacentCellFinder::top(int index) const
 {
-	int increment = _dimensions;
+	int increment = _dimensionsX;
 	if (in_row_with_margin(index))
-		increment -= _markerSize;
+		increment -= _markerSizeX;
 	int next = index - increment;
 	if (in_row_with_margin(next))
-		next += _markerSize;
+		next += _markerSizeX;
 
 	if (next < 0)
 		return -1;

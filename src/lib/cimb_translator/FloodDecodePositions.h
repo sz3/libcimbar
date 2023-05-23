@@ -28,7 +28,7 @@ public:
 	};
 
 public:
-	FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size);
+	FloodDecodePositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y);
 
 	size_t size() const;
 	void reset();
@@ -48,5 +48,6 @@ protected:
 	std::vector<decode_instructions> _instructions;
 	CellPositions::positions_list _positions;
 	AdjacentCellFinder _cellFinder;
+	int _topWidth;
 };
 
