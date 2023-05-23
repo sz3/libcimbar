@@ -12,11 +12,27 @@ namespace cimbar
 		static constexpr int image_size = 988;
 
 		static constexpr unsigned cell_size = 5;
-		static constexpr unsigned cell_spacing_x = 6;
-		static constexpr unsigned cell_spacing_y = 6;
+		static constexpr unsigned cell_spacing_x = cell_size+1;
+		static constexpr unsigned cell_spacing_y = cell_size+1;
 		static constexpr unsigned cell_offset = 9;
 		static constexpr unsigned cells_per_col_x = 162;
-		static constexpr unsigned cells_per_col_y = 162;
+		static constexpr unsigned cells_per_col_y = cells_per_col_x;
+	};
+
+	struct Conf5x5d
+	{
+		static constexpr unsigned color_bits = 2;
+		static constexpr unsigned symbol_bits = 2;
+		static constexpr unsigned ecc_bytes = 35;
+		static constexpr unsigned ecc_block_size = 182;
+		static constexpr int image_size = 958;
+
+		static constexpr unsigned cell_size = 5;
+		static constexpr unsigned cell_spacing_x = cell_size;
+		static constexpr unsigned cell_spacing_y = cell_size+1;
+		static constexpr unsigned cell_offset = 9;
+		static constexpr unsigned cells_per_col_x = 188;
+		static constexpr unsigned cells_per_col_y = 157;
 	};
 
 	struct Conf8x8
@@ -28,7 +44,10 @@ namespace cimbar
 		static constexpr int image_size = 1024;
 
 		static constexpr unsigned cell_size = 8;
+		static constexpr unsigned cell_spacing_x = cell_size+1;
+		static constexpr unsigned cell_spacing_y = cell_size+1;
 		static constexpr unsigned cell_offset = 8;
-		static constexpr unsigned cells_per_col = 112;
+		static constexpr unsigned cells_per_col_x = 112;
+		static constexpr unsigned cells_per_col_y = cells_per_col_x;
 	};
 }
