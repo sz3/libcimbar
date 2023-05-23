@@ -7,12 +7,15 @@
 class AdjacentCellFinder
 {
 public:
-	AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size);
+	AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions_x, int dimensions_y, int marker_size_x, int marker_size_y);
 
 	std::array<int, 4> find(int index) const;
 
-	int dimensions() const;
-	int marker_size() const;
+	int dimensions_x() const;
+	int marker_size_x() const;
+	int calc_mid_width() const;
+
+	int first_mid() const;
 
 	int right(int index) const;
 	int left(int index) const;
@@ -24,8 +27,8 @@ protected:
 
 protected:
 	const CellPositions::positions_list& _positions;
-	int _dimensions;
-	int _markerSize;
+	int _dimensionsX;
+	int _markerSizeX;
 	int _firstMid;
 	int _firstBottom;
 };

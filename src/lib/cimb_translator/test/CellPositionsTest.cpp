@@ -9,7 +9,7 @@
 
 TEST_CASE( "CellPositionsTest/testSimple", "[unit]" )
 {
-	CellPositions cells(9, 112, 8, 6);
+	CellPositions cells(9, 9, 112, 112, 8, 6, 6);
 
 	// test first coordinate. We'll just count the rest.
 	assertFalse( cells.done() );

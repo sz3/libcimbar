@@ -11,11 +11,11 @@ public:
 	using coordinate = std::pair<int, int>;
 	using positions_list = std::vector<coordinate>;
 
-	static positions_list compute_linear(int spacing, int dimensions, int offset, int marker_size);
-	static positions_list compute(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
+	static positions_list compute_linear(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y);
+	static positions_list compute(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y, int interleave_blocks=0, int interleave_partitions=1);
 
 public:
-	CellPositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size, int interleave_blocks=0, int interleave_partitions=1);
+	CellPositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y, int interleave_blocks=0, int interleave_partitions=1);
 
 	unsigned index() const;
 	size_t count() const;

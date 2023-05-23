@@ -2,7 +2,7 @@
 #include "CellPositions.h"
 #include "Interleave.h"
 
-CellPositions::positions_list CellPositions::compute_linear(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size)
+CellPositions::positions_list CellPositions::compute_linear(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y)
 {
 	/*
 	 * ex: if dimensions == 128, and marker_size == 8:
@@ -16,48 +16,49 @@ CellPositions::positions_list CellPositions::compute_linear(int spacing_x, int s
 	*/
 	positions_list res;
 	int offset_y = offset;
-	int marker_offset_x = std::max(spacing_x, spacing_y) * marker_size;
-	int top_width = dimensions - marker_size - marker_size;
-	int top_cells = top_width * marker_size;
+	int marker_offset_x = spacing_x * marker_size_x;
+	int top_width = dimensions_x - marker_size_x - marker_size_x;
+	int top_cells = top_width * marker_size_y;
 	for (int i = 0; i < top_cells; ++i)
 	{
-		int x = (i % top_width) * spacing + marker_offset_x + offset;
-		int y = (i / top_width) * spacing + offset_y;
+		int x = (i % top_width) * spacing_x + marker_offset_x + offset;
+		int y = (i / top_width) * spacing_y + offset_y;
 		res.push_back({x, y});
 	}
 
-	int mid_y = marker_size * spacing;
-	int mid_width = dimensions;
-	int mid_cells = mid_width * top_width;  // top_width is also "mid_height"
+	int mid_y = marker_size_y * spacing_y;
+	int mid_width = dimensions_x;
+	int mid_height = dimensions_y - marker_size_y - marker_size_y;
+	int mid_cells = mid_width * mid_height;
 	for (int i = 0; i < mid_cells; ++i)
 	{
-		int x = (i % mid_width) * spacing + offset;
-		int y = (i / mid_width) * spacing + mid_y + offset_y;
+		int x = (i % mid_width) * spacing_x + offset;
+		int y = (i / mid_width) * spacing_y + mid_y + offset_y;
 		res.push_back({x, y});
 	}
 
-	int bottom_y = (dimensions - marker_size) * spacing;
+	int bottom_y = (dimensions_y - marker_size_y) * spacing_y;
 	int bottom_width = top_width;
-	int bottom_cells = bottom_width * marker_size;
+	int bottom_cells = bottom_width * marker_size_y;
 	for (int i = 0; i < bottom_cells; ++i)
 	{
-		int x = (i % bottom_width) * spacing + marker_offset_x + offset;
-		int y = (i / bottom_width) * spacing + bottom_y + offset_y;
+		int x = (i % bottom_width) * spacing_x + marker_offset_x + offset;
+		int y = (i / bottom_width) * spacing_y + bottom_y + offset_y;
 		res.push_back({x, y});
 	}
 	return res;
 }
 
-CellPositions::positions_list CellPositions::compute(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
+CellPositions::positions_list CellPositions::compute(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y, int interleave_blocks, int interleave_partitions)
 {
-	CellPositions::positions_list pos = compute_linear(spacing, dimensions, offset, marker_size);
+	CellPositions::positions_list pos = compute_linear(spacing_x, spacing_y, dimensions_x, dimensions_y, offset, marker_size_x, marker_size_y);
 	if (interleave_blocks)
 		return Interleave::interleave(pos, interleave_blocks, interleave_partitions);
 	return pos;
 }
 
-CellPositions::CellPositions(int spacing, int dimensions, int offset, int marker_size, int interleave_blocks, int interleave_partitions)
-	: _positions(compute(spacing, dimensions, offset, marker_size, interleave_blocks, interleave_partitions))
+CellPositions::CellPositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y, int interleave_blocks, int interleave_partitions)
+	: _positions(compute(spacing_x, spacing_y, dimensions_x, dimensions_y, offset, marker_size_x, marker_size_y, interleave_blocks, interleave_partitions))
 {
 	reset();
 }

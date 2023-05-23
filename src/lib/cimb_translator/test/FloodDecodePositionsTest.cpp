@@ -12,7 +12,7 @@ TEST_CASE( "FloodDecodePositionsTest/testSimple", "[unit]" )
 {
 	const unsigned posCount = 12400;
 
-	FloodDecodePositions cells(9, 112, 8, 6);
+	FloodDecodePositions cells(9, 9, 112, 112, 8, 6, 6);
 	std::set<unsigned> remainingPos;
 	for (unsigned i = 0; i < posCount; ++i)
 		remainingPos.insert(i);

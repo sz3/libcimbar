@@ -6,7 +6,7 @@ namespace cimbar {
 
 unsigned Config::total_cells()
 {
-	return std::pow(cells_per_col(), 2) - std::pow(corner_padding(), 2) * 4;
+	return cells_per_col_x()*cells_per_col_y() - (corner_padding_x()*corner_padding_y() * 4);
 }
 
 unsigned Config::decode_window_bits()
@@ -21,9 +21,14 @@ unsigned Config::capacity(unsigned bitspercell)
 	return total_cells() * bitspercell / 8;
 }
 
-unsigned Config::corner_padding()
+unsigned Config::corner_padding_x()
 {
-	return lrint(54.0 / cell_spacing());
+	return lrint(54.0 / cell_spacing_x());
+}
+
+unsigned Config::corner_padding_y()
+{
+	return lrint(54.0 / cell_spacing_y());
 }
 
 unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode)

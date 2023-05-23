@@ -9,7 +9,7 @@
 
 TEST_CASE( "LinearDecodePositionsTest/testSimple", "[unit]" )
 {
-	LinearDecodePositions cells(9, 112, 8, 6);
+	LinearDecodePositions cells(9, 9, 112, 112, 8, 6, 6);
 
 	// test first coordinate. We'll just count the rest.
 	assertFalse( cells.done() );
