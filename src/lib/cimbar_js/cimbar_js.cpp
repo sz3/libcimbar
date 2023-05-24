@@ -31,6 +31,11 @@ int initialize_GL(int width, int height)
 	if (_window)
 		return 1;
 
+	// must be divisible by 4???
+	if (width % 4 != 0)
+		width += (4 - width % 4);
+	if (height % 4 != 0)
+		height += (4 - height % 4);
 	std::cerr << "initializing " << width << " by " << height << " window";
 
 	_window = std::make_shared<cimbar::window_glfw>(width, height, "Cimbar Encoder");
