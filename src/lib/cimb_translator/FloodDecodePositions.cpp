@@ -88,7 +88,9 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 	update_adjacents(adj, drift, error_distance, cooldown);
 
 	auto& [_, prev_error, prev_cooldown] = _instructions[index];
-	if (prev_error < 3 and cooldown == 4 and prev_cooldown == 4 and error_distance < 3) // low error, down the middle
+	// in the case where we have consecutive high confidence cells with no drift changes,
+	// it's safe(ish) to aggressively queue a few more cells
+	if (prev_error < 3 and error_distance < 3 and prev_cooldown == 4 and cooldown == 4)
 	{
 		unsigned rr = 0;
 		unsigned ll = 1;
@@ -124,15 +126,6 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 
 			update_adjacents(vert, drift, error_distance, cooldown);
 		}
-
-		/*for (int next : adj)
-		{
-			if (next < 0)
-				continue;
-			std::array<int,4> adjadj = _cellFinder.find(next);
-			// maybe strip out dups?
-			update_adjacents(adjadj, drift, error_distance, cooldown);
-		}*/
 	}
 
 	prev_error = error_distance;
