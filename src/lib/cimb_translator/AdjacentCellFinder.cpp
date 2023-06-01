@@ -2,9 +2,9 @@
 #include "AdjacentCellFinder.h"
 
 AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions, int marker_size)
-    : _positions(positions)
-    , _dimensions(dimensions)
-    , _markerSize(marker_size)
+	: _positions(positions)
+	, _dimensions(dimensions)
+	, _markerSize(marker_size)
 {
 	int midDimensions = dimensions - marker_size - marker_size;
 	int midCells = dimensions * midDimensions;
@@ -13,10 +13,10 @@ AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& posi
 	_firstBottom = edgeCells + midCells;
 }
 
-std::array<int, 4> AdjacentCellFinder::find(int index)
+std::array<int, 4> AdjacentCellFinder::find(int index) const
 {
 	std::array<int,4> adj = {
-	    right(index), left(index), bottom(index), top(index)
+		right(index), left(index), bottom(index), top(index)
 	};
 	return adj;
 }

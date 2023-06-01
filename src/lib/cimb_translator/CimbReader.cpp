@@ -32,13 +32,10 @@ namespace {
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
 		if (needs_sharpen)
-		{
-			sharpenSymbolGrid(symbols, symbols);
-			blockSize = 7;
-		}
-		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
+			sharpenSymbolGrid(symbols, symbols); // we used to change blockSize for this case -- may one day be a useful trick again?
+		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, -5);
 
-		bitbuffer bb(1024*128);
+		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
@@ -89,11 +86,11 @@ namespace {
 }
 
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
-    : _image(img)
-    , _cellSize(Config::cell_size() + 2)
-    , _positions(Config::cell_spacing(), Config::num_cells(), Config::cell_size(), Config::corner_padding())
-    , _decoder(decoder)
-    , _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
+	: _image(img)
+	, _cellSize(Config::cell_size() + 2)
+	, _positions(Config::cell_spacing(), Config::cells_per_col(), Config::cell_offset(), Config::corner_padding())
+	, _decoder(decoder)
+	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction)
@@ -101,7 +98,7 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_shar
 }
 
 CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
-    : CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
+	: CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
 {
 }
 
@@ -117,18 +114,18 @@ unsigned CimbReader::read(PositionData& pos)
 		return 0;
 
 	// need coordinate, index, and drift from next position
-	auto [i, xy, drift] = _positions.next();
+	auto [i, xy, drift, cooldown] = _positions.next();
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
 	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;
-	unsigned bits = _decoder.decode_symbol(cell, drift_offset, error_distance);
+	unsigned bits = _decoder.decode_symbol(cell, drift_offset, error_distance, cooldown);
 
 	std::pair<int, int> best_drift = CellDrift::driftPairs[drift_offset];
 	drift.updateDrift(best_drift.first, best_drift.second);
-	_positions.update(i, drift, error_distance);
+	_positions.update(i, drift, error_distance, CellDrift::calculate_cooldown(cooldown, drift_offset));
 
 	pos.i = i;
 	pos.x = x + best_drift.first;

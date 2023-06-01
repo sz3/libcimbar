@@ -30,6 +30,7 @@ protected:
 
 protected:
 	unsigned _eccBytes;
+	unsigned _eccBlockSize;
 	unsigned _colorBits;
 	unsigned _bitsPerOp;
 	unsigned _interleaveBlocks;
@@ -38,12 +39,13 @@ protected:
 };
 
 inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
-    : _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
-    , _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
-    , _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
-    , _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
-    , _interleavePartitions(cimbar::Config::interleave_partitions())
-    , _decoder(cimbar::Config::symbol_bits(), _colorBits, cimbar::Config::dark(), 0xFF)
+	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
+	, _eccBlockSize(cimbar::Config::ecc_block_size())
+	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
+	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
+	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
+	, _interleavePartitions(cimbar::Config::interleave_partitions())
+	, _decoder(cimbar::Config::symbol_bits(), _colorBits, cimbar::Config::dark(), 0xFF)
 {
 }
 
@@ -62,9 +64,10 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	bitbuffer bb(_bitsPerOp * 1550);
+	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
-	std::array<PositionData, 12400> colorPositions; // 12400 = 1500 * 8, aka the number of cells. This should probably be determined at runtime
+	std::vector<PositionData> colorPositions;
+	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
 
 	// read symbols first
 	while (!reader.done())
@@ -88,7 +91,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		bb.write(bits, p.i, _colorBits);
 	}
 
-	reed_solomon_stream rss(ostream, _eccBytes);
+	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
 	return bb.flush(rss);
 }
 

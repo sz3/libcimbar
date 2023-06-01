@@ -12,8 +12,10 @@
 class FloodDecodePositions
 {
 public:
-	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift>;
-	using decode_instructions = std::pair<CellDrift, uint8_t>; // drift, best_prio
+	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift, uint8_t>;
+	// compress these types down to reduce size and cache pressure?
+	// i.e. with a struct ...
+	using decode_instructions = std::tuple<CellDrift, uint8_t, uint8_t>; // drift, best_prio, cooldown_pos
 	using decode_prio = std::tuple<uint16_t, uint8_t>; // index, prio
 
 	class PrioCompare
@@ -33,7 +35,10 @@ public:
 
 	bool done() const;
 	iter next();
-	int update(unsigned index, const CellDrift& drift, unsigned error_distance);
+	int update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown);
+
+protected:
+	int update_adjacents(const std::array<int,4>& adj, const CellDrift& drift, unsigned error_distance, uint8_t cooldown);
 
 protected:
 	unsigned _index;

@@ -12,7 +12,7 @@ public:
 	static constexpr int NEEDS_SHARPEN = 2;
 
 public:
-	Extractor();
+	Extractor(unsigned image_size=0, unsigned anchor_size=0);
 
 	int extract(const cv::Mat& img, cv::Mat& out);
 	int extract(const cv::UMat& img, cv::UMat& out);
@@ -20,4 +20,6 @@ public:
 	int extract(std::string read_path, std::string write_path);
 
 protected:
+	unsigned _imageSize;
+	unsigned _anchorSize;
 };

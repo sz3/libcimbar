@@ -4,37 +4,40 @@
 #include "bit_extractor.h"
 #include "intx/intx.hpp"
 #include <array>
+#include <cmath>
 #include <iostream>
 #include <utility>
 
 namespace image_hash
 {
 
+template <unsigned CELLSIZE>
 class ahash_result
 {
 public:
 	static const int FAST = 5;
 	static const int ALL = 9;
+	static constexpr unsigned CELLAREA = (CELLSIZE+2)*(CELLSIZE+2);
 
 	// out from the center.
 	// 4 == center.
 	// 5, 7, 3, 1 == sides.
 	// 8, 0, 2, 6 == corners.
 	// mode=FAST will discard the corner checks.
-	static constexpr std::array<int, 9> _ORDER = {4, 5, 7, 3, 1, 8, 0, 2, 6};
+	static constexpr std::array<unsigned, 9> _ORDER = {4, 5, 7, 3, 1, 8, 0, 2, 6};
 
 public:
 	class iterator
 	{
 	public:
 		iterator(const ahash_result& hr, unsigned i=0)
-		    : _hr(hr)
-		    , _i(i)
+			: _hr(hr)
+			, _i(i)
 		{}
 
-		std::pair<int, uint64_t> operator*()
+		std::pair<unsigned, uint64_t> operator*()
 		{
-			int idx = _hr._ORDER[_i];
+			unsigned idx = _hr._ORDER[_i];
 			return {idx, _hr._results[idx]};
 		}
 
@@ -56,8 +59,8 @@ public:
 
 public:
 	ahash_result(const intx::uint128& bits, unsigned mode=ALL)
-	    : _bits(bits)
-	    , _mode(mode)
+		: _bits(bits)
+		, _mode(mode)
 	{
 		if (mode == ALL)
 			_results = extract_all();
@@ -67,38 +70,38 @@ public:
 
 	std::array<uint64_t, 9> extract_all() const
 	{
-		bit_extractor<intx::uint128, 100> be(_bits);
+		bit_extractor<intx::uint128, CELLAREA, CELLSIZE> be(_bits);
 		return {
 			// top row -- top left bit is the start bit (0). bottom right is end bit.
-			be.extract(0, 10, 20, 30, 40, 50, 60, 70), // left
-			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
-			be.extract(2, 12, 22, 32, 42, 52, 62, 72), // right
+			be.extract_tuple( be.pattern(0) ), // left
+			be.extract_tuple( be.pattern(1) ),
+			be.extract_tuple( be.pattern(2) ), // right
 			// middle row
-			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+			be.extract_tuple( be.pattern(3) ),
+			be.extract_tuple( be.pattern(4) ),
+			be.extract_tuple( be.pattern(5) ),
 			// bottom row
-			be.extract(20, 30, 40, 50, 60, 70, 80, 90),
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
-			be.extract(22, 32, 42, 52, 62, 72, 82, 92)
+			be.extract_tuple( be.pattern(6) ),
+			be.extract_tuple( be.pattern(7) ),
+			be.extract_tuple( be.pattern(8) )
 		};
 	}
 
 	std::array<uint64_t, 9> extract_fast() const
 	{
-		bit_extractor<intx::uint128, 100> be(_bits);
+		bit_extractor<intx::uint128, CELLAREA, CELLSIZE> be(_bits);
 		// skip the corners
 		return {
 			0,
-			be.extract(1, 11, 21, 31, 41, 51, 61, 71),
+			be.extract_tuple( be.pattern(1) ),
 			0,
 			// middle row
-			be.extract(10, 20, 30, 40, 50, 60, 70, 80),
-			be.extract(11, 21, 31, 41, 51, 61, 71, 81),
-			be.extract(12, 22, 32, 42, 52, 62, 72, 82),
+			be.extract_tuple( be.pattern(3) ),
+			be.extract_tuple( be.pattern(4) ),
+			be.extract_tuple( be.pattern(5) ),
 			// bottom row
 			0,
-			be.extract(21, 31, 41, 51, 61, 71, 81, 91),
+			be.extract_tuple( be.pattern(7) ),
 			0
 		};
 	}

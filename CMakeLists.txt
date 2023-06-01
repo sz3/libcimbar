@@ -13,7 +13,7 @@ add_definitions("-DLIBCIMBAR_PROJECT_ROOT=\"${libcimbar_SOURCE_DIR}\"")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 	set(CMAKE_C_FLAGS "${CFLAGS} -Wall -std=c99 -Os -fPIC")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Wall -g -O2 -fPIC")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Wall -Wextra -g -O2 -fPIC")
 endif()
 
 if(DEFINED USE_WASM)  # wasm build needs OPENCV_DIR defined

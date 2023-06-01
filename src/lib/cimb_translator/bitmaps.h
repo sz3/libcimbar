@@ -1,6 +1,9 @@
-/* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 namespace cimbar {
 static const std::map<std::string, std::string> bitmaps = {
+{"bitmap/2/00.png", R"(vuk:eJs4+BAAN/-MCG4DAADHAABtZLYAAANJTkaoAA6y#TzjGFAA$FDAqCsCco~EbAAA'yCG@v_CLK;IA'B'1'1(-o5}s%9~(gEzXCg/0(KC{QC'0;XE/9/#iBAAC'nHpwZ9)'&F)"},
+{"bitmap/2/01.png", R"(vuk:eJs4+BAAN/-MCG4DAADHAABtZLYAAANJTkaoAA6y#TzjGFAA$FDAqCsCco~EbAAAPzCG@v_CLK;IA'B'tWPcq1,(KC{Qw2t/_(Tj'hDTV)kAJ1[Mk)_SvlLAAAdZJzDwHP_Q%)"},
+{"bitmap/2/02.png", R"(vuk:eJs4+BAAN/-MCG4DAADHAABtZLYAAANJTkaoAA6y#TzjGFAA$FDAqCsCco~EbAAAvzCG@v_CLK;IA'B'1'1(YEGRxt(a[hFBQ/_(sI$~Ybu+SAY4$`FBn``[CAAAXLhYKMe8#(\C)"},
+{"bitmap/2/03.png", R"(vuk:eJs4+BAAN/-MCG4DAADHAABtZLYAAANJTkaoAA6y#TzjGFAA$FDAqCsCco~EbAAAfzCG@v_CY^So5JAAU)ai%|tW(8Xj^zH9_t(C$1XUh'(C~tC[}hv2Q?=BAAAAr7vbMo\F9BB)"},
 {"bitmap/4/00.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA&aCw`XaxEylEB'B'atItc|3|y|UAp!E8e+_GyD?^VR_3wcW'Qh#GAaztVEMA`*8DBfF/k8AAAA9ZNoBz[uhNI)"},
 {"bitmap/4/01.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA]aCw`Xax=HOU:EBtV)%tL-IV&7RD,W?p/]fZO-8B$}Fhjf%GC}~Y8(/Y$w|t^oN/ZNiN0s}\5AAAuW&wUY6eit&F)"},
 {"bitmap/4/02.png", R"(vuk:eJs4+BAAN/-MCG4DAAXLAAAA7FMAAA_)z_ZMAAdZ=J.!wCC'\vBAVBWBP%tvNAAA]aCw`Xax4{NUBFBt&t%tk`B'H{1N6k{N,,B$ho#%7F'Su&HLs]iDkfwcgZSGR501W0WE+WxodAAAuW&wUY6eit&F)"},

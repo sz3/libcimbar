@@ -1,8 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "CimbDecoder.h"
 
-#include "Common.h"
 #include "Cell.h"
+#include "Common.h"
+#include "Config.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
 
@@ -43,19 +44,19 @@ namespace {
 		std::tuple<int,int,int> rel1 = relative_color(a);
 		std::tuple<int,int,int> rel2 = relative_color(b);
 		return (
-		    squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
-		    squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
-		    squared_difference(std::get<2>(rel1), std::get<2>(rel2))
+			squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
+			squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
+			squared_difference(std::get<2>(rel1), std::get<2>(rel2))
 		);
 	}
 }
 
 CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
-    : _symbolBits(symbol_bits)
-    , _numSymbols(1 << symbol_bits)
-    , _numColors(1 << color_bits)
-    , _dark(dark)
-    , _ahashThreshold(ahashThreshold)
+	: _symbolBits(symbol_bits)
+	, _numSymbols(1 << symbol_bits)
+	, _numColors(1 << color_bits)
+	, _dark(dark)
+	, _ahashThreshold(ahashThreshold)
 {
 	load_tiles();
 }
@@ -79,7 +80,7 @@ bool CimbDecoder::load_tiles()
 	return true;
 }
 
-unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result<cimbar::Config::cell_size()>& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	drift_offset = 0;
 	unsigned best_fit = 0;
@@ -91,6 +92,11 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	// 8, 0, 2, 6 == corners.
 	for (auto&& [drift_idx, h] : results)
 	{
+		// skip over this drift_idx if it matches cooldown
+		// we could be more clever to check for corners, but for now this is fine
+		// ~0U is "unset"
+		if (drift_idx == cooldown and drift_idx != 4) // don't skip the center, obvs
+			continue;
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
 			unsigned distance = image_hash::hamming_distance(h, _tileHashes[i]);
@@ -107,16 +113,19 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result& results, unsigne
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, _ahashThreshold, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
+	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(
+		cell, _ahashThreshold, image_hash::ahash_result<cimbar::Config::cell_size()>::FAST
+	);
+	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
-unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance) const
+unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	image_hash::ahash_result results = image_hash::fuzzy_ahash(cell, image_hash::ahash_result::FAST);
-	return get_best_symbol(results, drift_offset, best_distance);
+	int checkRule = cooldown == 0xFE? image_hash::ahash_result<cimbar::Config::cell_size()>::ALL : image_hash::ahash_result<cimbar::Config::cell_size()>::FAST;
+	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(cell, checkRule);
+	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<float,float,float> c, float adjustUp, float down) const
@@ -174,10 +183,10 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 		return 0;
 
 	// TODO: check/enforce dimensions of color_cell?
-	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6
+	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(Cell::SKIP);
+	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
 	return get_best_color(r, g, b);
 }
 
