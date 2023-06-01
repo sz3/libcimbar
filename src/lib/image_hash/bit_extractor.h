@@ -23,6 +23,8 @@ public:
 
 	static constexpr auto pattern(unsigned id)
 	{
+		// convert our numbering scheme in extract_fast() into the bitpositions
+		// that we'll use to extract our (e.g.) 64 bits (8x8) from the 100 bits (10x10) we have.
 		return get_offsets(id%3 + (id/3)*(READLEN+2));
 	}
 

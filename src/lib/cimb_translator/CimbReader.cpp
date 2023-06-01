@@ -27,17 +27,12 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
-		// will this need to change for smaller tiles? probably?
-
 		int blockSize = 3; // default: no preprocessing
 
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
 		if (needs_sharpen)
-		{
-			sharpenSymbolGrid(symbols, symbols);
-			blockSize = 3;
-		}
+			sharpenSymbolGrid(symbols, symbols); // we used to change blockSize for this case -- may one day be a useful trick again?
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, -5);
 
 		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);
@@ -123,10 +118,6 @@ unsigned CimbReader::read(PositionData& pos)
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
 	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
-
-	// before we get the main cell, try the single-channel (red?) version?
-	// e.g. do pull the redCell, do a popcnt on the middle pixels, and iff it's above a threshhold, pass it to decode_symbol() as the cell we use
-	// if redCell is below the threshhold, use the standard all-channel version
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;
