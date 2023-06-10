@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimbar_js.h"
 
+#include "cimb_translator/Config.h"
 #include "encoder/SimpleEncoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
@@ -18,9 +19,9 @@ namespace {
 	uint8_t _encodeId = 0;
 
 	// settings
-	unsigned _ecc = 30;
-	unsigned _colorBits = 2;
-	int _compressionLevel = 6;
+	unsigned _ecc = cimbar::Config::ecc_bytes();
+	unsigned _colorBits = cimbar::Config::color_bits();
+	int _compressionLevel = cimbar::Config::compression_level();
 }
 
 extern "C" {
@@ -30,6 +31,11 @@ int initialize_GL(int width, int height)
 	if (_window)
 		return 1;
 
+	// must be divisible by 4???
+	if (width % 4 != 0)
+		width += (4 - width % 4);
+	if (height % 4 != 0)
+		height += (4 - height % 4);
 	std::cerr << "initializing " << width << " by " << height << " window";
 
 	_window = std::make_shared<cimbar::window_glfw>(width, height, "Cimbar Encoder");
@@ -105,11 +111,11 @@ int configure(unsigned color_bits, unsigned ecc, int compression)
 {
 	// defaults
 	if (color_bits > 3)
-		color_bits = 2;
+		color_bits = cimbar::Config::color_bits();
 	if (ecc < 0 or ecc >= 150)
-		ecc = 30;
+		ecc = cimbar::Config::ecc_bytes();
 	if (compression < 0 or compression > 22)
-		compression = 6;
+		compression = cimbar::Config::compression_level();
 
 	// check if we need to refresh the stream
 	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel);
