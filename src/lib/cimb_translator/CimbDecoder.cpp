@@ -14,8 +14,7 @@ using std::get;
 using std::string;
 
 namespace {
-	template <typename T>
-	unsigned squared_difference(T a, T b)
+	unsigned squared_difference(int a, int b)
 	{
 		return std::pow(a - b, 2);
 	}
@@ -31,22 +30,12 @@ namespace {
 		return (uchar)c;
 	}
 
-	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
-	{
-		int r = std::get<0>(c);
-		int g = std::get<1>(c);
-		int b = std::get<2>(c);
-		return {r - g, g - b, b - r};
-	}
-
 	unsigned color_diff(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b)
 	{
-		std::tuple<int,int,int> rel1 = relative_color(a);
-		std::tuple<int,int,int> rel2 = relative_color(b);
 		return (
-			squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
-			squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
-			squared_difference(std::get<2>(rel1), std::get<2>(rel2))
+			squared_difference(std::get<0>(a), std::get<0>(b)) +
+			squared_difference(std::get<1>(a), std::get<1>(b)) +
+			squared_difference(std::get<2>(a), std::get<2>(b))
 		);
 	}
 }
@@ -186,7 +175,7 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0, _dark);
 	return get_best_color(r, g, b);
 }
 

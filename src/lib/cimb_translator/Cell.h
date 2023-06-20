@@ -27,7 +27,7 @@ public:
 	{}
 
 	// it would be nice to use a cropped cv::Mat to get the contiguous memory pointer...
-	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip) const
+	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip, bool dark) const
 	{
 		uint16_t blue = 0;
 		uint16_t green = 0;
@@ -47,9 +47,15 @@ public:
 		{
 			for (int j = 0; j < _rows; ++j, ++count)
 			{
-				red += p[0];
-				green += p[1];
-				blue += p[2];
+				// skip pixel if don't we have enough "signal"
+				if (dark and p[0] < 80 and p[1] < 80)
+					--count;
+				else
+				{
+					red += p[0];
+					green += p[1];
+					blue += p[2];
+				}
 				p += channels;
 			}
 			p += toNextCol;
@@ -61,13 +67,13 @@ public:
 		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
 	}
 
-	std::tuple<uchar,uchar,uchar> mean_rgb(bool skip=false) const
+	std::tuple<uchar,uchar,uchar> mean_rgb(bool skip=false, bool dark=true) const
 	{
 		int channels = _img.channels();
 		if (channels < 3)
 			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
 		if (_img.isContinuous() and _cols > 0)
-			return mean_rgb_continuous(skip);
+			return mean_rgb_continuous(skip, dark);
 
 		uint16_t blue = 0;
 		uint16_t green = 0;
@@ -81,9 +87,15 @@ public:
 			const uchar* p = _img.ptr<uchar>(i);
 			for (int j = 0; j < yend; j+=_img.channels(), ++count)
 			{
-				red += p[j];
-				green += p[j+1];
-				blue += p[j+2];
+				// skip pixel if don't we have enough "signal"
+				if (dark and p[j] < 80 and p[j+1] < 80)
+					--count;
+				else
+				{
+					red += p[j];
+					green += p[j+1];
+					blue += p[j+2];
+				}
 			}
 		}
 
