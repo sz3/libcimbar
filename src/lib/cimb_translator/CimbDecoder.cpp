@@ -175,7 +175,10 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0, _dark);
+	auto [rm, gm, bm] = center.calc_rgb(center.cols() > 4? Cell::SKIP : 0);
+	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+
+	std::cout << fmt::format("{},{},{} vs {},{},{}", r,g,b, rm,gm,bm) << std::endl;
 	return get_best_color(r, g, b);
 }
 
