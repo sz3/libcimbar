@@ -30,12 +30,35 @@ namespace {
 		return (uchar)c;
 	}
 
+	uint8_t color_adjust(uint8_t c, uint8_t low, uint8_t hi)
+	{
+		if (low > c)
+			return 0;
+		c -= low;
+		if (low >= hi)
+			hi = c;
+		else
+			hi -= low;
+		float adj = 255.0 / hi;
+		return c * adj;
+	}
+
+	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
+	{
+		int r = std::get<0>(c);
+		int g = std::get<1>(c);
+		int b = std::get<2>(c);
+		return {r - g, g - b, b - r};
+	}
+
 	unsigned color_diff(std::tuple<uchar,uchar,uchar> a, std::tuple<uchar,uchar,uchar> b)
 	{
+		std::tuple<int,int,int> rel1 = relative_color(a);
+		std::tuple<int,int,int> rel2 = relative_color(b);
 		return (
-			squared_difference(std::get<0>(a), std::get<0>(b)) +
-			squared_difference(std::get<1>(a), std::get<1>(b)) +
-			squared_difference(std::get<2>(a), std::get<2>(b))
+			squared_difference(std::get<0>(rel1), std::get<0>(rel2)) +
+			squared_difference(std::get<1>(rel1), std::get<1>(rel2)) +
+			squared_difference(std::get<2>(rel1), std::get<2>(rel2))
 		);
 	}
 }
@@ -149,6 +172,9 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 		min = 0;
 	adjust /= (max - min);
 
+	if (max < 100)
+		return 2;
+
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
 	unsigned best_fit = 0;
@@ -178,8 +204,16 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	auto [rm, gm, bm] = center.calc_rgb(center.cols() > 4? Cell::SKIP : 0);
 	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
 
-	std::cout << fmt::format("{},{},{} vs {},{},{}", r,g,b, rm,gm,bm) << std::endl;
-	return get_best_color(r, g, b);
+	_stats.update_low(r, g, b);
+	_stats.update_high(rm, gm, bm);
+
+	uint8_t ro = color_adjust(rm, _stats.red_min(), _stats.red_max());
+	uint8_t go = color_adjust(gm, _stats.green_min(), _stats.green_max());
+	uint8_t bo = color_adjust(bm, _stats.blue_min(), _stats.blue_max());
+
+	unsigned res = get_best_color(ro, go, bo);
+	std::cout << fmt::format("{} = {},{},{} vs {},{},{} vs {},{},{}, window = {},{},{} to {},{},{}", res, r,g,b, rm,gm,bm, ro,go,bo, _stats.red_min(), _stats.green_min(), _stats.blue_min(), _stats.red_max(), _stats.green_max(), _stats.blue_max()) << std::endl;
+	return res;
 }
 
 bool CimbDecoder::expects_binary_threshold() const

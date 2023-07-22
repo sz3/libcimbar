@@ -23,11 +23,41 @@ public:
 		_blueHigh.add(b);
 	}
 
+	uint8_t red_min() const
+	{
+		return _redHigh.min();
+	}
+
+	uint8_t red_max() const
+	{
+		return _redHigh.max();
+	}
+
+	uint8_t green_min() const
+	{
+		return _greenHigh.min();
+	}
+
+	uint8_t green_max() const
+	{
+		return _greenHigh.max();
+	}
+
+	uint8_t blue_min() const
+	{
+		return _blueHigh.min();
+	}
+
+	uint8_t blue_max() const
+	{
+		return _blueHigh.max();
+	}
+
 protected:
-	sliding_window<uint8_t> _redLow;
-	sliding_window<uint8_t> _redHigh;
-	sliding_window<uint8_t> _greenLow;
-	sliding_window<uint8_t> _greenHigh;
-	sliding_window<uint8_t> _blueLow;
-	sliding_window<uint8_t> _blueHigh;
+	sliding_window<uint8_t, 20> _redLow;
+	sliding_window<uint8_t, 20> _redHigh;
+	sliding_window<uint8_t, 20> _greenLow;
+	sliding_window<uint8_t, 20> _greenHigh;
+	sliding_window<uint8_t, 20> _blueLow;
+	sliding_window<uint8_t, 20> _blueHigh;
 };

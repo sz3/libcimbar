@@ -4,6 +4,7 @@
 #include "CellDrift.h"
 #include "Config.h"
 #include "chromatic_adaptation/color_correction.h"
+#include "chromatic_adaptation/color_stats.h"
 #include "image_hash/ahash_result.h"
 #include "image_hash/average_hash.h"
 #include <opencv2/opencv.hpp>
@@ -42,4 +43,5 @@ protected:
 	bool _dark;
 	uchar _ahashThreshold;
 	color_correction _ccm;
+	mutable color_stats _stats;
 };

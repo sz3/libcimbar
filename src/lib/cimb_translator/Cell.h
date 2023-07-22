@@ -48,15 +48,9 @@ public:
 		{
 			for (int j = 0; j < _rows; ++j, ++count)
 			{
-				// skip pixel if don't we have enough "signal"
-				if (dark and p[0] < 80 and p[1] < 80)
-					--count;
-				else
-				{
-					red += p[0];
-					green += p[1];
-					blue += p[2];
-				}
+				red += p[0];
+				green += p[1];
+				blue += p[2];
 				p += channels;
 			}
 			p += toNextCol;
