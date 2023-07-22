@@ -211,7 +211,12 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	uint8_t go = color_adjust(gm, _stats.green_min(), _stats.green_max());
 	uint8_t bo = color_adjust(bm, _stats.blue_min(), _stats.blue_max());
 
-	unsigned res = get_best_color(ro, go, bo);
+	unsigned res;
+	if (std::max({r, g, b}) < 125)
+		res = get_best_color(ro, go, bo);
+	else
+		res = get_best_color(r, g, b);
+
 	std::cout << fmt::format("{} = {},{},{} vs {},{},{} vs {},{},{}, window = {},{},{} to {},{},{}", res, r,g,b, rm,gm,bm, ro,go,bo, _stats.red_min(), _stats.green_min(), _stats.blue_min(), _stats.red_max(), _stats.green_max(), _stats.blue_max()) << std::endl;
 	return res;
 }
