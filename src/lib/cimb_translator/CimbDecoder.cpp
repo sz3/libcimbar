@@ -30,17 +30,17 @@ namespace {
 		return (uchar)c;
 	}
 
-	uint8_t color_adjust(uint8_t c, uint8_t low, uint8_t hi)
+	float color_adjust(uint8_t c, uint8_t low, uint8_t hi)
 	{
 		if (low > c)
 			return 0;
-		c -= low;
+		uint8_t c2 = c - low;
 		if (low >= hi)
-			hi = c;
+			hi = c2;
 		else
 			hi -= low;
 		float adj = 255.0 / hi;
-		return c * adj;
+		return c2 * adj / c;
 	}
 
 	std::tuple<int,int,int> relative_color(std::tuple<uchar,uchar,uchar> c)
@@ -207,15 +207,12 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	_stats.update_low(r, g, b);
 	_stats.update_high(rm, gm, bm);
 
-	uint8_t ro = color_adjust(rm, _stats.red_min(), _stats.red_max());
-	uint8_t go = color_adjust(gm, _stats.green_min(), _stats.green_max());
-	uint8_t bo = color_adjust(bm, _stats.blue_min(), _stats.blue_max());
+	// scale rgb based on what we know about the surrounding colorscape
+	float ro = r * color_adjust(rm, _stats.red_min(), _stats.red_max());
+	float go = g * color_adjust(gm, _stats.green_min(), _stats.green_max());
+	float bo = b * color_adjust(bm, _stats.blue_min(), _stats.blue_max());
 
-	unsigned res;
-	if (std::max({r, g, b}) < 125)
-		res = get_best_color(ro, go, bo);
-	else
-		res = get_best_color(r, g, b);
+	unsigned res = get_best_color(r, g, b);
 
 	std::cout << fmt::format("{} = {},{},{} vs {},{},{} vs {},{},{}, window = {},{},{} to {},{},{}", res, r,g,b, rm,gm,bm, ro,go,bo, _stats.red_min(), _stats.green_min(), _stats.blue_min(), _stats.red_max(), _stats.green_max(), _stats.blue_max()) << std::endl;
 	return res;
