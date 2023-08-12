@@ -28,6 +28,14 @@ public:
 		return _nums[0];
 	}
 
+	Number mean() const
+	{
+		int res = 0;
+		for (int i = 0; i < N; ++i)
+			res += _nums[i];
+		return res / N;
+	}
+
 	Number max() const
 	{
 		return _nums[N-1];

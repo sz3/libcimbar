@@ -102,9 +102,9 @@ public:
 
 	std::tuple<uchar,uchar,uchar> calc_rgb_continuous(bool skip) const
 	{
-		nlargest<uint8_t, 3> blues;
-		nlargest<uint8_t, 3> greens;
-		nlargest<uint8_t, 3> reds;
+		nlargest<uint8_t, 5> blues;
+		nlargest<uint8_t, 5> greens;
+		nlargest<uint8_t, 5> reds;
 
 		int channels = _img.channels();
 		int index = (_ystart * _img.cols) + _xstart;
@@ -128,7 +128,7 @@ public:
 			p += toNextCol;
 		}
 
-		return std::tuple<uchar,uchar,uchar>(reds.min(), greens.min(), blues.min());
+		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
 	}
 
 	std::tuple<uchar,uchar,uchar> calc_rgb(bool skip=false) const
@@ -139,9 +139,9 @@ public:
 		if (_img.isContinuous() and _cols > 0)
 			return calc_rgb_continuous(skip);
 
-		nlargest<uint8_t, 3> blues;
-		nlargest<uint8_t, 3> greens;
-		nlargest<uint8_t, 3> reds;
+		nlargest<uint8_t, 5> blues;
+		nlargest<uint8_t, 5> greens;
+		nlargest<uint8_t, 5> reds;
 
 		int increment = 1 + skip;
 		int yend = _img.rows * _img.channels();
@@ -156,7 +156,7 @@ public:
 			}
 		}
 
-		return std::tuple<uchar,uchar,uchar>(reds.min(), greens.min(), blues.min());
+		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
 	}
 
 	uchar mean_grayscale_continuous() const
