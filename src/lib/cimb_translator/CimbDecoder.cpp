@@ -13,6 +13,10 @@
 using std::get;
 using std::string;
 
+const int FIX_THRESH_HIGH = 245;
+const int FIX_THRESH_LOW = 0;
+const float BEST_COLOR_FLOOR = 100.0f;
+
 namespace {
 	unsigned squared_difference(int a, int b)
 	{
@@ -23,9 +27,9 @@ namespace {
 	{
 		c -= down;
 		c *= adjustUp;
-		if (c > (245 - down))
+		if (c > FIX_THRESH_HIGH)
 			c = 255;
-		if (c < 0)
+		if (c < FIX_THRESH_LOW)
 			c = 0;
 		return (uchar)c;
 	}
@@ -166,21 +170,28 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	}
 
 	float max = std::max({r, g, b, 1.0f});
-	float min = std::min({r, g, b, 48.0f});
+	float min = std::min({r, g, b, BEST_COLOR_FLOOR});
 	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
 	adjust /= (max - min);
 
-	if (max < 100)
-		return 2;
+	//if (max < 100)
+	//	return 2;
 
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
+
+	//std::cout << fmt::format(" final color: {},{},{} -- fixed as {},{},{}", r, g, b, std::get<0>(c), std::get<1>(c), std::get<2>(c)) << std::endl;
 
 	unsigned best_fit = 0;
 	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
+		/*if (b > g and (i == 1 or i == 3))
+			continue;
+		if (r > g and (i == 0 or i == 3))
+			continue;*/
+
 		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);
 		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
@@ -201,20 +212,20 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [rm, gm, bm] = center.calc_rgb(center.cols() > 4? Cell::SKIP : 0);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+	auto [rm, gm, bm] = center.calc_rgb(center.cols() > 5? Cell::SKIP : 0);
+	auto [r, g, b] = center.mean_rgb(center.cols() > 5? Cell::SKIP : 0);
 
 	_stats.update_low(r, g, b);
 	_stats.update_high(rm, gm, bm);
 
 	// scale rgb based on what we know about the surrounding colorscape
-	float ro = r * color_adjust(rm, _stats.red_min(), _stats.red_max());
-	float go = g * color_adjust(gm, _stats.green_min(), _stats.green_max());
-	float bo = b * color_adjust(bm, _stats.blue_min(), _stats.blue_max());
+	uint8_t ro = r * color_adjust(rm, _stats.red_min(), _stats.red_max());
+	uint8_t go = g * color_adjust(gm, _stats.green_min(), _stats.green_max());
+	uint8_t bo = b * color_adjust(bm, _stats.blue_min(), _stats.blue_max());
 
 	unsigned res = get_best_color(r, g, b);
 
-	std::cout << fmt::format("{} = {},{},{} vs {},{},{} vs {},{},{}, window = {},{},{} to {},{},{}", res, r,g,b, rm,gm,bm, ro,go,bo, _stats.red_min(), _stats.green_min(), _stats.blue_min(), _stats.red_max(), _stats.green_max(), _stats.blue_max()) << std::endl;
+	std::cout << fmt::format("{} = {},{},{} vs {},{},{} -- adjust {},{},{}, window = {},{},{} to {},{},{}", res, r,g,b, rm,gm,bm, ro,go,bo, _stats.red_min(), _stats.green_min(), _stats.blue_min(), _stats.red_max(), _stats.green_max(), _stats.blue_max()) << std::endl;
 	return res;
 }
 
