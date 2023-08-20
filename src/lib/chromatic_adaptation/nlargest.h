@@ -23,22 +23,28 @@ public:
 		}
 	}
 
+	Number nth(int n=1) const
+	{
+		return _nums[_nums.size()-n];
+	}
+
 	Number min() const
 	{
 		return _nums[0];
 	}
 
-	Number mean() const
+	// count must be < N+skip
+	Number mean(int count, int skip=0) const
 	{
 		int res = 0;
-		for (int i = 0; i < N; ++i)
-			res += _nums[i];
-		return res / N;
+		for (int i = 1+skip; i <= count; ++i)
+			res += _nums[_nums.size()-i];
+		return res / count;
 	}
 
 	Number max() const
 	{
-		return _nums[N-1];
+		return nth(1);
 	}
 
 protected:

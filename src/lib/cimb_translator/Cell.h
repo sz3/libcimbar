@@ -82,15 +82,9 @@ public:
 			const uchar* p = _img.ptr<uchar>(i);
 			for (int j = 0; j < yend; j+=_img.channels(), ++count)
 			{
-				// skip pixel if don't we have enough "signal"
-				if (dark and p[j] < 80 and p[j+1] < 80)
-					--count;
-				else
-				{
-					red += p[j];
-					green += p[j+1];
-					blue += p[j+2];
-				}
+				red += p[j];
+				green += p[j+1];
+				blue += p[j+2];
 			}
 		}
 
@@ -102,9 +96,9 @@ public:
 
 	std::tuple<uchar,uchar,uchar> calc_rgb_continuous(bool skip) const
 	{
-		nlargest<uint8_t, 5> blues;
-		nlargest<uint8_t, 5> greens;
-		nlargest<uint8_t, 5> reds;
+		nlargest<uint8_t, 9> blues;
+		nlargest<uint8_t, 9> greens;
+		nlargest<uint8_t, 9> reds;
 
 		int channels = _img.channels();
 		int index = (_ystart * _img.cols) + _xstart;
@@ -128,7 +122,14 @@ public:
 			p += toNextCol;
 		}
 
-		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
+		int sk = 0;
+		if (reds.nth(5) > 200 and reds.nth(5) > 200 and reds.nth(5) > 200)
+		{
+			std::cout << "everything is bright" << std::endl;
+			sk = 3;
+		}
+
+		return std::tuple<uchar,uchar,uchar>(reds.mean(5, sk), greens.mean(5, sk), blues.mean(5, sk));
 	}
 
 	std::tuple<uchar,uchar,uchar> calc_rgb(bool skip=false) const
@@ -139,9 +140,9 @@ public:
 		if (_img.isContinuous() and _cols > 0)
 			return calc_rgb_continuous(skip);
 
-		nlargest<uint8_t, 5> blues;
-		nlargest<uint8_t, 5> greens;
-		nlargest<uint8_t, 5> reds;
+		nlargest<uint8_t, 9> blues;
+		nlargest<uint8_t, 9> greens;
+		nlargest<uint8_t, 9> reds;
 
 		int increment = 1 + skip;
 		int yend = _img.rows * _img.channels();
@@ -156,7 +157,14 @@ public:
 			}
 		}
 
-		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
+		int sk = 0;
+		if (reds.nth(5) > 200 and reds.nth(5) > 200 and reds.nth(5) > 200)
+		{
+			std::cout << "everything is bright" << std::endl;
+			sk = 3;
+		}
+
+		return std::tuple<uchar,uchar,uchar>(reds.mean(5, sk), greens.mean(5, sk), blues.mean(5, sk));
 	}
 
 	uchar mean_grayscale_continuous() const
