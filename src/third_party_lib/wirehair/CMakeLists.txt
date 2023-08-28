@@ -3,6 +3,8 @@ project(wirehair)
 
 set(CMAKE_CXX_STANDARD 11)
 
+option(MARCH_NATIVE "Use -march=native option" ON)
+
 set(LIB_SOURCE_FILES
         wirehair.cpp
         include/wirehair/wirehair.h
@@ -54,13 +56,9 @@ set(GEN_TABLES
         gf256.h
         )
 
-if(NOT ANDROID)
-    set(ARCH_NATIVE "-march=native")
-endif()
 
-if(MSVC)
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_NATIVE}")
+if(MARCH_NATIVE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 
 add_library(wirehair ${LIB_SOURCE_FILES})
