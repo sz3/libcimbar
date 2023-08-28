@@ -243,7 +243,7 @@ WIREHAIR_EXPORT WirehairResult wirehair_decode(
 );
 
 /**
-    wirehair_reconstruct()
+    wirehair_recover()
 
     Reconstruct the message after reading is complete.
 
