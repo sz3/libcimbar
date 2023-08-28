@@ -15,6 +15,12 @@
 #include <tuple>
 #include <type_traits>
 
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable : 5030)  // Allow unknown attributes.
+#endif
+
+
 #ifndef __has_builtin
     #define __has_builtin(NAME) 0
 #endif
@@ -72,6 +78,15 @@ namespace intx
 using builtin_uint128 = unsigned __int128;
 
     #pragma GCC diagnostic pop
+#endif
+
+constexpr bool byte_order_is_little_endian =
+#if defined(__BYTE_ORDER__)
+    (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__);
+#elif defined(_WIN32)
+    true;  // On Windows assume little endian.
+#else
+    #error "Unknown endianness"
 #endif
 
 template <unsigned N>
@@ -154,9 +169,28 @@ struct result_with_carry
 /// Linear arithmetic operators.
 /// @{
 
-inline constexpr result_with_carry<uint64_t> add_with_carry(
+/// Addition with carry.
+inline constexpr result_with_carry<uint64_t> addc(
     uint64_t x, uint64_t y, bool carry = false) noexcept
 {
+#if __has_builtin(__builtin_addcll)
+    if (!is_constant_evaluated())
+    {
+        unsigned long long carryout = 0;  // NOLINT(google-runtime-int)
+        const auto s = __builtin_addcll(x, y, carry, &carryout);
+        static_assert(sizeof(s) == sizeof(uint64_t));
+        return {s, static_cast<bool>(carryout)};
+    }
+#elif __has_builtin(__builtin_ia32_addcarryx_u64)
+    if (!is_constant_evaluated())
+    {
+        unsigned long long s = 0;  // NOLINT(google-runtime-int)
+        static_assert(sizeof(s) == sizeof(uint64_t));
+        const auto carryout = __builtin_ia32_addcarryx_u64(carry, x, y, &s);
+        return {s, static_cast<bool>(carryout)};
+    }
+#endif
+
     const auto s = x + y;
     const auto carry1 = s < x;
     const auto t = s + carry;
@@ -164,35 +198,28 @@ inline constexpr result_with_carry<uint64_t> add_with_carry(
     return {t, carry1 || carry2};
 }
 
-template <unsigned N>
-inline constexpr result_with_carry<uint<N>> add_with_carry(
-    const uint<N>& x, const uint<N>& y, bool carry = false) noexcept
-{
-    uint<N> s;
-    bool k = carry;
-    for (size_t i = 0; i < uint<N>::num_words; ++i)
-    {
-        s[i] = x[i] + y[i];
-        const auto k1 = s[i] < x[i];
-        s[i] += k;
-        k = (s[i] < uint64_t{k}) || k1;
-    }
-    return {s, k};
-}
-
-inline constexpr uint128 operator+(uint128 x, uint128 y) noexcept
-{
-    return add_with_carry(x, y).value;
-}
-
-inline constexpr uint128 operator+(uint128 x) noexcept
-{
-    return x;
-}
-
-inline constexpr result_with_carry<uint64_t> sub_with_carry(
+/// Subtraction with carry (borrow).
+inline constexpr result_with_carry<uint64_t> subc(
     uint64_t x, uint64_t y, bool carry = false) noexcept
 {
+#if __has_builtin(__builtin_subcll)
+    if (!is_constant_evaluated())
+    {
+        unsigned long long carryout = 0;  // NOLINT(google-runtime-int)
+        const auto d = __builtin_subcll(x, y, carry, &carryout);
+        static_assert(sizeof(d) == sizeof(uint64_t));
+        return {d, static_cast<bool>(carryout)};
+    }
+#elif __has_builtin(__builtin_ia32_sbb_u64)
+    if (!is_constant_evaluated())
+    {
+        unsigned long long d = 0;  // NOLINT(google-runtime-int)
+        static_assert(sizeof(d) == sizeof(uint64_t));
+        const auto carryout = __builtin_ia32_sbb_u64(carry, x, y, &d);
+        return {d, static_cast<bool>(carryout)};
+    }
+#endif
+
     const auto d = x - y;
     const auto carry1 = x < y;
     const auto e = d - carry;
@@ -200,28 +227,52 @@ inline constexpr result_with_carry<uint64_t> sub_with_carry(
     return {e, carry1 || carry2};
 }
 
+/// Addition with carry.
+template <unsigned N>
+inline constexpr result_with_carry<uint<N>> addc(
+    const uint<N>& x, const uint<N>& y, bool carry = false) noexcept
+{
+    uint<N> s;
+    bool k = carry;
+    for (size_t i = 0; i < uint<N>::num_words; ++i)
+    {
+        auto t = addc(x[i], y[i], k);
+        s[i] = t.value;
+        k = t.carry;
+    }
+    return {s, k};
+}
+
+inline constexpr uint128 operator+(uint128 x, uint128 y) noexcept
+{
+    return addc(x, y).value;
+}
+
+inline constexpr uint128 operator+(uint128 x) noexcept
+{
+    return x;
+}
+
 /// Performs subtraction of two unsigned numbers and returns the difference
 /// and the carry bit (aka borrow, overflow).
 template <unsigned N>
-inline constexpr result_with_carry<uint<N>> sub_with_carry(
+inline constexpr result_with_carry<uint<N>> subc(
     const uint<N>& x, const uint<N>& y, bool carry = false) noexcept
 {
     uint<N> z;
     bool k = carry;
     for (size_t i = 0; i < uint<N>::num_words; ++i)
     {
-        z[i] = x[i] - y[i];
-        const auto k1 = x[i] < y[i];
-        const auto k2 = z[i] < uint64_t{k};
-        z[i] -= k;
-        k = k1 || k2;
+        auto t = subc(x[i], y[i], k);
+        z[i] = t.value;
+        k = t.carry;
     }
     return {z, k};
 }
 
 inline constexpr uint128 operator-(uint128 x, uint128 y) noexcept
 {
-    return sub_with_carry(x, y).value;
+    return subc(x, y).value;
 }
 
 inline constexpr uint128 operator-(uint128 x) noexcept
@@ -242,16 +293,16 @@ inline uint128& operator--(uint128& x) noexcept
     return x = x - 1;
 }
 
-inline uint128 operator++(uint128& x, int) noexcept
+inline const uint128 operator++(uint128& x, int) noexcept  // NOLINT(readability-const-return-type)
 {
-    auto ret = x;
+    const auto ret = x;
     ++x;
     return ret;
 }
 
-inline uint128 operator--(uint128& x, int) noexcept
+inline const uint128 operator--(uint128& x, int) noexcept  // NOLINT(readability-const-return-type)
 {
-    auto ret = x;
+    const auto ret = x;
     --x;
     return ret;
 }
@@ -329,8 +380,8 @@ inline constexpr uint128 operator~(uint128 x) noexcept
 
 inline constexpr uint128 operator|(uint128 x, uint128 y) noexcept
 {
-    // Clang7: perfect.
-    // GCC8: stupidly uses a vector instruction in all bitwise operators.
+    // Clang: perfect.
+    // GCC 8-12: stupidly uses a vector instruction in all bitwise operators.
     return {x[0] | y[0], x[1] | y[1]};
 }
 
@@ -395,7 +446,7 @@ inline constexpr uint128 umul(uint64_t x, uint64_t y) noexcept
 {
 #if INTX_HAS_BUILTIN_INT128
     return builtin_uint128{x} * builtin_uint128{y};
-#elif defined(_MSC_VER) && _MSC_VER >= 1925
+#elif defined(_MSC_VER) && _MSC_VER >= 1925 && defined(_M_X64)
     if (!is_constant_evaluated())
     {
         unsigned __int64 hi = 0;
@@ -643,7 +694,7 @@ inline uint64_t reciprocal_2by1(uint64_t d) noexcept
     const uint32_t v0 = internal::reciprocal_table[d9 - 256];
 
     const uint64_t d40 = (d >> 24) + 1;
-    const uint64_t v1 = (v0 << 11) - uint32_t(v0 * v0 * d40 >> 40) - 1;
+    const uint64_t v1 = (v0 << 11) - uint32_t(uint32_t{v0 * v0} * d40 >> 40) - 1;
 
     const uint64_t v2 = (v1 << 13) + (v1 * (0x1000000000000000 - v1 * d40) >> 47);
 
@@ -830,7 +881,7 @@ inline uint128& operator%=(uint128& x, uint128 y) noexcept
 namespace std
 {
 template <unsigned N>
-struct numeric_limits<intx::uint<N>>
+struct numeric_limits<intx::uint<N>>  // NOLINT(cert-dcl58-cpp)
 {
     using type = intx::uint<N>;
 
@@ -1023,6 +1074,97 @@ public:
         static_assert(sizeof(Int) <= sizeof(uint64_t));
         return static_cast<Int>(words_[0]);
     }
+
+    friend inline constexpr uint operator+(const uint& x, const uint& y) noexcept
+    {
+        return addc(x, y).value;
+    }
+
+    inline constexpr uint& operator+=(const uint& y) noexcept { return *this = *this + y; }
+
+    inline constexpr uint operator-() const noexcept { return ~*this + uint{1}; }
+
+    friend inline constexpr uint operator-(const uint& x, const uint& y) noexcept
+    {
+        return subc(x, y).value;
+    }
+
+    inline constexpr uint& operator-=(const uint& y) noexcept { return *this = *this - y; }
+
+    /// Multiplication implementation using word access
+    /// and discarding the high part of the result product.
+    friend inline constexpr uint operator*(const uint& x, const uint& y) noexcept
+    {
+        uint<N> p;
+        for (size_t j = 0; j < num_words; j++)
+        {
+            uint64_t k = 0;
+            for (size_t i = 0; i < (num_words - j - 1); i++)
+            {
+                auto a = addc(p[i + j], k);
+                auto t = umul(x[i], y[j]) + uint128{a.value, a.carry};
+                p[i + j] = t[0];
+                k = t[1];
+            }
+            p[num_words - 1] += x[num_words - j - 1] * y[j] + k;
+        }
+        return p;
+    }
+
+    inline constexpr uint& operator*=(const uint& y) noexcept { return *this = *this * y; }
+
+    friend inline constexpr uint operator/(const uint& x, const uint& y) noexcept
+    {
+        return udivrem(x, y).quot;
+    }
+
+    friend inline constexpr uint operator%(const uint& x, const uint& y) noexcept
+    {
+        return udivrem(x, y).rem;
+    }
+
+    inline constexpr uint& operator/=(const uint& y) noexcept { return *this = *this / y; }
+
+    inline constexpr uint& operator%=(const uint& y) noexcept { return *this = *this % y; }
+
+
+    inline constexpr uint operator~() const noexcept
+    {
+        uint z;
+        for (size_t i = 0; i < num_words; ++i)
+            z[i] = ~words_[i];
+        return z;
+    }
+
+    friend inline constexpr uint operator|(const uint& x, const uint& y) noexcept
+    {
+        uint z;
+        for (size_t i = 0; i < num_words; ++i)
+            z[i] = x[i] | y[i];
+        return z;
+    }
+
+    inline constexpr uint& operator|=(const uint& y) noexcept { return *this = *this | y; }
+
+    friend inline constexpr uint operator&(const uint& x, const uint& y) noexcept
+    {
+        uint z;
+        for (size_t i = 0; i < num_words; ++i)
+            z[i] = x[i] & y[i];
+        return z;
+    }
+
+    inline constexpr uint& operator&=(const uint& y) noexcept { return *this = *this & y; }
+
+    friend inline constexpr uint operator^(const uint& x, const uint& y) noexcept
+    {
+        uint z;
+        for (size_t i = 0; i < num_words; ++i)
+            z[i] = x[i] ^ y[i];
+        return z;
+    }
+
+    inline constexpr uint& operator^=(const uint& y) noexcept { return *this = *this ^ y; }
 };
 
 using uint192 = uint<192>;
@@ -1078,18 +1220,21 @@ inline constexpr bool operator!=(const T& x, const uint<N>& y) noexcept
 #if !defined(_MSC_VER) || _MSC_VER < 1916  // This kills MSVC 2017 compiler.
 inline constexpr bool operator<(const uint256& x, const uint256& y) noexcept
 {
-    const auto xhi = uint128{x[2], x[3]};
-    const auto xlo = uint128{x[0], x[1]};
-    const auto yhi = uint128{y[2], y[3]};
-    const auto ylo = uint128{y[0], y[1]};
-    return (unsigned(xhi < yhi) | (unsigned(xhi == yhi) & unsigned(xlo < ylo))) != 0;
+    auto xp = uint128{x[2], x[3]};
+    auto yp = uint128{y[2], y[3]};
+    if (xp == yp)
+    {
+        xp = uint128{x[0], x[1]};
+        yp = uint128{y[0], y[1]};
+    }
+    return xp < yp;
 }
 #endif
 
 template <unsigned N>
 inline constexpr bool operator<(const uint<N>& x, const uint<N>& y) noexcept
 {
-    return sub_with_carry(x, y).carry;
+    return subc(x, y).carry;
 }
 
 template <unsigned N, typename T,
@@ -1180,42 +1325,6 @@ inline constexpr bool slt(const uint<N>& x, const uint<N>& y) noexcept
     const auto x_neg = static_cast<int64_t>(x[top_word_idx]) < 0;
     const auto y_neg = static_cast<int64_t>(y[top_word_idx]) < 0;
     return ((x_neg ^ y_neg) != 0) ? x_neg : x < y;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator|(const uint<N>& x, const uint<N>& y) noexcept
-{
-    uint<N> z;
-    for (size_t i = 0; i < uint<N>::num_words; ++i)
-        z[i] = x[i] | y[i];
-    return z;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator&(const uint<N>& x, const uint<N>& y) noexcept
-{
-    uint<N> z;
-    for (size_t i = 0; i < uint<N>::num_words; ++i)
-        z[i] = x[i] & y[i];
-    return z;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator^(const uint<N>& x, const uint<N>& y) noexcept
-{
-    uint<N> z;
-    for (size_t i = 0; i < uint<N>::num_words; ++i)
-        z[i] = x[i] ^ y[i];
-    return z;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator~(const uint<N>& x) noexcept
-{
-    uint<N> z;
-    for (size_t i = 0; i < uint<N>::num_words; ++i)
-        z[i] = ~x[i];
-    return z;
 }
 
 
@@ -1396,48 +1505,18 @@ inline constexpr const uint64_t* as_words(const uint<N>& x) noexcept
     return &x[0];
 }
 
-template <unsigned N>
-inline uint8_t* as_bytes(uint<N>& x) noexcept
+template <typename T>
+inline uint8_t* as_bytes(T& x) noexcept
 {
-    return reinterpret_cast<uint8_t*>(as_words(x));
+    static_assert(std::is_trivially_copyable_v<T>);  // As in bit_cast.
+    return reinterpret_cast<uint8_t*>(&x);
 }
 
-template <unsigned N>
-inline const uint8_t* as_bytes(const uint<N>& x) noexcept
+template <typename T>
+inline const uint8_t* as_bytes(const T& x) noexcept
 {
-    return reinterpret_cast<const uint8_t*>(as_words(x));
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator+(const uint<N>& x, const uint<N>& y) noexcept
-{
-    return add_with_carry(x, y).value;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator-(const uint<N>& x) noexcept
-{
-    return ~x + uint<N>{1};
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator-(const uint<N>& x, const uint<N>& y) noexcept
-{
-    return sub_with_carry(x, y).value;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator+=(uint<N>& x, const T& y) noexcept
-{
-    return x = x + y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator-=(uint<N>& x, const T& y) noexcept
-{
-    return x = x - y;
+    static_assert(std::is_trivially_copyable_v<T>);  // As in bit_cast.
+    return reinterpret_cast<const uint8_t*>(&x);
 }
 
 template <unsigned N>
@@ -1451,42 +1530,14 @@ inline constexpr uint<2 * N> umul(const uint<N>& x, const uint<N>& y) noexcept
         uint64_t k = 0;
         for (size_t i = 0; i < num_words; ++i)
         {
-            const auto t = umul(x[i], y[j]) + p[i + j] + k;
+            auto a = addc(p[i + j], k);
+            auto t = umul(x[i], y[j]) + uint128{a.value, a.carry};
             p[i + j] = t[0];
             k = t[1];
         }
         p[j + num_words] = k;
     }
     return p;
-}
-
-/// Multiplication implementation using word access
-/// and discarding the high part of the result product.
-template <unsigned N>
-inline constexpr uint<N> operator*(const uint<N>& x, const uint<N>& y) noexcept
-{
-    constexpr auto num_words = uint<N>::num_words;
-
-    uint<N> p;
-    for (size_t j = 0; j < num_words; j++)
-    {
-        uint64_t k = 0;
-        for (size_t i = 0; i < (num_words - j - 1); i++)
-        {
-            const auto t = umul(x[i], y[j]) + p[i + j] + k;
-            p[i + j] = t[0];
-            k = t[1];
-        }
-        p[num_words - 1] += x[num_words - j - 1] * y[j] + k;
-    }
-    return p;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator*=(uint<N>& x, const T& y) noexcept
-{
-    return x = x * y;
 }
 
 template <unsigned N>
@@ -1553,7 +1604,7 @@ inline constexpr unsigned clz_nonzero(uint64_t x) noexcept
 }
 
 template <unsigned M, unsigned N>
-struct normalized_div_args
+struct normalized_div_args  // NOLINT(cppcoreguidelines-pro-type-member-init)
 {
     uint<N> divisor;
     uint<M + 64> numerator;
@@ -1566,7 +1617,6 @@ template <unsigned M, unsigned N>
 [[gnu::always_inline]] inline normalized_div_args<M, N> normalize(
     const uint<M>& numerator, const uint<N>& denominator) noexcept
 {
-    // FIXME: Make the implementation type independent
     static constexpr auto num_numerator_words = uint<M>::num_words;
     static constexpr auto num_denominator_words = uint<N>::num_words;
 
@@ -1666,7 +1716,7 @@ inline bool add(uint64_t s[], const uint64_t x[], const uint64_t y[], int len) n
 
     bool carry = false;
     for (int i = 0; i < len; ++i)
-        std::tie(s[i], carry) = add_with_carry(x[i], y[i], carry);
+        std::tie(s[i], carry) = addc(x[i], y[i], carry);
     return carry;
 }
 
@@ -1680,11 +1730,11 @@ inline uint64_t submul(
     uint64_t borrow = 0;
     for (int i = 0; i < len; ++i)
     {
-        const auto s = sub_with_carry(x[i], borrow);
+        const auto s = x[i] - borrow;
         const auto p = umul(y[i], multiplier);
-        const auto t = sub_with_carry(s.value, p[0]);
-        r[i] = t.value;
-        borrow = p[1] + s.carry + t.carry;
+        borrow = p[1] + (x[i] < s);
+        r[i] = s - p[0];
+        borrow += (s < r[i]);
     }
     return borrow;
 }
@@ -1703,7 +1753,7 @@ inline void udivrem_knuth(
         const auto u1 = u[j + dlen - 1];
         const auto u0 = u[j + dlen - 2];
 
-        uint64_t qhat;
+        uint64_t qhat{};
         if (INTX_UNLIKELY((uint128{u1, u2}) == divisor))  // Division overflows.
         {
             qhat = ~uint64_t{0};
@@ -1715,10 +1765,10 @@ inline void udivrem_knuth(
             uint128 rhat;
             std::tie(qhat, rhat) = udivrem_3by2(u2, u1, u0, divisor, reciprocal);
 
-            bool carry;
+            bool carry{};
             const auto overflow = submul(&u[j], &u[j], d, dlen - 2, qhat);
-            std::tie(u[j + dlen - 2], carry) = sub_with_carry(rhat[0], overflow);
-            std::tie(u[j + dlen - 1], carry) = sub_with_carry(rhat[1], carry);
+            std::tie(u[j + dlen - 2], carry) = subc(rhat[0], overflow);
+            std::tie(u[j + dlen - 1], carry) = subc(rhat[1], carry);
 
             if (INTX_UNLIKELY(carry))
             {
@@ -1734,7 +1784,7 @@ inline void udivrem_knuth(
 }  // namespace internal
 
 template <unsigned M, unsigned N>
-div_result<uint<M>, uint<N>> udivrem(const uint<M>& u, const uint<N>& v) noexcept
+constexpr div_result<uint<M>, uint<N>> udivrem(const uint<M>& u, const uint<N>& v) noexcept
 {
     auto na = internal::normalize(u, v);
 
@@ -1788,30 +1838,9 @@ inline constexpr div_result<uint<N>> sdivrem(const uint<N>& u, const uint<N>& v)
     return {q_is_neg ? -res.quot : res.quot, u_is_neg ? -res.rem : res.rem};
 }
 
-template <unsigned N>
-inline constexpr uint<N> operator/(const uint<N>& x, const uint<N>& y) noexcept
+inline constexpr uint256 bswap(const uint256& x) noexcept
 {
-    return udivrem(x, y).quot;
-}
-
-template <unsigned N>
-inline constexpr uint<N> operator%(const uint<N>& x, const uint<N>& y) noexcept
-{
-    return udivrem(x, y).rem;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator/=(uint<N>& x, const T& y) noexcept
-{
-    return x = x / y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator%=(uint<N>& x, const T& y) noexcept
-{
-    return x = x % y;
+    return {bswap(x[3]), bswap(x[2]), bswap(x[1]), bswap(x[0])};
 }
 
 template <unsigned N>
@@ -1826,139 +1855,6 @@ inline constexpr uint<N> bswap(const uint<N>& x) noexcept
 
 
 // Support for type conversions for binary operators.
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator+(const uint<N>& x, const T& y) noexcept
-{
-    return x + uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator+(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) + y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator-(const uint<N>& x, const T& y) noexcept
-{
-    return x - uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator-(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) - y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator*(const uint<N>& x, const T& y) noexcept
-{
-    return x * uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator*(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) * y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator/(const uint<N>& x, const T& y) noexcept
-{
-    return x / uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator/(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) / y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator%(const uint<N>& x, const T& y) noexcept
-{
-    return x % uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator%(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) % y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator|(const uint<N>& x, const T& y) noexcept
-{
-    return x | uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator|(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) | y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator&(const uint<N>& x, const T& y) noexcept
-{
-    return x & uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator&(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) & y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator^(const uint<N>& x, const T& y) noexcept
-{
-    return x ^ uint<N>(y);
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N> operator^(const T& x, const uint<N>& y) noexcept
-{
-    return uint<N>(x) ^ y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator|=(uint<N>& x, const T& y) noexcept
-{
-    return x = x | y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator&=(uint<N>& x, const T& y) noexcept
-{
-    return x = x & y;
-}
-
-template <unsigned N, typename T,
-    typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
-inline constexpr uint<N>& operator^=(uint<N>& x, const T& y) noexcept
-{
-    return x = x ^ y;
-}
 
 template <unsigned N, typename T,
     typename = typename std::enable_if<std::is_convertible<T, uint<N>>::value>::type>
@@ -1982,20 +1878,28 @@ inline uint256 addmod(const uint256& x, const uint256& y, const uint256& mod) no
     // Based on https://github.com/holiman/uint256/pull/86.
     if ((mod[3] != 0) && (x[3] <= mod[3]) && (y[3] <= mod[3]))
     {
-        auto s = sub_with_carry(x, mod);
-        if (s.carry)
-            s.value = x;
+        // Normalize x in case it is bigger than mod.
+        auto xn = x;
+        auto xd = subc(x, mod);
+        if (!xd.carry)
+            xn = xd.value;
 
-        auto t = sub_with_carry(y, mod);
-        if (t.carry)
-            t.value = y;
+        // Normalize y in case it is bigger than mod.
+        auto yn = y;
+        auto yd = subc(y, mod);
+        if (!yd.carry)
+            yn = yd.value;
 
-        s = add_with_carry(s.value, t.value);
-        t = sub_with_carry(s.value, mod);
-        return (s.carry || !t.carry) ? t.value : s.value;
+        auto a = addc(xn, yn);
+        auto av = a.value;
+        auto b = subc(av, mod);
+        auto bv = b.value;
+        if (a.carry || !b.carry)
+            return bv;
+        return av;
     }
 
-    const auto s = add_with_carry(x, y);
+    auto s = addc(x, y);
     uint<256 + 64> n = s.value;
     n[4] = s.carry;
     return udivrem(n, mod).rem;
@@ -2017,39 +1921,95 @@ inline constexpr uint512 operator"" _u512(const char* s)
     return from_string<uint512>(s);
 }
 
+
+/// Convert native representation to/from little-endian byte order.
+/// intx and built-in integral types are supported.
+template <typename T>
+inline constexpr T to_little_endian(const T& x) noexcept
+{
+    if constexpr (byte_order_is_little_endian)
+        return x;
+    else if constexpr (std::is_integral_v<T>)
+        return bswap(x);
+    else  // Wordwise bswap.
+    {
+        T r;
+        for (size_t i = 0; i < T::num_words; ++i)
+            r[i] = bswap(x[i]);
+        return r;
+    }
+}
+
+/// Convert native representation to/from big-endian byte order.
+/// intx and built-in integral types are supported.
+template <typename T>
+inline constexpr T to_big_endian(const T& x) noexcept
+{
+    if constexpr (byte_order_is_little_endian)
+        return bswap(x);
+    else if constexpr (std::is_integral_v<T>)
+        return x;
+    else  // Swap words.
+    {
+        T r;
+        for (size_t i = 0; i < T::num_words; ++i)
+            r[T::num_words - 1 - i] = x[i];
+        return r;
+    }
+}
+
 namespace le  // Conversions to/from LE bytes.
 {
-template <typename IntT, unsigned M>
-inline IntT load(const uint8_t (&bytes)[M]) noexcept
+template <typename T, unsigned M>
+inline T load(const uint8_t (&src)[M]) noexcept
 {
-    static_assert(M == IntT::num_bits / 8,
-        "the size of source bytes must match the size of the destination uint");
-    auto x = IntT{};
-    std::memcpy(&x, bytes, sizeof(x));
-    return x;
+    static_assert(
+        M == sizeof(T), "the size of source bytes must match the size of the destination uint");
+    T x;
+    std::memcpy(&x, src, sizeof(x));
+    return to_little_endian(x);
 }
 
-template <unsigned N>
-inline void store(uint8_t (&dst)[N / 8], const intx::uint<N>& x) noexcept
+template <typename T>
+inline void store(uint8_t (&dst)[sizeof(T)], const T& x) noexcept
 {
-    std::memcpy(dst, &x, sizeof(x));
+    const auto d = to_little_endian(x);
+    std::memcpy(dst, &d, sizeof(d));
 }
 
+namespace unsafe
+{
+template <typename T>
+inline T load(const uint8_t* src) noexcept
+{
+    T x;
+    std::memcpy(&x, src, sizeof(x));
+    return to_little_endian(x);
+}
+
+template <typename T>
+inline void store(uint8_t* dst, const T& x) noexcept
+{
+    const auto d = to_little_endian(x);
+    std::memcpy(dst, &d, sizeof(d));
+}
+}  // namespace unsafe
 }  // namespace le
 
 
 namespace be  // Conversions to/from BE bytes.
 {
-/// Loads an uint value from bytes of big-endian order.
-/// If the size of bytes is smaller than the result uint, the value is zero-extended.
-template <typename IntT, unsigned M>
-inline IntT load(const uint8_t (&bytes)[M]) noexcept
+/// Loads an integer value from bytes of big-endian order.
+/// If the size of bytes is smaller than the result, the value is zero-extended.
+template <typename T, unsigned M>
+inline T load(const uint8_t (&src)[M]) noexcept
 {
-    static_assert(M <= IntT::num_bits / 8,
+    static_assert(M <= sizeof(T),
         "the size of source bytes must not exceed the size of the destination uint");
-    auto x = IntT{};
-    std::memcpy(&as_bytes(x)[IntT::num_bits / 8 - M], bytes, M);
-    return bswap(x);
+    T x{};
+    std::memcpy(&as_bytes(x)[sizeof(T) - M], src, M);
+    x = to_big_endian(x);
+    return x;
 }
 
 template <typename IntT, typename T>
@@ -2058,20 +2018,20 @@ inline IntT load(const T& t) noexcept
     return load<IntT>(t.bytes);
 }
 
-/// Stores an uint value in a bytes array in big-endian order.
-template <unsigned N>
-inline void store(uint8_t (&dst)[N / 8], const intx::uint<N>& x) noexcept
+/// Stores an integer value in a bytes array in big-endian order.
+template <typename T>
+inline void store(uint8_t (&dst)[sizeof(T)], const T& x) noexcept
 {
-    const auto d = bswap(x);
+    const auto d = to_big_endian(x);
     std::memcpy(dst, &d, sizeof(d));
 }
 
-/// Stores an uint value in .bytes field of type T. The .bytes must be an array of uint8_t
+/// Stores an SrcT value in .bytes field of type DstT. The .bytes must be an array of uint8_t
 /// of the size matching the size of uint.
-template <typename T, unsigned N>
-inline T store(const intx::uint<N>& x) noexcept
+template <typename DstT, typename SrcT>
+inline DstT store(const SrcT& x) noexcept
 {
-    T r{};
+    DstT r{};
     store(r.bytes, x);
     return r;
 }
@@ -2080,17 +2040,16 @@ inline T store(const intx::uint<N>& x) noexcept
 /// Only the least significant bytes from big-endian representation of the uint
 /// are stored in the result bytes array up to array's size.
 template <unsigned M, unsigned N>
-inline void trunc(uint8_t (&dst)[M], const intx::uint<N>& x) noexcept
+inline void trunc(uint8_t (&dst)[M], const uint<N>& x) noexcept
 {
     static_assert(M < N / 8, "destination must be smaller than the source value");
-    const auto d = bswap(x);
-    const auto b = as_bytes(d);
-    std::memcpy(dst, &b[sizeof(d) - M], M);
+    const auto d = to_big_endian(x);
+    std::memcpy(dst, &as_bytes(d)[sizeof(d) - M], M);
 }
 
 /// Stores the truncated value of an uint in the .bytes field of an object of type T.
 template <typename T, unsigned N>
-inline T trunc(const intx::uint<N>& x) noexcept
+inline T trunc(const uint<N>& x) noexcept
 {
     T r{};
     trunc(r.bytes, x);
@@ -2102,23 +2061,50 @@ namespace unsafe
 /// Loads an uint value from a buffer. The user must make sure
 /// that the provided buffer is big enough. Therefore marked "unsafe".
 template <typename IntT>
-inline IntT load(const uint8_t* bytes) noexcept
+inline IntT load(const uint8_t* src) noexcept
 {
-    auto x = IntT{};
-    std::memcpy(&x, bytes, sizeof(x));
-    return bswap(x);
+    // Align bytes.
+    // TODO: Using memcpy() directly triggers this optimization bug in GCC:
+    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107837
+    alignas(IntT) std::byte aligned_storage[sizeof(IntT)];
+    std::memcpy(&aligned_storage, src, sizeof(IntT));
+    // TODO(C++23): Use std::start_lifetime_as<uint256>().
+    return to_big_endian(*reinterpret_cast<const IntT*>(&aligned_storage));
 }
 
-/// Stores an uint value at the provided pointer in big-endian order. The user must make sure
+/// Stores an integer value at the provided pointer in big-endian order. The user must make sure
 /// that the provided buffer is big enough to fit the value. Therefore marked "unsafe".
-template <unsigned N>
-inline void store(uint8_t* dst, const intx::uint<N>& x) noexcept
+template <typename T>
+inline void store(uint8_t* dst, const T& x) noexcept
 {
-    const auto d = bswap(x);
+    const auto d = to_big_endian(x);
     std::memcpy(dst, &d, sizeof(d));
 }
+
+/// Specialization for uint256.
+inline void store(uint8_t* dst, const uint256& x) noexcept
+{
+    // Store byte-swapped words in primitive temporaries. This helps with memory aliasing
+    // and GCC bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=107837
+    // TODO: Use std::byte instead of uint8_t.
+    const auto v0 = to_big_endian(x[0]);
+    const auto v1 = to_big_endian(x[1]);
+    const auto v2 = to_big_endian(x[2]);
+    const auto v3 = to_big_endian(x[3]);
+
+    // Store words in reverse (big-endian) order, write addresses are ascending.
+    std::memcpy(dst, &v3, sizeof(v3));
+    std::memcpy(dst + 8, &v2, sizeof(v2));
+    std::memcpy(dst + 16, &v1, sizeof(v1));
+    std::memcpy(dst + 24, &v0, sizeof(v0));
+}
+
 }  // namespace unsafe
 
 }  // namespace be
 
 }  // namespace intx
+
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
