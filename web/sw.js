@@ -1,12 +1,13 @@
 
-var _cacheName = 'cimbar-js-v0.5.8.c';
+var _cacheName = 'cimbar-js-v0.5.13';
 var _cacheFiles = [
   '/',
   '/index.html',
   '/cimbar_js.js',
   '/cimbar_js.wasm',
   '/favicon.ico',
-  '/main.js'
+  '/main.js',
+  '/pwa.json'
 ];
 
 // fetch files
