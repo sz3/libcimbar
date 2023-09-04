@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include "chromatic_adaptation/nlargest.h"
 #include <opencv2/opencv.hpp>
 
 #include <tuple>
@@ -91,6 +92,64 @@ public:
 			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
 
 		return std::tuple<uchar,uchar,uchar>(red/count, green/count, blue/count);
+	}
+
+	std::tuple<uchar,uchar,uchar> sample_rgb_continuous(bool skip) const
+	{
+		nlargest<uint8_t, 9> blues;
+		nlargest<uint8_t, 9> greens;
+		nlargest<uint8_t, 9> reds;
+
+		int channels = _img.channels();
+		int index = (_ystart * _img.cols) + _xstart;
+		const uchar* p = _img.ptr<uchar>(0) + (index * channels);
+
+		int increment = 1 + skip;
+		int toNextCol = channels * (_img.rows - _rows);
+		if (skip)
+			toNextCol += channels * _img.rows;
+
+		for (int i = 0; i < _cols; i+=increment)
+		{
+			for (int j = 0; j < _rows; ++j)
+			{
+				reds.eval(p[0]);
+				greens.eval(p[1]);
+				blues.eval(p[2]);
+				p += channels;
+			}
+			p += toNextCol;
+		}
+
+		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
+	}
+
+	std::tuple<uchar,uchar,uchar> sample_rgb(bool skip=false) const
+	{
+		int channels = _img.channels();
+		if (channels < 3)
+			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
+		if (_img.isContinuous() and _cols > 0)
+			return sample_rgb_continuous(skip);
+
+		nlargest<uint8_t, 9> blues;
+		nlargest<uint8_t, 9> greens;
+		nlargest<uint8_t, 9> reds;
+
+		int increment = 1 + skip;
+		int yend = _img.rows * _img.channels();
+		for (int i = 0; i < _img.cols; i+=increment)
+		{
+			const uchar* p = _img.ptr<uchar>(i);
+			for (int j = 0; j < yend; j+=_img.channels())
+			{
+				reds.eval(p[j]);
+				greens.eval(p[j+1]);
+				blues.eval(p[j+2]);
+			}
+		}
+
+		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
 	}
 
 	uchar mean_grayscale_continuous() const

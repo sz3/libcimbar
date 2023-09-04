@@ -5,6 +5,7 @@ project(chromatic_adaptation_test)
 set (SOURCES
 	test.cpp
 	color_correctionTest.cpp
+	nlargestTest.cpp
 )
 
 include_directories(

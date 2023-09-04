@@ -57,5 +57,5 @@ TEST_CASE( "DecoderTest/testDecode.Sample", "[unit]" )
 	assertEquals( 9300, bytesDecoded );
 
 	if (CV_VERSION_MAJOR == 4)
-		assertEquals( "0f74a76cb1f59df7a42449a3527d464d913d12a03bffa51d6f53828724c3feb1", get_hash(decodedFile) );
+		assertEquals( "69b608d82083b5d22cd3ebf8785c2d0329a83b0cd084521c418ea97316b54cc6", get_hash(decodedFile) );
 }

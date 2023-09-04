@@ -13,9 +13,12 @@
 using std::get;
 using std::string;
 
+const int FIX_THRESH_HIGH = 245;
+const int FIX_THRESH_LOW = 0;
+const float BEST_COLOR_FLOOR = 100.0f;
+
 namespace {
-	template <typename T>
-	unsigned squared_difference(T a, T b)
+	unsigned squared_difference(int a, int b)
 	{
 		return std::pow(a - b, 2);
 	}
@@ -24,9 +27,9 @@ namespace {
 	{
 		c -= down;
 		c *= adjustUp;
-		if (c > (245 - down))
+		if (c > FIX_THRESH_HIGH)
 			c = 255;
-		if (c < 0)
+		if (c < FIX_THRESH_LOW)
 			c = 0;
 		return (uchar)c;
 	}
@@ -154,7 +157,7 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	}
 
 	float max = std::max({r, g, b, 1.0f});
-	float min = std::min({r, g, b, 48.0f});
+	float min = std::min({r, g, b, BEST_COLOR_FLOOR});
 	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
@@ -186,8 +189,17 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
-	return get_best_color(r, g, b);
+
+	if (_dark)
+	{
+		auto [rm, gm, bm] = center.sample_rgb(center.cols() > 5? Cell::SKIP : 0);
+		return get_best_color(rm, gm, bm);
+	}
+	else
+	{
+		auto [r, g, b] = center.mean_rgb(center.cols() > 5? Cell::SKIP : 0);
+		return get_best_color(r, g, b);
+	}
 }
 
 bool CimbDecoder::expects_binary_threshold() const
