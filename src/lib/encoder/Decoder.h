@@ -111,6 +111,7 @@ inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_pre
 template <typename MAT, typename FOUNTAINSTREAM>
 inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess, bool color_correction)
 {
+	// reader takes cimbar::Config::color_mode() ?
 	CimbReader reader(img, _decoder, should_preprocess, color_correction);
 
 	aligned_stream aligner(ostream, ostream.chunk_size());

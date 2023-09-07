@@ -10,6 +10,6 @@ namespace cimbar
 
 	cv::Mat load_img(std::string path);
 
-	std::tuple<uchar,uchar,uchar> getColor(unsigned index, unsigned num_colors);
-	cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0);
+	std::tuple<uchar,uchar,uchar> getColor(unsigned index, unsigned num_colors, unsigned color_mode);
+	cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark=true, unsigned num_colors=4, unsigned color=0, unsigned color_mode=1);
 }

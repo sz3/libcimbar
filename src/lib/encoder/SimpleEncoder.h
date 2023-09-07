@@ -30,6 +30,7 @@ protected:
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
 	bool _dark;
+	unsigned _colorMode;
 	uint8_t _encodeId = 0;
 };
 
@@ -39,6 +40,7 @@ inline SimpleEncoder::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int
 	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
 	, _dark(cimbar::Config::dark())
+	, _colorMode(cimbar::Config::color_mode())
 {
 }
 
@@ -66,7 +68,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, canvas_size);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
