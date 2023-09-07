@@ -16,6 +16,11 @@ namespace cimbar
 			return true;
 		}
 
+		static constexpr unsigned color_mode()
+		{
+			return 1; // unless we override per-thread?
+		}
+
 		static constexpr unsigned color_bits()
 		{
 			return GridConf::color_bits;
