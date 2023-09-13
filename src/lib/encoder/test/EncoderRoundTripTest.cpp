@@ -39,7 +39,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 
 	// decoder
 	Decoder dec(30);
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30));
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30, 6));
 
 	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
 	assertEquals( 7500, bytesDecoded );
@@ -63,7 +63,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 
 	// create decoder
 	Decoder dec(30);
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30));
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30, 6));
 
 	// encode frames, then pass to decoder
 	for (int i = 0; i < 100; ++i)

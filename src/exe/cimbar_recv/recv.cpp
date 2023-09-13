@@ -41,10 +41,10 @@ int main(int argc, char** argv)
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())
-	    ("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
+		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target decode FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
-	    ("h,help", "Print usage")
+		("h,help", "Print usage")
 	;
 	options.show_positional_help();
 	options.parse_positional({"in", "out"});
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 	Extractor ext;
 	Decoder dec;
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits());
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
 
 	cv::Mat mat;

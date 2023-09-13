@@ -69,7 +69,7 @@ int next_frame()
 
 	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
 	unsigned required = _fes->blocks_required();
-	if (required > cimbar::Config::fountain_chunks_per_frame())
+	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits()+_colorBits))
 		required = required*8;
 	if (_fes->block_count() > required)
 	{
