@@ -44,7 +44,7 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
 	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
 	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
 	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
-	, _interleavePartitions(cimbar::Config::interleave_partitions())
+	, _interleavePartitions(cimbar::Config::interleave_partitions(_bitsPerOp))
 	, _decoder(cimbar::Config::symbol_bits(), _colorBits, cimbar::Config::dark(), 0xFF)
 {
 }

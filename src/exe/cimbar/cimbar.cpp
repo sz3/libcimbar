@@ -246,7 +246,7 @@ int main(int argc, char** argv)
 	}
 
 	// else, the good stuff
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits());
 	if (compressionLevel <= 0)
 	{
 		fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize, true);
