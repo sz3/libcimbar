@@ -69,6 +69,9 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
 
+	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
+	unsigned maxSymbolBit = reader.num_reads() * cimbar::Config::symbol_bits();
+
 	// read symbols first
 	while (!reader.done())
 	{
@@ -77,10 +80,13 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		PositionData pos;
 		unsigned bits = reader.read(pos);
 
-		unsigned bitPos = interleaveLookup[pos.i] * _bitsPerOp;
-		bb.write(bits, bitPos, _bitsPerOp);
+		unsigned bitPos = interleaveLookup[pos.i] * bitsPerSymbol; // bitspersymbol, *iff* we're in the new mode
+		bb.write(bits, bitPos, bitsPerSymbol);
 
-		colorPositions[pos.i] = {bitPos, pos.x, pos.y};
+		// is colorBitPos == interleaveLookup[pos.i] * _colorBits + (maxSymbolBitPos)?
+		// where maxSymbolBiPos is interleaveLookup[-1] * bitspersymbol ?
+
+		colorPositions[pos.i] = {maxSymbolBit + (interleaveLookup[pos.i] * _colorBits), pos.x, pos.y}; // if no mode, bitPos is different...
 	}
 
 	// then decode colors.
