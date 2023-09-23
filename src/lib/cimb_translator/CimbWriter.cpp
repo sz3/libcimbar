@@ -96,3 +96,8 @@ cv::Mat CimbWriter::image() const
 {
 	return _image;
 }
+
+unsigned CimbWriter::num_cells() const
+{
+	return _positions.count();
+}

@@ -3,6 +3,7 @@
 
 #include "reed_solomon_stream.h"
 #include "bit_file/bitreader.h"
+#include "bit_file/bitbuffer.h"
 #include "cimb_translator/CimbWriter.h"
 #include "cimb_translator/Config.h"
 #include "compression/zstd_compressor.h"
@@ -11,6 +12,8 @@
 #include <opencv2/opencv.hpp>
 #include <optional>
 #include <string>
+
+#include <iostream>
 
 class SimpleEncoder
 {
@@ -70,6 +73,14 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
 	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
 
+	unsigned numCells = writer.num_cells();
+	bitbuffer bb(cimbar::Config::capacity(bits_per_op));
+
+	unsigned bitPos = 0;
+	unsigned endBitPos = numCells*bits_per_op;
+
+	int progress = 0;
+
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
 	while (rss.good())
@@ -78,16 +89,55 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 		if (bytes == 0)
 			break;
 		br.assign_new_buffer(rss.buffer(), bytes);
-		while (!br.empty())
-		{
-			unsigned bits = br.read(bits_per_op);
-			if (!br.partial())
-				writer.write(bits);
-		}
-		if (writer.done())
-			return writer.image();
+
+		// reorder. We're encoding the symbol bits and striping them across the whole image
+		// then encoding the color bits and striping them in the same way (filling in the gaps)
+		if (progress == 0)
+			while (!br.empty())
+			{
+				unsigned bits = br.read(_bitsPerSymbol);
+				if (!br.partial())
+					bb.write(bits, bitPos, bits_per_op);
+				bitPos += bits_per_op;
+
+				if (bitPos >= endBitPos)
+				{
+					bitPos = 0;
+					progress = 1;
+					break;
+				}
+			}
+
+		if (progress == 1)
+			while (!br.empty())
+			{
+				unsigned bits = br.read(_bitsPerColor);
+				if (!br.partial())
+					bb.write(bits, bitPos, _bitsPerColor);
+				bitPos += bits_per_op;
+
+				if (bitPos >= endBitPos)
+				{
+					bitPos = 0;
+					progress = 2;
+					break;
+				}
+			}
+
+		if (progress == 2)
+			break;
 	}
-	// we don't have a full frame, but return what we've got
+
+	// dump whatever we have to image
+	for (bitPos = 0; bitPos < endBitPos; bitPos+=bits_per_op)
+	{
+		unsigned bits = bb.read(bitPos, bits_per_op);
+		writer.write(bits);
+	}
+
+	std::cout << "is writer done? " << writer.done() << std::endl;
+
+	// return what we've got
 	return writer.image();
 }
 

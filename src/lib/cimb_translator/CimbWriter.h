@@ -14,6 +14,8 @@ public:
 
 	cv::Mat image() const;
 
+	unsigned num_cells() const;
+
 protected:
 	void paste(const cv::Mat& img, int x, int y);
 
