@@ -80,10 +80,12 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 	unsigned endBitPos = numCells*bits_per_op;
 
 	int progress = 0;
+	unsigned bitsPerRead = _bitsPerSymbol;
+	unsigned bitsPerWrite = bits_per_op;
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
-	while (rss.good())
+	while (rss.good() and progress < 2)  // 1 symbol pass + 1 color pass
 	{
 		unsigned bytes = rss.readsome();
 		if (bytes == 0)
@@ -92,40 +94,22 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 
 		// reorder. We're encoding the symbol bits and striping them across the whole image
 		// then encoding the color bits and striping them in the same way (filling in the gaps)
-		if (progress == 0)
-			while (!br.empty())
+		while (!br.empty())
+		{
+			unsigned bits = br.read(bitsPerRead);
+			if (!br.partial())
+				bb.write(bits, bitPos, bitsPerWrite);
+			bitPos += bits_per_op;
+
+			if (bitPos >= endBitPos)
 			{
-				unsigned bits = br.read(_bitsPerSymbol);
-				if (!br.partial())
-					bb.write(bits, bitPos, bits_per_op);
-				bitPos += bits_per_op;
-
-				if (bitPos >= endBitPos)
-				{
-					bitPos = 0;
-					progress = 1;
-					break;
-				}
+				bitsPerRead = _bitsPerColor; // switch to color mode
+				bitsPerWrite = _bitsPerColor;
+				bitPos = 0;
+				++progress;
+				break;
 			}
-
-		if (progress == 1)
-			while (!br.empty())
-			{
-				unsigned bits = br.read(_bitsPerColor);
-				if (!br.partial())
-					bb.write(bits, bitPos, _bitsPerColor);
-				bitPos += bits_per_op;
-
-				if (bitPos >= endBitPos)
-				{
-					bitPos = 0;
-					progress = 2;
-					break;
-				}
-			}
-
-		if (progress == 2)
-			break;
+		}
 	}
 
 	// dump whatever we have to image
@@ -134,8 +118,6 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 		unsigned bits = bb.read(bitPos, bits_per_op);
 		writer.write(bits);
 	}
-
-	std::cout << "is writer done? " << writer.done() << std::endl;
 
 	// return what we've got
 	return writer.image();
