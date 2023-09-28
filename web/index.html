@@ -91,6 +91,7 @@ body {
   pointer-events: none;
 }
 #nav-container .bg {
+  pointer-events: auto;
   position: absolute;
   left: 0;
   width: 100%;
@@ -192,12 +193,10 @@ body {
 #nav-content {
   margin-top: 60px;
   padding: 20px;
-  max-width: 200px;
   position: absolute;
   top: 0;
   left: 0;
   height: calc(100% - 60px);
-  width: 90%;
   overflow-x: clip;
   background-color: #282C34;
   text-align: center;
@@ -268,8 +267,8 @@ body {
 <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 
 <div id="nav-container" class="c4">
-    <div class="bg"></div>
-    <button id="nav-button" tabindex="0">
+    <div class="bg" onclick="Main.blurNav();"></div>
+    <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
