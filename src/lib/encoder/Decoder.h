@@ -28,6 +28,9 @@ protected:
 	template <typename STREAM>
 	unsigned do_decode(CimbReader& reader, STREAM& ostream);
 
+	template <typename STREAM>
+	unsigned do_decode_coupled(CimbReader& reader, STREAM& ostream);
+
 protected:
 	unsigned _eccBytes;
 	unsigned _eccBlockSize;
@@ -67,7 +70,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
 	std::vector<PositionData> colorPositions;
-	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time?
+	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
 	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
 	unsigned maxSymbolBit = reader.num_reads() * cimbar::Config::symbol_bits();
@@ -83,14 +86,12 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		unsigned bitPos = interleaveLookup[pos.i] * bitsPerSymbol; // bitspersymbol, *iff* we're in the new mode
 		bb.write(bits, bitPos, bitsPerSymbol);
 
-		// is colorBitPos == interleaveLookup[pos.i] * _colorBits + (maxSymbolBitPos)?
-		// where maxSymbolBiPos is interleaveLookup[-1] * bitspersymbol ?
-
-		colorPositions[pos.i] = {maxSymbolBit + (interleaveLookup[pos.i] * _colorBits), pos.x, pos.y}; // if no mode, bitPos is different...
+		// TODO: simplify this function by not storing colorPositions?
+		// this is how it was originally done (see `do_decode_coupled()`), but we should be able to calculate them on the fly now
+		colorPositions[pos.i] = {maxSymbolBit + (interleaveLookup[pos.i] * _colorBits), pos.x, pos.y};
 	}
 
 	// then decode colors.
-	// the symbol+color decode could be done as one pass, but doing it as two gives us more control of the caches
 	for (const PositionData& p : colorPositions)
 	{
 		unsigned bits = reader.read_color(p);
@@ -100,6 +101,43 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
 	return bb.flush(rss);
 }
+
+template <typename STREAM>
+inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
+{
+	// the legacy decoder function. Symbol and color bits are grouped together (an individual cell is treated as ex:6 bits),
+	// and the decode is done in two passes only for performance benefits (caching).
+	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
+	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
+	std::vector<PositionData> colorPositions;
+	colorPositions.resize(reader.num_reads());
+
+	// read symbols first
+	while (!reader.done())
+	{
+		// reader is in charge of the cell index (i) calculation
+		// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
+		PositionData pos;
+		unsigned bits = reader.read(pos);
+
+		unsigned bitPos = interleaveLookup[pos.i] * _bitsPerOp;
+		bb.write(bits, bitPos, _bitsPerOp);
+
+		colorPositions[pos.i] = {bitPos, pos.x, pos.y};
+	}
+
+	// then decode colors.
+	// the symbol+color decode could be done as one pass, but doing it as two gives us better cache utilization
+	for (const PositionData& p : colorPositions)
+	{
+		unsigned bits = reader.read_color(p);
+		bb.write(bits, p.i, _colorBits);
+	}
+
+	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
+	return bb.flush(rss);
+}
+
 
 // seems like we want to take a file or img, and have an output sink
 // output sync could be template param?
