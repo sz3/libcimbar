@@ -67,39 +67,52 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
 	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
-	unsigned maxSymbolBit = reader.num_reads() * cimbar::Config::symbol_bits();
+	unsigned maxSymbolBit = reader.num_reads() * bitsPerSymbol;
 
-	// read symbols first
-	while (!reader.done())
+	unsigned bytesDecoded = 0;
 	{
-		// reader is in charge of the cell index (i) calculation
-		// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
-		PositionData pos;
-		unsigned bits = reader.read(pos);
+		bitbuffer symbolBits(cimbar::Config::capacity(bitsPerSymbol));
+		// read symbols first
+		while (!reader.done())
+		{
+			// reader is in charge of the cell index (i) calculation
+			// we can compute the bitindex ('index') here, but only the reader will know the right cell index...
+			PositionData pos;
+			unsigned bits = reader.read(pos);
 
-		unsigned bitPos = interleaveLookup[pos.i] * bitsPerSymbol; // bitspersymbol, *iff* we're in the new mode
-		bb.write(bits, bitPos, bitsPerSymbol);
+			unsigned bitPos = interleaveLookup[pos.i] * bitsPerSymbol; // bitspersymbol, *iff* we're in the new mode
+			symbolBits.write(bits, bitPos, bitsPerSymbol);
 
-		// TODO: simplify this function by not storing colorPositions?
-		// this is how it was originally done (see `do_decode_coupled()`), but we should be able to calculate them on the fly now
-		colorPositions[pos.i] = {maxSymbolBit + (interleaveLookup[pos.i] * _colorBits), pos.x, pos.y};
+			// TODO: simplify this function by not storing colorPositions?
+			// this is how it was originally done (see `do_decode_coupled()`), but we should be able to calculate them on the fly now
+			colorPositions[pos.i] = {interleaveLookup[pos.i] * _colorBits, pos.x, pos.y};
+		}
+
+		// flush symbols
+		reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
+		bytesDecoded += symbolBits.flush(rss);
+
+		// TODO: get fountain headers out of ostream somehow.
+		// after we call symbolBits.flush(), the underlying aligned stream (ostream) may have knowledge about
+		// the fountain headers -- one per chunk (see chunk_size()) -- which we can use to help us with the color decode...
 	}
 
+	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
 	// then decode colors.
 	for (const PositionData& p : colorPositions)
 	{
 		unsigned bits = reader.read_color(p);
-		bb.write(bits, p.i, _colorBits);
+		colorBits.write(bits, p.i, _colorBits);
 	}
 
 	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
-	return bb.flush(rss);
+	bytesDecoded += colorBits.flush(rss);
+	return bytesDecoded;
 }
 
 template <typename STREAM>
