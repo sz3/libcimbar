@@ -192,7 +192,7 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 
 	if (_dark)
 	{
-		auto [rm, gm, bm] = center.sample_rgb(center.cols() > 5? Cell::SKIP : 0);
+		auto [rm, gm, bm] = center.mean_rgb(center.cols() > 5? Cell::SKIP : 0);
 		return get_best_color(rm, gm, bm);
 	}
 	else

@@ -97,7 +97,7 @@ namespace cimbar
 
 		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell=0)
 		{
-			return bitspercell;
+			return bitspercell << 1;
 		}
 
 		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell);
