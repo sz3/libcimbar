@@ -158,10 +158,9 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 
 	float max = std::max({r, g, b, 1.0f});
 	float min = std::min({r, g, b, BEST_COLOR_FLOOR});
-	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
-	adjust /= (max - min);
+	float adjust = 255.0/(max - min);
 
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
