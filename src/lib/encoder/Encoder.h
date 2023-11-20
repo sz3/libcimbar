@@ -48,7 +48,9 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 
 	// ex: with ecc = 30 and 155 byte blocks, we have 60 rs blocks * 125 bytes per block == 7500 bytes to work with.
 	// if fountain_chunks_per_frame() is 10, the fountain_chunk_size will be 750.
-	unsigned requiredFrames = fes->blocks_required() * redundancy / cimbar::Config::fountain_chunks_per_frame(_bitsPerSymbol+_bitsPerColor);
+	// we calculate requiredFrames based only on symbol bits, to avoid the situation where the color decode is failing while we're
+	// refusing to generate additional frames...
+	unsigned requiredFrames = fes->blocks_required() * redundancy / cimbar::Config::fountain_chunks_per_frame(_bitsPerSymbol);
 	if (requiredFrames == 0)
 		requiredFrames = 1;
 

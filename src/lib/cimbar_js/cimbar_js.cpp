@@ -67,10 +67,12 @@ int next_frame()
 	if (!_window or !_fes)
 		return 0;
 
-	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
+	// we generate 5x the amount of required symbol blocks -- unless everything fits in a single frame.
+	// color blocks will contribute to this total, but only symbols used for the initial calculation.
+	// ... this way, if the color decode is failing, we don't get "stuck" rendering a single frame.
 	unsigned required = _fes->blocks_required();
-	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits()+_colorBits))
-		required = required*8;
+	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits()))
+		required = required*5;
 	if (_fes->block_count() > required)
 	{
 		_fes->restart();
