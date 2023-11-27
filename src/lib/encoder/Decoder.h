@@ -72,8 +72,6 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
 	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
-	unsigned maxSymbolBit = reader.num_reads() * bitsPerSymbol;
-
 	unsigned bytesDecoded = 0;
 	{
 		bitbuffer symbolBits(cimbar::Config::capacity(bitsPerSymbol));

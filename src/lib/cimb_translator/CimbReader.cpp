@@ -27,12 +27,15 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
-		int blockSize = 7;
+		int blockSize = 5;
 
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
 		if (needs_sharpen)
-			sharpenSymbolGrid(symbols, symbols); // we used to change blockSize for this case -- may one day be a useful trick again?
+		{
+			blockSize = 7;
+			sharpenSymbolGrid(symbols, symbols);
+		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
 		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);

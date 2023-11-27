@@ -158,10 +158,9 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 
 	float max = std::max({r, g, b, 1.0f});
 	float min = std::min({r, g, b, BEST_COLOR_FLOOR});
-	float adjust = 255.0;
 	if (min >= max)
 		min = 0;
-	adjust /= (max - min);
+	float adjust = 255.0/(max - min);
 
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
@@ -188,7 +187,8 @@ unsigned CimbDecoder::decode_color(const Cell& color_cell) const
 	// TODO: check/enforce dimensions of color_cell?
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
-	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
+	int hcrop = color_cell.cols() > 6? 2 : 1;
+	center.crop(hcrop, 1, color_cell.cols()-1-hcrop, color_cell.rows()-2);
 
 	if (_dark)
 	{
