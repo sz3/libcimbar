@@ -91,7 +91,9 @@ int main(int argc, char** argv)
 					continue;
 				}
 
-				if (!encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i)))
+				// start encode_id is 109. This is mostly unimportant (it only needs to wrap between [0,127]), but useful
+				// for the decoder -- because it gives it a better distribution of colors in the first frame header it sees.
+				if (!encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i+109)))
 				{
 					std::cerr << "failed to encode file " << infiles[i] << std::endl;
 					continue;

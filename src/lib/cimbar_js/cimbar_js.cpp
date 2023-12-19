@@ -16,7 +16,7 @@ namespace {
 	std::optional<cv::Mat> _next;
 
 	int _frameCount = 0;
-	uint8_t _encodeId = 0;
+	uint8_t _encodeId = 109;
 
 	// settings
 	unsigned _ecc = cimbar::Config::ecc_bytes();
