@@ -15,7 +15,7 @@ using std::string;
 
 const int FIX_THRESH_HIGH = 245;
 const int FIX_THRESH_LOW = 0;
-const float BEST_COLOR_FLOOR = 100.0f;
+const float BEST_COLOR_FLOOR = 48.0f;
 
 namespace {
 	unsigned squared_difference(int a, int b)
@@ -27,7 +27,7 @@ namespace {
 	{
 		c -= down;
 		c *= adjustUp;
-		if (c > FIX_THRESH_HIGH)
+		if (c > (FIX_THRESH_HIGH-down))
 			c = 255;
 		if (c < FIX_THRESH_LOW)
 			c = 0;
