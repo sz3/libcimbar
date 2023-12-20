@@ -47,7 +47,7 @@ TEST_CASE( "CimbReaderTest/testReadOnce", "[unit]" )
 	assertEquals(8, pos.y);
 
 	unsigned color_bits = cr.read_color(pos);
-	assertEquals(0, color_bits);
+	assertEquals(1, color_bits);
 
 	assertFalse(cr.done());
 }
@@ -73,9 +73,9 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 		++count;
 	}
 
-	string expected = "0=0 99=8 600=33 710=28 711=30 821=8 822=22 823=19 934=55 11688=55 11799=25 "
-			"11900=28 12000=23 12100=0 12200=5 12201=0 12298=32 12299=34 12300=30 12301=32 "
-			"12398=10 12399=15";
+	string expected = "0=16 99=24 11680=19 11681=48 11900=44 11901=41 11904=28 11995=18 11996=24 "
+			"11998=22 11999=6 12001=45 12004=22 12099=18 12195=9 12196=17 12200=21 12201=16 "
+			"12298=48 12299=50 12300=46 12399=31";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -109,8 +109,9 @@ TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 		++count;
 	}
 
-	string expected = "0=0 99=8 600=33 711=30 11462=2 11573=33 11574=0 11685=52 11686=17 11687=41 "
-			"11688=55 11797=30 11798=15 11799=25 12200=5 12298=46 12299=34 12300=30 12301=32 12397=38 12398=10 12399=15";
+	string expected = "0=16 1=44 99=24 100=44 600=49 601=54 711=46 712=9 11464=5 11576=48 11577=60 "
+			"11687=57 11688=7 11689=48 11690=0 11798=31 11799=41 12297=62 12298=48 12299=50 "
+			"12300=46 12399=31";
 	assertEquals( expected, turbo::str::join(res) );
 
 	PositionData pos;
@@ -152,7 +153,7 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 				 " 0.0055368096, 1.5302141, -0.0011175937;\n"
 				 " 0, 0, 1.4676259]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 1, 3};
+	std::array<unsigned, 6> expectedColors = {1, 1, 1, 2, 2, 0};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -173,7 +174,7 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 
 	assertFalse( decoder._ccm.active() );
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 1, 3};
+	std::array<unsigned, 6> expectedColors = {1, 1, 1, 2, 2, 0};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -200,7 +201,7 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 				 " 0.023812667, 0.98703396, -0.0048082001;\n"
 				 " 0, 0, 1.0017186]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {0, 0, 0, 1, 2, 3}; // it's wrong, but it's consistent!
+	std::array<unsigned, 6> expectedColors = {1, 1, 1, 0, 0, 1}; // it's wrong, but it's consistent!
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;

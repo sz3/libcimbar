@@ -18,10 +18,10 @@ protected:
 
 protected:
 	fountain_encoder_stream(std::string&& data, unsigned buffer_size, uint8_t encode_id)
-	    : _data(data)
-	    , _buffer(buffer_size, 0)
-	    , _encodeId(encode_id)
-	    , _encoder((uint8_t*)_data.data(), _data.size(), block_size())
+		: _data(data)
+		, _buffer(buffer_size, 0)
+		, _encodeId(encode_id)
+		, _encoder((uint8_t*)_data.data(), _data.size(), block_size())
 	{
 	}
 
@@ -83,13 +83,9 @@ public:
 		if (res != block_size())
 			_encoder.encode(_block++, data, block_size()); // try twice -- the last initial block will be the wrong size
 
-		// write first 4 bytes of header
-		FountainMetadata::to_uint8_arr(_encodeId, _data.size(), _buffer.data());
-
-		// last 2 bytes of header
 		unsigned block = _block - 1; // we already incremented it above
-		_buffer.data()[4] = (block >> 8) & 0xFF;
-		_buffer.data()[5] = block & 0xFF;
+		// write header
+		FountainMetadata::to_uint8_arr(_encodeId, _data.size(), block, _buffer.data());
 		_buffIndex = 0;
 	}
 
