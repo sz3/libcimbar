@@ -1,20 +1,23 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include <functional>
 #include <vector>
 
 template <typename STREAM>
 class aligned_stream
 {
 public:
-	aligned_stream(STREAM& stream, unsigned align_increment, unsigned align_offset=0)
-	    : _stream(stream)
-	    , _buffer(align_increment, 0)
-	    , _offset(0)
-	    , _alignOffset(align_offset)
-	    , _alignIncrement(align_increment)
-	    , _badChunk(false)
-	    , _good(true)
+	aligned_stream(STREAM& stream, unsigned align_increment, unsigned align_offset=0, const std::function<void(char*,size_t)>& on_flush=nullptr)
+		: _stream(stream)
+		, _buffer(align_increment, 0)
+		, _offset(0)
+		, _alignOffset(align_offset)
+		, _alignIncrement(align_increment)
+		, _onFlush(on_flush)
+		, _badChunk(false)
+		, _good(true)
+
 	{
 	}
 
@@ -64,6 +67,9 @@ public:
 				{
 					_badChunk = false;
 					_offset = 0;
+					// notify callback w/ bad result
+					if (_onFlush)
+						_onFlush(nullptr, 0);
 				}
 				else
 				{
@@ -100,7 +106,12 @@ public:
 	void flush()
 	{
 		if (_offset > 0)
+		{
 			_stream.write(_buffer.data(), _offset);
+			if (_onFlush)
+				_onFlush(_buffer.data(), _offset);
+			// notify callback w/ header bytes!
+		}
 		_totalCount += _offset;
 		_offset = 0;
 	}
@@ -112,6 +123,8 @@ protected:
 	unsigned _offset;
 	unsigned _alignOffset;
 	unsigned _alignIncrement;
+	std::function<void(char*,size_t)> _onFlush;
+
 	bool _badChunk;
 	bool _good;
 	size_t _totalCount = 0;

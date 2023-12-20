@@ -9,6 +9,7 @@
 #include "cimb_translator/Interleave.h"
 
 #include <opencv2/opencv.hpp>
+#include <functional>
 #include <string>
 
 class Decoder
@@ -93,7 +94,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 
 		// flush symbols
 		reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
-		bytesDecoded += symbolBits.flush(rss);
+		symbolBits.flush(rss);
 
 		// TODO: get fountain headers out of ostream somehow.
 		// after we call symbolBits.flush(), the underlying aligned stream (ostream) may have knowledge about
@@ -109,7 +110,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	}
 
 	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
-	bytesDecoded += colorBits.flush(rss);
+	bytesDecoded += colorBits.flush(rss);  // will return the pos after this flush(), which includes the previous flush()...
 	return bytesDecoded;
 }
 
@@ -169,7 +170,13 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 	// reader takes cimbar::Config::color_mode() ?
 	CimbReader reader(img, _decoder, should_preprocess, color_correction);
 
-	aligned_stream aligner(ostream, ostream.chunk_size());
+	// maybe give aligned_stream a callback function that can poke the CimbReader on flush()?
+	// and then in do_decode(), after the first flush, call CimbReader::try_to_make_new_ccm(),
+	//  ... maybe a replacement for the existing updateColorCorrection()? (called in constructor, would now happen later)...
+	// which reads the values from the image (using what the aligned_stream gave it -- if anything, and maybe the cellpositions from FloodFillDecode?)
+	// iff we got enough data from aligned_stream to sample enough colors, try_to_make_new_ccm() pushes the updated ccm to CimbDecoder's threadlocal
+	// if not, we use whatever we previously had in CimbDecoder's threadlocal...?
+	aligned_stream aligner(ostream, ostream.chunk_size(), 0, std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2));
 	return do_decode(reader, aligner);
 }
 

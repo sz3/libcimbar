@@ -6,6 +6,7 @@
 #include "PositionData.h"
 
 #include "bit_file/bitbuffer.h"
+#include "fountain/FountainMetadata.h"
 #include <opencv2/opencv.hpp>
 
 class CimbReader
@@ -18,11 +19,14 @@ public:
 	unsigned read_color(const PositionData& pos);
 	bool done() const;
 
+	void update_metadata(char* buff, unsigned len);
+
 	unsigned num_reads() const;
 
 protected:
 	cv::Mat _image;
 	bitbuffer _grayscale;
+	FountainMetadata _fountainColorHeader;
 
 	unsigned _cellSize;
 	FloodDecodePositions _positions;

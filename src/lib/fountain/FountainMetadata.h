@@ -5,6 +5,13 @@
 
 class FountainMetadata
 {
+protected:
+	static void update_block_id_internal(uint16_t block_id, uint8_t* arr)
+	{
+		arr[0] = (block_id >> 8) & 0xFF;
+		arr[1] = block_id & 0xFF;
+	}
+
 public:
 	static const unsigned md_size = 6;
 
@@ -14,8 +21,7 @@ public:
 		arr[1] = (size >> 16) & 0xFF;
 		arr[2] = (size >> 8) & 0xFF;
 		arr[3] = size & 0xFF;
-		arr[4] = (block_id >> 8) & 0xFF;
-		arr[5] = block_id & 0xFF;
+		update_block_id_internal(block_id, arr+4);
 	}
 
 public:
@@ -57,6 +63,11 @@ public:
 		uint16_t res = d[1];
 		res |= ((uint16_t)d[0] << 8);
 		return res;
+	}
+
+	void increment_block_id()
+	{
+		update_block_id_internal(block_id()+1, data()+4);
 	}
 
 	unsigned file_size() const

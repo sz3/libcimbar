@@ -7,6 +7,8 @@
 #include "bit_file/bitmatrix.h"
 #include "chromatic_adaptation/adaptation_transform.h"
 #include "chromatic_adaptation/color_correction.h"
+#include "serialize/format.h"
+
 #include <opencv2/opencv.hpp>
 
 using namespace cimbar;
@@ -90,6 +92,7 @@ namespace {
 
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
 	: _image(img)
+	, _fountainColorHeader(0U)
 	, _cellSize(Config::cell_size() + 2)
 	, _positions(Config::cell_spacing(), Config::cells_per_col(), Config::cell_offset(), Config::corner_padding())
 	, _decoder(decoder)
@@ -139,6 +142,18 @@ unsigned CimbReader::read(PositionData& pos)
 bool CimbReader::done() const
 {
 	return !_good or _positions.done();
+}
+
+void CimbReader::update_metadata(char* buff, unsigned len)
+{
+	if (len == 0 and _fountainColorHeader.id() == 0)
+		return;
+
+	if (_fountainColorHeader.id() == 0)
+		_fountainColorHeader = FountainMetadata(buff, len);
+
+	std::cout << fmt::format("FountainMd {}, {}, {}", _fountainColorHeader.encode_id(), _fountainColorHeader.file_size(), _fountainColorHeader.block_id()) << std::endl;
+	_fountainColorHeader.increment_block_id(); // we always want to be +1
 }
 
 unsigned CimbReader::num_reads() const
