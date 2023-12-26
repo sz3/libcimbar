@@ -8,3 +8,7 @@ set(SOURCES
 
 add_library(util INTERFACE)
 
+if(NOT DEFINED DISABLE_TESTS)
+	add_subdirectory(test)
+endif()
+

@@ -1,8 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
-#include <opencv2/opencv.hpp>
+#include "util/sampling_min_stack.h"
 
+#include <opencv2/opencv.hpp>
 #include <tuple>
 
 class Cell
@@ -26,7 +27,59 @@ public:
 		, _rows(rows)
 	{}
 
-	// it would be nice to use a cropped cv::Mat to get the contiguous memory pointer...
+	std::tuple<uchar,uchar,uchar> sample_rgb_continuous(bool skip) const
+	{
+		/* cmovs everywhere?
+		 * sum += foo
+		 * sum_adj = foo < bar? foo : bar
+		 * sum -= sum_adj
+		 * ... etc, no branches, don't trust the compiler here
+		 * */
+
+		sampling_min_stack<uint16_t> blue;
+		sampling_min_stack<uint16_t> green;
+		sampling_min_stack<uint16_t> red;
+		uint16_t count = 0;
+
+		int channels = _img.channels();
+		int index = (_ystart * _img.cols) + _xstart;
+		const uchar* p = _img.ptr<uchar>(0) + (index * channels);
+
+		int increment = 1 + skip;
+		int toNextCol = channels * (_img.rows - _rows);
+		if (skip)
+			toNextCol += channels * _img.rows;
+
+		for (int i = 0; i < _cols; i+=increment)
+		{
+			for (int j = 0; j < _rows; ++j, ++count)
+			{
+				red += p[0];
+				green += p[1];
+				blue += p[2];
+				p += channels;
+			}
+			p += toNextCol;
+		}
+
+		if (count <= 4)
+			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
+
+		count -= 4;
+		return std::tuple<uchar,uchar,uchar>(red.total()/count, green.total()/count, blue.total()/count);
+	}
+
+	std::tuple<uchar,uchar,uchar> sample_rgb(bool skip=false) const
+	{
+		int channels = _img.channels();
+		if (channels < 3)
+			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
+		if (_img.isContinuous() and _cols > 0)
+			return sample_rgb_continuous(skip);
+
+		return mean_rgb(skip);
+	}
+
 	std::tuple<uchar,uchar,uchar> mean_rgb_continuous(bool skip) const
 	{
 		uint16_t blue = 0;
