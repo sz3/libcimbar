@@ -19,6 +19,7 @@ public:
 	unsigned read_color(const PositionData& pos);
 	bool done() const;
 
+	void init_ccm();
 	void update_metadata(char* buff, unsigned len);
 
 	unsigned num_reads() const;
