@@ -95,11 +95,10 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 		// flush symbols
 		reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
 		symbolBits.flush(rss);
-
-		// TODO: get fountain headers out of ostream somehow.
-		// after we call symbolBits.flush(), the underlying aligned stream (ostream) may have knowledge about
-		// the fountain headers -- one per chunk (see chunk_size()) -- which we can use to help us with the color decode...
 	}
+
+	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
+	reader.init_ccm();
 
 	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
 	// then decode colors.

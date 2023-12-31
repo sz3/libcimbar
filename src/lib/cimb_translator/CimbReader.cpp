@@ -144,6 +144,30 @@ bool CimbReader::done() const
 	return !_good or _positions.done();
 }
 
+void CimbReader::init_ccm()
+{
+	// if no fountain header, we use a simplified von kries matrix?
+	// or maybe don't bother? Might be easier if we treat it as authoritative (but old),
+	// rather than having a "good" CCM saved sometimes, but not always.
+	if (_fountainColorHeader.id() == 0) // & decoder CCM isn't set?
+	{
+		//updateColorCorrection(_image, decoder);
+		return;
+	}
+
+	// should most of this logic go into CimbDecoder?
+
+	// full ccm, using header values as known color index
+	// 1. get positions
+	// 2. put fountain header into a bitbuffer so we can read decoder.color_bits() bits at a time
+	// 3. using expected fountain headers, decode color for each position
+	// 4. sample corners
+	// 5. group results from #3 and #4 by expected color index, compute avgs
+	// 6. generate ccm from avgs in #5
+	// 7. save ccm in decoder. Success! We hope
+
+}
+
 void CimbReader::update_metadata(char* buff, unsigned len)
 {
 	if (len == 0 and _fountainColorHeader.id() == 0)

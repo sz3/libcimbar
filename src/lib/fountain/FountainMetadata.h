@@ -47,7 +47,7 @@ public:
 
 	uint32_t id() const
 	{
-		uint32_t shortid;
+		uint32_t shortid = 0;
 		std::copy(data(), data()+4, reinterpret_cast<uint8_t*>(&shortid));
 		return shortid;
 	}
