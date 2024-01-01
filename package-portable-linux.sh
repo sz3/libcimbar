@@ -14,7 +14,7 @@ apt install -y pkgconf g++-7 python-pip
 apt install -y libgles2-mesa-dev libglfw3-dev
 
 # cmake (via pip)
-python -m pip install cmake
+python -m pip install cmake==3.21.4
 
 # use gcc7
 update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-7 100
