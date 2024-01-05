@@ -98,7 +98,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	}
 
 	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
-	reader.init_ccm();
+	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp));
 
 	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
 	// then decode colors.

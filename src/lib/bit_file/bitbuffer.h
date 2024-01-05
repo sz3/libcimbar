@@ -125,6 +125,12 @@ public:
 		return _buffer;
 	}
 
+	void copy_to_buffer(const char* data, unsigned size)
+	{
+		_buffer.resize(size, 0);
+		std::copy(data, data+size, _buffer.data());
+	}
+
 	writer get_writer(size_t pos=0)
 	{
 		return writer(*this, pos);

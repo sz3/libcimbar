@@ -19,7 +19,7 @@ public:
 	unsigned read_color(const PositionData& pos);
 	bool done() const;
 
-	void init_ccm();
+	void init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks);
 	void update_metadata(char* buff, unsigned len);
 
 	unsigned num_reads() const;

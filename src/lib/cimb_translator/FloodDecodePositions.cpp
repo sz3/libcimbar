@@ -133,3 +133,7 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 	return 0;
 }
 
+const CellPositions::positions_list& FloodDecodePositions::positions() const
+{
+	return _positions;
+}

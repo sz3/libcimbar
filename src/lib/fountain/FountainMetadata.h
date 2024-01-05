@@ -27,7 +27,7 @@ public:
 public:
 	FountainMetadata(uint32_t id)
 	{
-		uint8_t* d = data();
+		uint8_t* d = _data.data();
 		std::copy(reinterpret_cast<uint8_t*>(&id), reinterpret_cast<uint8_t*>(&id)+4, d);
 		d[4] = d[5] = 0;
 	}
@@ -36,12 +36,12 @@ public:
 	{
 		if (len > md_size)
 			len = md_size;
-		std::copy(buff, buff+len, data());
+		std::copy(buff, buff+len, _data.data());
 	}
 
 	FountainMetadata(uint8_t encode_id, unsigned size, uint16_t block_id)
 	{
-		uint8_t* d = data();
+		uint8_t* d = _data.data();
 		to_uint8_arr(encode_id, size, block_id, d);
 	}
 
@@ -67,7 +67,7 @@ public:
 
 	void increment_block_id()
 	{
-		update_block_id_internal(block_id()+1, data()+4);
+		update_block_id_internal(block_id()+1, _data.data()+4);
 	}
 
 	unsigned file_size() const
@@ -78,12 +78,6 @@ public:
 		res |= ((uint32_t)d[1] << 16);
 		res |= ((uint32_t)d[0] & 0x80) << 17;
 		return res;
-	}
-
-protected:
-	uint8_t* data()
-	{
-		return _data.data();
 	}
 
 	const uint8_t* data() const
