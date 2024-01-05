@@ -21,6 +21,7 @@ public:
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 
+	std::tuple<uchar,uchar,uchar> avg_color(const Cell& color_cell) const;
 	unsigned get_best_color(float r, float g, float b) const;
 	unsigned decode_color(const Cell& cell) const;
 

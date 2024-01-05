@@ -179,16 +179,20 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const Cell& color_cell) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) const
 {
-	if (_numColors <= 1)
-		return 0;
-
 	// TODO: check/enforce dimensions of color_cell?
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+	return center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+}
+
+unsigned CimbDecoder::decode_color(const Cell& color_cell) const
+{
+	if (_numColors <= 1)
+		return 0;
+	auto [r, g, b] = avg_color(color_cell);
 	return get_best_color(r, g, b);
 }
 

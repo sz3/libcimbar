@@ -3,6 +3,7 @@
 
 #include "CellDrift.h"
 #include "Config.h"
+#include "Interleave.h"
 
 #include "bit_file/bitmatrix.h"
 #include "chromatic_adaptation/adaptation_transform.h"
@@ -144,12 +145,12 @@ bool CimbReader::done() const
 	return !_good or _positions.done();
 }
 
-void CimbReader::init_ccm()
+void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks)
 {
 	// if no fountain header, we use a simplified von kries matrix?
 	// or maybe don't bother? Might be easier if we treat it as authoritative (but old),
 	// rather than having a "good" CCM saved sometimes, but not always.
-	if (_fountainColorHeader.id() == 0) // & decoder CCM isn't set?
+	if (_fountainColorHeader.id() == 0) // && decoder CCM isn't set?
 	{
 		//updateColorCorrection(_image, decoder);
 		return;
@@ -160,7 +161,54 @@ void CimbReader::init_ccm()
 	// full ccm, using header values as known color index
 	// 1. get positions
 	// 2. put fountain header into a bitbuffer so we can read decoder.color_bits() bits at a time
+	CellPositions::positions_list positions = Interleave::interleave(_positions.positions(), interleave_blocks, interleave_partitions);
+
 	// 3. using expected fountain headers, decode color for each position
+
+	unsigned end = cimbar::Config::capacity(color_bits) * 8 / color_bits;
+	unsigned headerStartInterval = cimbar::Config::capacity(_decoder.symbol_bits() + color_bits) * 8 / fountain_blocks / color_bits;
+	unsigned headerLen = (_fountainColorHeader.md_size) * 8 / color_bits; // shrink this to md_size-2 to discard the block_id bytes...
+
+	// get color map
+	std::unordered_map<uint16_t, std::tuple<unsigned, unsigned, unsigned, unsigned>> colors;
+	bitbuffer buff;
+	for (unsigned block = 0; block < end; block+=headerStartInterval)
+	{
+		// TODO: could just copy/write final 2 bytes after first round?
+		buff.copy_to_buffer(reinterpret_cast<const char*>(_fountainColorHeader.data()), _fountainColorHeader.md_size);
+
+		// sample all colors in header
+		for (unsigned idx = block, i = 0; idx < block+headerLen; ++idx, i+=color_bits)
+		{
+			unsigned expected = buff.read(i, color_bits);
+			CellPositions::coordinate pos = positions[idx];
+
+			Cell color_cell(_image, pos.first, pos.second, Config::cell_size(), Config::cell_size());
+			auto col = _decoder.avg_color(color_cell); // could just call cell mean_rgb directly?
+
+			auto [it, isNew] = colors.try_emplace(expected, std::make_tuple(0, 0, 0, 0)); // count,r,g,b
+			std::get<0>(it->second) += 1;
+			std::get<1>(it->second) += std::get<0>(col);
+			std::get<2>(it->second) += std::get<1>(col);
+			std::get<3>(it->second) += std::get<2>(col);
+		}
+
+		_fountainColorHeader.increment_block_id();
+	}
+
+	// compute avgs
+	for (auto& it : colors)
+	{
+		unsigned total = std::get<0>(it.second);
+		if (total > 0)
+		{
+			std::get<1>(it.second) /= total;
+			std::get<2>(it.second) /= total;
+			std::get<3>(it.second) /= total;
+		}
+	}
+
+
 	// 4. sample corners
 	// 5. group results from #3 and #4 by expected color index, compute avgs
 	// 6. generate ccm from avgs in #5
