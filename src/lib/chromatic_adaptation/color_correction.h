@@ -3,6 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <iostream>
+
 // transforms are in adaptation_transform.h
 // http://brucelindbloom.com/Eqn_ChromAdapt.html
 
@@ -23,15 +25,30 @@ public:
 		return transform().inv() * d * transform();
 	}
 
+	static inline cv::Matx<float, 3, 3> get_moore_penrose_lsm(const cv::Mat& actual, const cv::Mat& desired)
+	{
+		// 1. TODO: make sure actual and desired dims match?
+		// 2. the calculation is MoorePenrose least squares mapping:
+		//  in numpy, it's dot(transpose(x), pinv(transpose(y)))
+
+		cv::Mat x, y, z;
+		cv::transpose(desired, x);
+		cv::transpose(actual, y);
+		cv::invert(y, z, cv::DECOMP_SVD);
+
+		y = x * z;
+		return y;
+	}
+
 public:
 	color_correction()
-	    : _active(false)
+		: _active(false)
 	{
 	}
 
 	color_correction(cv::Matx<float, 3, 3>&& m)
-	    : _m(m)
-	    , _active(true)
+		: _m(m)
+		, _active(true)
 	{
 	}
 
