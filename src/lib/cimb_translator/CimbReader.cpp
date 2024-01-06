@@ -2,6 +2,7 @@
 #include "CimbReader.h"
 
 #include "CellDrift.h"
+#include "Common.h"
 #include "Config.h"
 #include "Interleave.h"
 
@@ -11,6 +12,7 @@
 #include "serialize/format.h"
 
 #include <opencv2/opencv.hpp>
+#include <iostream>
 
 using namespace cimbar;
 
@@ -169,6 +171,9 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 	unsigned headerStartInterval = cimbar::Config::capacity(_decoder.symbol_bits() + color_bits) * 8 / fountain_blocks / color_bits;
 	unsigned headerLen = (_fountainColorHeader.md_size) * 8 / color_bits; // shrink this to md_size-2 to discard the block_id bytes...
 
+	//std::cout << fmt::format("fountain blocks={},capacity={}", fountain_blocks, cimbar::Config::capacity(_decoder.symbol_bits() + color_bits)) << std::endl;
+	//std::cout << fmt::format("fountain end={},headerstart={},headerlen={}", end, headerStartInterval, headerLen) << std::endl;
+
 	// get color map
 	std::unordered_map<uint16_t, std::tuple<unsigned, unsigned, unsigned, unsigned>> colors;
 	bitbuffer buff;
@@ -196,22 +201,46 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 		_fountainColorHeader.increment_block_id();
 	}
 
-	// compute avgs
+	// 4. compute avgs
+	cv::Mat actual = cv::Mat::ones(0, 3, CV_32F);
+	cv::Mat desired = cv::Mat::ones(0, 3, CV_32F);
+
 	for (auto& it : colors)
 	{
 		unsigned total = std::get<0>(it.second);
-		if (total > 0)
-		{
-			std::get<1>(it.second) /= total;
-			std::get<2>(it.second) /= total;
-			std::get<3>(it.second) /= total;
-		}
+		if (total == 0)
+			continue;
+
+		std::get<1>(it.second) /= total;
+		std::get<2>(it.second) /= total;
+		std::get<3>(it.second) /= total;
+
+		cv::Mat arow = (cv::Mat_<float>(1,3) << std::get<1>(it.second), std::get<2>(it.second), std::get<3>(it.second));
+		actual.push_back(arow);
+
+		cimbar::RGB cc = _decoder.get_color(it.first);
+		cv::Mat drow = (cv::Mat_<float>(1,3) << std::get<0>(cc), std::get<1>(cc), std::get<2>(cc));
+		desired.push_back(drow);
 	}
 
+	// bail if we don't have enough data...
+	if (actual.rows < 4)
+		return;
 
-	// 4. sample corners
-	// 5. group results from #3 and #4 by expected color index, compute avgs
-	// 6. generate ccm from avgs in #5
+	// 5. sample corners
+	{
+		std::tuple<float, float, float> white = calculateWhite(_image, Config::dark());
+		cv::Mat arow = (cv::Mat_<float>(1,3) << std::get<0>(white), std::get<1>(white), std::get<2>(white));
+		actual.push_back(arow);
+
+		cv::Mat drow = (cv::Mat_<float>(1,3) << 255, 255, 255);
+		desired.push_back(drow);
+	}
+
+	// 6. generate ccm from avgs in #4/5
+	cv::Matx<float, 3, 3> ccm = color_correction::get_moore_penrose_lsm(actual, desired);
+	std::cout << "resulting ccm is " << ccm << std::endl;
+
 	// 7. save ccm in decoder. Success! We hope
 
 }

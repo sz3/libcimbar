@@ -145,6 +145,11 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
+std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i) const
+{
+	return cimbar::getColor(i, _numColors, 1);  // 1=color_mode...
+}
+
 unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 {
 	// transform color with ccm
@@ -168,7 +173,7 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
-		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors, 1); // color_mode...
+		std::tuple<uchar,uchar,uchar> candidate = get_color(i);
 		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
 		{
