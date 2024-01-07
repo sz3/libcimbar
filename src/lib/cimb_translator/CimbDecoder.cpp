@@ -64,8 +64,17 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, u
 	load_tiles();
 }
 
+const color_correction& CimbDecoder::get_ccm() const
+{
+	// testing purposes only.
+	// this returning a thread local would be fine, iff we only use it for debugging!
+	return _ccm;
+}
+
 void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 {
+	// TODO: threadlocal?
+	// because this is dubious to begin with...
 	_ccm.update(std::move(ccm));
 }
 

@@ -12,11 +12,11 @@
 class CimbReader
 {
 public:
-	CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen=false, bool color_correction=true);
-	CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen=false, bool color_correction=true);
+	CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen=false, int color_correction=2);
+	CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen=false, int color_correction=2);
 
 	unsigned read(PositionData& pos);
-	unsigned read_color(const PositionData& pos);
+	unsigned read_color(const PositionData& pos) const;
 	bool done() const;
 
 	void init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks);
@@ -31,6 +31,7 @@ protected:
 
 	unsigned _cellSize;
 	FloodDecodePositions _positions;
-	const CimbDecoder& _decoder;
+	CimbDecoder& _decoder;
 	bool _good;
+	int _colorCorrection;
 };
