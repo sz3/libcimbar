@@ -85,7 +85,7 @@ namespace {
 		return bestColor;
 	}
 
-	bool updateColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
+	bool simpleColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
 	{
 		std::tuple<float, float, float> white = calculateWhite(img, Config::dark());
 		decoder.update_color_correction(color_correction::get_adaptation_matrix<adaptation_transform::von_kries>(white, {255.0, 255.0, 255.0}));
@@ -93,25 +93,26 @@ namespace {
 	}
 }
 
-CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
+CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, int color_correction)
 	: _image(img)
 	, _fountainColorHeader(0U)
 	, _cellSize(Config::cell_size() + 2)
 	, _positions(Config::cell_spacing(), Config::cells_per_col(), Config::cell_offset(), Config::corner_padding())
 	, _decoder(decoder)
 	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
+	, _colorCorrection(color_correction)
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
-	if (_good and color_correction)
-		updateColorCorrection(_image, decoder);
+	if (_good and color_correction == 1)
+		simpleColorCorrection(_image, decoder);
 }
 
-CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, bool color_correction)
+CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, int color_correction)
 	: CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
 {
 }
 
-unsigned CimbReader::read_color(const PositionData& pos)
+unsigned CimbReader::read_color(const PositionData& pos) const
 {
 	Cell color_cell(_image, pos.x, pos.y, Config::cell_size(), Config::cell_size());
 	return _decoder.decode_color(color_cell);
@@ -149,16 +150,17 @@ bool CimbReader::done() const
 
 void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks)
 {
-	// if no fountain header, we use a simplified von kries matrix?
-	// or maybe don't bother? Might be easier if we treat it as authoritative (but old),
-	// rather than having a "good" CCM saved sometimes, but not always.
-	if (_fountainColorHeader.id() == 0) // && decoder CCM isn't set?
-	{
-		//updateColorCorrection(_image, decoder);
+	if (_colorCorrection != 2)
 		return;
-	}
 
-	// should most of this logic go into CimbDecoder?
+	// if no fountain header, we don't attempt color correction
+	// we *could* (and used to) sample white pixels in the anchor points, and use the von kries/bradford matrix to generate a primitive CCM
+	// but for now we're aiming for something a bit smarter
+	if (_fountainColorHeader.id() == 0) // and _decoder.has_no_ccm() ... or something?
+		return;
+
+	// TODO: refactor?
+	// most logical thing to do is probably to make a get_color_map(), and leave the rest (avg computation, etc) here...?
 
 	// full ccm, using header values as known color index
 	// 1. get positions
@@ -166,7 +168,6 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 	CellPositions::positions_list positions = Interleave::interleave(_positions.positions(), interleave_blocks, interleave_partitions);
 
 	// 3. using expected fountain headers, decode color for each position
-
 	unsigned end = cimbar::Config::capacity(color_bits) * 8 / color_bits;
 	unsigned headerStartInterval = cimbar::Config::capacity(_decoder.symbol_bits() + color_bits) * 8 / fountain_blocks / color_bits;
 	unsigned headerLen = (_fountainColorHeader.md_size) * 8 / color_bits; // shrink this to md_size-2 to discard the block_id bytes...
@@ -188,8 +189,11 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 			unsigned expected = buff.read(i, color_bits);
 			CellPositions::coordinate pos = positions[idx];
 
-			Cell color_cell(_image, pos.first, pos.second, Config::cell_size(), Config::cell_size());
-			auto col = _decoder.avg_color(color_cell); // could just call cell mean_rgb directly?
+			//Cell color_cell(_image, pos.first, pos.second, Config::cell_size(), Config::cell_size());
+			//auto col = _decoder.avg_color(color_cell); // could just call cell mean_rgb directly?
+
+			Cell color_cell(_image, pos.first+1, pos.second+1, Config::cell_size()-2, Config::cell_size()-2);
+			auto col = color_cell.mean_rgb();
 
 			auto [it, isNew] = colors.try_emplace(expected, std::make_tuple(0, 0, 0, 0)); // count,r,g,b
 			std::get<0>(it->second) += 1;
@@ -237,12 +241,8 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 		desired.push_back(drow);
 	}
 
-	// 6. generate ccm from avgs in #4/5
-	cv::Matx<float, 3, 3> ccm = color_correction::get_moore_penrose_lsm(actual, desired);
-	std::cout << "resulting ccm is " << ccm << std::endl;
-
-	// 7. save ccm in decoder. Success! We hope
-
+	// 6. generate ccm from avgs in #4/5, save in decoder. Success! We hope
+	_decoder.update_color_correction(color_correction::get_moore_penrose_lsm(actual, desired));
 }
 
 void CimbReader::update_metadata(char* buff, unsigned len)
