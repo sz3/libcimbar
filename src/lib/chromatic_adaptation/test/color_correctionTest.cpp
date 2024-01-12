@@ -45,9 +45,6 @@ TEST_CASE( "color_correctionTest/testComputeMoorePenrose", "[unit]" )
 				   255, 0, 255,
 				   255, 255, 255);
 
-	std::cout << actual << std::endl;
-	std::cout << desired << std::endl;
-
 	cv::Matx<float, 3, 3> mat = color_correction::get_moore_penrose_lsm(actual, desired);
 	{
 		std::stringstream ss;
@@ -73,9 +70,6 @@ TEST_CASE( "color_correctionTest/testComputeMoorePenrose.2", "[unit]" )
 				   255, 255, 0,
 				   255, 0, 255,
 				   255, 255, 255);
-
-	std::cout << actual << std::endl;
-	std::cout << desired << std::endl;
 
 	cv::Matx<float, 3, 3> mat = color_correction::get_moore_penrose_lsm(actual, desired);
 	{

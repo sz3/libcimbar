@@ -200,7 +200,7 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) con
 	Cell center = color_cell;
 	int hcrop = color_cell.cols() > 6? 2 : 1;
 	center.crop(hcrop, 1, color_cell.cols()-1-hcrop, color_cell.rows()-2);
-	return center.mean_rgb(center.cols() > 5? Cell::SKIP : 0);
+	return center.sample_rgb(center.cols() > 5? Cell::SKIP : 0);
 }
 
 unsigned CimbDecoder::decode_color(const Cell& color_cell) const

@@ -253,7 +253,6 @@ void CimbReader::update_metadata(char* buff, unsigned len)
 	if (_fountainColorHeader.id() == 0)
 		_fountainColorHeader = FountainMetadata(buff, len);
 
-	std::cout << fmt::format("FountainMd {}, {}, {}", _fountainColorHeader.encode_id(), _fountainColorHeader.file_size(), _fountainColorHeader.block_id()) << std::endl;
 	_fountainColorHeader.increment_block_id(); // we always want to be +1
 }
 

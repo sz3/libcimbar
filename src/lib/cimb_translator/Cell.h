@@ -2,8 +2,9 @@
 #pragma once
 
 #include "chromatic_adaptation/nlargest.h"
-#include <opencv2/opencv.hpp>
+#include "util/sampling_min_stack.h"
 
+#include <opencv2/opencv.hpp>
 #include <tuple>
 
 class Cell
@@ -96,9 +97,17 @@ public:
 
 	std::tuple<uchar,uchar,uchar> sample_rgb_continuous(bool skip) const
 	{
-		nlargest<uint8_t, 9> blues;
-		nlargest<uint8_t, 9> greens;
-		nlargest<uint8_t, 9> reds;
+		/* cmovs everywhere?
+		 * sum += foo
+		 * sum_adj = foo < bar? foo : bar
+		 * sum -= sum_adj
+		 * ... etc, no branches, don't trust the compiler here
+		 * */
+
+		sampling_min_stack<uint16_t> blue;
+		sampling_min_stack<uint16_t> green;
+		sampling_min_stack<uint16_t> red;
+		uint16_t count = 0;
 
 		int channels = _img.channels();
 		int index = (_ystart * _img.cols) + _xstart;
@@ -111,17 +120,21 @@ public:
 
 		for (int i = 0; i < _cols; i+=increment)
 		{
-			for (int j = 0; j < _rows; ++j)
+			for (int j = 0; j < _rows; ++j, ++count)
 			{
-				reds.eval(p[0]);
-				greens.eval(p[1]);
-				blues.eval(p[2]);
+				red += p[0];
+				green += p[1];
+				blue += p[2];
 				p += channels;
 			}
 			p += toNextCol;
 		}
 
-		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
+		if (count <= 4)
+			return std::tuple<uchar,uchar,uchar>(0, 0, 0);
+
+		count -= 4;
+		return std::tuple<uchar,uchar,uchar>(red.total()/count, green.total()/count, blue.total()/count);
 	}
 
 	std::tuple<uchar,uchar,uchar> sample_rgb(bool skip=false) const
@@ -132,24 +145,7 @@ public:
 		if (_img.isContinuous() and _cols > 0)
 			return sample_rgb_continuous(skip);
 
-		nlargest<uint8_t, 9> blues;
-		nlargest<uint8_t, 9> greens;
-		nlargest<uint8_t, 9> reds;
-
-		int increment = 1 + skip;
-		int yend = _img.rows * _img.channels();
-		for (int i = 0; i < _img.cols; i+=increment)
-		{
-			const uchar* p = _img.ptr<uchar>(i);
-			for (int j = 0; j < yend; j+=_img.channels())
-			{
-				reds.eval(p[j]);
-				greens.eval(p[j+1]);
-				blues.eval(p[j+2]);
-			}
-		}
-
-		return std::tuple<uchar,uchar,uchar>(reds.mean(), greens.mean(), blues.mean());
+		return mean_rgb(skip);
 	}
 
 	uchar mean_grayscale_continuous() const
