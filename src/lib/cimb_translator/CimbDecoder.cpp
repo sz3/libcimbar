@@ -199,7 +199,7 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) con
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	return center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+	return center.mean_rgb();
 }
 
 unsigned CimbDecoder::decode_color(const Cell& color_cell) const
