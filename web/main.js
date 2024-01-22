@@ -49,8 +49,7 @@ return {
   {
     // reset zoom
     var canvas = document.getElementById('canvas');
-    canvas.style.zoom = (window.innerWidth / window.outerWidth);
-    var width = window.outerWidth;
+    var width = window.innerWidth;
     var height = window.outerHeight;
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);

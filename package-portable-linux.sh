@@ -2,7 +2,8 @@
 ## targeting old glibc
 # docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it ubuntu:16.04
 
-cd /usr/src/app
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+cd $SCRIPT_DIR
 
 # https://gist.github.com/jlblancoc/99521194aba975286c80f93e47966dc5
 apt update
@@ -25,7 +26,7 @@ mkdir build-portable/ && cd build-portable/
 /usr/local/bin/cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_SHARED_LIBS=OFF -DOPENCV_GENERATE_PKGCONFIG=YES -DOPENCV_FORCE_3RDPARTY_BUILD=YES
 make -j5 install
 
-cd /usr/src/app
+cd $SCRIPT_DIR
 mkdir build-portable/ && cd build-portable/
 /usr/local/bin/cmake .. -DBUILD_PORTABLE_LINUX=1
 make -j5 install
