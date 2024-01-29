@@ -16,7 +16,7 @@
 class Decoder
 {
 public:
-	Decoder(int ecc_bytes=-1, int color_bits=-1, bool interleave=true);
+	Decoder(int ecc_bytes=-1, int color_bits=-1, unsigned color_mode=1, bool coupled=false, bool interleave=true);
 
 	template <typename MAT, typename STREAM>
 	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false, int color_correction=2);
@@ -41,19 +41,21 @@ protected:
 	unsigned _eccBlockSize;
 	unsigned _colorBits;
 	unsigned _bitsPerOp;
+	bool _coupled;
 	unsigned _interleaveBlocks;
 	unsigned _interleavePartitions;
 	CimbDecoder _decoder;
 };
 
-inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
+inline Decoder::Decoder(int ecc_bytes, int color_bits, unsigned color_mode, bool coupled, bool interleave)
 	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
 	, _eccBlockSize(cimbar::Config::ecc_block_size())
 	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
 	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
+	, _coupled(coupled)
 	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
 	, _interleavePartitions(cimbar::Config::interleave_partitions(_bitsPerOp))
-	, _decoder(cimbar::Config::symbol_bits(), _colorBits, cimbar::Config::dark(), 0xFF)
+	, _decoder(cimbar::Config::symbol_bits(), _colorBits, color_mode, cimbar::Config::dark(), 0xFF)
 {
 }
 
@@ -72,6 +74,9 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
 template <typename STREAM>
 inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
+	if (_coupled)
+		return do_decode_coupled(reader, ostream);
+
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?

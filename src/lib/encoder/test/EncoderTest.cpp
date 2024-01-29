@@ -38,7 +38,30 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 	}
 }
 
-TEST_CASE( "EncoderTest/testFountain", "[unit]" )
+TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
+{
+	MakeTempDirectory tempdir;
+
+	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
+	std::string outPrefix = tempdir.path() / "encoder.fountain";
+
+	Encoder enc(40, 4, 2);
+	enc.set_legacy_mode();
+	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix, 0) );
+
+	std::vector<uint64_t> hashes = {0x3f16ce63e424b9e2, 0x8f809de57607a92b, 0xb8d41fc26c0ca107, 0xb84c6d8ac21d6a43};
+	for (unsigned i = 0; i < hashes.size(); ++i)
+	{
+		DYNAMIC_SECTION( "are we correct? : " << i )
+		{
+			std::string path = fmt::format("{}_{}.png", outPrefix, i);
+			cv::Mat img = cv::imread(path);
+			assertEquals( hashes[i], image_hash::average_hash(img) );
+		}
+	}
+}
+
+TEST_CASE( "EncoderTest/testFountain.B", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
@@ -48,7 +71,7 @@ TEST_CASE( "EncoderTest/testFountain", "[unit]" )
 	Encoder enc(40, 4, 2);
 	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix, 0) );
 
-	std::vector<uint64_t> hashes = {0xcf09eb067c876ea6, 0x4697a76025a40c43, 0x666aaca0ec8d6d43, 0xcf09eb067c876ea6};
+	std::vector<uint64_t> hashes = {0xcf09eb067c876ea6, 0x4697a76025a40c43, 0x666aaca0ec8d6d43, 0xe6e44ca8ec33a260};
 	for (unsigned i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )

@@ -31,7 +31,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xaecc8c00efce8c28;
+	uint64_t hash = 0xeecc8800efce8c48;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat encodedImg = cv::imread(path);
 	cv::cvtColor(encodedImg, encodedImg, cv::COLOR_BGR2RGB);
@@ -44,7 +44,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
 	assertEquals( 7500, bytesDecoded );
 
-	std::string decodedContents = File(tempdir.path() / "0.751").read_all();
+	std::string decodedContents = File(tempdir.path() / "0.626").read_all();
 	assertEquals( "hello", decodedContents );
 }
 
