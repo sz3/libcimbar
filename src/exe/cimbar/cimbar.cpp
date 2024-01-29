@@ -101,9 +101,11 @@ namespace {
 }
 
 template <typename FilenameIterable>
-int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc, int color_bits, int compression_level, bool no_fountain)
+int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc, int color_bits, int compression_level, bool legacy_mode, bool no_fountain)
 {
 	Encoder en(ecc, cimbar::Config::symbol_bits(), color_bits);
+	if (legacy_mode)
+		en.set_legacy_mode();
 	for (const string& f : infiles)
 	{
 		if (f.empty())
@@ -179,6 +181,7 @@ int main(int argc, char** argv)
 		("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
 		("c,color-bits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
+		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,4C]", cxxopts::value<string>()->default_value("B"))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 		("color-correct", "Toggle decoding color correction. 2 == full (fountain mode only). 1 == simple. 0 == off.", cxxopts::value<int>()->default_value("2"))
 		("color-correction-file", "Debug -- save color correction matrix generated during fountain decode, or use it for non-fountain decodes", cxxopts::value<string>())
@@ -219,12 +222,19 @@ int main(int argc, char** argv)
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
+	bool legacy_mode = false;
+	if (result.count("mode"))
+	{
+		string mode = result["mode"].as<string>();
+		legacy_mode = (mode == "4c") or (mode == "4C");
+	}
+
 	if (encodeFlag)
 	{
 		if (useStdin)
-			return encode(StdinLineReader(), outpath, ecc, colorBits, compressionLevel, no_fountain);
+			return encode(StdinLineReader(), outpath, ecc, colorBits, compressionLevel, legacy_mode, no_fountain);
 		else
-			return encode(infiles, outpath, ecc, colorBits, compressionLevel, no_fountain);
+			return encode(infiles, outpath, ecc, colorBits, compressionLevel, legacy_mode, no_fountain);
 	}
 
 	// else, decode
@@ -236,7 +246,9 @@ int main(int argc, char** argv)
 		color_correction_file = result["color-correction-file"].as<string>();
 	int preprocess = result["preprocess"].as<int>();
 
-	Decoder d(ecc, colorBits);
+	unsigned color_mode = legacy_mode? 0 : 1;
+	bool coupled = legacy_mode;
+	Decoder d(ecc, colorBits, color_mode, coupled);
 
 	if (no_fountain)
 	{

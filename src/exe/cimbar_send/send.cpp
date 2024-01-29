@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
+		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,4C]", cxxopts::value<string>()->default_value("B"))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 		("h,help", "Print usage")
 	;
@@ -61,6 +62,14 @@ int main(int argc, char** argv)
 	colorBits = std::min(3, result["colorbits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
+
+	bool legacy_mode = false;
+	if (result.count("mode"))
+	{
+		string mode = result["mode"].as<string>();
+		legacy_mode = (mode == "4c") or (mode == "4C");
+	}
+
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
 		fps = defaultFps;
@@ -73,7 +82,7 @@ int main(int argc, char** argv)
 		return 70;
 	}
 
-	configure(colorBits, ecc, compressionLevel);
+	configure(colorBits, ecc, compressionLevel, legacy_mode);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)

@@ -10,7 +10,7 @@ int initialize_GL(int width, int height);
 int render();
 int next_frame();
 int encode(unsigned char* buffer, unsigned size, int encode_id);  // encode_id == -1 -> auto-increment
-int configure(unsigned color_bits, unsigned ecc, int compression);
+int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode);
 
 #ifdef __cplusplus
 }

@@ -140,7 +140,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream,
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, canvas_size);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
