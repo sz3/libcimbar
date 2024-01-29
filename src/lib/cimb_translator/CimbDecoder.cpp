@@ -54,10 +54,11 @@ namespace {
 	}
 }
 
-CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
+CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned color_mode, bool dark, uchar ahashThreshold)
 	: _symbolBits(symbol_bits)
 	, _numSymbols(1 << symbol_bits)
 	, _numColors(1 << color_bits)
+	, _colorMode(color_mode)
 	, _dark(dark)
 	, _ahashThreshold(ahashThreshold)
 {
@@ -156,7 +157,7 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 
 std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i) const
 {
-	return cimbar::getColor(i, _numColors, 1);  // 1=color_mode...
+	return cimbar::getColor(i, _numColors, _colorMode);
 }
 
 unsigned CimbDecoder::get_best_color(float r, float g, float b) const

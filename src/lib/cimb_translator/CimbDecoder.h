@@ -13,7 +13,7 @@
 class CimbDecoder
 {
 public:
-	CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark=true, uchar ahashThreshold=0);
+	CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned color_mode=1, bool dark=true, uchar ahashThreshold=0);
 
 	const color_correction& get_ccm() const;
 	void update_color_correction(cv::Matx<float, 3, 3>&& ccm);
@@ -42,6 +42,7 @@ protected:
 	unsigned _symbolBits;
 	unsigned _numSymbols;
 	unsigned _numColors;
+	unsigned _colorMode;
 	bool _dark;
 	uchar _ahashThreshold;
 	color_correction _ccm;

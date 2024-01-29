@@ -140,20 +140,26 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 {
-	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
+	cv::Mat sample = TestCimbar::loadSample("b/ex2434.png");
 
 	TestableCimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
+
+	// this is the header value for the sample -- we could imitate what the Decoder does
+	// and compute it from the symbols, but that seems like overkill for this test.
+	FountainMetadata md(0, 23586, 7);
+	cr.update_metadata((char*)md.data(), md.md_size);
+	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(6), cimbar::Config::fountain_chunks_per_frame(6));
 
 	assertTrue( decoder._ccm.active() );
 
 	std::stringstream ss;
 	ss << decoder._ccm.mat();
-	assertEquals("[1.5489368, 0.050406694, -0.016417533;\n"
-				 " 0.0055368096, 1.5302141, -0.0011175937;\n"
-				 " 0, 0, 1.4676259]", ss.str());
+	assertEquals("[2.389859, -0.42397472, -0.54128295;\n "
+				 "-0.41857719, 2.6328294, -0.77389711;\n "
+				 "-0.53674293, -0.18659814, 2.2577474]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {1, 1, 1, 2, 2, 0};
+	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 3, 0};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -167,14 +173,14 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 {
-	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
+	cv::Mat sample = TestCimbar::loadSample("b/ex2434.png");
 
 	TestableCimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder, false, false);
 
 	assertFalse( decoder._ccm.active() );
 
-	std::array<unsigned, 6> expectedColors = {1, 1, 1, 2, 2, 0};
+	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 3, 0};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
@@ -188,20 +194,26 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 
 TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 {
-	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_177_ccm.jpg");
+	cv::Mat sample = TestCimbar::loadSample("b/ex380.png");
 
 	TestableCimbDecoder decoder(4, 2);
 	CimbReader cr(sample, decoder);
+
+	// this is the header value for the sample -- we could imitate what the Decoder does
+	// and compute it from the symbols, but that seems like overkill for this test.
+	FountainMetadata md(0, 23586, 7);
+	cr.update_metadata((char*)md.data(), md.md_size);
+	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(6), cimbar::Config::fountain_chunks_per_frame(6));
 
 	assertTrue( decoder._ccm.active() );
 
 	std::stringstream ss;
 	ss << decoder._ccm.mat();
-	assertEquals("[1.0675567, 0.21678841, -0.013292357;\n"
-				 " 0.023812667, 0.98703396, -0.0048082001;\n"
-				 " 0, 0, 1.0017186]", ss.str());
+	assertEquals("[1.6070682, 0.0049305325, -0.44365519;\n "
+				 "-0.2887049, 2.2809668, -0.65952438;\n "
+				 "-1.2105154, -2.6882038, 4.980772]", ss.str());
 
-	std::array<unsigned, 6> expectedColors = {1, 1, 1, 0, 0, 1}; // it's wrong, but it's consistent!
+	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 2, 2}; // some are wrong, but all are consistent!
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
 	{
 		PositionData pos;
