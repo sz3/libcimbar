@@ -22,6 +22,7 @@ namespace {
 	unsigned _ecc = cimbar::Config::ecc_bytes();
 	unsigned _colorBits = cimbar::Config::color_bits();
 	int _compressionLevel = cimbar::Config::compression_level();
+	bool _legacyMode = false;
 }
 
 extern "C" {
@@ -109,15 +110,17 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 	return 1;
 }
 
-int configure(unsigned color_bits, unsigned ecc, int compression)
+int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
 {
 	// defaults
 	if (color_bits > 3)
 		color_bits = cimbar::Config::color_bits();
-	if (ecc < 0 or ecc >= 150)
+	if (ecc >= 150)
 		ecc = cimbar::Config::ecc_bytes();
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
+
+	_legacyMode = legacy_mode; // legacy mode shouldn't need a refresh, so just change it
 
 	// check if we need to refresh the stream
 	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel);

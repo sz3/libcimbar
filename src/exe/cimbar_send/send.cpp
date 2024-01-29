@@ -43,6 +43,7 @@ int main(int argc, char** argv)
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
+		("4c", "Use 0.5.x mode (4c)", cxxopts::value<bool>())
 		("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -61,6 +62,8 @@ int main(int argc, char** argv)
 	colorBits = std::min(3, result["colorbits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
+	bool legacy_mode = result.count("4c");
+
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
 		fps = defaultFps;
@@ -73,7 +76,7 @@ int main(int argc, char** argv)
 		return 70;
 	}
 
-	configure(colorBits, ecc, compressionLevel);
+	configure(colorBits, ecc, compressionLevel, legacy_mode);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)

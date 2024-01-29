@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target decode FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
+		("4c", "Use 0.5.x mode (4c)", cxxopts::value<bool>())
 		("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -62,6 +63,8 @@ int main(int argc, char** argv)
 
 	colorBits = std::min(3, result["colorbits"].as<int>());
 	ecc = result["ecc"].as<unsigned>();
+	bool legacy_mode = result.count("4c");
+
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
 		fps = defaultFps;
@@ -95,7 +98,8 @@ int main(int argc, char** argv)
 	window.auto_scale_to_window();
 
 	Extractor ext;
-	Decoder dec;
+	unsigned color_mode = legacy_mode? 0 : 1;
+	Decoder dec(-1, -1, color_mode, legacy_mode);
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits());
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
