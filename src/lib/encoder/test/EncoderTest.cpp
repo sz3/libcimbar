@@ -47,9 +47,9 @@ TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
 
 	Encoder enc(40, 4, 2);
 	enc.set_legacy_mode();
-	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix, 0) );
+	assertEquals( 3, enc.encode_fountain(inputFile, outPrefix, 0) );
 
-	std::vector<uint64_t> hashes = {0x3f16ce63e424b9e2, 0x8f809de57607a92b, 0xb8d41fc26c0ca107, 0xb84c6d8ac21d6a43};
+	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x8c2f0f40e6ecb08b};
 	for (unsigned i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )

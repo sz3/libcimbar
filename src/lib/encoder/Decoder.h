@@ -42,6 +42,7 @@ protected:
 	unsigned _colorBits;
 	unsigned _bitsPerOp;
 	bool _coupled;
+	unsigned _colorMode;
 	unsigned _interleaveBlocks;
 	unsigned _interleavePartitions;
 	CimbDecoder _decoder;
@@ -53,8 +54,9 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, unsigned color_mode, bool
 	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
 	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
 	, _coupled(coupled)
+	, _colorMode(color_mode)
 	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
-	, _interleavePartitions(cimbar::Config::interleave_partitions(_bitsPerOp))
+	, _interleavePartitions(cimbar::Config::interleave_partitions())
 	, _decoder(cimbar::Config::symbol_bits(), _colorBits, color_mode, cimbar::Config::dark(), 0xFF)
 {
 }
@@ -107,7 +109,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	}
 
 	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
-	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp));
+	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp, _coupled and _colorMode==0));
 
 	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
 	// then decode colors.

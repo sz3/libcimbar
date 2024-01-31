@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 	unsigned color_mode = legacy_mode? 0 : 1;
 	Decoder dec(-1, -1, color_mode, legacy_mode);
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits());
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
 
 	cv::Mat mat;

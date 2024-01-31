@@ -72,7 +72,7 @@ int next_frame()
 	// color blocks will contribute to this total, but only symbols used for the initial calculation.
 	// ... this way, if the color decode is failing, we don't get "stuck" rendering a single frame.
 	unsigned required = _fes->blocks_required();
-	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits()))
+	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits(), _legacyMode))
 		required = required*5;
 	if (_fes->block_count() > required)
 	{

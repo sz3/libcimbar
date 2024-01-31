@@ -89,18 +89,17 @@ namespace cimbar
 			return ecc_block_size();
 		}
 
-		static constexpr unsigned interleave_partitions(unsigned bitspercell=0)
+		static constexpr unsigned interleave_partitions()
 		{
-			//return bitspercell;
 			return 2;
 		}
 
-		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell=0)
+		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell, bool legacy_mode)
 		{
-			return bitspercell << 1;
+			return legacy_mode? 10 : bitspercell << 1;
 		}
 
-		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell);
+		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode);
 
 		static constexpr unsigned compression_level()
 		{

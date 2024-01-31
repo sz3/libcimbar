@@ -49,14 +49,14 @@ inline SimpleEncoder::SimpleEncoder(int ecc_bytes, unsigned bits_per_symbol, int
 	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
 	, _dark(cimbar::Config::dark())
-	, _coupled(true)
+	, _coupled(false)
 	, _colorMode(cimbar::Config::color_mode())
 {
 }
 
 inline void SimpleEncoder::set_legacy_mode()
 {
-	_coupled = false;
+	_coupled = true;
 	_colorMode = 0;
 }
 
@@ -68,7 +68,7 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
 template <typename STREAM>
 inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
 {
-	if (!_coupled)
+	if (_coupled)
 		return encode_next_coupled(stream, canvas_size);
 
 	if (!stream.good())
@@ -166,7 +166,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream,
 template <typename STREAM>
 inline fountain_encoder_stream::ptr SimpleEncoder::create_fountain_encoder(STREAM& stream, int compression_level)
 {
-	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol);
+	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol, (_colorMode==0 and _coupled));
 
 	std::stringstream ss;
 	if (compression_level <= 0)

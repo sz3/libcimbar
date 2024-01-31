@@ -26,13 +26,13 @@ unsigned Config::corner_padding()
 	return lrint(54.0 / cell_spacing());
 }
 
-unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell)
+unsigned Config::fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode)
 {
 	// TODO: sanity checks?
 	// this should neatly split into fountain_chunks_per_frame() [ex: 10] chunks per frame.
 	// the other reasonable settings for fountain_chunks_per_frame are `2` and `5`
 	const unsigned eccBlockSize = ecc_block_size();
-	return capacity(bitspercell) * (eccBlockSize-ecc) / eccBlockSize / fountain_chunks_per_frame(bitspercell);
+	return capacity(bitspercell) * (eccBlockSize-ecc) / eccBlockSize / fountain_chunks_per_frame(bitspercell, legacy_mode);
 }
 
 }
