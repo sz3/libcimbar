@@ -154,20 +154,21 @@ return {
     invisi.classList.add("active");
   },
 
-  setColorBits : function(color_bits)
+  setMode : function(mode_str)
   {
-    Module._configure(color_bits, 255, 255, true);
+    var is_4c = (mode_str == "4C");
+    Module._configure(2, 255, 255, is_4c);
 
     var nav = document.getElementById("nav-container");
-    if (color_bits == 2) {
-      nav.classList.remove("c8");
-      nav.classList.add("c4");
-    } else if (color_bits >= 3) {
-      nav.classList.add("c8");
-      nav.classList.remove("c4");
+    if (is_4c) {
+      nav.classList.remove("mode-b");
+      nav.classList.add("mode-4c");
+    } else if (mode_str == "B") {
+      nav.classList.add("mode-b");
+      nav.classList.remove("mode-4c");
     } else {
-      nav.classList.remove("c4");
-      nav.classList.remove("c8");
+      nav.classList.remove("mode-b");
+      nav.classList.remove("mode-4c");
     }
   },
 
