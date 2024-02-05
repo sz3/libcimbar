@@ -24,7 +24,7 @@ namespace {
 	{
 	public:
 		using CimbDecoder::CimbDecoder;
-		using CimbDecoder::_ccm;
+		using CimbDecoder::internal_ccm;
 	};
 }
 #include "serialize/str_join.h"
@@ -143,6 +143,7 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 	cv::Mat sample = TestCimbar::loadSample("b/ex2434.jpg");
 
 	TestableCimbDecoder decoder(4, 2);
+	decoder.internal_ccm() = color_correction();
 	CimbReader cr(sample, decoder);
 
 	// this is the header value for the sample -- we could imitate what the Decoder does
@@ -151,10 +152,10 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 	cr.update_metadata((char*)md.data(), md.md_size);
 	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(), cimbar::Config::fountain_chunks_per_frame(6, false));
 
-	assertTrue( decoder._ccm.active() );
+	assertTrue( decoder.get_ccm().active() );
 
 	std::stringstream ss;
-	ss << decoder._ccm.mat();
+	ss << decoder.get_ccm().mat();
 	assertEquals("[2.3991191, -0.41846275, -0.54654282;\n "
 				 "-0.42976046, 2.632102, -0.76466882;\n "
 				 "-0.54299992, -0.20199311, 2.2753253]", ss.str());
@@ -176,9 +177,10 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 	cv::Mat sample = TestCimbar::loadSample("b/ex2434.jpg");
 
 	TestableCimbDecoder decoder(4, 2);
+	decoder.internal_ccm() = color_correction();
 	CimbReader cr(sample, decoder, false, false);
 
-	assertFalse( decoder._ccm.active() );
+	assertFalse( decoder.get_ccm().active() );
 
 	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 2, 2};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
@@ -197,6 +199,7 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 	cv::Mat sample = TestCimbar::loadSample("b/ex380.jpg");
 
 	TestableCimbDecoder decoder(4, 2);
+	decoder.internal_ccm() = color_correction();
 	CimbReader cr(sample, decoder);
 
 	// this is the header value for the sample -- we could imitate what the Decoder does
@@ -205,10 +208,10 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 	cr.update_metadata((char*)md.data(), md.md_size);
 	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(), cimbar::Config::fountain_chunks_per_frame(6, false));
 
-	assertTrue( decoder._ccm.active() );
+	assertTrue( decoder.get_ccm().active() );
 
 	std::stringstream ss;
-	ss << decoder._ccm.mat();
+	ss << decoder.get_ccm().mat();
 	assertEquals("[1.6250746, 0.0024788622, -0.45772526;\n "
 				 "-0.29126319, 2.2922182, -0.67037439;\n "
 				 "-1.2192062, -2.7447209, 5.0476217]", ss.str());

@@ -31,6 +31,8 @@ public:
 	unsigned symbol_bits() const;
 
 protected:
+	color_correction& internal_ccm() const;
+
 	uint64_t get_tile_hash(unsigned symbol) const;
 	bool load_tiles();
 
@@ -45,5 +47,4 @@ protected:
 	unsigned _colorMode;
 	bool _dark;
 	uchar _ahashThreshold;
-	color_correction _ccm;
 };

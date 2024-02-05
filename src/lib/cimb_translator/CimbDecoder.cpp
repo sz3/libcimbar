@@ -65,18 +65,23 @@ CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned col
 	load_tiles();
 }
 
+// protected
+color_correction& CimbDecoder::internal_ccm() const
+{
+	static thread_local color_correction _ccm;
+	return _ccm;
+}
+
+// public
 const color_correction& CimbDecoder::get_ccm() const
 {
-	// testing purposes only.
-	// this returning a thread local would be fine, iff we only use it for debugging!
-	return _ccm;
+	// testing/debugging purposes only!!!!
+	return internal_ccm();
 }
 
 void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 {
-	// TODO: threadlocal?
-	// because this is dubious to begin with...
-	_ccm.update(std::move(ccm));
+	internal_ccm().update(std::move(ccm));
 }
 
 uint64_t CimbDecoder::get_tile_hash(unsigned symbol) const
@@ -163,9 +168,9 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i) const
 unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 {
 	// transform color with ccm
-	if (_ccm.active())
+	if (internal_ccm().active())
 	{
-		std::tuple<float, float, float> color = _ccm.transform(r, g, b);
+		std::tuple<float, float, float> color = internal_ccm().transform(r, g, b);
 		r = std::get<0>(color);
 		g = std::get<1>(color);
 		b = std::get<2>(color);
