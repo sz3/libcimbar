@@ -103,10 +103,10 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		{
 			std::array<int,4> horizon = {-1, -1, -1, -1};
 			horizon[0] = _cellFinder.right(rridx);
-			if (horizon[0])
+			if (horizon[0] >= 0)
 				horizon[1] = _cellFinder.right(horizon[0]);
 			horizon[2] = _cellFinder.left(llidx);
-			if (horizon[2])
+			if (horizon[2] >= 0)
 				horizon[3] = _cellFinder.left(horizon[2]);
 
 			update_adjacents(horizon, drift, error_distance, cooldown);
@@ -118,10 +118,10 @@ int FloodDecodePositions::update(unsigned index, const CellDrift& drift, unsigne
 		{
 			std::array<int,4> vert = {-1, -1, -1, -1};
 			vert[0] = _cellFinder.top(uuidx);
-			if (vert[0])
+			if (vert[0] >= 0)
 				vert[1] = _cellFinder.top(vert[0]);
 			vert[2] = _cellFinder.bottom(ddidx);
-			if (vert[2])
+			if (vert[2] >= 0)
 				vert[3] = _cellFinder.bottom(vert[2]);
 
 			update_adjacents(vert, drift, error_distance, cooldown);
