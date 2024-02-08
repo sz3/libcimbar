@@ -57,7 +57,7 @@ cv::Mat load_img(string path)
 	vector<unsigned char> data(bytes.data(), bytes.data() + bytes.size());
 
 	int width, height, channels;
-	std::unique_ptr<uint8_t[]> imgdata(stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &width, &height, &channels, STBI_rgb_alpha));
+	std::unique_ptr<uint8_t[], void (*)(void*)> imgdata(stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &width, &height, &channels, STBI_rgb_alpha), ::free);
 	if (!imgdata)
 		return cv::Mat();
 
