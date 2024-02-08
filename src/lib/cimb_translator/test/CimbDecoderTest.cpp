@@ -125,7 +125,7 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 			DYNAMIC_SECTION( "testColor " << c << ":" << i )
 			{
 				cv::Mat tile = cimbar::getTile(4, i, true, 4, c);
-				cv::Mat tenxten(10, 10, tile.type());
+				cv::Mat tenxten(10, 10, tile.type(), {0,0,0});
 				tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
 				unsigned color = cd.decode_color(Cell(tenxten));

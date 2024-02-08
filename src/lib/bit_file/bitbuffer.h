@@ -61,15 +61,15 @@ public:
 
 	bool write(unsigned data, unsigned index, int length)
 	{
-		resize(index+length-1);
+		resize(index+length);
 
 		int currentByte = index/8;
 		int currentBit = index%8;
 
 		int nextWrite = std::min(length, 8-currentBit); // write this many bits
-		while (length > 0)
+		while (length > 0 and nextWrite > 0)
 		{
-			char bits = data >> (length - nextWrite);
+			unsigned char bits = data >> (length - nextWrite);
 			bits = bits << (8 - nextWrite - currentBit);
 			_buffer[currentByte] |= bits;
 
@@ -92,7 +92,7 @@ public:
 		int nextRead = std::min(length, 8-currentBit); // read this many bits
 		while (length > 0)
 		{
-			unsigned char bits = _buffer[currentByte] << currentBit;
+			unsigned char bits = static_cast<unsigned char>(_buffer[currentByte]) << currentBit;
 			bits = bits >> (8-nextRead);
 			res |= bits << (length - nextRead);
 
