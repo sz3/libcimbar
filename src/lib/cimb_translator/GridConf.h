@@ -27,8 +27,5 @@ namespace cimbar
 		static constexpr unsigned cell_size = 8;
 		static constexpr unsigned cell_offset = 8;
 		static constexpr unsigned cells_per_col = 112;
-
-		static constexpr int interleave_partitions = 2;
-		static constexpr int fountain_chunks_per_frame = 10;
 	};
 }

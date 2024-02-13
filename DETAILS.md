@@ -84,7 +84,7 @@ These properties may appear to be magical as you consider them more, and they do
 2. wirehair requires the file contents to be stored in RAM
 	* this relates to the size limit!
 
-This constraint is less of an obstacle than it may seem -- the fountain codes are essentially being used as a wire format, and the encoder and decoder could agree on a scheme to split up, and then reassemble, larger files. Cimbar does not (yet?) implement this, however!
+The size constraint is less of an obstacle than it may seem -- the fountain codes are essentially being used as a wire format, and the encoder and decoder could agree on a scheme to split up, and then reassemble, larger files. Cimbar does not (yet?) implement this, however!
 
 ## Implementation: Decoder
 
