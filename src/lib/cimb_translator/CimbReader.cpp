@@ -9,10 +9,7 @@
 #include "bit_file/bitmatrix.h"
 #include "chromatic_adaptation/adaptation_transform.h"
 #include "chromatic_adaptation/color_correction.h"
-#include "serialize/format.h"
-
 #include <opencv2/opencv.hpp>
-#include <iostream>
 
 using namespace cimbar;
 

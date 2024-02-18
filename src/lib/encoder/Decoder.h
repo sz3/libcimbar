@@ -160,13 +160,6 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 	return bb.flush(rss);
 }
 
-
-// seems like we want to take a file or img, and have an output sink
-// output sync could be template param?
-// we'd decode the full message (via bit_writer) to a temp buffer -- probably a stringstream
-// then we'd direct the stringstream to our sink
-// which would either be a filestream, or a multi-channel fountain sink
-
 template <typename MAT, typename STREAM>
 inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess, int color_correction)
 {
@@ -177,15 +170,7 @@ inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_pre
 template <typename MAT, typename FOUNTAINSTREAM>
 inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess, int color_correction)
 {
-	// reader takes cimbar::Config::color_mode() ?
 	CimbReader reader(img, _decoder, should_preprocess, color_correction);
-
-	// maybe give aligned_stream a callback function that can poke the CimbReader on flush()?
-	// and then in do_decode(), after the first flush, call CimbReader::try_to_make_new_ccm(),
-	//  ... maybe a replacement for the existing updateColorCorrection()? (called in constructor, would now happen later)...
-	// which reads the values from the image (using what the aligned_stream gave it -- if anything, and maybe the cellpositions from FloodFillDecode?)
-	// iff we got enough data from aligned_stream to sample enough colors, try_to_make_new_ccm() pushes the updated ccm to CimbDecoder's threadlocal
-	// if not, we use whatever we previously had in CimbDecoder's threadlocal...?
 	aligned_stream aligner(ostream, ostream.chunk_size(), 0, std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2));
 	return do_decode(reader, aligner);
 }

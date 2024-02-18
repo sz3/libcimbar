@@ -3,8 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <iostream>
-
 // transforms are in adaptation_transform.h
 // http://brucelindbloom.com/Eqn_ChromAdapt.html
 
@@ -27,10 +25,10 @@ public:
 
 	static inline cv::Matx<float, 3, 3> get_moore_penrose_lsm(const cv::Mat& actual, const cv::Mat& desired)
 	{
-		// 1. TODO: make sure actual and desired dims match?
-		// 2. the calculation is MoorePenrose least squares mapping:
-		//  in numpy, it's dot(transpose(x), pinv(transpose(y)))
-
+		// inspired by the python colour-science package. It's not complicated,
+		// but I didn't know that going in.
+		// See also:
+		// https://en.wikipedia.org/wiki/Moore-Penrose_inverse
 		cv::Mat x, y, z;
 		cv::transpose(desired, x);
 		cv::transpose(actual, y);

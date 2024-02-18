@@ -13,8 +13,6 @@
 #include <optional>
 #include <string>
 
-#include <iostream>
-
 class SimpleEncoder
 {
 public:
