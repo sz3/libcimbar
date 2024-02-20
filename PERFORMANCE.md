@@ -14,7 +14,7 @@
 ## Current sustained benchmark
 
 * `mode B` (8x8 4-color) cimbar with ecc=30/155:
-	* 4,689,084 bytes (after compression) in 43s -> 872 kilobits/s (~109 KB/s)
+	* 4,689,084 bytes (after compression) in 44s -> 852 kilobits/s (~106 KB/s)
 	* mode B was introduced in 0.6.0, and should work in a wide variety of scenarios
 
 * *legacy* `mode 4C` (8x8 4-color) cimbar with ecc=30/155:

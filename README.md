@@ -5,7 +5,7 @@
 
 Behold: an experimental barcode format for air-gapped data transfer.
 
-It can sustain speeds of 872 kilobits/s (~109 KB/s) using just a computer monitor and a smartphone camera!
+It can sustain speeds of 850 kilobits/s (~106 KB/s) using just a computer monitor and a smartphone camera!
 
 <p align="center">
 <img src="https://github.com/sz3/cimbar-samples/blob/v0.5/6bit/4cecc30f.png" width="70%" title="A non-animated cimbar code" >
