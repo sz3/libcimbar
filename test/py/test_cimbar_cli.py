@@ -38,7 +38,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
         self.assertTrue(getsize(encoded_img) > 30000)
 
         # decode
-        cmd = _get_command('-i', encoded_img, '-o', self.working_dir.name)
+        cmd = _get_command('-i', encoded_img, '-o', self.working_dir.name, '--no-deskew')
         res = subprocess.run(cmd, stdout=PIPE)
         self.assertEqual(0, res.returncode)
 
@@ -69,7 +69,7 @@ class CimbarCliTest(TestDirMixin, TestCase):
         self.assertTrue(getsize(encoded_img) > 30000)
 
         # decode defaults to cwd -- which should be self.working_dir
-        cmd = _get_command()
+        cmd = _get_command('--no-deskew')
         res = subprocess.run(
             cmd, input=encoded_img.encode('utf-8'), stdout=PIPE,
             cwd=self.working_dir.name,
@@ -86,4 +86,3 @@ class CimbarCliTest(TestDirMixin, TestCase):
             actual = r.read()
 
         self.assertEqual(expected, actual)
-

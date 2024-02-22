@@ -68,7 +68,7 @@ TEST_CASE( "FountainSinkTest/testDefault", "[unit]" )
 
 	string frame2 = createFrame(1, 1600);
 	assertEquals( true, sink.decode_frame(frame2.data(), frame2.size()) );
-	assertEquals( true, sink.is_done(FountainMetadata(1, 1600).id()) );
+	assertEquals( true, sink.is_done(FountainMetadata(1, 1600, 0).id()) );
 
 	assertEquals( 0, sink.num_streams() );
 	assertEquals( 2, sink.num_done() );

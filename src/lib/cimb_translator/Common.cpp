@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "Common.h"
 
+#include "Config.h"
 #include "base91/base.hpp"
 #include "serialize/format.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -19,12 +20,23 @@ using std::vector;
 namespace {
 	RGB getColor4(unsigned index)
 	{
-		// opencv uses BGR, but we don't have to conform to this tyranny
+		// opencv uses BGR, but we don't have to conform to its tyranny
 		static constexpr array<RGB, 4> colors = {
-		    RGB(0, 0xFF, 0xFF),
-		    RGB(0xFF, 0xFF, 0),
-		    RGB(0xFF, 0, 0xFF),
-		    RGB(0, 0xFF, 0)
+			RGB(0, 0xFF, 0),
+			RGB(0, 0xFF, 0xFF),
+			RGB(0xFF, 0xFF, 0),
+			RGB(0xFF, 0, 0xFF),
+		};
+		return colors[index];
+	}
+
+	RGB getColor4_old(unsigned index)
+	{
+		static constexpr array<RGB, 4> colors = {
+			RGB(0, 0xFF, 0xFF),
+			RGB(0xFF, 0xFF, 0),
+			RGB(0xFF, 0, 0xFF),
+			RGB(0, 0xFF, 0),
 		};
 		return colors[index];
 	}
@@ -32,14 +44,29 @@ namespace {
 	RGB getColor8(unsigned index)
 	{
 		static constexpr array<RGB, 8> colors = {
-		    RGB(0, 0xFF, 0xFF), // cyan
-		    RGB(0x7F, 0x7F, 0xFF),  // mid-blue
-		    RGB(0xFF, 0, 0xFF), // magenta
-		    RGB(0xFF, 65, 65), // red
-		    RGB(0xFF, 0x9F, 0),  // orange
-		    RGB(0xFF, 0xFF, 0), // yellow
-		    RGB(0xFF, 0xFF, 0xFF),
-		    RGB(0, 0xFF, 0),
+			RGB(0, 0xFF, 0xFF), // cyan
+			RGB(0xFF, 0xFF, 0), // yellow
+			RGB(0x7F, 0x7F, 0xFF),  // mid-blue
+			RGB(0xFF, 0xFF, 0xFF), // white
+			RGB(0, 0xFF, 0), // green
+			RGB(0xFF, 0x9F, 0),  // orange
+			RGB(0xFF, 0, 0xFF), // magenta
+			RGB(0xFF, 65, 65), // red
+		};
+		return colors[index];
+	}
+
+	RGB getColor8_old(unsigned index)
+	{
+		static constexpr array<RGB, 8> colors = {
+			RGB(0, 0xFF, 0xFF), // cyan
+			RGB(0x7F, 0x7F, 0xFF),  // mid-blue
+			RGB(0xFF, 0, 0xFF), // magenta
+			RGB(0xFF, 65, 65), // red
+			RGB(0xFF, 0x9F, 0),  // orange
+			RGB(0xFF, 0xFF, 0), // yellow
+			RGB(0xFF, 0xFF, 0xFF),
+			RGB(0, 0xFF, 0),
 		};
 		return colors[index];
 	}
@@ -68,15 +95,24 @@ cv::Mat load_img(string path)
 	return mat;
 }
 
-RGB getColor(unsigned index, unsigned num_colors)
+RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 {
+	if (color_mode == 0)
+	{
+		if (num_colors <= 4)
+			return getColor4_old(index);
+		else
+			return getColor8_old(index);
+	}
+
 	if (num_colors <= 4)
 		return getColor4(index);
 	else
 		return getColor8(index);
+
 }
 
-cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color)
+cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color, unsigned color_mode)
 {
 	static cv::Vec3b background({0xFF, 0xFF, 0xFF});
 
@@ -84,7 +120,7 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 	cv::Mat tile = load_img(imgPath);
 
 	uchar r, g, b;
-	std::tie(r, g, b) = getColor(color, num_colors);
+	std::tie(r, g, b) = getColor(color, num_colors, color_mode);
 	cv::MatIterator_<cv::Vec3b> end = tile.end<cv::Vec3b>();
 	for (cv::MatIterator_<cv::Vec3b> it = tile.begin<cv::Vec3b>(); it != end; ++it)
 	{

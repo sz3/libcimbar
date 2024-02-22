@@ -27,7 +27,7 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 
 TEST_CASE( "CimbWriterTest/testCustomSize", "[unit]" )
 {
-	CimbWriter cw(4, 2, true, 1040);
+	CimbWriter cw(4, 2, true, 1, 1040);
 
 	while (1)
 	{

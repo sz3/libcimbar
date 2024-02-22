@@ -15,8 +15,8 @@ public:
 	using SimpleEncoder::SimpleEncoder;
 
 	unsigned encode(const std::string& filename, std::string output_prefix);
-	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=6, double redundancy=1.2, int canvas_size=0);
-	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=6, double redundancy=4.0, int canvas_size=0);
+	unsigned encode_fountain(const std::string& filename, std::string output_prefix, int compression_level=16, double redundancy=1.2, int canvas_size=0);
+	unsigned encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level=16, double redundancy=4.0, int canvas_size=0);
 };
 
 inline unsigned Encoder::encode(const std::string& filename, std::string output_prefix)
@@ -46,10 +46,11 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 	if (!fes)
 		return 0;
 
-	// With ecc = 40, we have 60 rs blocks * 115 bytes per block == 6900 bytes to work with.
-	// the fountain_chunk_size will be 690.
-	// fountain_chunks_per_frame() is currently a constant (10).
-	unsigned requiredFrames = fes->blocks_required() * redundancy / cimbar::Config::fountain_chunks_per_frame();
+	// ex: with ecc = 30 and 155 byte blocks, we have 60 rs blocks * 125 bytes per block == 7500 bytes to work with.
+	// if fountain_chunks_per_frame() is 10, the fountain_chunk_size will be 750.
+	// we calculate requiredFrames based only on symbol bits, to avoid the situation where the color decode is failing while we're
+	// refusing to generate additional frames...
+	unsigned requiredFrames = fes->blocks_required() * redundancy / cimbar::Config::fountain_chunks_per_frame(_bitsPerSymbol, _coupled and _colorMode==0);
 	if (requiredFrames == 0)
 		requiredFrames = 1;
 

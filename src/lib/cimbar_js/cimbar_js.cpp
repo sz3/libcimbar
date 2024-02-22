@@ -16,12 +16,13 @@ namespace {
 	std::optional<cv::Mat> _next;
 
 	int _frameCount = 0;
-	uint8_t _encodeId = 0;
+	uint8_t _encodeId = 109;
 
 	// settings
 	unsigned _ecc = cimbar::Config::ecc_bytes();
 	unsigned _colorBits = cimbar::Config::color_bits();
 	int _compressionLevel = cimbar::Config::compression_level();
+	bool _legacyMode = false;
 }
 
 extern "C" {
@@ -67,10 +68,12 @@ int next_frame()
 	if (!_window or !_fes)
 		return 0;
 
-	// we generate 8x the amount of required blocks -- unless everything fits in a single frame.
+	// we generate 5x the amount of required symbol blocks -- unless everything fits in a single frame.
+	// color blocks will contribute to this total, but only symbols are used for the initial calculation.
+	// ... this way, if the color decode is failing, it won't get "stuck" failing to read a single frame.
 	unsigned required = _fes->blocks_required();
-	if (required > cimbar::Config::fountain_chunks_per_frame())
-		required = required*8;
+	if (required > cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits(), _legacyMode))
+		required = required*5;
 	if (_fes->block_count() > required)
 	{
 		_fes->restart();
@@ -79,8 +82,10 @@ int next_frame()
 	}
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
-	enc.set_encode_id(_encodeId);
+	if (_legacyMode)
+		enc.set_legacy_mode();
 
+	enc.set_encode_id(_encodeId);
 	_next = enc.encode_next(*_fes, _window->width());
 	return ++_frameCount;
 }
@@ -92,6 +97,9 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 		std::cerr << "failed FountainInit :(" << std::endl;
 
 	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
+	if (_legacyMode)
+		enc.set_legacy_mode();
+
 	if (encode_id < 0)
 		enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 	else
@@ -107,29 +115,30 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 	return 1;
 }
 
-int configure(unsigned color_bits, unsigned ecc, int compression)
+int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
 {
 	// defaults
 	if (color_bits > 3)
 		color_bits = cimbar::Config::color_bits();
-	if (ecc < 0 or ecc >= 150)
+	if (ecc >= 150)
 		ecc = cimbar::Config::ecc_bytes();
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
 
 	// check if we need to refresh the stream
-	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel);
+	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel or legacy_mode != _legacyMode);
 	if (refresh)
 	{
 		// update config
 		_colorBits = color_bits;
 		_ecc = ecc;
 		_compressionLevel = compression;
+		_legacyMode = legacy_mode;
 
 		// try to refresh the stream
 		if (_window and _fes)
 		{
-			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits);
+			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits, _legacyMode);
 			if (!_fes->restart_and_resize_buffer(buff_size_new))
 			{
 				// if the data is too small, we should throw out _fes -- and clear the canvas.

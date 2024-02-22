@@ -36,7 +36,7 @@ TEST_CASE( "FountainMetadataTest/testFromBytes.BigFile", "[unit]" )
 
 TEST_CASE( "FountainMetadataTest/testThings", "[unit]" )
 {
-	FountainMetadata inmd(0_uchar, 0xd0731f);
+	FountainMetadata inmd(0_uchar, 0xd0731f, 0U);
 	assertEquals( 0, inmd.encode_id() );
 	assertEquals( 0xd0731f, inmd.file_size() );
 
@@ -47,7 +47,7 @@ TEST_CASE( "FountainMetadataTest/testThings", "[unit]" )
 
 TEST_CASE( "FountainMetadataTest/testIgnoreTopEncodeIdBit", "[unit]" )
 {
-	FountainMetadata inmd(250_uchar, 0xFFFFFF);
+	FountainMetadata inmd(250_uchar, 0xFFFFFF, 0U);
 	assertEquals( 122, static_cast<unsigned>(inmd.encode_id()) );
 	assertEquals( 0xFFFFFF, inmd.file_size() );
 
@@ -58,7 +58,7 @@ TEST_CASE( "FountainMetadataTest/testIgnoreTopEncodeIdBit", "[unit]" )
 
 TEST_CASE( "FountainMetadataTest/testBigFile", "[unit]" )
 {
-	FountainMetadata inmd(2_uchar, 0x1FFFFFF);
+	FountainMetadata inmd(2_uchar, 0x1FFFFFF, 0U);
 	assertEquals( 2, static_cast<unsigned>(inmd.encode_id()) );
 	assertEquals( 0x1FFFFFF, inmd.file_size() );
 

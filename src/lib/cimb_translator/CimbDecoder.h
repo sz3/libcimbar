@@ -13,14 +13,17 @@
 class CimbDecoder
 {
 public:
-	CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark=true, uchar ahashThreshold=0);
+	CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned color_mode=1, bool dark=true, uchar ahashThreshold=0);
 
+	const color_correction& get_ccm() const;
 	void update_color_correction(cv::Matx<float, 3, 3>&& ccm);
 
 	unsigned get_best_symbol(image_hash::ahash_result<cimbar::Config::cell_size()>& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 
+	std::tuple<uchar,uchar,uchar> get_color(int i) const;
+	std::tuple<uchar,uchar,uchar> avg_color(const Cell& color_cell) const;
 	unsigned get_best_color(float r, float g, float b) const;
 	unsigned decode_color(const Cell& cell) const;
 
@@ -39,6 +42,7 @@ protected:
 	unsigned _symbolBits;
 	unsigned _numSymbols;
 	unsigned _numColors;
+	unsigned _colorMode;
 	bool _dark;
 	uchar _ahashThreshold;
 	color_correction _ccm;

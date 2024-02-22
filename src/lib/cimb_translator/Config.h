@@ -16,6 +16,11 @@ namespace cimbar
 			return true;
 		}
 
+		static constexpr unsigned color_mode()
+		{
+			return 1; // unless we override per-thread?
+		}
+
 		static constexpr unsigned color_bits()
 		{
 			return GridConf::color_bits;
@@ -89,12 +94,12 @@ namespace cimbar
 			return 2;
 		}
 
-		static constexpr unsigned fountain_chunks_per_frame()
+		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell, bool legacy_mode)
 		{
-			return 10;
+			return legacy_mode? 10 : bitspercell << 1;
 		}
 
-		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell=0);
+		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode);
 
 		static constexpr unsigned compression_level()
 		{

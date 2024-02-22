@@ -144,3 +144,17 @@ TEST_CASE( "bitbufferTest/testOverwrite", "[unit]" )
 	assertEquals( '.', bb.buffer()[0x3f5] );
 	assertEquals( 't', bb.buffer()[0x3f6] );
 }
+
+TEST_CASE( "bitbufferTest/testCopyToBuffer", "[unit]" )
+{
+	bitbuffer bb;
+
+	std::string hello = "hello";
+	bb.copy_to_buffer(hello.data(), 5);
+
+	assertEquals( 0x68, bb.read(0, 8) );
+	assertEquals( 0x65, bb.read(8, 8) );
+	assertEquals( 0x6c, bb.read(16, 8) );
+	assertEquals( 0x6c, bb.read(24, 8) );
+	assertEquals( 0x6f, bb.read(32, 8) );
+}

@@ -37,6 +37,8 @@ public:
 	iter next();
 	int update(unsigned index, const CellDrift& drift, unsigned error_distance, uint8_t cooldown);
 
+	const CellPositions::positions_list& positions() const;
+
 protected:
 	int update_adjacents(const std::array<int,4>& adj, const CellDrift& drift, unsigned error_distance, uint8_t cooldown);
 

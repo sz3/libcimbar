@@ -79,27 +79,27 @@ TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
 	CimbDecoder cd(4, 2);
 
 	// obvious ones
-	assertEquals(2, cd.get_best_color(255, 0, 255));
-	assertEquals(1, cd.get_best_color(255, 255, 0));
-	assertEquals(0, cd.get_best_color(0, 255, 255));
-	assertEquals(3, cd.get_best_color(0, 255, 0));
+	assertEquals(3, cd.get_best_color(255, 0, 255));
+	assertEquals(2, cd.get_best_color(255, 255, 0));
+	assertEquals(1, cd.get_best_color(0, 255, 255));
+	assertEquals(0, cd.get_best_color(0, 255, 0));
 
 	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
 	assertEquals(0, cd.get_best_color(0, 0, 0));
 	assertEquals(0, cd.get_best_color(70, 70, 70));
 
 	// these we can use!
-	assertEquals(3, cd.get_best_color(20, 200, 20));
-	assertEquals(3, cd.get_best_color(50, 155, 50));
+	assertEquals(0, cd.get_best_color(20, 200, 20));
+	assertEquals(0, cd.get_best_color(50, 155, 50));
 
-	assertEquals(2, cd.get_best_color(200, 30, 200));
-	assertEquals(2, cd.get_best_color(155, 50, 155));
+	assertEquals(3, cd.get_best_color(200, 30, 200));
+	assertEquals(3, cd.get_best_color(155, 50, 155));
 
-	assertEquals(1, cd.get_best_color(200, 155, 20));
-	assertEquals(1, cd.get_best_color(155, 155, 50));
+	assertEquals(2, cd.get_best_color(200, 155, 20));
+	assertEquals(2, cd.get_best_color(155, 155, 50));
 
-	assertEquals(0, cd.get_best_color(50, 155, 200));
-	assertEquals(0, cd.get_best_color(50, 155, 155));
+	assertEquals(1, cd.get_best_color(50, 155, 200));
+	assertEquals(1, cd.get_best_color(50, 155, 155));
 }
 
 TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )

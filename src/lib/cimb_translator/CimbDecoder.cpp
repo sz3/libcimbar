@@ -13,9 +13,12 @@
 using std::get;
 using std::string;
 
+const int FIX_THRESH_HIGH = 245;
+const int FIX_THRESH_LOW = 0;
+const float BEST_COLOR_FLOOR = 48.0f;
+
 namespace {
-	template <typename T>
-	unsigned squared_difference(T a, T b)
+	unsigned squared_difference(int a, int b)
 	{
 		return std::pow(a - b, 2);
 	}
@@ -24,9 +27,9 @@ namespace {
 	{
 		c -= down;
 		c *= adjustUp;
-		if (c > (245 - down))
+		if (c > (FIX_THRESH_HIGH-down))
 			c = 255;
-		if (c < 0)
+		if (c < FIX_THRESH_LOW)
 			c = 0;
 		return (uchar)c;
 	}
@@ -51,18 +54,28 @@ namespace {
 	}
 }
 
-CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
+CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned color_mode, bool dark, uchar ahashThreshold)
 	: _symbolBits(symbol_bits)
 	, _numSymbols(1 << symbol_bits)
 	, _numColors(1 << color_bits)
+	, _colorMode(color_mode)
 	, _dark(dark)
 	, _ahashThreshold(ahashThreshold)
 {
 	load_tiles();
 }
 
+const color_correction& CimbDecoder::get_ccm() const
+{
+	// testing purposes only.
+	// this returning a thread local would be fine, iff we only use it for debugging!
+	return _ccm;
+}
+
 void CimbDecoder::update_color_correction(cv::Matx<float, 3, 3>&& ccm)
 {
+	// TODO: threadlocal?
+	// because this is dubious to begin with...
 	_ccm.update(std::move(ccm));
 }
 
@@ -142,6 +155,11 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
+std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i) const
+{
+	return cimbar::getColor(i, _numColors, _colorMode);
+}
+
 unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 {
 	// transform color with ccm
@@ -154,11 +172,10 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	}
 
 	float max = std::max({r, g, b, 1.0f});
-	float min = std::min({r, g, b, 48.0f});
-	float adjust = 255.0;
+	float min = std::min({r, g, b, BEST_COLOR_FLOOR});
 	if (min >= max)
 		min = 0;
-	adjust /= (max - min);
+	float adjust = 255.0/(max - min);
 
 	std::tuple<uchar,uchar,uchar> c = fix_color({r, g, b}, adjust, min);
 
@@ -166,7 +183,7 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
-		std::tuple<uchar,uchar,uchar> candidate = cimbar::getColor(i, _numColors);
+		std::tuple<uchar,uchar,uchar> candidate = get_color(i);
 		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
 		{
@@ -177,16 +194,20 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	return best_fit;
 }
 
-unsigned CimbDecoder::decode_color(const Cell& color_cell) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) const
 {
-	if (_numColors <= 1)
-		return 0;
-
 	// TODO: check/enforce dimensions of color_cell?
 	// limit dimensions to ignore outer row/col. We want to look at the middle 6x6, or 3x3...
 	Cell center = color_cell;
 	center.crop(1, 1, color_cell.cols()-2, color_cell.rows()-2);
-	auto [r, g, b] = center.mean_rgb(center.cols() > 4? Cell::SKIP : 0);
+	return center.mean_rgb();
+}
+
+unsigned CimbDecoder::decode_color(const Cell& color_cell) const
+{
+	if (_numColors <= 1)
+		return 0;
+	auto [r, g, b] = avg_color(color_cell);
 	return get_best_color(r, g, b);
 }
 
