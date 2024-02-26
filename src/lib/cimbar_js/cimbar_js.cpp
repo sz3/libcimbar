@@ -22,7 +22,7 @@ namespace {
 	unsigned _ecc = cimbar::Config::ecc_bytes();
 	unsigned _colorBits = cimbar::Config::color_bits();
 	int _compressionLevel = cimbar::Config::compression_level();
-	bool _legacyMode = false;
+	bool _legacyMode = true;
 }
 
 extern "C" {
