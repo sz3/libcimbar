@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
-		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,4C]", cxxopts::value<string>()->default_value("B"))
+		("m,mode", "Select a cimbar mode. B is new to 0.6.x. 4C is the 0.5.x config. [B,4C]", cxxopts::value<string>()->default_value("4C"))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 		("h,help", "Print usage")
 	;
