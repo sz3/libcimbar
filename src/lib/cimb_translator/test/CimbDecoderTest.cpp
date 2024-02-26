@@ -27,7 +27,7 @@ namespace {
 		cv::Rect crop(1+x, 1+y, tile10.cols-2, tile10.rows-2);
 		cv::Mat tile8 = tile10(crop);
 
-		bits |= cd.decode_color(tile8) << cd.symbol_bits();
+		bits |= cd.decode_color(tile8, 1) << cd.symbol_bits();
 		return bits;
 	}
 }
@@ -74,32 +74,60 @@ TEST_CASE( "CimbDecoderTest/testPrethresholdDecode", "[unit]" )
 	}
 }
 
-TEST_CASE( "CimbDecoderTest/test_get_best_color__dark", "[unit]" )
+TEST_CASE( "CimbDecoderTest/test_get_best_color_mode0", "[unit]" )
 {
 	CimbDecoder cd(4, 2);
 
 	// obvious ones
-	assertEquals(3, cd.get_best_color(255, 0, 255));
-	assertEquals(2, cd.get_best_color(255, 255, 0));
-	assertEquals(1, cd.get_best_color(0, 255, 255));
-	assertEquals(0, cd.get_best_color(0, 255, 0));
+	assertEquals(2, cd.get_best_color(255, 0, 255, 0));
+	assertEquals(1, cd.get_best_color(255, 255, 0, 0));
+	assertEquals(0, cd.get_best_color(0, 255, 255, 0));
+	assertEquals(3, cd.get_best_color(0, 255, 0, 0));
 
 	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
-	assertEquals(0, cd.get_best_color(0, 0, 0));
-	assertEquals(0, cd.get_best_color(70, 70, 70));
+	assertEquals(0, cd.get_best_color(0, 0, 0, 0));
+	assertEquals(0, cd.get_best_color(70, 70, 70, 0));
 
 	// these we can use!
-	assertEquals(0, cd.get_best_color(20, 200, 20));
-	assertEquals(0, cd.get_best_color(50, 155, 50));
+	assertEquals(3, cd.get_best_color(20, 200, 20, 0));
+	assertEquals(3, cd.get_best_color(50, 155, 50, 0));
 
-	assertEquals(3, cd.get_best_color(200, 30, 200));
-	assertEquals(3, cd.get_best_color(155, 50, 155));
+	assertEquals(2, cd.get_best_color(200, 30, 200, 0));
+	assertEquals(2, cd.get_best_color(155, 50, 155, 0));
 
-	assertEquals(2, cd.get_best_color(200, 155, 20));
-	assertEquals(2, cd.get_best_color(155, 155, 50));
+	assertEquals(1, cd.get_best_color(200, 155, 20, 0));
+	assertEquals(1, cd.get_best_color(155, 155, 50, 0));
 
-	assertEquals(1, cd.get_best_color(50, 155, 200));
-	assertEquals(1, cd.get_best_color(50, 155, 155));
+	assertEquals(0, cd.get_best_color(50, 155, 200, 0));
+	assertEquals(0, cd.get_best_color(50, 155, 155, 0));
+}
+
+TEST_CASE( "CimbDecoderTest/test_get_best_color_mode1", "[unit]" )
+{
+	CimbDecoder cd(4, 2);
+
+	// obvious ones
+	assertEquals(3, cd.get_best_color(255, 0, 255, 1));
+	assertEquals(2, cd.get_best_color(255, 255, 0, 1));
+	assertEquals(1, cd.get_best_color(0, 255, 255, 1));
+	assertEquals(0, cd.get_best_color(0, 255, 0, 1));
+
+	// arbitrary edge cases. We can't really say anything about the value of these colors, but we can at least pick a consistent one
+	assertEquals(0, cd.get_best_color(0, 0, 0, 1));
+	assertEquals(0, cd.get_best_color(70, 70, 70, 1));
+
+	// these we can use!
+	assertEquals(0, cd.get_best_color(20, 200, 20, 1));
+	assertEquals(0, cd.get_best_color(50, 155, 50, 1));
+
+	assertEquals(3, cd.get_best_color(200, 30, 200, 1));
+	assertEquals(3, cd.get_best_color(155, 50, 155, 1));
+
+	assertEquals(2, cd.get_best_color(200, 155, 20, 1));
+	assertEquals(2, cd.get_best_color(155, 155, 50, 1));
+
+	assertEquals(1, cd.get_best_color(50, 155, 200, 1));
+	assertEquals(1, cd.get_best_color(50, 155, 155, 1));
 }
 
 TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
@@ -109,7 +137,7 @@ TEST_CASE( "CimbDecoderTest/testColorDecode", "[unit]" )
 	cv::Mat tile = cimbar::getTile(4, 2, true, 4, 2);
 	cv::resize(tile, tile, cv::Size(10, 10));
 
-	unsigned color = cd.decode_color(Cell(tile));
+	unsigned color = cd.decode_color(Cell(tile), 1);
 	assertEquals(2, color);
 	unsigned res = decode(cd, tile);
 	assertEquals(34, res);
@@ -128,7 +156,7 @@ TEST_CASE( "CimbDecoderTest/testAllColorDecodes", "[unit]" )
 				cv::Mat tenxten(10, 10, tile.type(), {0,0,0});
 				tile.copyTo(tenxten(cv::Rect(cv::Point(1, 1), tile.size())));
 
-				unsigned color = cd.decode_color(Cell(tenxten));
+				unsigned color = cd.decode_color(Cell(tenxten), 1);
 				assertEquals(c, color);
 				unsigned res = decode(cd, tenxten);
 				assertEquals(i+16*c, res);

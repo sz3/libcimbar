@@ -41,7 +41,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	Decoder dec(30);
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30, 6, false));
 
-	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
+	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds, 1);
 	assertEquals( 7500, bytesDecoded );
 
 	std::string decodedContents = File(tempdir.path() / "0.626").read_all();
@@ -71,7 +71,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 		std::optional<cv::Mat> frame = enc.encode_next(*fes);
 		assertTrue( frame );
 
-		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
+		unsigned bytesDecoded = dec.decode_fountain(*frame, fds, 1);
 		assertEquals( 7500, bytesDecoded );
 
 		if (fds.num_done())
