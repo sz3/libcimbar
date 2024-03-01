@@ -80,7 +80,6 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream, bool leg
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
 	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
-	unsigned bytesDecoded = 0;
 	{
 		bitbuffer symbolBits(cimbar::Config::capacity(bitsPerSymbol));
 		// read symbols first
@@ -116,8 +115,8 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream, bool leg
 	}
 
 	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
-	bytesDecoded += colorBits.flush(rss);  // will return the pos after this flush(), which includes the previous flush()...
-	return bytesDecoded;
+	// flush() will return the (good) cumulative bytes written to the underlying stream
+	return colorBits.flush(rss);
 }
 
 template <typename STREAM>
