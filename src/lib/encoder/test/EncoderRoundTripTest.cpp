@@ -64,9 +64,10 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 
 	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
 	Encoder enc(30, 4, 2);
+	enc.set_legacy_mode();
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xeecc8800efce8c48;
+	uint64_t hash = 0xaecc8c00efce8c28;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat encodedImg = cv::imread(path);
 	cv::cvtColor(encodedImg, encodedImg, cv::COLOR_BGR2RGB);
@@ -75,10 +76,11 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	// decoder
 	Decoder dec(30);
 	// sink with a mismatched fountain_chunk_size
-	// importantly, the sink expects a *larger* chunk than we'll give it...
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30, 6, true));
+	// importantly, the sink expects a *smaller* chunk than we'll give it...
+	// because that's a more interesting test...
+	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> fds(tempdir.path(), cimbar::Config::fountain_chunk_size(30, 6, false));
 
-	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds, 1);
+	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds, 0);
 	assertEquals( 7500, bytesDecoded );
 
 	assertEquals( 0, fds.num_done() );
