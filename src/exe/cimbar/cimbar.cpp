@@ -119,7 +119,7 @@ int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc,
 }
 
 template <typename FilenameIterable>
-int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, bool, int)>& decodefun, bool no_deskew, bool undistort, int preprocess, int color_correct)
+int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, unsigned, bool, int)>& decodefun, bool no_deskew, bool undistort, unsigned color_mode, int preprocess, int color_correct)
 {
 	int err = 0;
 	for (const string& inf : infiles)
@@ -152,7 +152,7 @@ int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, bo
 				shouldPreprocess = true;
 		}
 
-		int bytes = decodefun(img, shouldPreprocess, color_correct);
+		int bytes = decodefun(img, color_mode, shouldPreprocess, color_correct);
 		if (!bytes)
 			err |= 4;
 	}
@@ -162,10 +162,10 @@ int decode(const FilenameIterable& infiles, const std::function<int(cv::UMat, bo
 // see also "decodefun" for non-fountain decodes, defined as a lambda inline below.
 // this one needs its own function since it's a template (:
 template <typename SINK>
-std::function<int(cv::UMat,bool,int)> fountain_decode_fun(SINK& sink, Decoder& d)
+std::function<int(cv::UMat,unsigned,bool,int)> fountain_decode_fun(SINK& sink, Decoder& d)
 {
-	return [&sink, &d] (cv::UMat m, bool pre, int cc) {
-		return d.decode_fountain(m, sink, pre, cc);
+	return [&sink, &d] (cv::UMat m, unsigned cm, bool pre, int cc) {
+		return d.decode_fountain(m, sink, cm, pre, cc);
 	};
 }
 
@@ -247,8 +247,7 @@ int main(int argc, char** argv)
 	int preprocess = result["preprocess"].as<int>();
 
 	unsigned color_mode = legacy_mode? 0 : 1;
-	bool coupled = legacy_mode;
-	Decoder d(ecc, colorBits, color_mode, coupled);
+	Decoder d(ecc, colorBits);
 
 	if (no_fountain)
 	{
@@ -257,13 +256,13 @@ int main(int argc, char** argv)
 
 		// simpler encoding, just the basics + ECC. No compression, fountain codes, etc.
 		std::ofstream f(outpath);
-		std::function<int(cv::UMat,bool,int)> decodefun = [&f, &d] (cv::UMat m, bool pre, int cc) {
-			return d.decode(m, f, pre, cc);
+		std::function<int(cv::UMat,unsigned,bool,int)> decodefun = [&f, &d] (cv::UMat m, unsigned cm, bool pre, int cc) {
+			return d.decode(m, f, cm, pre, cc);
 		};
 		if (useStdin)
-			return decode(StdinLineReader(), decodefun, no_deskew, undistort, preprocess, color_correct);
+			return decode(StdinLineReader(), decodefun, no_deskew, undistort, color_mode, preprocess, color_correct);
 		else
-			return decode(infiles, decodefun, no_deskew, undistort, preprocess, color_correct);
+			return decode(infiles, decodefun, no_deskew, undistort, color_mode, preprocess, color_correct);
 	}
 
 	// else, the good stuff
@@ -273,16 +272,16 @@ int main(int argc, char** argv)
 	if (compressionLevel <= 0)
 	{
 		fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize, true);
-		res = decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
+		res = decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, color_mode, preprocess, color_correct);
 	}
 	else // default case, all bells and whistles
 	{
 		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize, true);
 
 		if (useStdin)
-			res = decode(StdinLineReader(), fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
+			res = decode(StdinLineReader(), fountain_decode_fun(sink, d), no_deskew, undistort, color_mode, preprocess, color_correct);
 		else
-			res = decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, preprocess, color_correct);
+			res = decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, color_mode, preprocess, color_correct);
 	}
 	if (not color_correction_file.empty())
 		d.save_ccm(color_correction_file);

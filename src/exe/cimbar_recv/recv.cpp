@@ -70,6 +70,7 @@ int main(int argc, char** argv)
 		string mode = result["mode"].as<string>();
 		legacy_mode = (mode == "4c") or (mode == "4C");
 	}
+	unsigned color_mode = legacy_mode? 0 : 1;
 
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
@@ -104,8 +105,7 @@ int main(int argc, char** argv)
 	window.auto_scale_to_window();
 
 	Extractor ext;
-	unsigned color_mode = legacy_mode? 0 : 1;
-	Decoder dec(-1, -1, color_mode, legacy_mode);
+	Decoder dec(-1, -1);
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
 	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 			shouldPreprocess = true;
 
 		// decode
-		int bytes = dec.decode_fountain(img, sink, shouldPreprocess);
+		int bytes = dec.decode_fountain(img, sink, color_mode, shouldPreprocess);
 		if (bytes > 0)
 			std::cerr << "got some bytes " << bytes << std::endl;
 	}

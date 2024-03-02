@@ -34,7 +34,7 @@ TEST_CASE( "CimbReaderTest/testReadOnce", "[unit]" )
 	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 1);
 
 	assertFalse(cr.done());
 
@@ -52,12 +52,48 @@ TEST_CASE( "CimbReaderTest/testReadOnce", "[unit]" )
 	assertFalse(cr.done());
 }
 
-TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
+TEST_CASE( "CimbReaderTest/testSample.colormode0", "[unit]" )
 {
 	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 0);
+
+	// read
+	int count = 0;
+	std::map<unsigned, unsigned> res;
+	for (int c = 0; c < 22; ++c)
+	{
+		PositionData pos;
+		unsigned bits = cr.read(pos);
+		res[pos.i] = bits;
+
+		unsigned color_bits = cr.read_color(pos);
+		res[pos.i] |= color_bits << decoder.symbol_bits();
+		++count;
+	}
+
+	string expected = "0=0 99=8 11680=3 11681=32 11900=28 11901=25 11904=12 11995=2 11996=8 11998=6 "
+					  "11999=54 12001=29 12004=6 12099=2 12195=57 12196=1 12200=5 12201=0 12298=32 "
+					  "12299=34 12300=30 12399=15";
+	assertEquals( expected, turbo::str::join(res) );
+
+	PositionData pos;
+	while (!cr.done())
+	{
+		cr.read(pos);
+		++count;
+	}
+	assertTrue(cr.done());
+	assertEquals(12400, count);
+}
+
+TEST_CASE( "CimbReaderTest/testSample.colormode1", "[unit]" )
+{
+	cv::Mat sample = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
+
+	CimbDecoder decoder(4, 2);
+	CimbReader cr(sample, decoder, 1);
 
 	// read
 	int count = 0;
@@ -88,12 +124,13 @@ TEST_CASE( "CimbReaderTest/testSample", "[unit]" )
 	assertEquals(12400, count);
 }
 
+
 TEST_CASE( "CimbReaderTest/testSampleMessy", "[unit]" )
 {
 	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f0_627_extract.jpg");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 1);
 
 	// read
 	int count = 0;
@@ -127,7 +164,7 @@ TEST_CASE( "CimbReaderTest/testBad", "[unit]" )
 	cv::Mat sample = TestCimbar::loadSample("6bit/4_30_f2_246.jpg");
 
 	CimbDecoder decoder(4, 2);
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 1);
 
 	// refuse to do anything
 	assertTrue( cr.done() );
@@ -144,7 +181,7 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 
 	TestableCimbDecoder decoder(4, 2);
 	decoder.internal_ccm() = color_correction();
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 1);
 
 	// this is the header value for the sample -- we could imitate what the Decoder does
 	// and compute it from the symbols, but that seems like overkill for this test.
@@ -178,7 +215,7 @@ TEST_CASE( "CimbReaderTest/testCCM.Disabled", "[unit]" )
 
 	TestableCimbDecoder decoder(4, 2);
 	decoder.internal_ccm() = color_correction();
-	CimbReader cr(sample, decoder, false, false);
+	CimbReader cr(sample, decoder, 1, false, false);
 
 	assertFalse( decoder.get_ccm().active() );
 
@@ -200,7 +237,7 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 
 	TestableCimbDecoder decoder(4, 2);
 	decoder.internal_ccm() = color_correction();
-	CimbReader cr(sample, decoder);
+	CimbReader cr(sample, decoder, 1);
 
 	// this is the header value for the sample -- we could imitate what the Decoder does
 	// and compute it from the symbols, but that seems like overkill for this test.

@@ -90,7 +90,7 @@ namespace {
 	}
 }
 
-CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_sharpen, int color_correction)
+CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen, int color_correction)
 	: _image(img)
 	, _fountainColorHeader(0U)
 	, _cellSize(Config::cell_size() + 2)
@@ -98,21 +98,22 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, bool needs_shar
 	, _decoder(decoder)
 	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
 	, _colorCorrection(color_correction)
+	, _colorMode(color_mode)
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction == 1)
 		simpleColorCorrection(_image, decoder);
 }
 
-CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, bool needs_sharpen, int color_correction)
-	: CimbReader(img.getMat(cv::ACCESS_READ), decoder, needs_sharpen, color_correction)
+CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen, int color_correction)
+	: CimbReader(img.getMat(cv::ACCESS_READ), decoder, color_mode, needs_sharpen, color_correction)
 {
 }
 
 unsigned CimbReader::read_color(const PositionData& pos) const
 {
 	Cell color_cell(_image, pos.x, pos.y, Config::cell_size(), Config::cell_size());
-	return _decoder.decode_color(color_cell);
+	return _decoder.decode_color(color_cell, _colorMode);
 }
 
 unsigned CimbReader::read(PositionData& pos)
@@ -219,7 +220,7 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 		cv::Mat arow = (cv::Mat_<float>(1,3) << std::get<1>(it.second), std::get<2>(it.second), std::get<3>(it.second));
 		actual.push_back(arow);
 
-		cimbar::RGB cc = _decoder.get_color(it.first);
+		cimbar::RGB cc = _decoder.get_color(it.first, _colorMode);
 		cv::Mat drow = (cv::Mat_<float>(1,3) << std::get<0>(cc), std::get<1>(cc), std::get<2>(cc));
 		desired.push_back(drow);
 	}

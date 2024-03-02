@@ -88,7 +88,7 @@ protected:
 	bool _good;
 };
 
-inline std::ifstream& operator<<(std::ifstream& s, const ReedSolomon::BadChunk& chunk)
+inline std::ifstream& operator<<(std::ifstream& s, const ReedSolomon::BadChunk&)
 {
 	return s;
 }

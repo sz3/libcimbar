@@ -54,11 +54,10 @@ namespace {
 	}
 }
 
-CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, unsigned color_mode, bool dark, uchar ahashThreshold)
+CimbDecoder::CimbDecoder(unsigned symbol_bits, unsigned color_bits, bool dark, uchar ahashThreshold)
 	: _symbolBits(symbol_bits)
 	, _numSymbols(1 << symbol_bits)
 	, _numColors(1 << color_bits)
-	, _colorMode(color_mode)
 	, _dark(dark)
 	, _ahashThreshold(ahashThreshold)
 {
@@ -160,12 +159,12 @@ unsigned CimbDecoder::check_color_distance(std::tuple<uchar,uchar,uchar> a, std:
 	return color_diff(a, b);
 }
 
-std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i) const
+std::tuple<uchar,uchar,uchar> CimbDecoder::get_color(int i, unsigned color_mode) const
 {
-	return cimbar::getColor(i, _numColors, _colorMode);
+	return cimbar::getColor(i, _numColors, color_mode);
 }
 
-unsigned CimbDecoder::get_best_color(float r, float g, float b) const
+unsigned CimbDecoder::get_best_color(float r, float g, float b, unsigned color_mode) const
 {
 	// transform color with ccm
 	if (internal_ccm().active())
@@ -188,7 +187,7 @@ unsigned CimbDecoder::get_best_color(float r, float g, float b) const
 	float best_distance = 1000000;
 	for (unsigned i = 0; i < _numColors; ++i)
 	{
-		std::tuple<uchar,uchar,uchar> candidate = get_color(i);
+		std::tuple<uchar,uchar,uchar> candidate = get_color(i, color_mode);
 		unsigned distance = check_color_distance(c, candidate);
 		if (distance < best_distance)
 		{
@@ -208,12 +207,12 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) con
 	return center.mean_rgb();
 }
 
-unsigned CimbDecoder::decode_color(const Cell& color_cell) const
+unsigned CimbDecoder::decode_color(const Cell& color_cell, unsigned color_mode) const
 {
 	if (_numColors <= 1)
 		return 0;
 	auto [r, g, b] = avg_color(color_cell);
-	return get_best_color(r, g, b);
+	return get_best_color(r, g, b, color_mode);
 }
 
 bool CimbDecoder::expects_binary_threshold() const
