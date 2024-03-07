@@ -8,7 +8,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf8x8;
+		using GridConf = Conf8x8_B;
 
 	public:
 		static constexpr bool dark()
