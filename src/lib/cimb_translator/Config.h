@@ -8,7 +8,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf8x8;
+		using GridConf = Conf5x5d;
 
 	public:
 		static constexpr bool dark()
@@ -108,7 +108,9 @@ namespace cimbar
 
 		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell, bool legacy_mode)
 		{
-			return legacy_mode? 10 : bitspercell << 1;
+			if (legacy_mode or !GridConf::fountain_chunks_per_frame)
+				return 10;
+			return bitspercell * GridConf::fountain_chunks_per_frame;
 		}
 
 		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode);

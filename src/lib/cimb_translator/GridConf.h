@@ -17,6 +17,8 @@ namespace cimbar
 		static constexpr unsigned cell_offset = 9;
 		static constexpr unsigned cells_per_col_x = 162;
 		static constexpr unsigned cells_per_col_y = cells_per_col_x;
+
+		static constexpr int fountain_chunks_per_frame = 3;
 	};
 
 	struct Conf5x5d
@@ -33,6 +35,8 @@ namespace cimbar
 		static constexpr unsigned cell_offset = 9;
 		static constexpr unsigned cells_per_col_x = 188;
 		static constexpr unsigned cells_per_col_y = 157;
+
+		static constexpr int fountain_chunks_per_frame = 4;
 	};
 
 	struct Conf8x8
@@ -49,5 +53,7 @@ namespace cimbar
 		static constexpr unsigned cell_offset = 8;
 		static constexpr unsigned cells_per_col_x = 112;
 		static constexpr unsigned cells_per_col_y = cells_per_col_x;
+
+		static constexpr int fountain_chunks_per_frame = 2;
 	};
 }

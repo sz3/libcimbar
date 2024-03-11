@@ -25,7 +25,7 @@ namespace {
 			RGB(0, 0xFF, 0),
 			RGB(0, 0xFF, 0xFF),
 			RGB(0xFF, 0xFF, 0),
-			RGB(0xFF, 0, 0xFF),
+			RGB(0xFF, 0x55, 0xFF), // 0x55
 		};
 		return colors[index];
 	}
@@ -70,6 +70,18 @@ namespace {
 		};
 		return colors[index];
 	}
+
+	RGB getBgColor4(unsigned index)
+	{
+		// opencv uses BGR, but we don't have to conform to its tyranny
+		static constexpr array<RGB, 4> colors = {
+			RGB(0, 0x20, 0),
+			RGB(0, 0, 0xFF),
+			RGB(0x7F, 0, 0),
+			RGB(0, 0, 0),
+		};
+		return colors[index];
+	}
 }
 
 namespace cimbar {
@@ -109,7 +121,18 @@ RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 		return getColor4(index);
 	else
 		return getColor8(index);
+}
 
+RGB getBgColor(unsigned index, unsigned num_colors, unsigned color_mode)
+{
+	// light mode
+	if (color_mode >= 100)
+		return RGB(0xFF, 0xFF, 0xFF);
+
+	if (color_mode == 1 and num_colors <= 4)
+		return getBgColor4(index);
+	else
+		return RGB(0,0,0);
 }
 
 cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_colors, unsigned color, unsigned color_mode)
@@ -121,17 +144,16 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 
 	uchar r, g, b;
 	std::tie(r, g, b) = getColor(color, num_colors, color_mode);
+	uchar bgr, bgg, bgb;
+	std::tie(bgr, bgg, bgb) = getBgColor(color, num_colors, color_mode);
 	cv::MatIterator_<cv::Vec3b> end = tile.end<cv::Vec3b>();
 	for (cv::MatIterator_<cv::Vec3b> it = tile.begin<cv::Vec3b>(); it != end; ++it)
 	{
 		cv::Vec3b& c = *it;
 		if (c == background)
-		{
-			if (dark)
-				c = {0, 0, 0};
-			continue;
-		}
-		c = {r, g, b};
+			c = {bgr, bgg, bgb};
+		else
+			c = {r, g, b};
 	}
 	return tile;
 }
