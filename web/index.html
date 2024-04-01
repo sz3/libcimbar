@@ -56,7 +56,7 @@ body {
 	box-shadow: 0px 0px 12px black, 0px 0px 18px black;
 }
 
-#dragdrop::before {
+.dragdrop::before {
 	content: "⌜ Tap to start! ⌟";
 	font: 1.5em serif;
 	padding-top: 2em;
@@ -64,6 +64,10 @@ body {
 	left: 0;
 	text-align: center;
 	width: 100%;
+}
+
+.dragdrop.error:before {
+	content: "⌜ Error! WebGL is not enabled :( ⌟";
 }
 
 #invisible_click {
@@ -303,7 +307,7 @@ body {
 	var Module = {};
 	Module.canvas = canvas;
 	Module.onRuntimeInitialized = () => {
-		Main.init();
+		Main.init(canvas);
 		Main.nextFrame();
 	};
 </script>

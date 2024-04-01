@@ -43,6 +43,15 @@ return {
   {
     Module._initialize_GL(1040, 1040);
     Main.resize();
+    Main.check_GL_enabled(canvas);
+  },
+
+  check_GL_enabled : function(canvas)
+  {
+    if (canvas.getContext("2d")) {
+       var elem = document.getElementById('dragdrop');
+       elem.classList.add("error");
+    }
   },
 
   resize : function()
