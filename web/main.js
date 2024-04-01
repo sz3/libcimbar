@@ -1,6 +1,7 @@
 var Main = function() {
 
 var _interval = 66;
+var _pause = false;
 
 var _showStats = false;
 var _renders = 0;
@@ -69,6 +70,16 @@ return {
     toggleFullscreen().then(Main.resize);
   },
 
+  togglePause : function(pause)
+  {
+    if (pause === undefined) {
+       _pause = !_pause;
+    }
+    else {
+       _pause = pause;
+    }
+  },
+
   scaleCanvas : function(canvas, width, height)
   {
     var dim = width;
@@ -123,6 +134,7 @@ return {
     document.getElementById("nav-button").blur();
     document.getElementById("nav-content").blur();
     document.getElementById("nav-find-file-link").blur();
+    Main.togglePause(false);
   },
 
   clickFileInput : function()
@@ -142,7 +154,9 @@ return {
   nextFrame : function()
   {
     var start = performance.now();
-    Module._render();
+    if (!_pause) {
+       Module._render();
+    }
     var frameCount = Module._next_frame();
 
     var elapsed = performance.now() - start;
@@ -201,6 +215,10 @@ window.addEventListener('keydown', function(e) {
         e.key == 'Space' || e.keyCode == 32
     ) {
       Main.clickNav();
+      e.preventDefault();
+    }
+    else if (e.key == 'Backspace' || e.keyCode == 8) {
+      Main.togglePause();
       e.preventDefault();
     }
   }
@@ -267,6 +285,21 @@ window.addEventListener('keydown', function(e) {
     }
   }
 }, true);
+
+window.addEventListener("touchstart", function(e) {
+  e = e || event;
+  Main.togglePause(true);
+}, false);
+
+window.addEventListener("touchend", function(e) {
+  e = e || event;
+  Main.togglePause(false);
+}, false);
+
+window.addEventListener("touchcancel", function(e) {
+  e = e || event;
+  Main.togglePause(false);
+}, false);
 
 window.addEventListener("dragover", function(e) {
   e = e || event;
