@@ -4,7 +4,7 @@ var _interval = 66;
 var _pause = false;
 
 var _showStats = false;
-var _renders = 0;
+var _counter = 0;
 var _renderTime = 0;
 
 function toggleFullscreen()
@@ -68,6 +68,7 @@ return {
   toggleFullscreen : function()
   {
     toggleFullscreen().then(Main.resize);
+    Main.togglePause(false);
   },
 
   togglePause : function(pause)
@@ -96,6 +97,7 @@ return {
 
   alignInvisibleClick : function(canvas)
   {
+     canvas = canvas || document.getElementById('canvas');
      var cpos = canvas.getBoundingClientRect();
      var invisible_click = document.getElementById("invisible_click");
      invisible_click.style.width = canvas.style.width;
@@ -127,6 +129,7 @@ return {
   clickNav : function()
   {
     document.getElementById("nav-button").focus();
+    Main.togglePause(false);
   },
 
   blurNav : function()
@@ -140,6 +143,7 @@ return {
   clickFileInput : function()
   {
     document.getElementById("file_input").click();
+    Main.togglePause(false);
   },
 
   fileInput : function(ev)
@@ -153,11 +157,12 @@ return {
 
   nextFrame : function()
   {
+    _counter += 1;
     var start = performance.now();
     if (!_pause) {
        Module._render();
+       var frameCount = Module._next_frame();
     }
-    var frameCount = Module._next_frame();
 
     var elapsed = performance.now() - start;
     var nextInterval = _interval>elapsed? _interval-elapsed : 0;
@@ -166,6 +171,9 @@ return {
     if (_showStats && frameCount) {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
+    }
+    if (_counter & 16 > 0) {
+       Main.alignInvisibleClick();
     }
   },
 
@@ -193,6 +201,7 @@ return {
       nav.classList.remove("mode-b");
       nav.classList.remove("mode-4c");
     }
+    Main.togglePause(false);
   },
 
   setHTML : function(id, msg)
