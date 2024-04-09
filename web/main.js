@@ -1,7 +1,7 @@
 var Main = function() {
 
 var _interval = 66;
-var _pause = false;
+var _pause = 0;
 
 var _showStats = false;
 var _counter = 0;
@@ -68,17 +68,23 @@ return {
   toggleFullscreen : function()
   {
     toggleFullscreen().then(Main.resize);
-    Main.togglePause(false);
+    Main.togglePause(true);
   },
 
   togglePause : function(pause)
   {
+    // pause is a cooldown. We pause to help autofocus, but we don't want to do it forever...
     if (pause === undefined) {
-       _pause = !_pause;
+       _pause = Main.isPaused()? 0 : 32;
     }
     else {
-       _pause = pause;
+       _pause = pause? 32 : 0;
     }
+  },
+
+  isPaused : function()
+  {
+     return _pause > 0;
   },
 
   scaleCanvas : function(canvas, width, height)
@@ -129,21 +135,22 @@ return {
   clickNav : function()
   {
     document.getElementById("nav-button").focus();
-    Main.togglePause(false);
   },
 
-  blurNav : function()
+  blurNav : function(pause)
   {
+    if (pause === undefined) {
+       pause = true;
+    }
     document.getElementById("nav-button").blur();
     document.getElementById("nav-content").blur();
     document.getElementById("nav-find-file-link").blur();
-    Main.togglePause(false);
+    Main.togglePause(pause);
   },
 
   clickFileInput : function()
   {
     document.getElementById("file_input").click();
-    Main.togglePause(false);
   },
 
   fileInput : function(ev)
@@ -152,14 +159,17 @@ return {
     var file = document.getElementById('file_input').files[0];
     if (file)
        importFile(file);
-    Main.blurNav();
+    Main.blurNav(false);
   },
 
   nextFrame : function()
   {
     _counter += 1;
+    if (_pause > 0) {
+       _pause -= 1;
+    }
     var start = performance.now();
-    if (!_pause) {
+    if (!Main.isPaused()) {
        Module._render();
        var frameCount = Module._next_frame();
     }
@@ -172,8 +182,8 @@ return {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
     }
-    if (_counter & 16 > 0) {
-       Main.alignInvisibleClick();
+    if ( !(_counter & 31) ) {
+       Main.resize();
     }
   },
 
@@ -201,7 +211,6 @@ return {
       nav.classList.remove("mode-b");
       nav.classList.remove("mode-4c");
     }
-    Main.togglePause(false);
   },
 
   setHTML : function(id, msg)
