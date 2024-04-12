@@ -36,9 +36,13 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
 	top: 0;
 }
 
-#invisible_click, #canvas, #nav-container {
+#nav-container:focus-within {
 	z-index: 1;
 }
+
+#nav-content, #nav-container .bg,  #nav-container:focus-within #nav-button {
+ 	z-index: 1;
+ }
 
 #canvas {
 	display: block;
