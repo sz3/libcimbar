@@ -21,8 +21,8 @@ html, body {
 body {
 	background-color: white;
 	background-image: linear-gradient(135deg, rgb(0,0,0) 65px, transparent 130px),
-repeating-linear-gradient(135deg, rgb(0,0,0) 0px, rgb(0,0,0) 1px,transparent 1px, transparent 30px),
-repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(0,0,0) 1px,transparent 1px, transparent 30px);
+repeating-linear-gradient(135deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparent 1px, transparent 30px),
+repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparent 1px, transparent 30px);
 	background-size: cover;
 	color: gray;
 	display: grid;
@@ -38,10 +38,6 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(0,0,0) 1px,transparent 1px,
 
 #invisible_click, #canvas, #nav-container {
 	z-index: 1;
-}
-
-#nav-button {
-	z-index: 2;
 }
 
 #canvas {
@@ -277,6 +273,8 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(0,0,0) 1px,transparent 1px,
 
 <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 
+<a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
+
 <div id="nav-container" class="mode-4c">
     <div class="bg" onclick="Main.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
@@ -298,7 +296,6 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(0,0,0) 1px,transparent 1px,
       </ul>
     </div>
 </div>
-<a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
 
 <script type="text/javascript">
 	if ('serviceWorker' in navigator) {
