@@ -75,11 +75,9 @@ return {
   {
     // pause is a cooldown. We pause to help autofocus, but we don't want to do it forever...
     if (pause === undefined) {
-       _pause = Main.isPaused()? 0 : 32;
+       pause = !Main.isPaused();
     }
-    else {
-       _pause = pause? 32 : 0;
-    }
+    _pause = pause? 15 : 0;
   },
 
   isPaused : function()
@@ -236,7 +234,7 @@ window.addEventListener('keydown', function(e) {
       e.preventDefault();
     }
     else if (e.key == 'Backspace' || e.keyCode == 8) {
-      Main.togglePause();
+      Main.togglePause(true);
       e.preventDefault();
     }
   }
