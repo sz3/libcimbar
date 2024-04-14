@@ -156,6 +156,19 @@ return {
     }
   },
 
+  checkNavButtonOverlap : function()
+  {
+    var nav = document.getElementById("nav-button");
+    var navBounds = nav.getBoundingClientRect();
+    var canvas = document.getElementById('canvas').getBoundingClientRect();
+    if (navBounds.right > canvas.left && navBounds.bottom > canvas.top) {
+       nav.classList.add("hide");
+    }
+    else {
+       nav.classList.remove("hide");
+    }
+  },
+
   clickNav : function()
   {
     document.getElementById("nav-button").focus();
@@ -208,6 +221,7 @@ return {
     }
     if ( !(_counter & 15) ) {
        Main.resize();
+       Main.checkNavButtonOverlap();
     }
   },
 

@@ -148,6 +148,13 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
   background-image: linear-gradient(180deg, rgb(0,0,0,0) 10%, rgb(0,0,0) 40%, rgb(0,0,0) 60%, rgb(0,0,0,0) 90%);
   background-color: initial;
 }
+#nav-button.hide {
+  opacity: 0;
+  transition: .3s;
+}
+#nav-container:focus-within #nav-button.hide {
+  opacity: 1;
+}
 .icon-bar {
   display: block;
   width: 100%;
