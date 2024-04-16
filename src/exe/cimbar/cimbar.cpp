@@ -104,6 +104,7 @@ template <typename FilenameIterable>
 int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc, int color_bits, int compression_level, bool legacy_mode, bool no_fountain)
 {
 	Encoder en(ecc, cimbar::Config::symbol_bits(), color_bits);
+	en.set_encode_id(109);
 	if (legacy_mode)
 		en.set_legacy_mode();
 	for (const string& f : infiles)
