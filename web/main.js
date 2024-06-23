@@ -59,8 +59,8 @@ return {
   {
     // reset zoom
     var canvas = document.getElementById('canvas');
-    var width = window.innerWidth;
-    var height = window.outerHeight;
+    var width = window.innerWidth - 12;
+    var height = window.outerHeight - 12;
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);
   },
@@ -91,10 +91,7 @@ return {
     if (height < dim) {
       dim = height;
     }
-    console.log(dim);
-    if (dim > 1040) {
-      dim = 1040;
-    }
+    console.log(dim + "x" + dim);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
   },
