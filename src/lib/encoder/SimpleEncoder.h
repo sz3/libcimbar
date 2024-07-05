@@ -21,14 +21,14 @@ public:
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
-	std::optional<cv::Mat> encode_next(STREAM& stream, int canvas_size=0);
+	std::optional<cv::Mat> encode_next(STREAM& stream, int canvas_width=0, int canvas_height=0);
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
 
 protected:
 	template <typename STREAM>
-	std::optional<cv::Mat> encode_next_coupled(STREAM& stream, int canvas_size=0);
+	std::optional<cv::Mat> encode_next_coupled(STREAM& stream, int canvas_width=0, int canvas_height=0);
 
 protected:
 	unsigned _eccBytes;
@@ -64,16 +64,16 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
 }
 
 template <typename STREAM>
-inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
+inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int canvas_width, int canvas_height)
 {
 	if (_coupled)
-		return encode_next_coupled(stream, canvas_size);
+		return encode_next_coupled(stream, canvas_width, canvas_height);
 
 	if (!stream.good())
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_width, canvas_height);
 
 	unsigned numCells = writer.num_cells();
 	bitbuffer bb(cimbar::Config::capacity(bits_per_op));
@@ -127,7 +127,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 }
 
 template <typename STREAM>
-inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream, int canvas_size)
+inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream, int canvas_width, int canvas_height)
 {
 	// the old way. Symbol and color bits are mixed together, limiting the color correction possibilities
 	// but potentially allowing a lack of errors in one channel to correct errors in the other.
@@ -138,7 +138,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream,
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_width, canvas_height);
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;

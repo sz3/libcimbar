@@ -9,7 +9,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 2;
 		static constexpr unsigned ecc_bytes = 40;
 		static constexpr unsigned ecc_block_size = 216;
-		static constexpr int image_size = 988;
+		static constexpr int image_size_x = 988;
+		static constexpr int image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 5;
 		static constexpr unsigned cell_spacing_x = cell_size+1;
@@ -27,7 +28,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 2;
 		static constexpr unsigned ecc_bytes = 35;
 		static constexpr unsigned ecc_block_size = 182;
-		static constexpr int image_size = 958;
+		static constexpr int image_size_x = 958;
+		static constexpr int image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 5;
 		static constexpr unsigned cell_spacing_x = cell_size;
@@ -45,7 +47,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 4;
 		static constexpr unsigned ecc_bytes = 30;
 		static constexpr unsigned ecc_block_size = 155;
-		static constexpr int image_size = 1024;
+		static constexpr int image_size_x = 1024;
+		static constexpr int image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 8;
 		static constexpr unsigned cell_spacing_x = cell_size+1;

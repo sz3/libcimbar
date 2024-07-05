@@ -10,15 +10,15 @@ class Corners
 {
 public:
 	Corners(const std::vector<Anchor>& anchors)
-	    : Corners(anchors[0].center(), anchors[1].center(), anchors[2].center(), anchors[3].center())
+		: Corners(anchors[0].center(), anchors[1].center(), anchors[2].center(), anchors[3].center())
 	{
 	}
 
 	Corners(point<int> top_left, point<int> top_right, point<int> bottom_left, point<int> bottom_right)
-	    : _top_left(top_left)
-	    , _top_right(top_right)
-	    , _bottom_left(bottom_left)
-	    , _bottom_right(bottom_right)
+		: _top_left(top_left)
+		, _top_right(top_right)
+		, _bottom_left(bottom_left)
+		, _bottom_right(bottom_right)
 	{
 	}
 
@@ -52,21 +52,21 @@ public:
 		return points;
 	}
 
-	bool is_granular_scale(unsigned min_size) const
+	bool is_granular_scale(unsigned min_width, unsigned min_height) const
 	{
 		// if any of our edges are < min_size, return false -- this means we'll be upscaling when we run a deskew.
 		return (
-		        check_scaling(_top_left, _top_right, min_size) and
-		        check_scaling(_top_right, _bottom_right, min_size) and
-		        check_scaling(_bottom_right, _bottom_left, min_size) and
-		        check_scaling(_bottom_left, _top_left, min_size)
+				check_scaling(_top_left, _top_right, min_width, min_height) and
+				check_scaling(_top_right, _bottom_right, min_width, min_height) and
+				check_scaling(_bottom_right, _bottom_left, min_width, min_height) and
+				check_scaling(_bottom_left, _top_left, min_width, min_height)
 		);
 	}
 
 protected:
-	bool check_scaling(const point<int>& a, const point<int>& b, unsigned min_size) const
+	bool check_scaling(const point<int>& a, const point<int>& b, unsigned min_width, unsigned min_height) const
 	{
-		return abs(a.x() - b.x()) > min_size or abs(a.y() - b.y()) > min_size;
+		return abs(a.x() - b.x()) > min_width or abs(a.y() - b.y()) > min_height;
 	}
 
 protected:

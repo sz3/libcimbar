@@ -40,7 +40,8 @@ namespace {
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
-		bitbuffer bb(std::pow(Config::image_size(), 2) / 8);
+		// TODO: this should be on capacity, not image_size... right??
+		bitbuffer bb(Config::image_size_x() * Config::image_size_y() / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
@@ -58,8 +59,9 @@ namespace {
 		if (dark)
 		{
 			unsigned tl = Config::anchor_size() - 2;
-			unsigned br = Config::image_size() - Config::anchor_size() - 2;
-			std::array<std::pair<unsigned, unsigned>, 3> anchors = {{ {tl, tl}, {tl, br}, {br, tl} }};
+			unsigned right = Config::image_size_x() - Config::anchor_size() - 2;
+			unsigned bottom = Config::image_size_y() - Config::anchor_size() - 2;
+			std::array<std::pair<unsigned, unsigned>, 3> anchors = {{ {tl, tl}, {tl, bottom}, {right, tl} }};
 			for (auto [x, y] : anchors)
 			{
 				cv::Rect crop(x, y, 4, 4);
@@ -69,9 +71,11 @@ namespace {
 		}
 		else // light
 		{
+			// TODO ONO: this is wrong, fix it
 			unsigned tl = (Config::anchor_size() << 1) + 6;
-			unsigned br = Config::image_size() - tl - 4;
-			std::array<std::pair<unsigned, unsigned>, 4> anchors = {{ {0, tl}, {tl, 0}, {0, br}, {br, 0} }};
+			unsigned right = Config::image_size_x() - tl - 4;
+			unsigned bottom = Config::image_size_y() - tl - 4;
+			std::array<std::pair<unsigned, unsigned>, 4> anchors = {{ {0, tl}, {tl, 0}, {0, bottom}, {right, 0} }};
 			for (auto [x, y] : anchors)
 			{
 				cv::Rect crop(x, y, 4, 4);
@@ -96,7 +100,7 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 	, _cellSize(Config::cell_size() + 2)
 	, _positions(Config::cell_spacing_x(), Config::cell_spacing_y(), Config::cells_per_col_x(), Config::cells_per_col_y(), Config::cell_offset(), Config::corner_padding_x(), Config::corner_padding_y())
 	, _decoder(decoder)
-	, _good(_image.cols >= Config::image_size() and _image.rows >= Config::image_size())
+	, _good(_image.cols >= Config::image_size_x() and _image.rows >= Config::image_size_y())
 	, _colorCorrection(color_correction)
 	, _colorMode(color_mode)
 {
@@ -172,6 +176,7 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 
 	//std::cout << fmt::format("fountain blocks={},capacity={}", fountain_blocks, cimbar::Config::capacity(_decoder.symbol_bits() + color_bits)) << std::endl;
 	//std::cout << fmt::format("fountain end={},headerstart={},headerlen={}", end, headerStartInterval, headerLen) << std::endl;
+	//std::cout << fmt::format("headerintervalcalc={},fountainblocks={}, color_bits={}", cimbar::Config::capacity(_decoder.symbol_bits() + color_bits), fountain_blocks, color_bits) << std::endl;
 
 	// get color map
 	std::unordered_map<uint16_t, std::tuple<unsigned, unsigned, unsigned, unsigned>> colors;

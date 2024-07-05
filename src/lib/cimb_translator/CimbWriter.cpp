@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "serialize/format.h"
 #include <string>
+#include <iostream>
 using std::string;
 
 using namespace cimbar;
@@ -35,43 +36,45 @@ namespace {
 	}
 }
 
-CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, unsigned color_mode, int size)
+CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, unsigned color_mode, int width, int height)
 	: _positions(Config::cell_spacing_x(), Config::cell_spacing_y(), Config::cells_per_col_x(), Config::cells_per_col_y(), Config::cell_offset(), Config::corner_padding_x(), Config::corner_padding_y(), Config::interleave_blocks(), Config::interleave_partitions())
 	, _encoder(symbol_bits, color_bits, dark, color_mode)
 {
-	if (size > cimbar::Config::image_size())
-		_offset = (size - cimbar::Config::image_size()) / 2;
-	else
-		size = cimbar::Config::image_size();
+	height = std::max(height, cimbar::Config::image_size_y());
+	width = std::max(width, cimbar::Config::image_size_x());
+
+	_offsetX = (width - cimbar::Config::image_size_x()) / 2;
+	_offsetY = (height - cimbar::Config::image_size_y()) / 2;
 
 	cv::Scalar bgcolor = dark? cv::Scalar(0, 0, 0) : cv::Scalar(0xFF, 0xFF, 0xFF);
-	_image = cv::Mat(size, size, CV_8UC3, bgcolor);
+	_image = cv::Mat(height, width, CV_8UC3, bgcolor);
 
 	// from here on, we only care about the internal size
-	size = cimbar::Config::image_size();
+	width = cimbar::Config::image_size_x();
+	height = cimbar::Config::image_size_y();
 
 	cv::Mat anchor = getAnchor(dark);
 	paste(anchor, 0, 0);
-	paste(anchor, 0, size - anchor.cols);
-	paste(anchor, size - anchor.rows, 0);
+	paste(anchor, 0, height - anchor.rows);
+	paste(anchor, width - anchor.cols, 0);
 
 	cv::Mat secondaryAnchor = getSecondaryAnchor(dark);
-	paste(secondaryAnchor, size - anchor.rows, size - anchor.cols);
+	paste(secondaryAnchor, width - anchor.cols, height - anchor.rows);
 
 	cv::Mat hg = getHorizontalGuide(dark);
-	paste(hg, (size/2) - (hg.cols/2), 2);
-	paste(hg, (size/2) - (hg.cols/2), size-4);
-	paste(hg, (size/2) - (hg.cols/2) - hg.cols, size-4);
-	paste(hg, (size/2) - (hg.cols/2) + hg.cols, size-4);
+	paste(hg, (width/2) - (hg.cols/2), 2);
+	paste(hg, (width/2) - (hg.cols/2), height-4);
+	paste(hg, (width/2) - (hg.cols/2) - hg.cols, height-4);
+	paste(hg, (width/2) - (hg.cols/2) + hg.cols, height-4);
 
 	cv::Mat vg = getVerticalGuide(dark);
-	paste(vg, 2, (size/2) - (vg.rows/2));
-	paste(vg, size-4, (size/2) - (vg.rows/2));
+	paste(vg, 2, (height/2) - (vg.rows/2));
+	paste(vg, width-4, (height/2) - (vg.rows/2));
 }
 
 void CimbWriter::paste(const cv::Mat& img, int x, int y)
 {
-	img.copyTo(_image(cv::Rect(x+_offset, y+_offset, img.cols, img.rows)));
+	img.copyTo(_image(cv::Rect(x+_offsetX, y+_offsetY, img.cols, img.rows)));
 }
 
 bool CimbWriter::write(unsigned bits)

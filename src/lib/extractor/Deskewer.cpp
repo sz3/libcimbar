@@ -4,15 +4,21 @@
 
 #include <iostream>
 
-Deskewer::Deskewer(unsigned image_size, unsigned anchor_size)
-	: _imageSize(image_size? image_size : cimbar::Config::image_size())
+Deskewer::Deskewer(unsigned image_width, unsigned image_height, unsigned anchor_size)
+	: _imageWidth(image_width? image_width : cimbar::Config::image_size_x())
+	, _imageHeight(image_height? image_height : cimbar::Config::image_size_y())
 	, _anchorSize(anchor_size? anchor_size : cimbar::Config::anchor_size())
 {
 }
 
-unsigned Deskewer::image_size() const
+unsigned Deskewer::image_width() const
 {
-	return _imageSize;
+	return _imageWidth;
+}
+
+unsigned Deskewer::image_height() const
+{
+	return _imageHeight;
 }
 
 cv::Mat Deskewer::deskew(std::string img, const Corners& corners)

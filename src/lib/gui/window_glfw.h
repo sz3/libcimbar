@@ -15,7 +15,8 @@ class window_glfw
 {
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
-	    : _width(width)
+		: _width(width)
+		, _height(height)
 	{
 		if (!glfwInit())
 		{
@@ -108,6 +109,11 @@ public:
 		return _width;
 	}
 
+	unsigned height() const
+	{
+		return _height;
+	}
+
 protected:
 	void init_opengl(int width, int height)
 	{
@@ -131,6 +137,7 @@ protected:
 	GLuint _texid;
 	std::shared_ptr<cimbar::gl_2d_display> _display;
 	unsigned _width;
+	unsigned _height;
 	bool _good = true;
 };
 

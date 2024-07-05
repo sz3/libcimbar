@@ -25,7 +25,7 @@ namespace {
 			RGB(0, 0xFF, 0),
 			RGB(0, 0xFF, 0xFF),
 			RGB(0xFF, 0xFF, 0),
-			RGB(0xFF, 0x55, 0xFF), // 0x55
+			RGB(0xFF, 0, 0xFF), // RGB(0xFF, 0x55, 0xFF),
 		};
 		return colors[index];
 	}
@@ -75,9 +75,9 @@ namespace {
 	{
 		// opencv uses BGR, but we don't have to conform to its tyranny
 		static constexpr array<RGB, 4> colors = {
-			RGB(0, 0x20, 0),
-			RGB(0, 0, 0xFF),
-			RGB(0x7F, 0, 0),
+			RGB(0, 0, 0), //RGB(0, 0x20, 0),
+			RGB(0, 0, 0),//RGB(0, 0, 0xFF),
+			RGB(0, 0, 0), //RGB(0x7F, 0, 0),
 			RGB(0, 0, 0),
 		};
 		return colors[index];
@@ -125,9 +125,6 @@ RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 
 RGB getBgColor(unsigned index, unsigned num_colors, unsigned color_mode)
 {
-	// light mode
-	if (color_mode >= 100)
-		return RGB(0xFF, 0xFF, 0xFF);
 
 	if (color_mode == 1 and num_colors <= 4)
 		return getBgColor4(index);
@@ -150,10 +147,10 @@ cv::Mat getTile(unsigned symbol_bits, unsigned symbol, bool dark, unsigned num_c
 	for (cv::MatIterator_<cv::Vec3b> it = tile.begin<cv::Vec3b>(); it != end; ++it)
 	{
 		cv::Vec3b& c = *it;
-		if (c == background)
-			c = {bgr, bgg, bgb};
-		else
+		if (c != background)
 			c = {r, g, b};
+		else if (dark)
+			c = {bgr, bgg, bgb};
 	}
 	return tile;
 }

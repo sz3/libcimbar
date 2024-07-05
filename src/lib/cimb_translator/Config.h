@@ -8,7 +8,7 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf5x5d;
+		using GridConf = Conf8x8;
 
 	public:
 		static constexpr bool dark()
@@ -46,9 +46,14 @@ namespace cimbar
 			return GridConf::ecc_block_size;
 		}
 
-		static constexpr int image_size()
+		static constexpr int image_size_x()
 		{
-			return GridConf::image_size;
+			return GridConf::image_size_x;
+		}
+
+		static constexpr int image_size_y()
+		{
+			return GridConf::image_size_y;
 		}
 
 		static constexpr unsigned anchor_size()
