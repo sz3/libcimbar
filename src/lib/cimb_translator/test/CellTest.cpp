@@ -108,21 +108,52 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 {
 	cv::Mat img = TestCimbar::loadSample("6bit/4color_ecc30_fountain_0.png");
 
-	cv::Rect crop(125, 8, 4, 6);
+	cv::Rect crop(126, 9, 6, 6);
 	cv::Mat cell = img(crop);
+	cv::Scalar expectedColor = cv::mean(cell);
 
-	auto [r, g, b] = Cell(img, 125, 8, 4, 6).mean_rgb();
+	auto [r, g, b] = Cell(img, 126, 9, 6, 6).mean_rgb();
 
 	DYNAMIC_SECTION( "r" )
 	{
-		assertEquals( 191, (int)r );
+		assertAlmostEquals( expectedColor[0], (int)r );
+		assertEquals( 198, (int)r );
 	}
 	DYNAMIC_SECTION( "g" )
 	{
-		assertEquals( 191, (int)g );
+		assertAlmostEquals( expectedColor[1], (int)g );
+		assertEquals( 198, (int)g );
 	}
 	DYNAMIC_SECTION( "b" )
 	{
+		assertAlmostEquals( expectedColor[2], (int)b );
 		assertEquals( 0, (int)b );
+	}
+}
+
+TEST_CASE( "CellTest/testRgbCellOffsets.WideCanvas", "[unit]" )
+{
+	cv::Mat img = TestCimbar::loadSample("bm/ecc35.png");
+
+	cv::Rect crop(127, 10, 6, 6);
+	cv::Mat cell = img(crop);
+	cv::Scalar expectedColor = cv::mean(cell);
+
+	auto [r, g, b] = Cell(img, 127, 10, 6, 6).mean_rgb();
+
+	DYNAMIC_SECTION( "r" )
+	{
+		assertAlmostEquals( expectedColor[0], (int)r );
+		assertEquals( 148, (int)r );
+	}
+	DYNAMIC_SECTION( "g" )
+	{
+		assertAlmostEquals( expectedColor[1], (int)g );
+		assertEquals( 0, (int)g );
+	}
+	DYNAMIC_SECTION( "b" )
+	{
+		assertAlmostEquals( expectedColor[2], (int)b );
+		assertEquals( 148, (int)b );
 	}
 }

@@ -39,20 +39,20 @@ public:
 		const uchar* p = _img.ptr<uchar>(0) + (index * channels);
 
 		int increment = 1 + skip;
-		int toNextCol = channels * (_img.rows - _rows);
+		int toNextRow = channels * (_img.cols - _cols);
 		if (skip)
-			toNextCol += channels * _img.rows;
+			toNextRow += channels * _img.cols;
 
-		for (int i = 0; i < _cols; i+=increment)
+		for (int i = 0; i < _rows; i+=increment)
 		{
-			for (int j = 0; j < _rows; ++j, ++count)
+			for (int j = 0; j < _cols; ++j, ++count)
 			{
 				red += p[0];
 				green += p[1];
 				blue += p[2];
 				p += channels;
 			}
-			p += toNextCol;
+			p += toNextRow;
 		}
 
 		if (!count)
