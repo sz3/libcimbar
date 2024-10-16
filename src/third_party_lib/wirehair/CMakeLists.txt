@@ -54,7 +54,7 @@ set(GEN_TABLES
         gf256.h
         )
 
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT USE_WASM)
     set(ARCH_NATIVE "-march=native")
 endif()
 

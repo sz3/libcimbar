@@ -16,14 +16,14 @@ jobs:
 
       - name: Get openCV
         run: |
-          wget https://github.com/opencv/opencv/archive/refs/tags/4.5.5.zip
-          unzip 4.5.5.zip
-          mv opencv-4.5.5 opencv4
+          wget https://github.com/opencv/opencv/archive/refs/tags/4.10.0.zip
+          unzip 4.10.0.zip
+          mv opencv-4.10.0 opencv4
 
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
-          image: emscripten/emsdk:3.1.39
+          image: emscripten/emsdk:3.1.69
           options: -v ${{ github.workspace }}:/usr/src/app
           shell: bash
           run: |
