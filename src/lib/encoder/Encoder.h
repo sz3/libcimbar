@@ -3,6 +3,7 @@
 
 #include "SimpleEncoder.h"
 #include "cimb_translator/Config.h"
+#include "extractor/Scanner.h"
 #include "serialize/format.h"
 
 #include <opencv2/opencv.hpp>
@@ -60,6 +61,13 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 		auto frame = encode_next(*fes, canvas_size);
 		if (!frame)
 			break;
+
+		// some % of generated frames (for the current 8x8 impl)
+		// will produce random patterns that falsely match as
+		// corner "anchors" and fail to extract. So:
+		// if frame fails the scan, skip it.
+		if (!Scanner::will_it_scan(*frame))
+			continue;
 
 		if (!on_frame(*frame, i))
 			break;
