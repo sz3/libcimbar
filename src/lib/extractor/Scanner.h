@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Anchor.h"
+#include "Corners.h"
 #include "Point.h"
 #include "ScanState.h"
 
@@ -10,7 +11,6 @@
 #include <iostream>
 #include <vector>
 
-class Corners;
 class Midpoints;
 
 class Scanner
@@ -32,6 +32,10 @@ public: // public inline methods
 	static void preprocess_image(const MAT& img, MAT2& out, bool fast);
 
 	static unsigned nextPowerOfTwoPlusOne(unsigned v); // helper
+
+	// external helper method
+	template <typename MAT>
+	static bool will_it_scan(const MAT& img);
 
 	// rest of public interface
 	std::vector<Anchor> scan();
@@ -98,6 +102,27 @@ inline unsigned Scanner::nextPowerOfTwoPlusOne(unsigned v)
 	return std::max(3U, v + 2);
 }
 
+template <typename MAT>
+inline bool Scanner::will_it_scan(const MAT& unpadded_img)
+{
+	Scanner scanner(unpadded_img);
+	std::vector<Anchor> points = scanner.scan();
+	if (points.size() < 4)
+		return false;
+
+	constexpr int limit = 50;
+	Corners corners(points);
+	if (corners.top_left().x() > limit or corners.top_left().y() > limit)
+		return false;
+	if (corners.top_right().x() < (unpadded_img.cols - limit) or corners.top_right().y() > limit)
+		return false;
+	if (corners.bottom_left().x() > limit or corners.bottom_left().y() < (unpadded_img.rows - limit))
+		return false;
+	if (corners.bottom_right().x() < (unpadded_img.cols - limit) or corners.bottom_right().y() < (unpadded_img.rows - limit))
+		return false;
+	return true;
+}
+
 template <typename MAT, typename MAT2>
 inline void Scanner::threshold_fast(const MAT& img, MAT2& out)
 {
@@ -141,10 +166,10 @@ inline void Scanner::preprocess_image(const MAT& img, MAT2& out, bool fast)
 
 template <typename MAT>
 inline Scanner::Scanner(const MAT& img, bool fast, bool dark, int skip)
-    : _dark(dark)
-    , _skip(skip? skip : std::min(img.rows, img.cols) / 60)
-    , _mergeCutoff(img.cols / 30)
-    , _anchorSize(30)
+	: _dark(dark)
+	, _skip(skip? skip : std::min(img.rows, img.cols) / 60)
+	, _mergeCutoff(img.cols / 30)
+	, _anchorSize(30)
 {
 	_img = preprocess_image(img, fast);
 }
