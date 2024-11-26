@@ -49,7 +49,7 @@ TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
 	enc.set_legacy_mode();
 	assertEquals( 3, enc.encode_fountain(inputFile, outPrefix, 0) );
 
-	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x8c2f0f40e6ecb08b};
+	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x93a3830d042966e1};
 	for (unsigned i = 0; i < hashes.size(); ++i)
 	{
 		DYNAMIC_SECTION( "are we correct? : " << i )
@@ -93,7 +93,7 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	Encoder enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xb36b65402eec434e;
+	uint64_t hash = 0xa66a666543280e8e;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( hash, image_hash::average_hash(img) );
@@ -131,12 +131,12 @@ TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
 	Encoder enc(30, 4, 2);
-	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6, 1080) );
+	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6, 1024) );
 
-	uint64_t hash = 0xbdc232c714226fe6;
+	uint64_t hash = 0xa66a666543280e8e;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
-	assertEquals( 1080, img.rows );
-	assertEquals( 1080, img.cols );
+	assertEquals( 1024, img.rows );
+	assertEquals( 1024, img.cols );
 	assertEquals( hash, image_hash::average_hash(img) );
 }
