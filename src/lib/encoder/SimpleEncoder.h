@@ -73,7 +73,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_width, canvas_height);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, {canvas_width, canvas_height});
 
 	unsigned numCells = writer.num_cells();
 	bitbuffer bb(cimbar::Config::capacity(bits_per_op));
@@ -138,7 +138,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream,
 		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_width, canvas_height);
+	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, {canvas_width, canvas_height});
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;

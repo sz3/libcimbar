@@ -36,12 +36,12 @@ namespace {
 	}
 }
 
-CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, unsigned color_mode, int width, int height)
+CimbWriter::CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark, unsigned color_mode, vec_xy size)
 	: _positions(Config::cell_spacing_x(), Config::cell_spacing_y(), Config::cells_per_col_x(), Config::cells_per_col_y(), Config::cell_offset(), Config::corner_padding_x(), Config::corner_padding_y(), Config::interleave_blocks(), Config::interleave_partitions())
 	, _encoder(symbol_bits, color_bits, dark, color_mode)
 {
-	height = std::max(height, cimbar::Config::image_size_y());
-	width = std::max(width, cimbar::Config::image_size_x());
+	int height = std::max(size.height(), cimbar::Config::image_size_y());
+	int width = std::max(size.width(), cimbar::Config::image_size_x());
 
 	_offsetX = (width - cimbar::Config::image_size_x()) / 2;
 	_offsetY = (height - cimbar::Config::image_size_y()) / 2;

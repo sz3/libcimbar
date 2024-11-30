@@ -3,8 +3,8 @@
 
 #include "Anchor.h"
 #include "Point.h"
+#include "util/vec_xy.h"
 #include <opencv2/opencv.hpp>
-#include <tuple>
 
 class Corners
 {
@@ -52,21 +52,21 @@ public:
 		return points;
 	}
 
-	bool is_granular_scale(unsigned min_width, unsigned min_height) const
+	bool is_granular_scale(cimbar::vec_xy min_size) const
 	{
 		// if any of our edges are < min_size, return false -- this means we'll be upscaling when we run a deskew.
 		return (
-				check_scaling(_top_left, _top_right, min_width, min_height) and
-				check_scaling(_top_right, _bottom_right, min_width, min_height) and
-				check_scaling(_bottom_right, _bottom_left, min_width, min_height) and
-				check_scaling(_bottom_left, _top_left, min_width, min_height)
+				check_scaling(_top_left, _top_right, min_size) and
+				check_scaling(_top_right, _bottom_right, min_size) and
+				check_scaling(_bottom_right, _bottom_left, min_size) and
+				check_scaling(_bottom_left, _top_left, min_size)
 		);
 	}
 
 protected:
-	bool check_scaling(const point<int>& a, const point<int>& b, unsigned min_width, unsigned min_height) const
+	bool check_scaling(const point<int>& a, const point<int>& b, cimbar::vec_xy min_size) const
 	{
-		return abs(a.x() - b.x()) > min_width or abs(a.y() - b.y()) > min_height;
+		return abs(a.x() - b.x()) > min_size.width() or abs(a.y() - b.y()) > min_size.height();
 	}
 
 protected:

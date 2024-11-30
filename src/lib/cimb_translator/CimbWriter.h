@@ -3,11 +3,12 @@
 
 #include "CellPositions.h"
 #include "CimbEncoder.h"
+#include "util/vec_xy.h"
 
 class CimbWriter
 {
 public:
-	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true, unsigned color_mode=1, int width=0, int height=0);
+	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true, unsigned color_mode=1, cimbar::vec_xy size={});
 
 	bool write(unsigned bits);
 	bool done() const;

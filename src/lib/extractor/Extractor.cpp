@@ -7,9 +7,10 @@
 #include <vector>
 using std::string;
 
-Extractor::Extractor(unsigned image_width, unsigned image_height, unsigned anchor_size)
-	: _imageWidth(image_width? image_width : cimbar::Config::image_size_x())
-	, _imageHeight(image_height? image_height : cimbar::Config::image_size_y())
+Extractor::Extractor(cimbar::vec_xy image_size, unsigned anchor_size)
+	: _imageSize({
+		image_size.width()? image_size.width() : cimbar::Config::image_size_x(),
+		image_size.height()? image_size.height() : cimbar::Config::image_size_y()})
 	, _anchorSize(anchor_size? anchor_size : cimbar::Config::anchor_size())
 {
 }
@@ -22,10 +23,10 @@ int Extractor::extract(const cv::Mat& img, cv::Mat& out)
 		return FAILURE;
 
 	Corners corners(points);
-	Deskewer de(_imageWidth, _imageHeight, _anchorSize);
+	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.image_width(), de.image_height()) )
+	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }
@@ -38,10 +39,10 @@ int Extractor::extract(const cv::UMat& img, cv::UMat& out)
 		return FAILURE;
 
 	Corners corners(points);
-	Deskewer de(_imageWidth, _imageHeight, _anchorSize);
+	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.image_width(), de.image_height()) )
+	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }
