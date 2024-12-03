@@ -86,7 +86,7 @@ int next_frame()
 		enc.set_legacy_mode();
 
 	enc.set_encode_id(_encodeId);
-	_next = enc.encode_next(*_fes, _window->width(), _window->height());
+	_next = enc.encode_next(*_fes, {(int)_window->width(), (int)_window->height()});
 	return ++_frameCount;
 }
 
