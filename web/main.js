@@ -1,9 +1,10 @@
 var Main = function() {
 
 var _interval = 66;
+var _pause = 0;
 
 var _showStats = false;
-var _renders = 0;
+var _counter = 0;
 var _renderTime = 0;
 
 function toggleFullscreen()
@@ -43,14 +44,23 @@ return {
   {
     Module._initialize_GL(1040, 1040);
     Main.resize();
+    Main.check_GL_enabled(canvas);
+  },
+
+  check_GL_enabled : function(canvas)
+  {
+    if (canvas.getContext("2d")) {
+       var elem = document.getElementById('dragdrop');
+       elem.classList.add("error");
+    }
   },
 
   resize : function()
   {
     // reset zoom
     var canvas = document.getElementById('canvas');
-    var width = window.innerWidth;
-    var height = window.outerHeight;
+    var width = window.innerWidth - 10;
+    var height = window.innerHeight - 10;
     Main.scaleCanvas(canvas, width, height);
     Main.alignInvisibleClick(canvas);
   },
@@ -58,6 +68,21 @@ return {
   toggleFullscreen : function()
   {
     toggleFullscreen().then(Main.resize);
+    Main.togglePause(true);
+  },
+
+  togglePause : function(pause)
+  {
+    // pause is a cooldown. We pause to help autofocus, but we don't want to do it forever...
+    if (pause === undefined) {
+       pause = !Main.isPaused();
+    }
+    _pause = pause? 15 : 0;
+  },
+
+  isPaused : function()
+  {
+     return _pause > 0;
   },
 
   scaleCanvas : function(canvas, width, height)
@@ -66,16 +91,14 @@ return {
     if (height < dim) {
       dim = height;
     }
-    console.log(dim);
-    if (dim > 1040) {
-      dim = 1040;
-    }
+    console.log(dim + "x" + dim);
     canvas.style.width = dim + "px";
     canvas.style.height = dim + "px";
   },
 
   alignInvisibleClick : function(canvas)
   {
+     canvas = canvas || document.getElementById('canvas');
      var cpos = canvas.getBoundingClientRect();
      var invisible_click = document.getElementById("invisible_click");
      invisible_click.style.width = canvas.style.width;
@@ -109,11 +132,15 @@ return {
     document.getElementById("nav-button").focus();
   },
 
-  blurNav : function()
+  blurNav : function(pause)
   {
+    if (pause === undefined) {
+       pause = true;
+    }
     document.getElementById("nav-button").blur();
     document.getElementById("nav-content").blur();
     document.getElementById("nav-find-file-link").blur();
+    Main.togglePause(pause);
   },
 
   clickFileInput : function()
@@ -127,14 +154,20 @@ return {
     var file = document.getElementById('file_input').files[0];
     if (file)
        importFile(file);
-    Main.blurNav();
+    Main.blurNav(false);
   },
 
   nextFrame : function()
   {
+    _counter += 1;
+    if (_pause > 0) {
+       _pause -= 1;
+    }
     var start = performance.now();
-    Module._render();
-    var frameCount = Module._next_frame();
+    if (!Main.isPaused()) {
+       Module._render();
+       var frameCount = Module._next_frame();
+    }
 
     var elapsed = performance.now() - start;
     var nextInterval = _interval>elapsed? _interval-elapsed : 0;
@@ -143,6 +176,9 @@ return {
     if (_showStats && frameCount) {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
+    }
+    if ( !(_counter & 31) ) {
+       Main.resize();
     }
   },
 
@@ -192,6 +228,10 @@ window.addEventListener('keydown', function(e) {
         e.key == 'Space' || e.keyCode == 32
     ) {
       Main.clickNav();
+      e.preventDefault();
+    }
+    else if (e.key == 'Backspace' || e.keyCode == 8) {
+      Main.togglePause(true);
       e.preventDefault();
     }
   }
@@ -258,6 +298,21 @@ window.addEventListener('keydown', function(e) {
     }
   }
 }, true);
+
+window.addEventListener("touchstart", function(e) {
+  e = e || event;
+  Main.togglePause(true);
+}, false);
+
+window.addEventListener("touchend", function(e) {
+  e = e || event;
+  Main.togglePause(false);
+}, false);
+
+window.addEventListener("touchcancel", function(e) {
+  e = e || event;
+  Main.togglePause(false);
+}, false);
 
 window.addEventListener("dragover", function(e) {
   e = e || event;

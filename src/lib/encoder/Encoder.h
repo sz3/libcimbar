@@ -3,6 +3,7 @@
 
 #include "SimpleEncoder.h"
 #include "cimb_translator/Config.h"
+#include "extractor/Scanner.h"
 #include "serialize/format.h"
 
 #include <opencv2/opencv.hpp>
@@ -55,12 +56,27 @@ inline unsigned Encoder::encode_fountain(const std::string& filename, const std:
 		requiredFrames = 1;
 
 	unsigned i = 0;
+	unsigned consecutiveScansFailed = 0;
 	while (i < requiredFrames)
 	{
 		auto frame = encode_next(*fes);
 		if (!frame)
 			break;
 
+		// some % of generated frames (for the current 8x8 impl)
+		// will produce random patterns that falsely match as
+		// corner "anchors" and fail to extract. So:
+		// if frame fails the scan, skip it.
+		if (!Scanner::will_it_scan(*frame))
+		{
+			if (++consecutiveScansFailed < 5)
+				continue;
+
+			// else, we gotta make forward progress. And it's probably a bug?
+			std::cerr << fmt::format("generated {} bad frames in a row. This really shouldn't happen, maybe report a bug. :(", consecutiveScansFailed) << std::endl;
+		}
+
+		consecutiveScansFailed = 0;
 		if (!on_frame(*frame, i))
 			break;
 		++i;

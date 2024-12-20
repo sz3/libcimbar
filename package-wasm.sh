@@ -1,5 +1,5 @@
 #!/bin/bash
-#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:3.1.39
+#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:3.1.69 bash
 
 cd /usr/src/app
 
@@ -16,7 +16,7 @@ mkdir build-wasm
 cd build-wasm
 emcmake cmake .. -DUSE_WASM=1 -DOPENCV_DIR=/usr/src/app/opencv4
 make -j5 install
-(cd ../web/ && tar -czvf cimbar.wasm.tar.gz cimbar_js.* index.html main.js)
+(cd ../web/ && tar -czvf cimbar.wasm.tar.gz cimbar_js.js cimbar_js.wasm index.html main.js)
 
 cd /usr/src/app
 mkdir build-asmjs
