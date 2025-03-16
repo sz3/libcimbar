@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 project ( libcimbar )
 enable_testing()
 
+if (MSVC)
+    add_compile_options(/FI "iso646.h")
+endif()
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${libcimbar_SOURCE_DIR}/dist" CACHE PATH "..." FORCE)
 endif()
@@ -48,6 +52,10 @@ endif()
 
 if(NOT DEFINED CPPFILESYSTEM)
 	set(CPPFILESYSTEM "stdc++fs")
+endif()
+
+if(MSVC)
+	set(CPPFILESYSTEM "")
 endif()
 
 set (PROJECTS

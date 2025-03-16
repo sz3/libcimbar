@@ -40,8 +40,11 @@ namespace {
 		{
 			if (_done)
 				return;
-
+#ifdef _WIN32
+			if (::feof(stdin))
+#else
 			if (::feof(::stdin))
+#endif
 			{
 				mark_done();
 				return;
@@ -204,7 +207,7 @@ int main(int argc, char** argv)
 		exit(0);
 	}
 
-	string outpath = std::experimental::filesystem::current_path();
+	string outpath = std::experimental::filesystem::current_path().string();
 	if (result.count("out"))
 		outpath = result["out"].as<string>();
 	std::cerr << "Output files will appear in " << outpath << std::endl;
