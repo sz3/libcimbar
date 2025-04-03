@@ -16,9 +16,7 @@ jobs:
 
       - name: Get openCV
         run: |
-          wget https://github.com/opencv/opencv/archive/refs/tags/4.10.0.zip
-          unzip 4.10.0.zip
-          mv opencv-4.10.0 opencv4
+          git clone --recurse-submodules --depth 1 --branch 4.11.0 https://github.com/opencv/opencv.git opencv4
 
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3

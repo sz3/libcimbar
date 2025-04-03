@@ -1,7 +1,9 @@
+.cmake/
 CMakeFiles/
 Testing/
-build/
+build*/
 dist/
+opencv4/
 web/cimbar_js.js
 web/cimbar_js.wasm
 CMakeCache.txt

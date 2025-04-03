@@ -42,7 +42,7 @@ inline unsigned Encoder::encode(const std::string& filename, std::string output_
 
 inline unsigned Encoder::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level, double redundancy)
 {
-	std::ifstream infile(filename);
+	std::ifstream infile(filename, std::ios::binary);
 	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, compression_level);
 	if (!fes)
 		return 0;

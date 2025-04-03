@@ -7,6 +7,7 @@ set (SOURCES
 	FountainEncodingTest.cpp
 	FountainMetadataTest.cpp
 	fountain_sinkTest.cpp
+	fountain_sinkSpecialTest.cpp
 	fountain_streamTest.cpp
 )
 

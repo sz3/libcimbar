@@ -36,7 +36,7 @@ public:
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
 		std::string file_path = fmt::format("{}/{}", _dataDir, get_filename(md));
-		OUTSTREAM f(file_path);
+		OUTSTREAM f(file_path, std::ios::binary);
 		f.write((char*)data.data(), data.size());
 		if (_logWrites)
 			printf("%s\n", file_path.c_str());

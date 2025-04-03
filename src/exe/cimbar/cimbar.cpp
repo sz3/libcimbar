@@ -40,8 +40,11 @@ namespace {
 		{
 			if (_done)
 				return;
-
+#ifdef _WIN32
+			if (::feof(stdin))
+#else
 			if (::feof(::stdin))
+#endif
 			{
 				mark_done();
 				return;
@@ -201,20 +204,27 @@ int main(int argc, char** argv)
 	if (result.count("help"))
 	{
 		std::cerr << options.help() << std::endl;
-		exit(0);
+		return 0;
 	}
 
-	string outpath = std::experimental::filesystem::current_path();
+	string outpath = std::experimental::filesystem::current_path().string();
 	if (result.count("out"))
 		outpath = result["out"].as<string>();
 	std::cerr << "Output files will appear in " << outpath << std::endl;
 
 	bool useStdin = !result.count("in");
 	vector<string> infiles;
-	if (useStdin)
-		std::cerr << "Enter input filenames:" << std::endl;
-	else
+	if (!useStdin)
+	{
 		infiles = result["in"].as<vector<string>>();
+		if (infiles.empty())
+		{
+			std::cerr << "No input files? :(" << std::endl;
+			return 128;
+		}
+	}
+	else
+		std::cerr << "Enter input filenames:" << std::endl;
 
 	bool encodeFlag = result.count("encode");
 	bool no_fountain = result.count("no-fountain");
