@@ -44,9 +44,9 @@ protected:
 	}
 
 public:
-	gl_2d_display(unsigned width, unsigned height)
+	gl_2d_display(float dim)
 	    : _p(create())
-	    , _shakePos(computeShakePos(std::min(width, height)))
+	    , _shakePos(computeShakePos(dim))
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
