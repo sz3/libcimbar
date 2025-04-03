@@ -201,7 +201,7 @@ int main(int argc, char** argv)
 	if (result.count("help"))
 	{
 		std::cerr << options.help() << std::endl;
-		exit(0);
+		return 0;
 	}
 
 	string outpath = std::experimental::filesystem::current_path();
@@ -211,10 +211,17 @@ int main(int argc, char** argv)
 
 	bool useStdin = !result.count("in");
 	vector<string> infiles;
-	if (useStdin)
-		std::cerr << "Enter input filenames:" << std::endl;
-	else
+	if (!useStdin)
+	{
 		infiles = result["in"].as<vector<string>>();
+		if (infiles.empty())
+		{
+			std::cerr << "No input files? :(" << std::endl;
+			return 128;
+		}
+	}
+	else
+		std::cerr << "Enter input filenames:" << std::endl;
 
 	bool encodeFlag = result.count("encode");
 	bool no_fountain = result.count("no-fountain");
