@@ -28,7 +28,7 @@ public:
 	};
 
 public:
-	FloodDecodePositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y);
+	FloodDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size);
 
 	size_t size() const;
 	void reset();

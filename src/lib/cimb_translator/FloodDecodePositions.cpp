@@ -2,9 +2,9 @@
 #include "FloodDecodePositions.h"
 #include <iostream>
 
-FloodDecodePositions::FloodDecodePositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y)
-	: _positions(CellPositions::compute(spacing_x, spacing_y, dimensions_x, dimensions_y, offset, marker_size_x, marker_size_y, 0))
-	, _cellFinder(_positions, dimensions_x, dimensions_y, marker_size_x, marker_size_y)
+FloodDecodePositions::FloodDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size)
+	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
+	, _cellFinder(_positions, dimensions, marker_size)
 {
 	reset();
 }

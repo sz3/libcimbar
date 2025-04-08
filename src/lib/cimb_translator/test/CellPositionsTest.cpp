@@ -9,7 +9,7 @@
 
 TEST_CASE( "CellPositionsTest/testSimple", "[unit]" )
 {
-	CellPositions cells(9, 9, 112, 112, 8, 6, 6);
+	CellPositions cells(cimbar::vec_xy{9, 9}, cimbar::vec_xy{112, 112}, 8, cimbar::vec_xy{6, 6});
 
 	// test first coordinate. We'll just count the rest.
 	assertFalse( cells.done() );

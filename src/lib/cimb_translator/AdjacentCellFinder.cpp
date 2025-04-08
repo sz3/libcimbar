@@ -1,14 +1,14 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "AdjacentCellFinder.h"
 
-AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions_x, int dimensions_y, int marker_size_x, int marker_size_y)
+AdjacentCellFinder::AdjacentCellFinder(const CellPositions::positions_list& positions, cimbar::vec_xy dimensions, cimbar::vec_xy marker_size)
 	: _positions(positions)
-	, _dimensionsX(dimensions_x)
-	, _markerSizeX(marker_size_x)
+	, _dimensionsX(dimensions.x)
+	, _markerSizeX(marker_size.x)
 {
-	int midHeight = dimensions_y - marker_size_y - marker_size_y;
-	int midCells = dimensions_x * midHeight;
-	int edgeCells = calc_mid_width() * marker_size_y;
+	int midHeight = dimensions.y - marker_size.y - marker_size.y;
+	int midCells = dimensions.x * midHeight;
+	int edgeCells = calc_mid_width() * marker_size.y;
 	_firstMid = edgeCells;
 	_firstBottom = edgeCells + midCells;
 }

@@ -98,7 +98,11 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 	: _image(img)
 	, _fountainColorHeader(0U)
 	, _cellSize(Config::cell_size() + 2)
-	, _positions(Config::cell_spacing_x(), Config::cell_spacing_y(), Config::cells_per_col_x(), Config::cells_per_col_y(), Config::cell_offset(), Config::corner_padding_x(), Config::corner_padding_y())
+	, _positions(
+		  cimbar::vec_xy{Config::cell_spacing_x(), Config::cell_spacing_y()},
+		  cimbar::vec_xy{Config::cells_per_col_x(), Config::cells_per_col_y()},
+		  Config::cell_offset(), cimbar::vec_xy{Config::corner_padding_x(), Config::corner_padding_y()}
+	)
 	, _decoder(decoder)
 	, _good(_image.cols >= Config::image_size_x() and _image.rows >= Config::image_size_y())
 	, _colorCorrection(color_correction)

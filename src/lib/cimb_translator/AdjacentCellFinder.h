@@ -2,12 +2,13 @@
 #pragma once
 
 #include "CellPositions.h"
+#include "util/vec_xy.h"
 #include <array>
 
 class AdjacentCellFinder
 {
 public:
-	AdjacentCellFinder(const CellPositions::positions_list& positions, int dimensions_x, int dimensions_y, int marker_size_x, int marker_size_y);
+	AdjacentCellFinder(const CellPositions::positions_list& positions, cimbar::vec_xy dimensions, cimbar::vec_xy marker_size);
 
 	std::array<int, 4> find(int index) const;
 

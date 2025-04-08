@@ -11,7 +11,7 @@ public:
 	using iter = std::tuple<unsigned, CellPositions::coordinate, CellDrift>;
 
 public:
-	LinearDecodePositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y);
+	LinearDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size);
 
 	size_t count() const;
 	void reset();
@@ -26,8 +26,8 @@ protected:
 	CellDrift _drift;
 };
 
-inline LinearDecodePositions::LinearDecodePositions(int spacing_x, int spacing_y, int dimensions_x, int dimensions_y, int offset, int marker_size_x, int marker_size_y)
-	: _positions(CellPositions::compute(spacing_x, spacing_y, dimensions_x, dimensions_y, offset, marker_size_x, marker_size_y, 0))
+inline LinearDecodePositions::LinearDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size)
+	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
 	, _drift()
 {
 	reset();

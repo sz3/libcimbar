@@ -5,15 +5,15 @@ namespace cimbar {
 
 struct vec_xy
 {
-	int x = 0;
-	int y = 0;
+	unsigned x = 0;
+	unsigned y = 0;
 
-	int width() const
+	unsigned width() const
 	{
 		return x;
 	};
 
-	int height() const
+	unsigned height() const
 	{
 		return y;
 	}

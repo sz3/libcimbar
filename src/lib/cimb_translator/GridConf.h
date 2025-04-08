@@ -9,8 +9,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 2;
 		static constexpr unsigned ecc_bytes = 40;
 		static constexpr unsigned ecc_block_size = 216;
-		static constexpr int image_size_x = 988;
-		static constexpr int image_size_y = image_size_x;
+		static constexpr unsigned image_size_x = 988;
+		static constexpr unsigned image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 5;
 		static constexpr unsigned cell_spacing_x = cell_size+1;
@@ -28,8 +28,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 2;
 		static constexpr unsigned ecc_bytes = 35;
 		static constexpr unsigned ecc_block_size = 182;
-		static constexpr int image_size_x = 958;
-		static constexpr int image_size_y = image_size_x;
+		static constexpr unsigned image_size_x = 958;
+		static constexpr unsigned image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 5;
 		static constexpr unsigned cell_spacing_x = cell_size;
@@ -47,8 +47,8 @@ namespace cimbar
 		static constexpr unsigned symbol_bits = 4;
 		static constexpr unsigned ecc_bytes = 30;
 		static constexpr unsigned ecc_block_size = 155;
-		static constexpr int image_size_x = 1024;
-		static constexpr int image_size_y = image_size_x;
+		static constexpr unsigned image_size_x = 1024;
+		static constexpr unsigned image_size_y = image_size_x;
 
 		static constexpr unsigned cell_size = 8;
 		static constexpr unsigned cell_spacing_x = cell_size+1;
@@ -56,6 +56,25 @@ namespace cimbar
 		static constexpr unsigned cell_offset = 8;
 		static constexpr unsigned cells_per_col_x = 112;
 		static constexpr unsigned cells_per_col_y = cells_per_col_x;
+
+		static constexpr int fountain_chunks_per_frame = 2;
+	};
+
+	struct Conf8x8_mini
+	{
+		static constexpr unsigned color_bits = 2;
+		static constexpr unsigned symbol_bits = 4;
+		static constexpr unsigned ecc_bytes = 35;
+		static constexpr unsigned ecc_block_size = 174;
+		static constexpr unsigned image_size_x = 1285;
+		static constexpr unsigned image_size_y = 736;
+
+		static constexpr unsigned cell_size = 8;
+		static constexpr unsigned cell_spacing_x = cell_size+1;
+		static constexpr unsigned cell_spacing_y = cell_size+1;
+		static constexpr unsigned cell_offset = 9;
+		static constexpr unsigned cells_per_col_x = 141;
+		static constexpr unsigned cells_per_col_y = 80;
 
 		static constexpr int fountain_chunks_per_frame = 2;
 	};

@@ -51,7 +51,7 @@ TEST_CASE( "InterleaveTest/testReverse", "[unit]" )
 
 TEST_CASE( "InterleaveTest/testCellPositions", "[unit]" )
 {
-	std::vector<unsigned> indices = Interleave::interleave_reverse(CellPositions::compute_linear(9, 9, 112, 112, 8, 6, 6).size(), 155, 1);
+	std::vector<unsigned> indices = Interleave::interleave_reverse(CellPositions::compute_linear(cimbar::vec_xy{9, 9}, cimbar::vec_xy{112, 112}, 8, cimbar::vec_xy{6, 6}).size(), 155, 1);
 	assertEquals( 12400, indices.size() );
 	assertEquals( 0, indices[0] );
 	assertEquals( 80, indices[1] );

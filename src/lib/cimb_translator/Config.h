@@ -46,12 +46,12 @@ namespace cimbar
 			return GridConf::ecc_block_size;
 		}
 
-		static constexpr int image_size_x()
+		static constexpr unsigned image_size_x()
 		{
 			return GridConf::image_size_x;
 		}
 
-		static constexpr int image_size_y()
+		static constexpr unsigned image_size_y()
 		{
 			return GridConf::image_size_y;
 		}
