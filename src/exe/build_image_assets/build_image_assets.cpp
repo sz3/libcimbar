@@ -20,7 +20,7 @@ map<string, string> getFileBlobs(string dir_path)
 	map<string, string> blobs;
 
 	vector<string> anchors = {"anchor-{}.png", "anchor-secondary-{}.png", "guide-horizontal-{}.png", "guide-vertical-{}.png"};
-	for (const string& mode : {"light", "dark"})
+	for (const auto& mode : {"light", "dark"})
 		for (const string& a : anchors)
 		{
 			string short_path = fmt::format(a, mode);
