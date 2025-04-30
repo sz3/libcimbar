@@ -6,6 +6,7 @@
 #include "serialize/format.h"
 
 #include <cstdio>
+#include <functional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -13,13 +14,24 @@
 #include <vector>
 
 template <typename OUTSTREAM>
+std::function<void(const std::string&, const std::vector<uint8_t>&)> write_on_store(std::string data_dir, bool log_writes=false)
+{
+	return [data_dir, log_writes](const std::string& filename, const std::vector<uint8_t>& data)
+	{
+		std::string file_path = fmt::format("{}/{}", data_dir, filename);
+		OUTSTREAM f(file_path, std::ios::binary);
+		f.write((char*)data.data(), data.size());
+		if (log_writes)
+			printf("%s\n", file_path.c_str());
+	};
+}
+
 class fountain_decoder_sink
 {
 public:
-	fountain_decoder_sink(std::string data_dir, unsigned chunk_size, bool log_writes=false)
-		: _dataDir(data_dir)
-		, _chunkSize(chunk_size)
-		, _logWrites(log_writes)
+	fountain_decoder_sink(unsigned chunk_size, const std::function<void(const std::string&, const std::vector<uint8_t>&)>& on_store=nullptr)
+		: _chunkSize(chunk_size)
+		, _onStore(on_store)
 	{
 	}
 
@@ -35,11 +47,8 @@ public:
 
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
-		std::string file_path = fmt::format("{}/{}", _dataDir, get_filename(md));
-		OUTSTREAM f(file_path, std::ios::binary);
-		f.write((char*)data.data(), data.size());
-		if (_logWrites)
-			printf("%s\n", file_path.c_str());
+		if (_onStore)
+			_onStore(get_filename(md), data);
 		return true;
 	}
 
@@ -138,8 +147,8 @@ protected:
 	}
 
 protected:
-	std::string _dataDir;
 	unsigned _chunkSize;
+	std::function<void(const std::string&, const std::vector<uint8_t>&)> _onStore;
 
 	// maybe instead of unordered_map+set, something where we can "age out" old streams?
 	// e.g. most recent 16/8, or something?

@@ -282,12 +282,12 @@ int main(int argc, char** argv)
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
 	if (compressionLevel <= 0)
 	{
-		fountain_decoder_sink<std::ofstream> sink(outpath, chunkSize, true);
+		fountain_decoder_sink sink(chunkSize, write_on_store<std::ofstream>(outpath, true));
 		res = decode(infiles, fountain_decode_fun(sink, d), no_deskew, undistort, color_mode, preprocess, color_correct);
 	}
 	else // default case, all bells and whistles
 	{
-		fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize, true);
+		fountain_decoder_sink sink(chunkSize, write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true));
 
 		if (useStdin)
 			res = decode(StdinLineReader(), fountain_decode_fun(sink, d), no_deskew, undistort, color_mode, preprocess, color_correct);
