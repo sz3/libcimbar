@@ -58,7 +58,7 @@ TEST_CASE( "FountainSinkSpecialTest/testMultipart", "[unit]" )
 	::srand( ::time(nullptr) );
 	MakeTempDirectory tempdir;
 
-	fountain_decoder_sink<std::ofstream> sink(tempdir.path(), 750);
+	fountain_decoder_sink sink(750, write_on_store<std::ofstream>(tempdir.path()));
 
 	const int totalSize = 6000000;
 	string randostr = random_string(2500);

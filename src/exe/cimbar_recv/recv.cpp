@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 	Decoder dec(-1, -1);
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
+	fountain_decoder_sink sink(chunkSize, write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true));
 
 	cv::Mat mat;
 
