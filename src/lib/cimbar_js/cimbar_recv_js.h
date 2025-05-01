@@ -16,7 +16,7 @@ int fountain_decode(char* buffer, unsigned size);
 // bouth fountain_*() calls should be from the same js webworker/thread
 int fountain_finish_copy(char* buffer, unsigned size);
 
-int configure_decode(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
+int configure_decode(unsigned color_bits, int mode_val);
 
 #ifdef __cplusplus
 }

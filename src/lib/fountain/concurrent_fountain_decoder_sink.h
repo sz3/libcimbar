@@ -6,12 +6,11 @@
 #include "concurrentqueue/concurrentqueue.h"
 #include <mutex>
 
-template <typename OUTSTREAM>
 class concurrent_fountain_decoder_sink
 {
 public:
-	concurrent_fountain_decoder_sink(std::string data_dir, unsigned chunk_size)
-	    : _decoder(data_dir, chunk_size)
+	concurrent_fountain_decoder_sink(unsigned chunk_size, const std::function<void(const std::string&, const std::vector<uint8_t>&)>& on_store=nullptr)
+		: _decoder(chunk_size, on_store)
 	{
 	}
 
@@ -87,7 +86,7 @@ public:
 protected:
 	std::mutex _writeMutex;
 	mutable std::mutex _readMutex;
-	fountain_decoder_sink<OUTSTREAM> _decoder;
+	fountain_decoder_sink _decoder;
 	moodycamel::ConcurrentQueue< std::string > _backlog;
 
 	std::vector<std::string> _done;
