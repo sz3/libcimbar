@@ -5,6 +5,8 @@ project(cimbar_js)
 set (SOURCES
 	cimbar_js.h
 	cimbar_js.cpp
+	cimbar_recv_js.h
+	cimbar_recv_js.cpp
 )
 
 if(DEFINED USE_WASM)

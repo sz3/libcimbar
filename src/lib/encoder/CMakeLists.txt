@@ -5,6 +5,8 @@ set(SOURCES
 	Encoder.h
 	ReedSolomon.h
 	SimpleEncoder.h
+	aligned_stream.h
+	escrow_buffer_writer.h
 	reed_solomon_stream.h
 )
 
