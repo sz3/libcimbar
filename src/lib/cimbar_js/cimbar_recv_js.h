@@ -16,7 +16,7 @@ int64_t fountain_decode(char* buffer, unsigned size);
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
-int fountain_finish_copy(uint32_t id, char* buffer, unsigned size);
+int fountain_finish_copy(uint32_t id, unsigned char* buffer, unsigned size);
 
 int configure_decode(unsigned color_bits, int mode_val);
 
