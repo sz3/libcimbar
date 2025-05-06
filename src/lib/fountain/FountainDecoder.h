@@ -60,12 +60,17 @@ public:
 		return true;
 	}
 
+	bool recover(unsigned char* data, unsigned size)
+	{
+		_res = wirehair_recover(_codec, data, size);
+		return _res == Wirehair_Success;
+	}
+
 	std::optional<std::vector<uint8_t>> recover()
 	{
 		std::vector<uint8_t> bytes;
 		bytes.resize(_length);
-		_res = wirehair_recover(_codec, bytes.data(), bytes.size());
-		if (_res != Wirehair_Success)
+		if (!recover(bytes.data(), bytes.size()))
 			return std::nullopt; // :(
 
 		return bytes;

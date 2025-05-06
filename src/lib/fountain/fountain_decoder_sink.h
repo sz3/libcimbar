@@ -50,17 +50,14 @@ public:
 		return fmt::format("{}.{}", md.encode_id(), md.file_size());
 	}
 
-	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
+	bool store(const FountainMetadata& md, fountain_decoder_stream& s)
 	{
-		// for web decoder, have f.write() map to a copy from our (native)
-		// buff in data to something that wasm owns?
-		// sizing will be slightly interesting -- could try to alloc a big buffer
-		// + reuse it, or could provide a hint back?
-		// hint would require a new api...
-
 		if (_onStore)
 		{
-			_onStore(get_filename(md), data);
+			auto res = s.recover();
+			if (!res)
+				return false;
+			_onStore(get_filename(md), *res);
 			mark_done(md);
 		}
 		return true;
@@ -128,14 +125,15 @@ public:
 		if (s.data_size() != md.file_size())
 			return 0;
 
-		auto finished = s.write(data, size);
+		bool finished = s.write(data, size);
 		if (!finished)
 			return 0;
 
-		// if you provide a write callback,
-		// store() will call mark_done() -- and the assembled file will we dropped from RAM.
-		// but if don't provide the callback, you can do something else.
-		store(md, *finished);
+		// when you provide a write callback,
+		// store() will call mark_done() afterwards
+		// -- and the assembled file will we dropped from RAM.
+		// but if no callback is provided, you can do something else.
+		store(md, s);
 		return md.id();
 	}
 
@@ -148,6 +146,23 @@ public:
 	{
 		write(buffer.data(), buffer.size());
 		return *this;
+	}
+
+	bool recover(uint32_t id, unsigned char* data, unsigned size)
+	{
+		// iff you don't provide a write callback
+		// this finalizes the write.
+		// after the data is copied to `data`,
+		// the stream will be dropped from RAM (`mark_done()`)
+		FountainMetadata md(id);
+		auto p = _streams.find(md.id());
+		if (p == _streams.end())
+			return false;
+
+		fountain_decoder_stream& s = p->second;
+		bool res = s.recover(data, size);
+		mark_done(md);
+		return res;
 	}
 
 protected:
