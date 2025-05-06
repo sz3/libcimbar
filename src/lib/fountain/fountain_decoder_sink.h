@@ -45,10 +45,24 @@ public:
 		return _chunkSize;
 	}
 
+	std::string get_filename(const FountainMetadata& md) const
+	{
+		return fmt::format("{}.{}", md.encode_id(), md.file_size());
+	}
+
 	bool store(const FountainMetadata& md, const std::vector<uint8_t>& data)
 	{
+		// for web decoder, have f.write() map to a copy from our (native)
+		// buff in data to something that wasm owns?
+		// sizing will be slightly interesting -- could try to alloc a big buffer
+		// + reuse it, or could provide a hint back?
+		// hint would require a new api...
+
 		if (_onStore)
+		{
 			_onStore(get_filename(md), data);
+			mark_done(md);
+		}
 		return true;
 	}
 
@@ -95,42 +109,44 @@ public:
 		return _done.find(id) != _done.end();
 	}
 
-	bool decode_frame(const char* data, unsigned size)
+	uint32_t decode_frame(const char* data, unsigned size)
 	{
 		if (size < FountainMetadata::md_size)
-			return false;
+			return 0;
 
 		FountainMetadata md(data, size);
 		if (!md.file_size())
-			return false;
+			return 0;
 
 		// check if already done
 		if (is_done(md.id()))
-			return false;
+			return 0;
 
 		// find or create
 		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
-			return false;
+			return 0;
 
 		auto finished = s.write(data, size);
 		if (!finished)
-			return false;
+			return 0;
 
-		if (store(md, *finished))
-			mark_done(md);
-		return true;
+		// if you provide a write callback,
+		// store() will call mark_done() -- and the assembled file will we dropped from RAM.
+		// but if don't provide the callback, you can do something else.
+		store(md, *finished);
+		return md.id();
 	}
 
 	bool write(const char* data, unsigned length)
 	{
-		return decode_frame(data, length);
+		return decode_frame(data, length) > 0;
 	}
 
 	fountain_decoder_sink& operator<<(const std::string& buffer)
 	{
-		decode_frame(buffer.data(), buffer.size());
+		write(buffer.data(), buffer.size());
 		return *this;
 	}
 
@@ -139,11 +155,6 @@ protected:
 	uint8_t stream_slot(const FountainMetadata& md) const
 	{
 		return md.encode_id() & 0x7;
-	}
-
-	std::string get_filename(const FountainMetadata& md) const
-	{
-		return fmt::format("{}.{}", md.encode_id(), md.file_size());
 	}
 
 protected:
