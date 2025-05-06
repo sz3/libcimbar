@@ -50,7 +50,9 @@ public:
 		// we ignore the first 4 bytes. It's the sink's job to make sure we're getting the right stuff.
 		// we may, at some point, sanity check if data_size == [1]+[2]+[3]
 		unsigned blockId = (unsigned)(_buffer[4]) << 8 | _buffer[5];
-		return _decoder.decode(blockId, _buffer.data() + _headerSize, block_size());
+		if  (!_decoder.decode(blockId, _buffer.data() + _headerSize, block_size()))
+			return std::nullopt;
+		return _decoder.recover();
 	}
 
 	// we need to track either:

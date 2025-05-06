@@ -57,20 +57,20 @@ int scan_extract_decode(char* imgdata, unsigned imgw, unsigned imgh, char** buff
 	return ebw.buffers_in_use();
 }
 
-// returns size of final file (size of `finish_copy`'s buffer) if complete, 0 if success, -1 if failure
-int fountain_decode(char* buffer, unsigned size)
+// returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
+int64_t fountain_decode(char* buffer, unsigned size)
 {
 	if (!_sink)
 		return -1;
 
-	_sink->write(buffer, size);
-	// _sink.write(); // if true, return size of file
-	return 0;
+	// res will be the file id on completion, 0 otherwise
+	uint32_t res = _sink->decode_frame(buffer, size);
+	return res;
 }
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
-int fountain_finish_copy(char* buffer, unsigned size)
+int fountain_finish_copy(uint32_t id, char* buffer, unsigned size)
 {
 	return 0;
 }
