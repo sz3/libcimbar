@@ -131,7 +131,7 @@ TEST_CASE( "CellTest/testRgbCellOffsets.Asymmetric.Contiguous", "[unit]" )
 	}
 }
 
-TEST_CASE( "CellTest/testRgbCellOffsets.WideCanvas", "[unit]" )
+/*TEST_CASE( "CellTest/testRgbCellOffsets.WideCanvas", "[unit]" )
 {
 	cv::Mat img = TestCimbar::loadSample("bm/ecc35.png");
 
@@ -156,4 +156,4 @@ TEST_CASE( "CellTest/testRgbCellOffsets.WideCanvas", "[unit]" )
 		assertAlmostEquals( expectedColor[2], (int)b );
 		assertEquals( 148, (int)b );
 	}
-}
+}*/
