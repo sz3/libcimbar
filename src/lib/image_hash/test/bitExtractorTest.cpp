@@ -92,14 +92,17 @@ TEST_CASE( "bitExtractorTest/testLargerValue.2", "[unit]" )
 
 TEST_CASE( "bitExtractorTest/testTuple.5", "[unit]" )
 {
-	uint64_t bits = 0x11d07e1f;
-	bit_extractor<uint64_t, 32, 5> be(bits);
+	uint64_t bits = 0x11d07e1f0;
+	bit_extractor<uint64_t, 36, 5> be(bits);
 
 	auto tup = be.pattern(0);
 	assertEquals( "0 7 14 21 28", tuple_to_str(tup) );
 
-	assertEquals(  0x2e8f00, be.extract(0, 7, 14, 21, 28) );
-	assertEquals(  0x2e8f00, be.extract_tuple(tup) );
+	assertEquals(  0x2, be.extract(0) );
+	assertEquals(  0x1E, be.extract(28) );
+	assertEquals(  0x17478, be.extract(0, 7, 14, 21) );
+	assertEquals(  0x2e8f1e, be.extract(0, 7, 14, 21, 28) );
+	assertEquals(  0x2e8f1e, be.extract_tuple(tup) );
 }
 
 TEST_CASE( "bitExtractorTest/testTuple.8", "[unit]" )
@@ -116,8 +119,8 @@ TEST_CASE( "bitExtractorTest/testTuple.8", "[unit]" )
 
 TEST_CASE( "bitExtractorTest/testTuplePatterns.5", "[unit]" )
 {
-	uint64_t bits = 0x11d07e1f;
-	bit_extractor<uint64_t, 32, 5> be(bits);
+	uint64_t bits = 0x11d07e1f0;
+	bit_extractor<uint64_t, 36, 5> be(bits);
 
 	std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned> tup = be.pattern(0);
 	assertEquals( "0 7 14 21 28", tuple_to_str(tup) );
