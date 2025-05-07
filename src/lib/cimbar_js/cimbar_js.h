@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 int initialize_GL(int width, int height);
+bool auto_scale_window();
 int render();
 int next_frame();
 int encode(unsigned char* buffer, unsigned size, int encode_id);  // encode_id == -1 -> auto-increment

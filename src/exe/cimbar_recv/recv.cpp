@@ -8,6 +8,7 @@
 
 #include "cxxopts/cxxopts.hpp"
 #include "serialize/str.h"
+#include "serialize/str_join.h"
 
 #include <GLFW/glfw3.h>
 #include <opencv2/videoio.hpp>
@@ -37,7 +38,7 @@ int main(int argc, char** argv)
 
 	unsigned colorBits = cimbar::Config::color_bits();
 	unsigned ecc = cimbar::Config::ecc_bytes();
-	unsigned defaultFps = 60;
+	unsigned defaultFps = 30;
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())
@@ -89,7 +90,7 @@ int main(int argc, char** argv)
 
 	// set max camera res, and use aspect ratio for window size...
 
-	std::cout << fmt::format("width: {}, height {}, exposure {}", vc.get(cv::CAP_PROP_FRAME_WIDTH), vc.get(cv::CAP_PROP_FRAME_HEIGHT), vc.get(cv::CAP_PROP_EXPOSURE)) << std::endl;
+	std::cout << fmt::format("width: {}, height {}, exposure {}, fps {}", vc.get(cv::CAP_PROP_FRAME_WIDTH), vc.get(cv::CAP_PROP_FRAME_HEIGHT), vc.get(cv::CAP_PROP_EXPOSURE), vc.get(cv::CAP_PROP_FPS)) << std::endl;
 
 	double ratio = vc.get(cv::CAP_PROP_FRAME_WIDTH) / vc.get(cv::CAP_PROP_FRAME_HEIGHT);
 	int height = 600;
@@ -129,14 +130,14 @@ int main(int argc, char** argv)
 			continue;
 		}
 
-		cv::UMat img = mat.getUMat(cv::ACCESS_RW);
+		cv::UMat img = mat.getUMat(cv::ACCESS_RW).clone();
 		cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
 
 		// draw some stats on mat?
 		window.show(mat, 0);
 
 		// extract
-		bool shouldPreprocess = true;
+		bool shouldPreprocess = false;
 		int res = ext.extract(img, img);
 		if (!res)
 		{
@@ -150,6 +151,8 @@ int main(int argc, char** argv)
 		int bytes = dec.decode_fountain(img, sink, color_mode, shouldPreprocess);
 		if (bytes > 0)
 			std::cerr << "got some bytes " << bytes << std::endl;
+
+		std::cerr << turbo::str::join(sink.get_progress()) << std::endl;
 	}
 
 	return 0;

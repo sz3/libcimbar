@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 		std::cerr << "failed to create window :(" << std::endl;
 		return 70;
 	}
-
+	auto_scale_window();
 	configure(colorBits, ecc, compressionLevel, legacy_mode);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
