@@ -155,7 +155,7 @@ public:
 		// after the data is copied to `data`,
 		// the stream will be dropped from RAM (`mark_done()`)
 		FountainMetadata md(id);
-		auto p = _streams.find(md.id());
+		auto p = _streams.find(stream_slot(md));
 		if (p == _streams.end())
 			return false;
 
