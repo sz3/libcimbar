@@ -6,6 +6,7 @@
 #include "encoder/escrow_buffer_writer.h"
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
+#include "serialize/str_join.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -26,29 +27,26 @@ namespace {
 extern "C" {
 
 
-int scan_extract_decode(char* imgdata, unsigned imgw, unsigned imgh, char** buffers, unsigned bufcount, unsigned bufsize)
+int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* bufspace, unsigned bufcount, unsigned bufsize)
 {
 	// TODO: early bail if bufsize doesn't match config params (fountain chunk size)
-	// if bad imgsize
-	// return -2
 	// if bad bufsize
-	// return -3;
+	// return -2;
 
 	// need a class that implements the writer/sink interface and writes to our "escrow" buffers
-	escrow_buffer_writer ebw(buffers, bufcount, bufsize);
+	escrow_buffer_writer ebw(bufspace, bufcount, bufsize);
 
 	// at the end, return abw.num_writes()
 
 	Extractor ext;
 	Decoder dec(-1, -1);
 
-	cv::Mat img(imgw, imgh, CV_8UC3, (void*)imgdata);
-	cv::Mat extracted;
+	cv::UMat img = cv::Mat(imgh, imgw, CV_8UC3, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
 
 	bool shouldPreprocess = true;
-	int res = ext.extract(img, extracted);
+	int res = ext.extract(img, img);
 	if (!res)
-		return -4;
+		return -3;
 	else if (res == Extractor::NEEDS_SHARPEN)
 		shouldPreprocess = true;
 
@@ -58,21 +56,39 @@ int scan_extract_decode(char* imgdata, unsigned imgw, unsigned imgh, char** buff
 }
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
-int64_t fountain_decode(char* buffer, unsigned size)
+int64_t fountain_decode(unsigned char* buffer, unsigned size)
 {
 	if (!_sink)
 		return -1;
 
 	// res will be the file id on completion, 0 otherwise
-	uint32_t res = _sink->decode_frame(buffer, size);
+	uint32_t res = _sink->decode_frame(reinterpret_cast<char*>(buffer), size);
+	std::cout << "progress: " << turbo::str::join(_sink->get_progress()) << std::endl;
 	return res;
 }
 
-// maybe a fountain_get_size(uint32_t) helper?
+unsigned fountain_get_size(uint32_t id)
+{
+	FountainMetadata md(id);
+	return md.file_size();
+}
+
+int fountain_get_filename(uint32_t id, char* buf, unsigned size)
+{
+	if (!_sink)
+		return -1;
+
+	FountainMetadata md(id);
+	std::string filename = _sink->get_filename(md);
+	if (filename.size() > size)
+		filename.resize(size);
+	std::copy(filename.begin(), filename.end(), buf);
+	return filename.size();
+}
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
-int fountain_finish_copy(uint32_t id, unsigned char* buffer, unsigned size)
+int fountain_finish_copy(uint32_t id, uchar* buffer, unsigned size)
 {
 	if (!_sink)
 		return -1;

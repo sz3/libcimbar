@@ -7,8 +7,8 @@
 class escrow_buffer_writer
 {
 public:
-	escrow_buffer_writer(char** buffers, unsigned bufcount, unsigned bufsize)
-		: _buffers(buffers)
+	escrow_buffer_writer(unsigned char* bufspace, unsigned bufcount, unsigned bufsize)
+		: _bufspace(bufspace)
 		, _bufcount(bufcount)
 		, _bufsize(bufsize)
 	{
@@ -46,7 +46,7 @@ public:
 		if (!good())
 			return *this;
 
-		std::copy(data, data+length, _buffers[_bufIdx]);
+		std::copy(data, data+length, _bufspace+(_bufIdx*_bufsize));
 
 		_totalCount += length;
 		++_bufIdx;
@@ -59,7 +59,7 @@ public:
 	}
 
 protected:
-	char** _buffers;
+	unsigned char* _bufspace;
 	unsigned _bufcount;
 	unsigned _bufsize;
 
