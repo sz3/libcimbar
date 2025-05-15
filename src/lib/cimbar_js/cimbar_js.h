@@ -12,6 +12,7 @@ int render();
 int next_frame();
 int encode(unsigned char* buffer, unsigned size, int encode_id);  // encode_id == -1 -> auto-increment
 int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode);
+float get_aspect_ratio();
 
 #ifdef __cplusplus
 }
