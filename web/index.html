@@ -56,6 +56,8 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
 	color: #F0F0F0;
 	outline: 6px solid black;
 	box-shadow: 0px 0px 12px black, 0px 0px 18px black;
+	transform-origin: 0;
+	transition: transform 0.3s;
 }
 
 .dragdrop::before {
@@ -66,6 +68,15 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
 	left: 0;
 	text-align: center;
 	width: 100%;
+	transform-origin: center center;
+	transition: transform 0.3s;
+}
+
+.dragdrop.rotated::before {
+	width: 100vh;
+	left: 0;
+	top: 0;
+	transform: rotate(-90deg) translateX(-20%) translateY(-5em);
 }
 
 .dragdrop.error:before {
@@ -215,7 +226,6 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   transform: translateX(-100%);
   transition: transform .3s;
-  will-change: transform;
 }
 
 #nav-content ul {
