@@ -92,7 +92,7 @@ return {
   {
     // using ratio from current config,
     // determine optimal dimensions and rotation
-    var needRotate = height > width;
+    var needRotate = _idealRatio > 1 && height > width;
     var ourRatio = needRotate? height / width : width / height;
 
     var xdim = needRotate? height : width;
