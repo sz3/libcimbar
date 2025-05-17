@@ -2,7 +2,7 @@
 #include "cimbar_recv_js.h"
 
 #include "cimb_translator/Config.h"
-#include "encoder/Decoder.h"
+#include "encoder/SimpleDecoder.h"
 #include "encoder/escrow_buffer_writer.h"
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
@@ -39,7 +39,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 	// at the end, return abw.num_writes()
 
 	Extractor ext;
-	Decoder dec(-1, -1);
+	SimpleDecoder dec(-1, -1);
 
 	cv::UMat img = cv::Mat(imgh, imgw, CV_8UC3, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
 
