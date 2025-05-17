@@ -4,6 +4,7 @@ set(SOURCES
 	Decoder.h
 	Encoder.h
 	ReedSolomon.h
+	SimpleDecoder.h
 	SimpleEncoder.h
 	aligned_stream.h
 	escrow_buffer_writer.h
