@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+int do_decode(uint8_t* rgba_image_data, int width, int height);
+
 // imgsize=width*height*channels. Stores results in `buffers`
 int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, unsigned char* bufspace, unsigned bufcount, unsigned bufsize);
 
