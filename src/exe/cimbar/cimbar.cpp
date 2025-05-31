@@ -1,8 +1,8 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimb_translator/Config.h"
 #include "compression/zstd_decompressor.h"
-#include "encoder/Decoder.h"
-#include "encoder/Encoder.h"
+#include "encoder/DecoderPlus.h"
+#include "encoder/EncoderPlus.h"
 #include "extractor/Extractor.h"
 #include "extractor/SimpleCameraCalibration.h"
 #include "extractor/Undistort.h"
@@ -106,7 +106,7 @@ namespace {
 template <typename FilenameIterable>
 int encode(const FilenameIterable& infiles, const std::string& outpath, int ecc, int color_bits, int compression_level, bool legacy_mode, bool no_fountain)
 {
-	Encoder en(ecc, cimbar::Config::symbol_bits(), color_bits);
+	EncoderPlus en(ecc, cimbar::Config::symbol_bits(), color_bits);
 	en.set_encode_id(109);
 	if (legacy_mode)
 		en.set_legacy_mode();
@@ -258,7 +258,7 @@ int main(int argc, char** argv)
 	int preprocess = result["preprocess"].as<int>();
 
 	unsigned color_mode = legacy_mode? 0 : 1;
-	Decoder d(ecc, colorBits);
+	DecoderPlus d(ecc, colorBits);
 
 	if (no_fountain)
 	{

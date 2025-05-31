@@ -2,14 +2,14 @@
 #include "unittest.h"
 #include "TestHelpers.h"
 
-#include "Deskewer.h"
+#include "DeskewerPlus.h"
 #include "image_hash/average_hash.h"
 #include <string>
 
 TEST_CASE( "DeskewerTest/testSimple", "[unit]" )
 {
 	Corners corners({312, 519}, {323, 2586}, {2405, 461}, {2425, 2594});
-	Deskewer de({1024, 1024}, 30);
+	DeskewerPlus de({1024, 1024}, 30);
 
 	cv::Mat actual = de.deskew(TestCimbar::getSample("6bit/4_30_f0_big.jpg"), corners);
 	assertEquals(cv::Size(1024, 1024), actual.size());
