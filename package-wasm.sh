@@ -17,7 +17,7 @@ mkdir build-wasm
 cd build-wasm
 emcmake cmake .. -DUSE_WASM=1 -DOPENCV_DIR=$CIMBAR_ROOT/opencv4
 make -j5 install
-(cd ../web/ && tar -czvf cimbar.wasm.tar.gz cimbar_js.js cimbar_js.wasm index.html main.js)
+(cd ../web/ && bash wasmgz.sh)
 
 cd $CIMBAR_ROOT
 mkdir build-asmjs
