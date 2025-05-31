@@ -4,7 +4,7 @@
 #include "cimb_translator/Config.h"
 #include "encoder/SimpleDecoder.h"
 #include "encoder/escrow_buffer_writer.h"
-#include "extractor/Extractor.h"
+#include "extractor/SimpleExtractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str_join.h"
 
@@ -26,6 +26,25 @@ namespace {
 
 extern "C" {
 
+int do_decode(uint8_t* rgba_image_data, int width, int height)
+{
+	if (!rgba_image_data)
+		return -1;
+
+	int totalRed = 0;
+	int count = 0;
+
+	int stride = 4;
+	int len = width*height*stride;
+	for (int i = 0; i < len; i+=stride)
+	{
+		totalRed += rgba_image_data[i];
+		++count;
+	}
+	if (!count)
+		++count;
+	return totalRed/count;
+}
 
 int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* bufspace, unsigned bufcount, unsigned bufsize)
 {
@@ -38,7 +57,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 
 	// at the end, return abw.num_writes()
 
-	Extractor ext;
+	SimpleExtractor ext;
 	SimpleDecoder dec(-1, -1);
 
 	cv::UMat img = cv::Mat(imgh, imgw, CV_8UC3, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
@@ -47,7 +66,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 	int res = ext.extract(img, img);
 	if (!res)
 		return -3;
-	else if (res == Extractor::NEEDS_SHARPEN)
+	else if (res == SimpleExtractor::NEEDS_SHARPEN)
 		shouldPreprocess = true;
 
 	// decode
