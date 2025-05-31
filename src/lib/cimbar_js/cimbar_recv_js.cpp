@@ -2,9 +2,9 @@
 #include "cimbar_recv_js.h"
 
 #include "cimb_translator/Config.h"
-#include "encoder/SimpleDecoder.h"
+#include "encoder/Decoder.h"
 #include "encoder/escrow_buffer_writer.h"
-#include "extractor/SimpleExtractor.h"
+#include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str_join.h"
 
@@ -57,8 +57,8 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 
 	// at the end, return abw.num_writes()
 
-	SimpleExtractor ext;
-	SimpleDecoder dec(-1, -1);
+	Extractor ext;
+	Decoder dec(-1, -1);
 
 	cv::UMat img = cv::Mat(imgh, imgw, CV_8UC3, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
 
@@ -66,7 +66,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 	int res = ext.extract(img, img);
 	if (!res)
 		return -3;
-	else if (res == SimpleExtractor::NEEDS_SHARPEN)
+	else if (res == Extractor::NEEDS_SHARPEN)
 		shouldPreprocess = true;
 
 	// decode

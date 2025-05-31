@@ -1,5 +1,5 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
-#include "extractor/Extractor.h"
+#include "extractor/ExtractorPlus.h"
 
 #include "cxxopts/cxxopts.hpp"
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 	std::string outfile = result["out"].as<std::string>();
 	bool dark = result["dark"].as<bool>();
 
-	Extractor ext;
+	ExtractorPlus ext;
 	if (!ext.extract(infile, outfile))
 		return 1;
 
