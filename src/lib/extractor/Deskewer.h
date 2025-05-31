@@ -1,32 +1,38 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
-#include "SimpleDeskewer.h"
+#include "Corners.h"
 
+#include "util/vec_xy.h"
 #include <opencv2/opencv.hpp>
 
-class Deskewer : public SimpleDeskewer
+#include <vector>
+
+class Deskewer
 {
 public:
-	using SimpleDeskewer::SimpleDeskewer;
-	using SimpleDeskewer::deskew;
+	Deskewer(cimbar::vec_xy image_size={}, unsigned anchor_size=0);
 
-	cv::Mat deskew(std::string img, const Corners& corners);
-	bool save(const cv::Mat& img, std::string path);
+	template <typename MAT>
+	MAT deskew(const MAT& img, const Corners& corners);
 
 protected:
+	cimbar::vec_xy _imageSize;
+	int _anchorSize;
 };
 
-inline cv::Mat Deskewer::deskew(std::string img, const Corners& corners)
+template <typename MAT>
+inline MAT Deskewer::deskew(const MAT& img, const Corners& corners)
 {
-	cv::Mat mat = cv::imread(img);
-	cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
-	return deskew(mat, corners);
-}
+	std::vector<cv::Point2f> outputPoints;
+	outputPoints.push_back(cv::Point2f(_anchorSize, _anchorSize));
+	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize, _anchorSize));
+	outputPoints.push_back(cv::Point2f(_anchorSize, _imageSize.height() - _anchorSize));
+	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize, _imageSize.height() - _anchorSize));
 
-inline bool Deskewer::save(const cv::Mat& img, std::string path)
-{
-	cv::Mat bgr;
-	cv::cvtColor(img, bgr, cv::COLOR_RGB2BGR);
-	return cv::imwrite(path, img);
+	MAT output(_imageSize.height(), _imageSize.width(), img.type());
+	cv::Mat transform = cv::getPerspectiveTransform(corners.all(), outputPoints);
+
+	cv::warpPerspective(img, output, transform, output.size(), cv::INTER_LINEAR);
+	return output;
 }

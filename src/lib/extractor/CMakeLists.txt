@@ -3,8 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 set(SOURCES
 	Anchor.h
 	Corners.h
+	Deskewer.cpp
+	Deskewer.h
 	DistortionParameters.h
 	EdgeScanState.h
+	Extractor.cpp
+	Extractor.h
 	Geometry.h
 	Midpoints.h
 	Point.h
@@ -13,10 +17,6 @@ set(SOURCES
 	Scanner.h
 	SimpleCameraCalibration.cpp
 	SimpleCameraCalibration.h
-	SimpleDeskewer.cpp
-	SimpleDeskewer.h
-	SimpleExtractor.cpp
-	SimpleExtractor.h
 	Undistort.h
 )
 

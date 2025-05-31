@@ -3,7 +3,7 @@
 #include "TestHelpers.h"
 
 #include "encoder/Decoder.h"
-#include "encoder/Encoder.h"
+#include "encoder/EncoderPlus.h"
 
 #include "compression/zstd_decompressor.h"
 #include "fountain/fountain_decoder_sink.h"
@@ -28,7 +28,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	}
 
 	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
-	Encoder enc(30, 4, 2);
+	EncoderPlus enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
 	uint64_t hash = 0xeecc8800efce8808;
@@ -63,7 +63,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	}
 
 	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
-	Encoder enc(30, 4, 2);
+	EncoderPlus enc(30, 4, 2);
 	enc.set_legacy_mode();
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
@@ -94,7 +94,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
 
 	// create encoder
-	Encoder enc(30, 4, 2);
+	EncoderPlus enc(30, 4, 2);
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(infile);
 	assertTrue( fes );
 	assertTrue( fes->good() );

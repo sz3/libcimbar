@@ -2,7 +2,7 @@
 #include "unittest.h"
 #include "TestHelpers.h"
 
-#include "Decoder.h"
+#include "DecoderPlus.h"
 #include "util/MakeTempDirectory.h"
 
 #include "PicoSHA2/picosha2.h"
@@ -26,7 +26,7 @@ TEST_CASE( "DecoderTest/testDecode", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
-	Decoder dec(0);
+	DecoderPlus dec(0);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/tr_0.png"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
@@ -38,7 +38,7 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
-	Decoder dec(30);
+	DecoderPlus dec(30);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/tr_0.png"), decodedFile);
 	assertEquals( 7500, bytesDecoded );
@@ -51,7 +51,7 @@ TEST_CASE( "DecoderTest/testDecode.Sample", "[unit]" )
 	// regression test -- useful for now, but is very brittle
 	MakeTempDirectory tempdir;
 
-	Decoder dec(0);
+	DecoderPlus dec(0);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/scan2434.jpg"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
@@ -65,7 +65,7 @@ TEST_CASE( "DecoderTest/testDecode.4c", "[unit]" )
 	// legacy format
 	MakeTempDirectory tempdir;
 
-	Decoder dec(0, 2, true);
+	DecoderPlus dec(0, 2, true);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile, 0);
 	assertEquals( 9300, bytesDecoded );
@@ -77,7 +77,7 @@ TEST_CASE( "DecoderTest/testDecodeEcc.4c", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
-	Decoder dec(30, 2, true);
+	DecoderPlus dec(30, 2, true);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile, 0);
 	assertEquals( 7500, bytesDecoded );
@@ -90,7 +90,7 @@ TEST_CASE( "DecoderTest/testDecode.Sample4c", "[unit]" )
 	// regression test -- useful for now, but is very brittle
 	MakeTempDirectory tempdir;
 
-	Decoder dec(0, 2, true);
+	DecoderPlus dec(0, 2, true);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg"), decodedFile, 0);
 	assertEquals( 9300, bytesDecoded );

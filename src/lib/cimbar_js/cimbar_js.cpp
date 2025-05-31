@@ -2,7 +2,7 @@
 #include "cimbar_js.h"
 
 #include "cimb_translator/Config.h"
-#include "encoder/SimpleEncoder.h"
+#include "encoder/Encoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
 
@@ -89,7 +89,7 @@ int next_frame()
 		_frameCount = 0;
 	}
 
-	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
+	Encoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	if (_legacyMode)
 		enc.set_legacy_mode();
 
@@ -104,7 +104,7 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 	if (!FountainInit::init())
 		std::cerr << "failed FountainInit :(" << std::endl;
 
-	SimpleEncoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
+	Encoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	if (_legacyMode)
 		enc.set_legacy_mode();
 
