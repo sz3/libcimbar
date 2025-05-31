@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-framework="javascript">
+<head>
+<title>Cimbar Decoder</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<link rel="manifest" href="pwa.json">
+</head>
+<body>
+
+<style>
+    video {
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		min-width: 100%;
+		min-height: 100%;
+		width: auto;
+		height: auto;
+		z-index: -100;
+		background-size: cover;
+		transition: 1s opacity;
+	}
+
+	.statusbox {
+		color: red;
+		text-shadow: 2px 2px 2px white;
+    }
+
+</style>
+
+<div id="container">
+	<video id="video" autoplay="true"  playsinline="true" muted="true">
+	</video>
+</div>
+
+<div class="statusbox" id="errorbox">hi</div>
+<div class="statusbox" id="t0">hi</div>
+<div class="statusbox" id="t1">hi</div>
+
+<script type="text/javascript">
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('./sw.js');
+	}
+	var video = document.querySelector('#video');
+
+	var Module = {};
+	Module.onRuntimeInitialized = () => {
+		Dec.init(video, 2);
+	};
+</script>
+
+<script src="cimbar_js.js"></script>
+<script src="dec.js"></script>
+
+</body>
+</html>
+
