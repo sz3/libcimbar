@@ -8,16 +8,17 @@
 extern "C" {
 #endif
 
-int do_decode(uint8_t* rgba_image_data, int width, int height);
+int do_decode(unsigned char* rgba_image_data, int width, int height);
 
-// imgsize=width*height*channels. Stores results in `buffers`
-int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, unsigned char* bufspace, unsigned bufcount, unsigned bufsize);
+// imgsize=width*height*channels. Stores results in `bufspace`
+int fountain_get_bufsize();
+int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, unsigned char* bufspace, unsigned bufsize);
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, negative on error
 int64_t fountain_decode(unsigned char* buffer, unsigned size);
 
 // get filesize, filename from id
-unsigned fountain_get_size(uint32_t id);
+int fountain_get_filesize(uint32_t id);
 int fountain_get_filename(uint32_t id, char* buf, unsigned size);
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
