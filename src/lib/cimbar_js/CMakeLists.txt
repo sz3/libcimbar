@@ -51,7 +51,7 @@ set (LINK_WASM_LIST
 	-s USE_GLFW=3
 	-s FILESYSTEM=0
 	-s TOTAL_MEMORY=134217728
-	-s EXPORTED_FUNCTIONS='["_render","_next_frame","_encode","_configure","_get_aspect_ratio", "_do_decode","_scan_extract_decode","_fountain_decode","_fountain_get_size","_fountain_get_filename","_fountain_finish_copy","_configure_decode", "_malloc","_free"]'
+	-s EXPORTED_FUNCTIONS='["_render","_next_frame","_encode","_configure","_get_aspect_ratio","_do_decode","_scan_extract_decode","_fountain_decode","_fountain_get_bufsize","_fountain_get_filesize","_fountain_get_filename","_fountain_finish_copy","_configure_decode","_malloc","_free"]'
 )
 string(REPLACE ";" " " LINK_WASM_FLAGS "${LINK_WASM_LIST}")
 

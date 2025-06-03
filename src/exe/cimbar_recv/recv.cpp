@@ -112,11 +112,10 @@ int main(int argc, char** argv)
 
 	// allocate buffers, etc
 	configure_decode(colorBits, config_mode);
-	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + colorBits, legacy_mode);
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, cimbar::Config::symbol_bits() + colorBits, legacy_mode);
 
 	std::vector<unsigned char> bufspace;
-	bufspace.resize(chunksPerFrame * chunkSize, 0);
+	bufspace.resize(fountain_get_bufsize(), 0);
 
 	cv::Mat mat;
 
@@ -143,46 +142,40 @@ int main(int argc, char** argv)
 		// draw some stats on mat?
 		window.show(mat, 0);
 
-		Extractor ext;
-		cv::UMat testmat = img.getUMat(cv::ACCESS_RW).clone();
-		int testres = ext.extract(testmat, testmat);
-
 		// extract, decode, etc
-		int count = scan_extract_decode(img.data, img.cols, img.rows, bufspace.data(), chunksPerFrame, chunkSize);
-		if (count <= 0)
+		int bytes = scan_extract_decode(img.data, img.cols, img.rows, bufspace.data(), bufspace.size());
+		if (bytes <= 0)
 			continue;
 
-		if (count >= chunksPerFrame)
+		if (bytes % chunkSize != 0)
 		{
 			std::cerr << "WEIRD SEEMS BAD? " << count << std::endl;
 			continue;
 		}
 
-		for (int i = 0; i < count; ++i)
+		int64_t res = fountain_decode(bufspace.data(), bytes);
+		if (res > 0)
 		{
-			int64_t res = fountain_decode(bufspace.data() + (i*chunkSize), chunkSize);
-			if (res > 0)
-			{
-				// attempt save
-				uint32_t fileId = res;
-				unsigned size = fountain_get_size(fileId);
+			// attempt save
+			uint32_t fileId = res;
 
-				std::string filename(256, '\0'); // max filename length tbd?
-				int fnsz = fountain_get_filename(fileId, filename.data(), filename.size());
-				if (fnsz <= 0)
-					filename = "cimbar_recv_out";
-				else
-					filename.resize(fnsz);
-				std::cerr << "Saving file " << filename << " of size " << size << std::endl;
+			std::string filename(256, '\0'); // max filename length tbd?
+			int fnsz = fountain_get_filename(fileId, filename.data(), filename.size());
+			if (fnsz <= 0)
+				filename = "cimbar_recv_out";
+			else
+				filename.resize(fnsz);
 
-				std::vector<unsigned char> data;
-				data.resize(size);
-				int res = fountain_finish_copy(fileId, data.data(), size);
-				if (res != 0)
-					std::cerr << "failed fountain_finish_copy " << res << std::endl;
+			unsigned size = fountain_get_filesize(fileId);
+			std::cerr << "Saving file " << filename << " of size " << size << std::endl;
 
-				write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true)(filename, data);
-			}
+			std::vector<unsigned char> data;
+			data.resize(size);
+			int res = fountain_finish_copy(fileId, data.data(), size);
+			if (res != 0)
+				std::cerr << "failed fountain_finish_copy " << res << std::endl;
+
+			write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true)(filename, data);
 		}
 	}
 
