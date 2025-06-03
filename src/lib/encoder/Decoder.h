@@ -158,7 +158,7 @@ inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, unsigned color_
 }
 
 template <typename MAT, typename FOUNTAINSTREAM>
-inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream,  unsigned color_mode, bool should_preprocess, int color_correction)
+inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, unsigned color_mode, bool should_preprocess, int color_correction)
 {
 	CimbReader reader(img, _decoder, color_mode, should_preprocess, color_correction);
 	bool legacy_mode = color_mode == 0;

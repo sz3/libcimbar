@@ -22,11 +22,15 @@ namespace {
 	unsigned _colorBits = 255; // call configure() for defaults
 	int _modeVal = 0;
 
+	bool legacy_mode()
+	{
+		return _modeVal == 4;
+	}
 }
 
 extern "C" {
 
-int do_decode(uint8_t* rgba_image_data, int width, int height)
+int do_decode(uchar* rgba_image_data, int width, int height)
 {
 	if (!rgba_image_data)
 		return -1;
@@ -46,14 +50,34 @@ int do_decode(uint8_t* rgba_image_data, int width, int height)
 	return totalRed/count;
 }
 
-int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* bufspace, unsigned bufcount, unsigned bufsize)
+int fountain_get_bufsize()
 {
-	// TODO: early bail if bufsize doesn't match config params (fountain chunk size)
-	// if bad bufsize
-	// return -2;
+	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
+				cimbar::Config::ecc_bytes(),
+				cimbar::Config::symbol_bits() + _colorBits,
+				legacy_mode()
+	);
+	return chunksPerFrame * chunkSize;
+}
+
+int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* bufspace, unsigned bufsize)
+{
+	if (imgw == 0 or imgh == 0)
+		return -1;
+
+	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
+				cimbar::Config::ecc_bytes(),
+				cimbar::Config::symbol_bits() + _colorBits,
+				legacy_mode()
+	);
+	// early bail if bufsize doesn't match config params (fountain chunk size * count)
+	if (bufsize != chunkSize * chunksPerFrame)
+		return -2;
 
 	// need a class that implements the writer/sink interface and writes to our "escrow" buffers
-	escrow_buffer_writer ebw(bufspace, bufcount, bufsize);
+	escrow_buffer_writer ebw(bufspace, chunksPerFrame, chunkSize);
 
 	// at the end, return abw.num_writes()
 
@@ -70,8 +94,8 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 		shouldPreprocess = true;
 
 	// decode
-	int bytes = dec.decode_fountain(img, ebw, _modeVal==4? 0 : 1, shouldPreprocess);
-	return ebw.buffers_in_use();
+	int bytes = dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
+	return ebw.buffers_in_use() * chunkSize;
 }
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
@@ -80,13 +104,24 @@ int64_t fountain_decode(unsigned char* buffer, unsigned size)
 	if (!_sink)
 		return -1;
 
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
+				cimbar::Config::ecc_bytes(),
+				cimbar::Config::symbol_bits() + _colorBits,
+				legacy_mode()
+	);
+	if (size == 0 or size % chunkSize != 0)
+		return -2;
+
+	uint32_t res = 0;
+	for (unsigned i = 0; i < size && res == 0; i+=chunkSize)
+		res = _sink->decode_frame(reinterpret_cast<char*>(buffer+i), chunkSize);
+
 	// res will be the file id on completion, 0 otherwise
-	uint32_t res = _sink->decode_frame(reinterpret_cast<char*>(buffer), size);
 	std::cout << "progress: " << turbo::str::join(_sink->get_progress()) << std::endl;
 	return res;
 }
 
-unsigned fountain_get_size(uint32_t id)
+int fountain_get_filesize(uint32_t id)
 {
 	FountainMetadata md(id);
 	return md.file_size();
@@ -133,7 +168,7 @@ int configure_decode(unsigned color_bits, int mode_val)
 		unsigned chunkSize = cimbar::Config::fountain_chunk_size(
 					cimbar::Config::ecc_bytes(),
 					cimbar::Config::symbol_bits() + color_bits,
-					mode_val==4);
+					legacy_mode());
 
 		// TODO: gotta give the final write a place to go
 		_sink = std::make_shared<fountain_decoder_sink>(chunkSize);
