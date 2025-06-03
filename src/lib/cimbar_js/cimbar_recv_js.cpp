@@ -17,10 +17,9 @@ namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
 
-
 	// settings
-	unsigned _colorBits = 255; // call configure() for defaults
-	int _modeVal = 0;
+	unsigned _colorBits = 2; // call configure() for defaults
+	int _modeVal = 68;
 
 	bool legacy_mode()
 	{
@@ -102,7 +101,15 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 int64_t fountain_decode(unsigned char* buffer, unsigned size)
 {
 	if (!_sink)
-		return -1;
+	{
+		// lazy-create the sink on first run
+		unsigned chunkSize = cimbar::Config::fountain_chunk_size(
+					cimbar::Config::ecc_bytes(),
+					cimbar::Config::symbol_bits() + _colorBits,
+					legacy_mode()
+		);
+		_sink = std::make_shared<fountain_decoder_sink>(chunkSize);
+	}
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
 				cimbar::Config::ecc_bytes(),
@@ -165,13 +172,7 @@ int configure_decode(unsigned color_bits, int mode_val)
 		// update config
 		_colorBits = color_bits;
 		_modeVal = mode_val;
-		unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-					cimbar::Config::ecc_bytes(),
-					cimbar::Config::symbol_bits() + color_bits,
-					legacy_mode());
-
-		// TODO: gotta give the final write a place to go
-		_sink = std::make_shared<fountain_decoder_sink>(chunkSize);
+		_sink.reset();
 	}
 
 	return 0;
