@@ -6,8 +6,33 @@ var Module = {
     onRuntimeInitialized: function load_done_callback() {
         console.info("The Module is loaded and is accessible here", Module);
         _wasmInitialized = true;
-    },
-	mallocPlease : function(name, size)
+    }
+};
+
+var DecWorker = function() {
+
+// public interface
+return {
+	on_frame : function(data)
+	{
+		const vf = data.vf;
+		const width = data.width;
+		const height = data.height;
+		try {
+		    console.log(vf);
+			// malloc iff necessary
+		    DecWorker.mallocAll(vf);
+		    vf.copyTo(DecWorker.imgBuff(), {format: "RGBX"});
+		    // then decode in wasm, fool
+		    var avg = Module._do_decode(DecWorker.imgBuff().byteOffset, width, height);
+		    self.postMessage({ type: 'proc', res: avg });
+		} catch (e) {
+		    console.log(e);
+		}
+		vf.close();
+	},
+
+  	mallocPlease : function(name, size)
 	{
 		if (_buffs[name] === undefined || size > _buffs[name].length)
         {
@@ -26,10 +51,10 @@ var Module = {
 	mallocAll : function(vf)
 	{
 		const imgsize = vf.allocationSize({format: "RGBX"});
-		Module.mallocPlease("img", imgsize);
+		DecWorker.mallocPlease("img", imgsize);
 
 		const bufsize = Module._fountain_get_bufsize();
-		Module.mallocPlease("fountain", bufsize);
+		DecWorker.mallocPlease("fountain", bufsize);
 	},
 
 	imgBuff : function()
@@ -42,6 +67,7 @@ var Module = {
 		return _buffs['fountain'];
 	}
 };
+}();
 
 importScripts('cimbar_js.js');
 
@@ -65,19 +91,6 @@ self.onmessage = async (event) => {
 		return;
 	}
 	
-	const vf = event.data.vf;
-	const width = event.data.width;
-	const height = event.data.height;
-	try {
-        console.log(vf);
-		// malloc iff necessary
-        Module.mallocAll(vf);
-        vf.copyTo(Module.imgBuff(), {format: "RGBX"});
-        // then decode in wasm, fool
-        var avg = Module._do_decode(Module.imgBuff().byteOffset, width, height);
-        self.postMessage({ type: 'proc', res: avg });
-    } catch (e) {
-        console.log(e);
-    }
-	vf.close();
+	// assert 'vf' in data?
+	DecWorker.on_frame(event.data)
 };
