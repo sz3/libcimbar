@@ -143,7 +143,7 @@ int main(int argc, char** argv)
 		window.show(mat, 0);
 
 		// extract, decode, etc
-		int bytes = scan_extract_decode(img.data, img.cols, img.rows, bufspace.data(), bufspace.size());
+		int bytes = scan_extract_decode(img.data, img.cols, img.rows, 3, bufspace.data(), bufspace.size());
 		if (bytes <= 0)
 			continue;
 

@@ -22,10 +22,27 @@ return {
 		    console.log(vf);
 			// malloc iff necessary
 		    DecWorker.mallocAll(vf);
-		    vf.copyTo(DecWorker.imgBuff(), {format: "RGBX"});
+			const imgBuff = DecWorker.imgBuff();
+		    vf.copyTo(imgBuff, {format: "RGBX"});
 		    // then decode in wasm, fool
-		    var avg = Module._do_decode(DecWorker.imgBuff().byteOffset, width, height);
-		    self.postMessage({ type: 'proc', res: avg });
+			const fountainBuff = DecWorker.fountainBuff();
+		    var len = Module._scan_extract_decode(imgBuff.byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
+
+			// copy fountainBuff to msgbuf
+			// const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length);
+			// const tempbuf = msgbuf.buffer;
+  			//self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
+			if (len != -8) {
+				const errorbuff = DecWorker.mallocPlease("error", 256);
+				if (Module._get_report(errorbuff.byteOffset, errorbuff.length) > 0) {
+					const decoder = new TextDecoder();
+					const msg = decoder.decode(errorbuff);
+					len += ' ' + msg;
+					console.log(len);
+				}
+		    	self.postMessage({ error: true, res: len }); //TODO: send fountainBuff too...
+			}
+			// in main, const receivedArray = new Uint8Array(event.data);
 		} catch (e) {
 		    console.log(e);
 		}
@@ -46,6 +63,7 @@ return {
             const dataPtr = Module._malloc(size);
             _buffs[name] = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
         }
+		return _buffs[name];
 	},
 
 	mallocAll : function(vf)

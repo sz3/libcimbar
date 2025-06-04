@@ -8,11 +8,12 @@
 extern "C" {
 #endif
 
+unsigned get_report(unsigned char* buff, unsigned maxlen);
 int do_decode(unsigned char* rgba_image_data, int width, int height);
 
 // imgsize=width*height*channels. Stores results in `bufspace`
 int fountain_get_bufsize();
-int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, unsigned char* bufspace, unsigned bufsize);
+int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, int channels, unsigned char* bufspace, unsigned bufsize);
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, negative on error
 int64_t fountain_decode(unsigned char* buffer, unsigned size);
