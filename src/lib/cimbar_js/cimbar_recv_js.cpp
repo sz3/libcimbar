@@ -10,12 +10,14 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <algorithm>
 #include <memory>
 
 
 namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
+	std::string _reporting;
 
 	// settings
 	unsigned _colorBits = 2; // call configure() for defaults
@@ -35,6 +37,8 @@ int do_decode(uchar* rgba_image_data, int width, int height)
 		return -1;
 
 	int totalRed = 0;
+	int totalBlue = 0;
+	int totalGreen = 0;
 	int count = 0;
 
 	int stride = 4;
@@ -42,11 +46,23 @@ int do_decode(uchar* rgba_image_data, int width, int height)
 	for (int i = 0; i < len; i+=stride)
 	{
 		totalRed += rgba_image_data[i];
+		totalBlue += rgba_image_data[i+1];
+		totalGreen += rgba_image_data[i+2];
 		++count;
 	}
 	if (!count)
 		++count;
+	_reporting = fmt::format("red: {}, blue {}, green {}     \0", totalRed/count, totalBlue/count, totalGreen/count);
 	return totalRed/count;
+}
+
+unsigned get_report(uchar* buff, unsigned maxlen)
+{
+	int len = std::min<unsigned>(_reporting.size(), maxlen);
+	if (len == 0)
+		return 0;
+	std::copy(_reporting.data(), _reporting.data()+len, buff);
+	return len;
 }
 
 int fountain_get_bufsize()
@@ -60,9 +76,11 @@ int fountain_get_bufsize()
 	return chunksPerFrame * chunkSize;
 }
 
-int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* bufspace, unsigned bufsize)
+int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channels, uchar* bufspace, unsigned bufsize)
 {
-	if (imgw == 0 or imgh == 0)
+	if (channels <= 0)
+		channels = 3;
+	if (imgw == 0 or imgh == 0 or channels < 3 or channels > 4)
 		return -1;
 
 	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
@@ -72,18 +90,21 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 				legacy_mode()
 	);
 	// early bail if bufsize doesn't match config params (fountain chunk size * count)
-	if (bufsize != chunkSize * chunksPerFrame)
+	if (bufsize < chunkSize * chunksPerFrame)
 		return -2;
 
 	// need a class that implements the writer/sink interface and writes to our "escrow" buffers
 	escrow_buffer_writer ebw(bufspace, chunksPerFrame, chunkSize);
 
-	// at the end, return abw.num_writes()
-
 	Extractor ext;
 	Decoder dec(-1, -1);
 
-	cv::UMat img = cv::Mat(imgh, imgw, CV_8UC3, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
+	auto cvtype = channels==4? CV_8UC4 : CV_8UC3;
+	cv::UMat img = cv::Mat(imgh, imgw, cvtype, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
+	if (channels == 4)
+		cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
+
+	_reporting = fmt::format("width {}, height {}, channels {}, probably won't work tho", imgw, imgh, channels);
 
 	bool shouldPreprocess = true;
 	int res = ext.extract(img, img);
@@ -94,6 +115,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, uchar* buf
 
 	// decode
 	int bytes = dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
+	_reporting = fmt::format("decoded {} bytes!!! {}", bytes, ebw.buffers_in_use() * chunkSize);
 	return ebw.buffers_in_use() * chunkSize;
 }
 
