@@ -19,7 +19,7 @@ return {
 		const width = data.width;
 		const height = data.height;
 		try {
-		    console.log(vf);
+		    //console.log(vf);
 			// malloc iff necessary
 		    DecWorker.mallocAll(vf);
 			const imgBuff = DecWorker.imgBuff();
@@ -32,21 +32,36 @@ return {
 			// const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length);
 			// const tempbuf = msgbuf.buffer;
   			//self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
-			if (len != -8) {
-				const errorbuff = DecWorker.mallocPlease("error", 256);
-				if (Module._get_report(errorbuff.byteOffset, errorbuff.length) > 0) {
-					const decoder = new TextDecoder();
-					const msg = decoder.decode(errorbuff);
-					len += ' ' + msg;
-					console.log(len);
-				}
+			if (len <= 0 && len != -3) {
+				const errmsg = DecWorker.get_error();
+				len += ' ' + errmsg;
+				console.log(errmsg);
 		    	self.postMessage({ error: true, res: len }); //TODO: send fountainBuff too...
+			}
+			else if (len > 0) {
+				console.log('len is ' + len);
+				//self.postMessage({ error: true, res: len });
+				const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length).slice();
+				console.log(msgbuf);
+				self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
 			}
 			// in main, const receivedArray = new Uint8Array(event.data);
 		} catch (e) {
 		    console.log(e);
 		}
 		vf.close();
+	},
+
+	get_error : function()
+	{
+		const errbuff = DecWorker.mallocPlease("error", 256);
+		const errlen = Module._get_report(errbuff.byteOffset, errbuff.length);
+		if (errlen > 0) {
+			const errview = new Uint8Array(Module.HEAPU8.buffer, errbuff.byteOffset, errlen);
+			const decoder = new TextDecoder();
+			return decoder.decode(errview); 
+		}
+		return "";
 	},
 
   	mallocPlease : function(name, size)
