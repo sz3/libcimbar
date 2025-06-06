@@ -40,8 +40,7 @@ return {
 		_workers.push(new Worker('dec-worker.js'));
 
 		_workers[i].onmessage = (event) => {
-			console.log('Main thread received message from worker' + i + ':', event.data);
-			Dec.set_HTML("t" + i, "avg red " + i + " is " + event.data.res);
+			Dec.on_decode(i, event.data);
 		};
 
 		_workers[i].onerror = (error) => {
@@ -74,8 +73,8 @@ return {
 
     navigator.mediaDevices.getUserMedia(constraints)
     .then(localMediaStream => {
-      console.log(localMediaStream);
-      console.dir(video);
+      //console.log(localMediaStream);
+      //console.dir(video);
       if ('srcObject' in video) {
         video.srcObject = localMediaStream;
       } else {
@@ -90,9 +89,21 @@ return {
 
   },
 
+  on_decode : function(wid, data)
+  {
+	console.log('Main thread received message from worker' + wid + ':', data);
+	if (data.res) {
+		Dec.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+		return;
+	}
+
+	const buff = new Uint8Array(data);
+	Dec.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+  },
+
   on_frame : function(now, metadata)
   {
-    console.log("on frame");
+    //console.log("on frame");
     // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
 
 	if (_workers.length == 0)
