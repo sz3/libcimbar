@@ -1,3 +1,32 @@
+var Sink = function() {
+
+var _fountainBuff = undefined;
+
+// public interface
+return {
+  on_decode : function(buff)
+  {
+	if (_fountainBuff === undefined) {
+		const size = Module._fountain_get_bufsize(); // max length of buff. We could also resize as we go...
+		const dataPtr = Module._malloc(size);
+		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+	}
+	_fountainBuff.set(buff);
+	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
+	Dec.set_HTML("tdec", "decode " + res);
+	if (res > 0) {
+		Sink.reassemble_file();
+	}
+  },
+
+  reassemble_file : function()
+  {
+	alert("we did it!?!");
+  }
+};
+}();
+
+
 var Dec = function() {
 
 var _counter = 0;
@@ -101,18 +130,7 @@ return {
 
 	const buff = new Uint8Array(data);
 	Dec.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
-
-	if (_fountainBuff === undefined) {
-		const size = Module._fountain_get_bufsize(); // max length of buff. We could also resize as we go...
-		const dataPtr = Module._malloc(size);
-		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
-	}
-	_fountainBuff.set(buff);
-	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
-	Dec.set_HTML("tdec", "decode " + res);
-	if (res > 0) {
-		alert("we did it!?!");
-	}
+	Sink.on_decode(buff);
   },
 
   on_frame : function(now, metadata)
