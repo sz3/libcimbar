@@ -7,6 +7,8 @@ var _video = 0;
 var _workers = [];
 var _nextWorker = 0;
 
+var _fountainBuff = undefined;
+
 function toggleFullscreen()
 {
   if (document.fullscreenElement) {
@@ -99,6 +101,18 @@ return {
 
 	const buff = new Uint8Array(data);
 	Dec.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+
+	if (_fountainBuff === undefined) {
+		const size = Module._fountain_get_bufsize(); // max length of buff. We could also resize as we go...
+		const dataPtr = Module._malloc(size);
+		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+	}
+	_fountainBuff.set(buff);
+	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
+	Dec.set_HTML("tdec", "decode " + res);
+	if (res > 0) {
+		alert("we did it!?!");
+	}
   },
 
   on_frame : function(now, metadata)
