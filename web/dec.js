@@ -7,6 +7,8 @@ var _video = 0;
 var _workers = [];
 var _nextWorker = 0;
 
+var _fountainBuff = undefined;
+
 function toggleFullscreen()
 {
   if (document.fullscreenElement) {
@@ -40,8 +42,7 @@ return {
 		_workers.push(new Worker('dec-worker.js'));
 
 		_workers[i].onmessage = (event) => {
-			console.log('Main thread received message from worker' + i + ':', event.data);
-			Dec.set_HTML("t" + i, "avg red " + i + " is " + event.data.res);
+			Dec.on_decode(i, event.data);
 		};
 
 		_workers[i].onerror = (error) => {
@@ -74,8 +75,8 @@ return {
 
     navigator.mediaDevices.getUserMedia(constraints)
     .then(localMediaStream => {
-      console.log(localMediaStream);
-      console.dir(video);
+      //console.log(localMediaStream);
+      //console.dir(video);
       if ('srcObject' in video) {
         video.srcObject = localMediaStream;
       } else {
@@ -90,9 +91,33 @@ return {
 
   },
 
+  on_decode : function(wid, data)
+  {
+	console.log('Main thread received message from worker' + wid + ':', data);
+	if (data.res) {
+		Dec.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+		return;
+	}
+
+	const buff = new Uint8Array(data);
+	Dec.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+
+	if (_fountainBuff === undefined) {
+		const size = Module._fountain_get_bufsize(); // max length of buff. We could also resize as we go...
+		const dataPtr = Module._malloc(size);
+		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+	}
+	_fountainBuff.set(buff);
+	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
+	Dec.set_HTML("tdec", "decode " + res);
+	if (res > 0) {
+		alert("we did it!?!");
+	}
+  },
+
   on_frame : function(now, metadata)
   {
-    console.log("on frame");
+    //console.log("on frame");
     // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
 
 	if (_workers.length == 0)
