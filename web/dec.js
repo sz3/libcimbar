@@ -1,6 +1,7 @@
 var Sink = function() {
 
 var _fountainBuff = undefined;
+var _errBuff = undefined;
 
 // public interface
 return {
@@ -13,15 +14,47 @@ return {
 	}
 	_fountainBuff.set(buff);
 	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
-	Dec.set_HTML("tdec", "decode " + res);
+	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
 	if (res > 0) {
-		Sink.reassemble_file();
+		Sink.reassemble_file(res);
 	}
   },
 
-  reassemble_file : function()
+  get_report : function()
   {
-	alert("we did it!?!");
+	const maxSize = 1024;
+	if (_errBuff === undefined) {
+		_errBuff = Module._malloc(maxSize);
+	}
+	const errlen = Module._get_report(_errBuff, maxSize);
+	if (errlen > 0) {
+		const errview = new Uint8Array(Module.HEAPU8.buffer, _errBuff, errlen);
+		const decoder = new TextDecoder();
+		return decoder.decode(errview); 
+	}
+  },
+
+  reassemble_file : function(id)
+  {
+	const size = Module._fountain_get_filesize(id);
+	alert("we did it!?! " + size);
+	const dataPtr = Module._malloc(size);
+	const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+	try {
+		var res = Module._fountain_finish_copy(id, buff.byteOffset, buff.length);
+		if (res < 0) {
+			alert("we biffed it. :( " + res);
+			console.log("we biffed it. :( " + res);
+			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
+			return;
+		}
+		console.log("we did it fr fr");
+		alert("it's done! " + size);
+		// may need to slice() buff here to copy from wasm...
+		Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
+	} catch (error) {
+		Module._free(dataPtr);
+	}
   }
 };
 }();
@@ -38,7 +71,7 @@ var _nextWorker = 0;
 
 var _fountainBuff = undefined;
 
-function toggleFullscreen()
+function _toggleFullscreen()
 {
   if (document.fullscreenElement) {
     return document.exitFullscreen();
@@ -46,6 +79,17 @@ function toggleFullscreen()
   else {
     return document.documentElement.requestFullscreen();
   }
+}
+
+function _downloadHelper(name, bloburl)
+{
+	var aaa = document.createElement('a');
+	aaa.href = bloburl;
+	aaa.download = name;
+	document.body.appendChild(aaa);
+	aaa.style = 'display: none';
+	aaa.click();
+	aaa.remove();
 }
 
 // public interface
@@ -89,13 +133,15 @@ return {
     video.setAttribute('playsinline', '');
 
     var constraints = {
-        audio: false,
-        video: {
+		audio: false,
+		video: {
           	facingMode: 'environment',
-            width: { ideal: 1080 }, // Request HD but allow flexibility
-            height: { ideal: 1080 },
-        }
-    };
+			width: { ideal: 1080 }, // Request HD but allow flexibility
+			height: { ideal: 1080 },
+			exposureMode: 'continuous',
+			focusMode: 'continuous',
+		}
+	};
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     {
@@ -118,6 +164,16 @@ return {
       console.error(`OH NO!!!!`, err);
     });
 
+  },
+
+  download_bytes : function(buff, name)
+  {
+	var blob = new Blob([buff], {type: 'application/octet-stream'});
+	var bloburl = window.URL.createObjectURL(blob);
+	_downloadHelper(name, bloburl);
+    setTimeout(function() {
+		return window.URL.revokeObjectURL(bloburl);
+	}, 1000);
   },
 
   on_decode : function(wid, data)
