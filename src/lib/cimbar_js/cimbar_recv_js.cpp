@@ -7,6 +7,7 @@
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str_join.h"
+#include "util/Timer.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -18,6 +19,9 @@ namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
 	std::string _reporting;
+
+	TimeAccumulator _tScanExtract;
+	TimeAccumulator _tImgDecode;
 
 	// settings
 	unsigned _colorBits = 2; // call configure() for defaults
@@ -104,18 +108,25 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channe
 	if (channels == 4)
 		cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
 
-	_reporting = fmt::format("width {}, height {}, channels {}, probably won't work tho", imgw, imgh, channels);
+	_reporting = fmt::format("sce: {}, imgdec: {}", _tScanExtract.avg(), _tImgDecode.avg());
 
 	bool shouldPreprocess = true;
-	int res = ext.extract(img, img);
-	if (!res)
-		return -3;
-	else if (res == Extractor::NEEDS_SHARPEN)
-		shouldPreprocess = true;
+	{
+		Timer t(_tScanExtract);
+		int res = ext.extract(img, img);
+		if (!res)
+			return -3;
+		else if (res == Extractor::NEEDS_SHARPEN)
+			shouldPreprocess = true;
+	}
 
 	// decode
-	int bytes = dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
-	_reporting = fmt::format("decoded {} bytes!!! {}", bytes, ebw.buffers_in_use() * chunkSize);
+	int bytes = 0;
+	{
+		Timer t(_tImgDecode);
+		dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
+	}
+	_reporting = fmt::format("sce: {}, imgdec: {}, decoded {} bytes!!! {}", _tScanExtract.avg(), _tImgDecode.avg(), bytes, ebw.buffers_in_use() * chunkSize);
 	return ebw.buffers_in_use() * chunkSize;
 }
 
@@ -141,12 +152,17 @@ int64_t fountain_decode(unsigned char* buffer, unsigned size)
 	if (size == 0 or size % chunkSize != 0)
 		return -2;
 
-	uint32_t res = 0;
+	int64_t res = 0;
 	for (unsigned i = 0; i < size && res == 0; i+=chunkSize)
+	{
+		/*std::cout << fmt::format("buff {} of {} -- {},{},{},{},{},{}", i, size, (unsigned)buffer[0+i], (unsigned)buffer[1+i],
+				(unsigned)buffer[2+i], (unsigned)buffer[3+i], (unsigned)buffer[4+i], (unsigned)buffer[5+i]) << std::endl;*/
 		res = _sink->decode_frame(reinterpret_cast<char*>(buffer+i), chunkSize);
+	}
 
 	// res will be the file id on completion, 0 otherwise
-	std::cout << "progress: " << turbo::str::join(_sink->get_progress()) << std::endl;
+	_reporting = fmt::format("progress: {}", turbo::str::join(_sink->get_progress()));
+	std::cout << _reporting << std::endl;
 	return res;
 }
 

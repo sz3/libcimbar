@@ -106,24 +106,28 @@ public:
 		return _done.find(id) != _done.end();
 	}
 
-	uint32_t decode_frame(const char* data, unsigned size)
+	int64_t decode_frame(const char* data, unsigned size)
 	{
 		if (size < FountainMetadata::md_size)
-			return 0;
+			return -10;
 
 		FountainMetadata md(data, size);
 		if (!md.file_size())
-			return 0;
+		{
+			/*std::cout << fmt::format("decode frame {} ... {},{},{},{}",
+									 md.file_size(), (unsigned)data[0], (unsigned)data[1], (unsigned)data[2], (unsigned)data[3]) << std::endl;*/
+			return -11;
+		}
 
 		// check if already done
 		if (is_done(md.id()))
-			return 0;
+			return -1;
 
 		// find or create
 		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
-			return 0;
+			return -12;
 
 		bool finished = s.write(data, size);
 		if (!finished)
