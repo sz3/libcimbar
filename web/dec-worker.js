@@ -19,7 +19,7 @@ return {
 		const width = data.width;
 		const height = data.height;
 		try {
-		    //console.log(vf);
+		    console.log(vf);
 			// malloc iff necessary
 		    DecWorker.mallocAll(vf);
 			const imgBuff = DecWorker.imgBuff();
@@ -32,13 +32,15 @@ return {
 			// const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length);
 			// const tempbuf = msgbuf.buffer;
   			//self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
-			if (len <= 0 && len != -3) {
-				const errmsg = DecWorker.get_error();
-				len += ' ' + errmsg;
+			if (len <= 0) {
+				var errmsg = DecWorker.get_error();
+				errmsg = len + " " + errmsg;
 				console.log(errmsg);
-		    	self.postMessage({ error: true, res: len }); //TODO: send fountainBuff too...
+				if (len != -3) {
+		    		self.postMessage({ error: true, res: errmsg });
+				}
 			}
-			else if (len > 0) {
+			else { //if (len > 0) {
 				console.log('len is ' + len);
 				//self.postMessage({ error: true, res: len });
 				const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length).slice();
