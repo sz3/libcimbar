@@ -19,7 +19,7 @@ return {
 		const width = data.width;
 		const height = data.height;
 		try {
-		    console.log(vf);
+		    //console.log(vf);
 			// malloc iff necessary
 		    DecWorker.mallocAll(vf);
 			const imgBuff = DecWorker.imgBuff();
