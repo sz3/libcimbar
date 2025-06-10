@@ -146,7 +146,8 @@ int64_t fountain_decode(unsigned char* buffer, unsigned size)
 		res = _sink->decode_frame(reinterpret_cast<char*>(buffer+i), chunkSize);
 
 	// res will be the file id on completion, 0 otherwise
-	std::cout << "progress: " << turbo::str::join(_sink->get_progress()) << std::endl;
+	_reporting = fmt::format("progress: {}", turbo::str::join(_sink->get_progress()));
+	std::cout << _reporting << std::endl;
 	return res;
 }
 
