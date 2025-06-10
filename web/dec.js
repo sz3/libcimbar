@@ -1,6 +1,7 @@
 var Sink = function() {
 
 var _fountainBuff = undefined;
+var _errorBuff = undefined;
 
 // public interface
 return {
@@ -13,15 +14,53 @@ return {
 	}
 	_fountainBuff.set(buff);
 	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
-	Dec.set_HTML("tdec", "decode " + res);
+	//Dec.set_HTML("tdec", "decode " + res);
+
+	if (res == 0) {
+		const err = Sink.get_report();
+		if (err) {
+			Dec.set_HTML("tdec", "dec progress " + res);
+		}
+	}
+
 	if (res > 0) {
-		Sink.reassemble_file();
+		Sink.reassemble_file(res);
 	}
   },
 
-  reassemble_file : function()
+  get_report : function()
+  {
+	const maxErrLen = 1024;
+	if (_errorBuff === undefined) {
+		_errorBuff = Module._malloc(1024);
+	}
+	const errlen = Module._get_report(_errorBuff, maxErrLen);
+	if (errlen > 0) {
+		const errview = new Uint8Array(Module.HEAPU8.buffer, _errorBuff, errlen);
+		const decoder = new TextDecoder();
+		return decoder.decode(errview); 
+	}
+	return "";
+  },
+
+  reassemble_file : function(id)
   {
 	alert("we did it!?!");
+	const size = Module._fountain_get_filesize(id);
+	const dataPtr = Module._malloc(size);
+	const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+	try {
+		var res = Module._fountain_finish_copy(buff.byteOffset, buff.length);
+		if (res < 0) {
+			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
+			return;
+		}
+		alert("it's done! " + size);
+		// may need to slice() buff here to copy from wasm...
+		Dec.download_bytes(buff, size); // size -> name, eventually
+	} catch (error) {
+		Module._free(dataPtr);
+	}
   }
 };
 }();
@@ -38,7 +77,7 @@ var _nextWorker = 0;
 
 var _fountainBuff = undefined;
 
-function toggleFullscreen()
+function _toggleFullscreen()
 {
   if (document.fullscreenElement) {
     return document.exitFullscreen();
@@ -46,6 +85,17 @@ function toggleFullscreen()
   else {
     return document.documentElement.requestFullscreen();
   }
+}
+
+function _downloadHelper(name, bloburl)
+{
+	var aaa = document.createElement('a');
+	aaa.href = bloburl;
+	aaa.download = name;
+	document.body.appendChild(aaa);
+	aaa.style = 'display: none';
+	aaa.click();
+	aaa.remove();
 }
 
 // public interface
@@ -118,6 +168,16 @@ return {
       console.error(`OH NO!!!!`, err);
     });
 
+  },
+
+  download_bytes : function(buff, name)
+  {
+	var blob = new Blob([buff], {type: 'application/octet-stream'});
+	var bloburl = window.URL.createObjectURL(blob);
+	_downloadHelper(name, bloburl);
+    setTimeout(function() {
+		return window.URL.revokeObjectURL(bloburl);
+	}, 1000);
   },
 
   on_decode : function(wid, data)
