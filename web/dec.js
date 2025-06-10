@@ -1,7 +1,6 @@
 var Sink = function() {
 
 var _fountainBuff = undefined;
-var _errorBuff = undefined;
 
 // public interface
 return {
@@ -15,51 +14,29 @@ return {
 	_fountainBuff.set(buff);
 	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
 	Dec.set_HTML("tdec", "decode " + res);
-	console.log("decode " + res);
-
-	if (res == 0) {
-		const err = Sink.get_report();
-		if (err) {
-			console.log("decode progress " + err);
-			Dec.set_HTML("tdec", "dec progress " + err);
-		}
-	}
-
 	if (res > 0) {
 		Sink.reassemble_file(res);
 	}
   },
 
-  get_report : function()
-  {
-	const maxErrLen = 1024;
-	if (_errorBuff === undefined) {
-		_errorBuff = Module._malloc(1024);
-	}
-	const errlen = Module._get_report(_errorBuff, maxErrLen);
-	if (errlen > 0) {
-		const errview = new Uint8Array(Module.HEAPU8.buffer, _errorBuff, errlen);
-		const decoder = new TextDecoder();
-		return decoder.decode(errview); 
-	}
-	return "";
-  },
-
   reassemble_file : function(id)
   {
-	alert("we did it!?!");
 	const size = Module._fountain_get_filesize(id);
+	alert("we did it!?! " + size);
 	const dataPtr = Module._malloc(size);
 	const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
 	try {
-		var res = Module._fountain_finish_copy(buff.byteOffset, buff.length);
+		var res = Module._fountain_finish_copy(id, buff.byteOffset, buff.length);
 		if (res < 0) {
+			alert("we biffed it. :( " + res);
+			console.log("we biffed it. :( " + res);
 			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
 			return;
 		}
+		console.log("we did it fr fr");
 		alert("it's done! " + size);
 		// may need to slice() buff here to copy from wasm...
-		Dec.download_bytes(buff, size); // size -> name, eventually
+		Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
 	} catch (error) {
 		Module._free(dataPtr);
 	}
