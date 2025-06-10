@@ -14,12 +14,14 @@ return {
 	}
 	_fountainBuff.set(buff);
 	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
-	//Dec.set_HTML("tdec", "decode " + res);
+	Dec.set_HTML("tdec", "decode " + res);
+	console.log("decode " + res);
 
 	if (res == 0) {
 		const err = Sink.get_report();
 		if (err) {
-			Dec.set_HTML("tdec", "dec progress " + res);
+			console.log("decode progress " + err);
+			Dec.set_HTML("tdec", "dec progress " + err);
 		}
 	}
 
