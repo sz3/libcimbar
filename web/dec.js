@@ -1,6 +1,7 @@
 var Sink = function() {
 
 var _fountainBuff = undefined;
+var _errBuff = undefined;
 
 // public interface
 return {
@@ -13,9 +14,23 @@ return {
 	}
 	_fountainBuff.set(buff);
 	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
-	Dec.set_HTML("tdec", "decode " + res);
+	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
 	if (res > 0) {
 		Sink.reassemble_file(res);
+	}
+  },
+
+  get_report : function()
+  {
+	const maxSize = 1024;
+	if (_errBuff === undefined) {
+		_errBuff = Module._malloc(maxSize);
+	}
+	const errlen = Module._get_report(_errBuff, maxSize);
+	if (errlen > 0) {
+		const errview = new Uint8Array(Module.HEAPU8.buffer, _errBuff, errlen);
+		const decoder = new TextDecoder();
+		return decoder.decode(errview); 
 	}
   },
 
@@ -118,13 +133,15 @@ return {
     video.setAttribute('playsinline', '');
 
     var constraints = {
-        audio: false,
-        video: {
+		audio: false,
+		video: {
           	facingMode: 'environment',
-            width: { ideal: 1080 }, // Request HD but allow flexibility
-            height: { ideal: 1080 },
-        }
-    };
+			width: { ideal: 1080 }, // Request HD but allow flexibility
+			height: { ideal: 1080 },
+			exposureMode: 'continuous',
+			focusMode: 'continuous',
+		}
+	};
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     {

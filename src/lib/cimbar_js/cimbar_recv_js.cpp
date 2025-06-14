@@ -7,6 +7,7 @@
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str_join.h"
+#include "util/Timer.h"
 
 #include <opencv2/opencv.hpp>
 
@@ -18,6 +19,9 @@ namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
 	std::string _reporting;
+
+	TimeAccumulator _tScanExtract;
+	TimeAccumulator _tImgDecode;
 
 	// settings
 	unsigned _colorBits = 2; // call configure() for defaults
@@ -104,18 +108,25 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channe
 	if (channels == 4)
 		cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
 
-	_reporting = fmt::format("width {}, height {}, channels {}, probably won't work tho", imgw, imgh, channels);
+	_reporting = fmt::format("sce: {}, imgdec: {}", _tScanExtract.avg(), _tImgDecode.avg());
 
 	bool shouldPreprocess = true;
-	int res = ext.extract(img, img);
-	if (!res)
-		return -3;
-	else if (res == Extractor::NEEDS_SHARPEN)
-		shouldPreprocess = true;
+	{
+		Timer t(_tScanExtract);
+		int res = ext.extract(img, img);
+		if (!res)
+			return -3;
+		else if (res == Extractor::NEEDS_SHARPEN)
+			shouldPreprocess = true;
+	}
 
 	// decode
-	int bytes = dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
-	_reporting = fmt::format("decoded {} bytes!!! {}", bytes, ebw.buffers_in_use() * chunkSize);
+	int bytes = 0;
+	{
+		Timer t(_tImgDecode);
+		dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
+	}
+	_reporting = fmt::format("sce: {}, imgdec: {}, decoded {} bytes!!! {}", _tScanExtract.avg(), _tImgDecode.avg(), bytes, ebw.buffers_in_use() * chunkSize);
 	return ebw.buffers_in_use() * chunkSize;
 }
 
