@@ -35,7 +35,7 @@ return {
 			if (len <= 0) {
 				var errmsg = DecWorker.get_error();
 				errmsg = len + " " + errmsg;
-				console.log(errmsg);
+				//console.log(errmsg);
 				if (len != -3) {
 		    		self.postMessage({ error: true, res: errmsg });
 				}
