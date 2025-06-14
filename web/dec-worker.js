@@ -43,7 +43,7 @@ return {
 			else { //if (len > 0) {
 				console.log('len is ' + len);
 				//self.postMessage({ error: true, res: len });
-				const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length).slice();
+				const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, len).slice();
 				console.log(msgbuf);
 				self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
 			}
