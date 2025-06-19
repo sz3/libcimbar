@@ -127,17 +127,14 @@ return {
   init_video : function(video)
   {
     _video = video;
-    // ios nonsense
-    video.setAttribute('autoplay', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('playsinline', '');
 
     var constraints = {
 		audio: false,
 		video: {
-          	facingMode: 'environment',
-			width: { ideal: 1080 }, // Request HD but allow flexibility
-			height: { ideal: 1080 },
+			width: { min: 720, ideal: 1920 }, // Request HD but allow flexibility
+			height: { min: 720, ideal: 1080 },
+			aspectRatio: matchMedia( 'all and (orientation:landscape)' ).matches ? 16/9 : 9/16,
+			facingMode: 'environment',
 			exposureMode: 'continuous',
 			focusMode: 'continuous',
 		}
