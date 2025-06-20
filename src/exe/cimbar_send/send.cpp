@@ -75,13 +75,14 @@ int main(int argc, char** argv)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
-	int window_size = cimbar::Config::image_size() + 32;
-	if (!initialize_GL(window_size, window_size))
+	int window_size_x = cimbar::Config::image_size_x() + 32;
+	int window_size_y = cimbar::Config::image_size_y() + 32;
+	if (!initialize_GL(window_size_x, window_size_y))
 	{
 		std::cerr << "failed to create window :(" << std::endl;
 		return 70;
 	}
-
+	auto_scale_window();
 	configure(colorBits, ecc, compressionLevel, legacy_mode);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();

@@ -131,7 +131,7 @@ TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
 	Encoder enc(30, 4, 2);
-	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6, 1024) );
+	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6) );
 
 	uint64_t hash = 0xa66a666543280e8e;
 	std::string path = fmt::format("{}_0.png", outPrefix);

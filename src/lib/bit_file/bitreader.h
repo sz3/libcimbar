@@ -88,7 +88,7 @@ public:
 		return bits;
 	}
 
-	std::tuple<unsigned, unsigned> bytes_and_bits(unsigned how_many_bits, unsigned bitoffset) const
+	std::tuple<unsigned, unsigned> bytes_and_bits(unsigned how_many_bits) const
 	{
 		unsigned remainder_bits = how_many_bits % 8;
 		unsigned bytes = how_many_bits / 8;

@@ -7,8 +7,10 @@
 #include <vector>
 using std::string;
 
-Extractor::Extractor(unsigned image_size, unsigned anchor_size)
-	: _imageSize(image_size? image_size : cimbar::Config::image_size())
+Extractor::Extractor(cimbar::vec_xy image_size, unsigned anchor_size)
+	: _imageSize({
+		image_size.width()? image_size.width() : cimbar::Config::image_size_x(),
+		image_size.height()? image_size.height() : cimbar::Config::image_size_y()})
 	, _anchorSize(anchor_size? anchor_size : cimbar::Config::anchor_size())
 {
 }
@@ -24,7 +26,7 @@ int Extractor::extract(const cv::Mat& img, cv::Mat& out)
 	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.image_size()) )
+	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }
@@ -40,7 +42,7 @@ int Extractor::extract(const cv::UMat& img, cv::UMat& out)
 	Deskewer de(_imageSize, _anchorSize);
 	out = de.deskew(img, corners);
 
-	if ( !corners.is_granular_scale(de.image_size()) )
+	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
 	return SUCCESS;
 }

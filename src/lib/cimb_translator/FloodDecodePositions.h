@@ -28,7 +28,7 @@ public:
 	};
 
 public:
-	FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size);
+	FloodDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size);
 
 	size_t size() const;
 	void reset();
@@ -50,5 +50,6 @@ protected:
 	std::vector<decode_instructions> _instructions;
 	CellPositions::positions_list _positions;
 	AdjacentCellFinder _cellFinder;
+	int _topWidth;
 };
 

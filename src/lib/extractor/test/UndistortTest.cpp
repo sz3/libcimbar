@@ -30,7 +30,7 @@ TEST_CASE( "UndistortTest/testUndistortAndExtract", "[unit]" )
 	Undistort<SimpleCameraCalibration> und;
 	assertTrue( und.undistort(img, out) );
 
-	Extractor ex(1024, 30);
+	Extractor ex({1024, 1024}, 30);
 	assertTrue( ex.extract(out, out) );
 
 	assertEquals( 0x18f26faca7766794, image_hash::average_hash(out) );

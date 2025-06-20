@@ -27,7 +27,7 @@ TEST_CASE( "CimbWriterTest/testSimple", "[unit]" )
 
 TEST_CASE( "CimbWriterTest/testCustomSize", "[unit]" )
 {
-	CimbWriter cw(4, 2, true, 1, 1040);
+	CimbWriter cw(4, 2, true, 1, {1040, 1040});
 
 	while (1)
 	{
@@ -39,4 +39,20 @@ TEST_CASE( "CimbWriterTest/testCustomSize", "[unit]" )
 	assertEquals(1040, img.cols);
 	assertEquals(1040, img.rows);
 	assertEquals( 0xab00ab02af0abfab, image_hash::average_hash(img) );
+}
+
+TEST_CASE( "CimbWriterTest/testCustomSize.2", "[unit]" )
+{
+	CimbWriter cw(4, 2, true, 1, {1040, 1080});
+
+	while (1)
+	{
+		if (!cw.write(0))
+			break;
+	}
+
+	cv::Mat img = cw.image();
+	assertEquals(1040, img.cols);
+	assertEquals(1080, img.rows);
+	assertEquals( 0xab2a2a2a2a2a2aab, image_hash::average_hash(img) );
 }

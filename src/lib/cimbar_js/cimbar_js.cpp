@@ -46,6 +46,15 @@ int initialize_GL(int width, int height)
 	return 1;
 }
 
+bool auto_scale_window()
+{
+	if (!_window or !_window->is_good())
+		return false;
+
+	_window->auto_scale_to_window();
+	return true;
+}
+
 // render() and next_frame() could be put in the same function,
 // but it seems cleaner to split them.
 // in any case, we're concerned with frame pacing (some encodes take longer than others)
@@ -85,7 +94,7 @@ int next_frame()
 		enc.set_legacy_mode();
 
 	enc.set_encode_id(_encodeId);
-	_next = enc.encode_next(*_fes, _window->width());
+	_next = enc.encode_next(*_fes, cimbar::vec_xy{_window->width(), _window->height()});
 	return ++_frameCount;
 }
 

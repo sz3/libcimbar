@@ -2,7 +2,7 @@
 #include "FloodDecodePositions.h"
 #include <iostream>
 
-FloodDecodePositions::FloodDecodePositions(int spacing, int dimensions, int offset, int marker_size)
+FloodDecodePositions::FloodDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size)
 	: _positions(CellPositions::compute(spacing, dimensions, offset, marker_size, 0))
 	, _cellFinder(_positions, dimensions, marker_size)
 {
@@ -26,7 +26,7 @@ void FloodDecodePositions::reset()
 	}
 
 	// seed
-	uint16_t smallRowLen = _cellFinder.dimensions() - (2*_cellFinder.marker_size());
+	uint16_t smallRowLen = _cellFinder.calc_mid_width();
 	uint16_t lastElem = _positions.size()-1;
 	_heap.push({0, 0});
 	_heap.push({smallRowLen-1, 0});
@@ -34,11 +34,11 @@ void FloodDecodePositions::reset()
 	_heap.push({lastElem-(smallRowLen-1), 0});
 
 	// add more seed corners?
-	uint16_t betweenMarkerBlock = smallRowLen * _cellFinder.marker_size();
+	uint16_t betweenMarkerBlock = _cellFinder.first_mid();
 	_heap.push({betweenMarkerBlock, 1});
-	_heap.push({betweenMarkerBlock+_cellFinder.dimensions()-1, 1});
+	_heap.push({betweenMarkerBlock+_cellFinder.dimensions_x()-1, 1});
 	_heap.push({lastElem-betweenMarkerBlock, 1});
-	_heap.push({lastElem-(betweenMarkerBlock+_cellFinder.dimensions()-1), 1});
+	_heap.push({lastElem-(betweenMarkerBlock+_cellFinder.dimensions_x()-1), 1});
 }
 
 bool FloodDecodePositions::done() const

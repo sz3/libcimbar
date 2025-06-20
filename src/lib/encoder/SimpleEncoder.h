@@ -21,14 +21,14 @@ public:
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
-	std::optional<cv::Mat> encode_next(STREAM& stream, int canvas_size=0);
+	std::optional<cv::Mat> encode_next(STREAM& stream, cimbar::vec_xy canvas_size={});
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
 
 protected:
 	template <typename STREAM>
-	std::optional<cv::Mat> encode_next_coupled(STREAM& stream, int canvas_size=0);
+	std::optional<cv::Mat> encode_next_coupled(STREAM& stream, cimbar::vec_xy canvas_size={});
 
 protected:
 	unsigned _eccBytes;
@@ -64,7 +64,7 @@ inline void SimpleEncoder::set_encode_id(uint8_t encode_id)
 }
 
 template <typename STREAM>
-inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int canvas_size)
+inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, cimbar::vec_xy canvas_size)
 {
 	if (_coupled)
 		return encode_next_coupled(stream, canvas_size);
@@ -127,7 +127,7 @@ inline std::optional<cv::Mat> SimpleEncoder::encode_next(STREAM& stream, int can
 }
 
 template <typename STREAM>
-inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream, int canvas_size)
+inline std::optional<cv::Mat> SimpleEncoder::encode_next_coupled(STREAM& stream, cimbar::vec_xy canvas_size)
 {
 	// the old way. Symbol and color bits are mixed together, limiting the color correction possibilities
 	// but potentially allowing a lack of errors in one channel to correct errors in the other.

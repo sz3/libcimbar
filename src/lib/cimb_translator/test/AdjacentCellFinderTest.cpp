@@ -12,8 +12,8 @@
 TEST_CASE( "AdjacentCellFinderTest/testFirstSection", "[unit]" )
 {
 	// there are 600 cells in the first section
-	CellPositions::positions_list positions = CellPositions::compute(9, 112, 8, 6, 0);
-	AdjacentCellFinder finder(positions, 112, 6);
+	CellPositions::positions_list positions = CellPositions::compute(cimbar::vec_xy{9, 9}, cimbar::vec_xy{112, 112}, 8, cimbar::vec_xy{6, 6}, 0);
+	AdjacentCellFinder finder(positions, cimbar::vec_xy{112, 112}, cimbar::vec_xy{6, 6});
 
 	// top row
 	assertEquals( "1 -1 100 -1", turbo::str::join(finder.find(0)) );
@@ -29,8 +29,8 @@ TEST_CASE( "AdjacentCellFinderTest/testFirstSection", "[unit]" )
 TEST_CASE( "AdjacentCellFinderTest/testMiddle", "[unit]" )
 {
 	// 11200 cells in the middle
-	CellPositions::positions_list positions = CellPositions::compute(9, 112, 8, 6, 0);
-	AdjacentCellFinder finder(positions, 112, 6);
+	CellPositions::positions_list positions = CellPositions::compute(cimbar::vec_xy{9, 9}, cimbar::vec_xy{112, 112}, 8, cimbar::vec_xy{6, 6}, 0);
+	AdjacentCellFinder finder(positions, cimbar::vec_xy{112, 112}, cimbar::vec_xy{6, 6});
 
 	// top row of "middle"
 	assertEquals( "601 -1 712 -1", turbo::str::join(finder.find(600)) );
@@ -50,8 +50,8 @@ TEST_CASE( "AdjacentCellFinderTest/testMiddle", "[unit]" )
 TEST_CASE( "AdjacentCellFinderTest/testLastSection", "[unit]" )
 {
 	// 600 cells in the last section
-	CellPositions::positions_list positions = CellPositions::compute(9, 112, 8, 6, 0);
-	AdjacentCellFinder finder(positions, 112, 6);
+	CellPositions::positions_list positions = CellPositions::compute(cimbar::vec_xy{9, 9}, cimbar::vec_xy{112, 112}, 8, cimbar::vec_xy{6, 6}, 0);
+	AdjacentCellFinder finder(positions, cimbar::vec_xy{112, 112}, cimbar::vec_xy{6, 6});
 
 	// bottom row of grid
 	assertEquals( "12301 -1 -1 12200", turbo::str::join(finder.find(12300)) );

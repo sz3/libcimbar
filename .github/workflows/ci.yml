@@ -7,23 +7,28 @@ jobs:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         config:
         - name: "linux gcc9"
-          os: ubuntu-20.04
+          os: ubuntu-22.04
           env: CXX="g++-9" CC="gcc-9"
 
         - name: "linux gcc-latest"
           os: ubuntu-latest
 
-        - name: "linux clang"
-          os: ubuntu-20.04
+        - name: "linux clang14"
+          os: ubuntu-22.04
+          env: CXX="clang++" CC="clang"
+          extra-packages: "clang"
+
+        - name: "linux clang-latest"
+          os: ubuntu-latest
           env: CXX="clang++" CC="clang"
           extra-packages: "clang"
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -39,21 +44,21 @@ jobs:
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
-      run: make -j2 && make install
+      run: cmake --build . && cmake --install .
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
-      run: make test CTEST_OUTPUT_ON_FAILURE=TRUE
+      run: ctest --output-on-failure
 
     - name: Usage test
       working-directory: ${{runner.workspace}}/libcimbar/test/py
       run: python3 -m unittest
 
   cppcheck:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install dependencies
       run: sudo apt-get install cppcheck
