@@ -15,23 +15,24 @@ var DecWorker = function() {
 return {
 	on_frame : function(data)
 	{
-		const vf = data.vf;
+		const pixels = data.pixels;
 		const width = data.width;
 		const height = data.height;
 		try {
 		    //console.log(vf);
 			// malloc iff necessary
-		    DecWorker.mallocAll(vf);
+			DecWorker.mallocAll(pixels.length);
 			const imgBuff = DecWorker.imgBuff();
-		    vf.copyTo(imgBuff, {format: "RGBX"});
+			imgBuff.set(data.pixels, 0); // copy
+		} catch (e) {
+		    console.log(e);
+		}
+		
+		try {
 		    // then decode in wasm, fool
 			const fountainBuff = DecWorker.fountainBuff();
-		    var len = Module._scan_extract_decode(imgBuff.byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
+		    var len = Module._scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
 
-			// copy fountainBuff to msgbuf
-			// const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, fountainBuff.length);
-			// const tempbuf = msgbuf.buffer;
-  			//self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
 			if (len <= 0) {
 				var errmsg = DecWorker.get_error();
 				errmsg = len + " " + errmsg;
@@ -51,7 +52,7 @@ return {
 		} catch (e) {
 		    console.log(e);
 		}
-		vf.close();
+		
 	},
 
 	get_error : function()
@@ -83,9 +84,8 @@ return {
 		return _buffs[name];
 	},
 
-	mallocAll : function(vf)
+	mallocAll : function(imgsize)
 	{
-		const imgsize = vf.allocationSize({format: "RGBX"});
 		DecWorker.mallocPlease("img", imgsize);
 
 		const bufsize = Module._fountain_get_bufsize();
