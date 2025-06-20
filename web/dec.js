@@ -196,12 +196,18 @@ return {
 	if (_nextWorker >= _workers.length)
 		_nextWorker = 0;
 
+	var vf = undefined;
 	try {
-		const vf = new VideoFrame(_video);
-		_workers[_nextWorker].postMessage({ type: 'proc', vf: vf, width: _video.videoWidth, height: _video.videoHeight });
+		vf = new VideoFrame(_video);
+		const size = vf.allocationSize({format: "RGBX"});
+		const buff = new Uint8Array(size);
+		vf.copyTo(buff, {format: "RGBX"});
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: _video.videoWidth, height: _video.videoHeight });
 	} catch (e) {
         console.log(e);
     }
+	if (vf)
+		vf.close();
 
     // schedule the next one
 	_nextWorker += 1;
