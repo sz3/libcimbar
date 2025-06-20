@@ -202,6 +202,8 @@ return {
 	} catch (e) {
         console.log(e);
     }
+	if (vf)
+		vf.close();
 
     // schedule the next one
 	_nextWorker += 1;

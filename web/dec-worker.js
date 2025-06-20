@@ -24,6 +24,12 @@ return {
 		    DecWorker.mallocAll(vf);
 			const imgBuff = DecWorker.imgBuff();
 		    vf.copyTo(imgBuff, {format: "RGBX"});
+		} catch (e) {
+		    console.log(e);
+		}
+		vf.close();
+		
+		try {
 		    // then decode in wasm, fool
 			const fountainBuff = DecWorker.fountainBuff();
 		    var len = Module._scan_extract_decode(imgBuff.byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
@@ -51,7 +57,7 @@ return {
 		} catch (e) {
 		    console.log(e);
 		}
-		vf.close();
+		
 	},
 
 	get_error : function()
