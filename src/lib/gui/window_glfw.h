@@ -64,6 +64,7 @@ public:
 	{
 		if (!is_good())
 			return;
+		glfwSetWindowAspectRatio(_w, _width, _height);
 		auto fun = [](GLFWwindow*, int w, int h){ glViewport(0, 0, w, h); };
 		glfwSetWindowSizeCallback(_w, fun);
 	}
