@@ -198,7 +198,9 @@ return {
 
 	try {
 		const vf = new VideoFrame(_video);
-		_workers[_nextWorker].postMessage({ type: 'proc', vf: vf, width: _video.videoWidth, height: _video.videoHeight });
+		const size = vf.allocationSize({format: "RGBX"});
+		const buff = new Uint8Array(size);
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: _video.videoWidth, height: _video.videoHeight });
 	} catch (e) {
         console.log(e);
     }
