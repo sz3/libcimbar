@@ -7,6 +7,9 @@ var _showStats = false;
 var _counter = 0;
 var _renderTime = 0;
 
+// cached
+var _idealRatio = 1;
+
 function toggleFullscreen()
 {
   if (document.fullscreenElement) {
@@ -42,7 +45,7 @@ function importFile(f)
 return {
   init : function(canvas)
   {
-    Module._initialize_GL(1040, 1040);
+    Main.setMode('B');
     Main.resize();
     Main.check_GL_enabled(canvas);
   },
@@ -87,13 +90,39 @@ return {
 
   scaleCanvas : function(canvas, width, height)
   {
-    var dim = width;
-    if (height < dim) {
-      dim = height;
+    // using ratio from current config,
+    // determine optimal dimensions and rotation
+    var needRotate = _idealRatio > 1 && height > width;
+    var ourRatio = needRotate? height / width : width / height;
+
+    var xdim = needRotate? height : width;
+    var ydim = needRotate? width : height;
+    if (ourRatio > _idealRatio) {
+        xdim = Math.floor(xdim*_idealRatio/ourRatio);
     }
-    console.log(dim + "x" + dim);
-    canvas.style.width = dim + "px";
-    canvas.style.height = dim + "px";
+    else if (ourRatio < _idealRatio) {
+        ydim = Math.floor(ydim*ourRatio/_idealRatio);
+    }
+
+    console.log(xdim + "x" + ydim);
+    canvas.style.width = xdim + "px";
+    canvas.style.height = ydim + "px";
+    if (needRotate) {
+        // TODO: rotating #dragdrop around the center doesn't work for inane
+        //  css reasons. So here's a hack to move it where it should be. css sucks.
+        // if at some point this is understood/fixed, we should define a static css rule
+        //  to match against `.rotated`
+        var translate = -Math.floor(width/2) - Math.floor(width/96) + "px";
+        var dragdrop = document.getElementById('dragdrop');
+        dragdrop.style.transform = "rotate(90deg) translateX(-50%) translateY(" + translate + ")";
+        dragdrop.classList.add("rotated");
+    }
+    else
+    {
+        var dragdrop = document.getElementById('dragdrop');
+        dragdrop.style.transform = "";
+        dragdrop.classList.remove("rotated");
+    }
   },
 
   alignInvisibleClick : function(canvas)
@@ -124,6 +153,19 @@ return {
     const files = event.dataTransfer.files;
     if (files && files.length === 1) {
       importFile(files[0]);
+    }
+  },
+
+  checkNavButtonOverlap : function()
+  {
+    var nav = document.getElementById("nav-button");
+    var navBounds = nav.getBoundingClientRect();
+    var canvas = document.getElementById('canvas').getBoundingClientRect();
+    if (navBounds.right > canvas.left && navBounds.bottom > canvas.top) {
+       nav.classList.add("hide");
+    }
+    else {
+       nav.classList.remove("hide");
     }
   },
 
@@ -177,8 +219,9 @@ return {
       _renderTime += elapsed;
       Main.setHTML( "status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime/frameCount));
     }
-    if ( !(_counter & 31) ) {
+    if ( !(_counter & 15) ) {
        Main.resize();
+       Main.checkNavButtonOverlap();
     }
   },
 
@@ -194,6 +237,7 @@ return {
   {
     var is_4c = (mode_str == "4C");
     Module._configure(2, 255, 255, is_4c);
+    _idealRatio = Module._get_aspect_ratio();
 
     var nav = document.getElementById("nav-container");
     if (is_4c) {

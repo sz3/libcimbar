@@ -18,11 +18,11 @@ namespace {
 	int _frameCount = 0;
 	uint8_t _encodeId = 109;
 
-	// settings
+	// settings, will be overriden by first call to configure()
 	unsigned _ecc = cimbar::Config::ecc_bytes();
 	unsigned _colorBits = cimbar::Config::color_bits();
 	int _compressionLevel = cimbar::Config::compression_level();
-	bool _legacyMode = true;
+	bool _legacyMode = false;
 }
 
 extern "C" {
@@ -133,6 +133,11 @@ int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mo
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
 
+	// make sure we've initialized
+	int window_size_x = cimbar::Config::image_size_x() + 16;
+	int window_size_y = cimbar::Config::image_size_y() + 16;
+	initialize_GL(window_size_x, window_size_y);
+
 	// check if we need to refresh the stream
 	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel or legacy_mode != _legacyMode);
 	if (refresh)
@@ -160,5 +165,15 @@ int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mo
 	}
 	return 0;
 }
+
+float get_aspect_ratio()
+{
+	// based on the current config
+	// we use +16 to match configure()
+	float window_size_x = cimbar::Config::image_size_x() + 16;
+	float window_size_y = cimbar::Config::image_size_y() + 16;
+	return window_size_x / window_size_y;
+}
+
 
 }
