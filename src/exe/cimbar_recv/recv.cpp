@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
 	unsigned colorBits = cimbar::Config::color_bits();
 	unsigned ecc = cimbar::Config::ecc_bytes();
-	unsigned defaultFps = 30;
+	unsigned defaultFps = 15;
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())

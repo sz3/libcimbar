@@ -66,6 +66,7 @@ TEST_CASE( "FountainSinkSpecialTest/testMultipart", "[unit]" )
 	stringstream input = dummyContents(totalSize, randostr);
 	fountain_encoder_stream::ptr fes = fountain_encoder_stream::create(input, 750, 108);
 
+	const int expectedBlocks = 1613;
 	for (int i = 0; i < (totalSize / 7500) * 3; ++i)
 	{
 		string iframe = createFrame(*fes);
@@ -77,10 +78,22 @@ TEST_CASE( "FountainSinkSpecialTest/testMultipart", "[unit]" )
 
 		if (i % 2 == 1)
 		{
-			bool res = sink.decode_frame(iframe.data(), iframe.size());
+			int64_t res = sink.decode_frame(iframe.data(), iframe.size());
 			//std::cout << i << ": " << res << std::endl;
-			assertMsg( ((i == 1613) == res), fmt::format("failed {}", i) );
-			assertMsg( ((i >= 1613) == sink.is_done(md.id())), fmt::format("failed {}", i) );
+			if (i < expectedBlocks)
+			{
+				assertMsg(res == 0, fmt::format("failed during  {}, res {}", i, res));
+			}
+			else if (i == expectedBlocks)
+			{
+				assertMsg(res == md.id(), fmt::format("failed {}, res {}", i, res));
+				assertMsg( sink.is_done(md.id()), fmt::format("failed {}, should be done", i) );
+			}
+			else // i > expectedBlocks, we're already done
+			{
+				assertMsg(res == -1, fmt::format("failed {}, res {}", i, res));
+				assertMsg( sink.is_done(md.id()), fmt::format("failed {}, should be done", i) );
+			}
 		}
 	}
 
