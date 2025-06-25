@@ -140,7 +140,7 @@ return {
   encode : function(filename, data)
   {
     console.log("encoding " + filename);
-    var res = Module._encode(data.byteOffset, data.length, -1);
+    var res = Module._cimbare_encode(data.byteOffset, data.length, -1);
     console.log(res);
     Main.setTitle(filename);
     Main.setActive(true);
@@ -207,8 +207,8 @@ return {
     }
     var start = performance.now();
     if (!Main.isPaused()) {
-       Module._render();
-       var frameCount = Module._next_frame();
+       Module._cimbare_render();
+       var frameCount = Module._cimbare_next_frame();
     }
 
     var elapsed = performance.now() - start;
@@ -236,8 +236,8 @@ return {
   setMode : function(mode_str)
   {
     var is_4c = (mode_str == "4C");
-    Module._configure(2, 255, 255, is_4c);
-    _idealRatio = Module._get_aspect_ratio();
+    Module._cimbare_configure(2, 255, 255, is_4c);
+    _idealRatio = Module._cimbare_get_aspect_ratio();
 
     var nav = document.getElementById("nav-container");
     if (is_4c) {
