@@ -27,7 +27,7 @@ namespace {
 
 extern "C" {
 
-int initialize_GL(int width, int height)
+int cimbare_initialize_GL(int width, int height)
 {
 	// must be divisible by 4???
 	if (width % 4 != 0)
@@ -46,7 +46,7 @@ int initialize_GL(int width, int height)
 	return 1;
 }
 
-bool auto_scale_window()
+bool cimbare_auto_scale_window()
 {
 	if (!_window or !_window->is_good())
 		return false;
@@ -58,7 +58,7 @@ bool auto_scale_window()
 // render() and next_frame() could be put in the same function,
 // but it seems cleaner to split them.
 // in any case, we're concerned with frame pacing (some encodes take longer than others)
-int render()
+int cimbare_render()
 {
 	if (!_window or !_fes or _window->should_close())
 		return -1;
@@ -72,7 +72,7 @@ int render()
 	return 0;
 }
 
-int next_frame()
+int cimbare_next_frame()
 {
 	if (!_window or !_fes)
 		return 0;
@@ -98,7 +98,7 @@ int next_frame()
 	return ++_frameCount;
 }
 
-int encode(unsigned char* buffer, unsigned size, int encode_id)
+int cimbare_encode(unsigned char* buffer, unsigned size, int encode_id)
 {
 	_frameCount = 0;
 	if (!FountainInit::init())
@@ -123,7 +123,7 @@ int encode(unsigned char* buffer, unsigned size, int encode_id)
 	return 1;
 }
 
-int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
+int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
 {
 	// defaults
 	if (color_bits > 3)
@@ -136,7 +136,7 @@ int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mo
 	// make sure we've initialized
 	int window_size_x = cimbar::Config::image_size_x() + 16;
 	int window_size_y = cimbar::Config::image_size_y() + 16;
-	initialize_GL(window_size_x, window_size_y);
+	cimbare_initialize_GL(window_size_x, window_size_y);
 
 	// check if we need to refresh the stream
 	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel or legacy_mode != _legacyMode);
@@ -166,7 +166,7 @@ int configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mo
 	return 0;
 }
 
-float get_aspect_ratio()
+float cimbare_get_aspect_ratio()
 {
 	// based on the current config
 	// we use +16 to match configure()
