@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 unsigned get_report(unsigned char* buff, unsigned maxlen);
+unsigned cimbard_get_debug(unsigned char* buff, unsigned maxlen);
 int do_decode(unsigned char* rgba_image_data, int width, int height);
 
 // imgsize=width*height*channels. Stores results in `bufspace`

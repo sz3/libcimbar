@@ -20,11 +20,13 @@ namespace {
 	std::shared_ptr<fountain_decoder_sink> _sink;
 	std::string _reporting;
 
+	cv::Mat _debugFrame;
+
 	TimeAccumulator _tScanExtract;
 	TimeAccumulator _tImgDecode;
 
 	// settings
-	unsigned _colorBits = 2; // call configure() for defaults
+	unsigned _colorBits = 2;
 	int _modeVal = 68;
 
 	bool legacy_mode()
@@ -35,37 +37,21 @@ namespace {
 
 extern "C" {
 
-int do_decode(uchar* rgba_image_data, int width, int height)
-{
-	if (!rgba_image_data)
-		return -1;
-
-	int totalRed = 0;
-	int totalBlue = 0;
-	int totalGreen = 0;
-	int count = 0;
-
-	int stride = 4;
-	int len = width*height*stride;
-	for (int i = 0; i < len; i+=stride)
-	{
-		totalRed += rgba_image_data[i];
-		totalBlue += rgba_image_data[i+1];
-		totalGreen += rgba_image_data[i+2];
-		++count;
-	}
-	if (!count)
-		++count;
-	_reporting = fmt::format("red: {}, blue {}, green {}     \0", totalRed/count, totalBlue/count, totalGreen/count);
-	return totalRed/count;
-}
-
 unsigned get_report(uchar* buff, unsigned maxlen)
 {
 	int len = std::min<unsigned>(_reporting.size(), maxlen);
 	if (len == 0)
 		return 0;
 	std::copy(_reporting.data(), _reporting.data()+len, buff);
+	return len;
+}
+
+unsigned cimbard_get_debug(uchar* buff, unsigned maxlen)
+{
+	int len = std::min<unsigned>(_debugFrame.dims*_debugFrame.cols*_debugFrame.rows, maxlen);
+	if (len == 0)
+		return 0;
+	std::copy(_debugFrame.data, _debugFrame.data+len, buff);
 	return len;
 }
 
@@ -107,6 +93,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channe
 	cv::UMat img = cv::Mat(imgh, imgw, cvtype, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
 	if (channels == 4)
 		cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
+	_debugFrame = img.getMat(cv::ACCESS_READ).clone();
 
 	_reporting = fmt::format("sce: {}, imgdec: {}", _tScanExtract.avg(), _tImgDecode.avg());
 
