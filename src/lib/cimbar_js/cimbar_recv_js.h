@@ -8,26 +8,28 @@
 extern "C" {
 #endif
 
-unsigned get_report(unsigned char* buff, unsigned maxlen);
+unsigned cimbard_get_report(unsigned char* buff, unsigned maxlen);
 unsigned cimbard_get_debug(unsigned char* buff, unsigned maxlen);
-int do_decode(unsigned char* rgba_image_data, int width, int height);
 
 // imgsize=width*height*channels. Stores results in `bufspace`
-int fountain_get_bufsize();
-int scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, int channels, unsigned char* bufspace, unsigned bufsize);
+int cimbard_get_bufsize();
+int cimbard_scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, int channels, unsigned char* bufspace, unsigned bufsize);
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, negative on error
-int64_t fountain_decode(unsigned char* buffer, unsigned size);
+// persists state, the return value (if >0) corresponds to a uint32_t id
+int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size);
 
 // get filesize, filename from id
-int fountain_get_filesize(uint32_t id);
-int fountain_get_filename(uint32_t id, char* buf, unsigned size);
+int cimbard_get_filesize(uint32_t id);
+int cimbard_get_filename(uint32_t id, char* buf, unsigned size);
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
-// bouth fountain_*() calls should be from the same js webworker/thread
-int fountain_finish_copy(uint32_t id, unsigned char* buffer, unsigned size);
+// wherever a uint32_t id is passed, it should be on the same js thread
+// ... or at least in the same js shared memory...
+// as the fountain_decode() call
+int cimbard_finish_copy(uint32_t id, unsigned char* buffer, unsigned size);
 
-int configure_decode(unsigned color_bits, int mode_val);
+int cimbard_configure_decode(unsigned color_bits, int mode_val);
 
 #ifdef __cplusplus
 }
