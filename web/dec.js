@@ -8,12 +8,12 @@ return {
   on_decode : function(buff)
   {
 	if (_fountainBuff === undefined) {
-		const size = Module._fountain_get_bufsize(); // max length of buff. We could also resize as we go...
+		const size = Module._cimbard_get_bufsize(); // max length of buff. We could also resize as we go...
 		const dataPtr = Module._malloc(size);
 		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
 	}
 	_fountainBuff.set(buff);
-	var res = Module._fountain_decode(_fountainBuff.byteOffset, buff.length);
+	var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
 	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
 	if (res > 0) {
 		Sink.reassemble_file(res);
@@ -26,7 +26,7 @@ return {
 	if (_errBuff === undefined) {
 		_errBuff = Module._malloc(maxSize);
 	}
-	const errlen = Module._get_report(_errBuff, maxSize);
+	const errlen = Module._cimbard_get_report(_errBuff, maxSize);
 	if (errlen > 0) {
 		const errview = new Uint8Array(Module.HEAPU8.buffer, _errBuff, errlen);
 		const decoder = new TextDecoder();
@@ -36,12 +36,12 @@ return {
 
   reassemble_file : function(id)
   {
-	const size = Module._fountain_get_filesize(id);
+	const size = Module._cimbard_get_filesize(id);
 	alert("we did it!?! " + size);
 	const dataPtr = Module._malloc(size);
 	const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
 	try {
-		var res = Module._fountain_finish_copy(id, buff.byteOffset, buff.length);
+		var res = Module._cimbard_finish_copy(id, buff.byteOffset, buff.length);
 		if (res < 0) {
 			alert("we biffed it. :( " + res);
 			console.log("we biffed it. :( " + res);
@@ -137,6 +137,7 @@ return {
 			facingMode: 'environment',
 			exposureMode: 'continuous',
 			focusMode: 'continuous',
+			frameRate: {ideal: 15, max: 30}, // we're not trying to set the user's phone on fire
 		}
 	};
 
