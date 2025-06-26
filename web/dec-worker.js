@@ -31,7 +31,7 @@ return {
 		try {
 		    // then decode in wasm, fool
 			const fountainBuff = DecWorker.fountainBuff();
-		    var len = Module._scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
+		    var len = Module._cimbard_scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
 
 			if (len <= 0) {
 				var errmsg = DecWorker.get_error();
@@ -58,7 +58,7 @@ return {
 	get_error : function()
 	{
 		const errbuff = DecWorker.mallocPlease("error", 256);
-		const errlen = Module._get_report(errbuff.byteOffset, errbuff.length);
+		const errlen = Module._cimbard_get_report(errbuff.byteOffset, errbuff.length);
 		if (errlen > 0) {
 			const errview = new Uint8Array(Module.HEAPU8.buffer, errbuff.byteOffset, errlen);
 			const decoder = new TextDecoder();
@@ -88,7 +88,7 @@ return {
 	{
 		DecWorker.mallocPlease("img", imgsize);
 
-		const bufsize = Module._fountain_get_bufsize();
+		const bufsize = Module._cimbard_get_bufsize();
 		DecWorker.mallocPlease("fountain", bufsize);
 	},
 
@@ -119,7 +119,7 @@ self.onmessage = async (event) => {
 	{
 		console.log('attempting config');
 		try {
-			Module._configure_decode(event.config.color_bits, event.config.mode_val);
+			Module._cimbard_configure_decode(event.config.color_bits, event.config.mode_val);
 		} catch (e) {
 			self.postMessage({ type: 'config', error: e });
 		}

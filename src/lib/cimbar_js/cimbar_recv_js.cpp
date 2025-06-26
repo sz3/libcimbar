@@ -37,7 +37,7 @@ namespace {
 
 extern "C" {
 
-unsigned get_report(uchar* buff, unsigned maxlen)
+unsigned cimbard_get_report(uchar* buff, unsigned maxlen)
 {
 	int len = std::min<unsigned>(_reporting.size(), maxlen);
 	if (len == 0)
@@ -55,7 +55,7 @@ unsigned cimbard_get_debug(uchar* buff, unsigned maxlen)
 	return len;
 }
 
-int fountain_get_bufsize()
+int cimbard_get_bufsize()
 {
 	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
@@ -66,7 +66,7 @@ int fountain_get_bufsize()
 	return chunksPerFrame * chunkSize;
 }
 
-int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channels, uchar* bufspace, unsigned bufsize)
+int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channels, uchar* bufspace, unsigned bufsize)
 {
 	if (channels <= 0)
 		channels = 3;
@@ -118,7 +118,7 @@ int scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channe
 }
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
-int64_t fountain_decode(unsigned char* buffer, unsigned size)
+int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 {
 	if (!_sink)
 	{
@@ -153,13 +153,13 @@ int64_t fountain_decode(unsigned char* buffer, unsigned size)
 	return res;
 }
 
-int fountain_get_filesize(uint32_t id)
+int cimbard_get_filesize(uint32_t id)
 {
 	FountainMetadata md(id);
 	return md.file_size();
 }
 
-int fountain_get_filename(uint32_t id, char* buf, unsigned size)
+int cimbard_get_filename(uint32_t id, char* buf, unsigned size)
 {
 	if (!_sink)
 		return -1;
@@ -174,7 +174,7 @@ int fountain_get_filename(uint32_t id, char* buf, unsigned size)
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
-int fountain_finish_copy(uint32_t id, uchar* buffer, unsigned size)
+int cimbard_finish_copy(uint32_t id, uchar* buffer, unsigned size)
 {
 	if (!_sink)
 		return -1;
@@ -183,7 +183,7 @@ int fountain_finish_copy(uint32_t id, uchar* buffer, unsigned size)
 	return 0;
 }
 
-int configure_decode(unsigned color_bits, int mode_val)
+int cimbard_configure_decode(unsigned color_bits, int mode_val)
 {
 	// defaults
 	if (color_bits > 3)
