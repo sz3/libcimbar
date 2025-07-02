@@ -117,7 +117,7 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 	return ebw.buffers_in_use() * chunkSize;
 }
 
-// returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, -1 if needs more, <= -2 on error
+// returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
 int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 {
 	if (!_sink)
@@ -139,8 +139,8 @@ int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 	if (size == 0 or size % chunkSize != 0)
 		return -5;
 
-	int64_t res = -1;
-	for (unsigned i = 0; i < size && res == -1; i+=chunkSize)
+	int64_t res = 0;
+	for (unsigned i = 0; i < size && res == 0; i+=chunkSize)
 	{
 		/*std::cout << fmt::format("buff {} of {} -- {},{},{},{},{},{}", i, size, (unsigned)buffer[0+i], (unsigned)buffer[1+i],
 				(unsigned)buffer[2+i], (unsigned)buffer[3+i], (unsigned)buffer[4+i], (unsigned)buffer[5+i]) << std::endl;*/

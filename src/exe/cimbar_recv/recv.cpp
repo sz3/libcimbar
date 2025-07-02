@@ -154,7 +154,7 @@ int main(int argc, char** argv)
 		}
 
 		int64_t res = cimbard_fountain_decode(bufspace.data(), bytes);
-		if (res >= 0)
+		if (res > 0)
 		{
 			// attempt save
 			uint32_t fileId = res;

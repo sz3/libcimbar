@@ -3,8 +3,6 @@ var Sink = function() {
 var _fountainBuff = undefined;
 var _errBuff = undefined;
 
-var _ctr = 1;
-
 // public interface
 return {
   on_decode : function(buff)
@@ -19,15 +17,11 @@ return {
     }
 	_fountainBuff.set(buff);
 
-	//Dec.download_bytes(buff, _ctr + ".bin");
-	//Dec.download_bytes(_fountainBuff, _ctr + ".two");
-	_ctr += 1;
-
 	console.log('sink decode ' + _fountainBuff); //TODO: base64?
 	var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
 	console.log("on decode got res " + res);
 	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
-	if (res >= 0) {
+	if (res > 0) {
 		const res32t = Number(res & 0xFFFFFFFFn);; // truncate BigInt res (int64_t) to a uint32_t
 		Sink.reassemble_file(res32t);
 	}

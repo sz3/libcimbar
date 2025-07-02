@@ -7,8 +7,6 @@ set (SOURCES
 	cimbar_js.cpp
 	cimbar_recv_js.h
 	cimbar_recv_js.cpp
-	wirehairy.h
-	wirehairy.cpp
 )
 
 if(DEFINED USE_WASM)
@@ -77,8 +75,4 @@ else()  # if no wasm, ignore all that and add in GLFW libraries
 		GL
 		glfw
 	)
-endif()
-
-if(NOT DEFINED DISABLE_TESTS)
-	add_subdirectory(test)
 endif()

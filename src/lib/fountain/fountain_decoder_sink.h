@@ -121,7 +121,7 @@ public:
 
 		// check if already done
 		if (is_done(md.id()))
-			return -2;
+			return -1;
 
 		// find or create
 		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
@@ -131,7 +131,7 @@ public:
 
 		bool finished = s.write(data, size);
 		if (!finished)
-			return -1;
+			return 0;
 
 		// when you provide a write callback,
 		// store() will call mark_done() afterwards
@@ -144,7 +144,7 @@ public:
 
 	bool write(const char* data, unsigned length)
 	{
-		return decode_frame(data, length) >= 0;
+		return decode_frame(data, length) > 0;
 	}
 
 	fountain_decoder_sink& operator<<(const std::string& buffer)
