@@ -137,7 +137,7 @@ int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 				legacy_mode()
 	);
 	if (size == 0 or size % chunkSize != 0)
-		return -2;
+		return -5;
 
 	int64_t res = 0;
 	for (unsigned i = 0; i < size && res == 0; i+=chunkSize)
@@ -146,6 +146,8 @@ int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 				(unsigned)buffer[2+i], (unsigned)buffer[3+i], (unsigned)buffer[4+i], (unsigned)buffer[5+i]) << std::endl;*/
 		res = _sink->decode_frame(reinterpret_cast<char*>(buffer+i), chunkSize);
 	}
+
+	std::cout << "fountain decode res is " << res << std::endl;
 
 	// res will be the file id on completion, 0 otherwise
 	_reporting = fmt::format("progress: {}", turbo::str::join(_sink->get_progress()));
