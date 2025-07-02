@@ -49,6 +49,7 @@ set (LINK_WASM_LIST
 	-s MIN_WEBGL_VERSION=2
 	-s MAX_WEBGL_VERSION=2
 	-s USE_GLFW=3
+	-s WASM_BIGINT=1
 	-s FILESYSTEM=0
 	-s TOTAL_MEMORY=134217728
 	-s EXPORTED_FUNCTIONS='["_cimbare_render","_cimbare_next_frame","_cimbare_encode","_cimbare_configure","_cimbare_get_aspect_ratio","_cimbard_get_report","_cimbard_scan_extract_decode","_cimbard_fountain_decode","_cimbard_get_bufsize","_cimbard_get_filesize","_cimbard_get_filename","_cimbard_finish_copy","_cimbard_configure_decode","_malloc","_free"]'

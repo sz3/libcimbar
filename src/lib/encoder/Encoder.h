@@ -58,6 +58,8 @@ inline void Encoder::set_legacy_mode()
 	_colorMode = 0;
 }
 
+// TODO: why does this exist here vs just being passed to create_fountain_encoder?
+// seems confusing...
 inline void Encoder::set_encode_id(uint8_t encode_id)
 {
 	_encodeId = encode_id;

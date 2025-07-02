@@ -138,7 +138,7 @@ public:
 		// -- and the assembled file will we dropped from RAM.
 		// but if no callback is provided, you can do something else.
 		store(md, s);
-		return md.id();
+		return (int64_t)md.id();
 	}
 
 	bool write(const char* data, unsigned length)

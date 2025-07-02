@@ -12,11 +12,18 @@ return {
 		const dataPtr = Module._malloc(size);
 		_fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
 	}
+	if (buff.length == 0) { // sanity check
+		return;
+    }
 	_fountainBuff.set(buff);
+
+	console.log('sink decode ' + _fountainBuff); //TODO: base64?
 	var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
+	console.log("on decode got res " + res);
 	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
 	if (res > 0) {
-		Sink.reassemble_file(res);
+		const res32t = Number(res & 0xFFFFFFFFn);; // truncate BigInt res (int64_t) to a uint32_t
+		Sink.reassemble_file(res32t);
 	}
   },
 
