@@ -121,7 +121,7 @@ public:
 
 		// check if already done
 		if (is_done(md.id()))
-			return -1;
+			return -2;
 
 		// find or create
 		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
@@ -131,19 +131,20 @@ public:
 
 		bool finished = s.write(data, size);
 		if (!finished)
-			return 0;
+			return -1;
 
 		// when you provide a write callback,
 		// store() will call mark_done() afterwards
 		// -- and the assembled file will we dropped from RAM.
 		// but if no callback is provided, you can do something else.
 		store(md, s);
-		return md.id();
+		std::cout << "finished with id " << md.id() << std::endl;
+		return static_cast<int64_t>(md.id());
 	}
 
 	bool write(const char* data, unsigned length)
 	{
-		return decode_frame(data, length) > 0;
+		return decode_frame(data, length) >= 0;
 	}
 
 	fountain_decoder_sink& operator<<(const std::string& buffer)
