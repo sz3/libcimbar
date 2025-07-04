@@ -64,17 +64,17 @@ namespace cimbar
 	{
 		static constexpr unsigned color_bits = 2;
 		static constexpr unsigned symbol_bits = 4;
-		static constexpr unsigned ecc_bytes = 35;
-		static constexpr unsigned ecc_block_size = 174;
-		static constexpr unsigned image_size_x = 1285;
-		static constexpr unsigned image_size_y = 736;
+		static constexpr unsigned ecc_bytes = 36;
+		static constexpr unsigned ecc_block_size = 179;
+		static constexpr unsigned image_size_x = 1024;
+		static constexpr unsigned image_size_y = 720;
 
 		static constexpr unsigned cell_size = 8;
 		static constexpr unsigned cell_spacing_x = cell_size+1;
 		static constexpr unsigned cell_spacing_y = cell_size+1;
 		static constexpr unsigned cell_offset = 9;
-		static constexpr unsigned cells_per_col_x = 141;
-		static constexpr unsigned cells_per_col_y = 80;
+		static constexpr unsigned cells_per_col_x = 112;
+		static constexpr unsigned cells_per_col_y = 78;
 
 		static constexpr int fountain_chunks_per_frame = 2;
 	};
