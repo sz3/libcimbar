@@ -41,6 +41,10 @@
 <div class="statusbox" id="t1">hi</div>
 <div class="statusbox" id="tdec">hi</div>
 
+<div class="debug_menu">
+<button id="screenshot_btn" onclick="Dec.capture_frame()">Capture</button>
+</div>
+
 <script type="text/javascript">
 	if ('serviceWorker' in navigator) {
 		navigator.serviceWorker.register('./sw.js');

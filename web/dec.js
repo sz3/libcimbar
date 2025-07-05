@@ -71,8 +71,9 @@ var Dec = function() {
 
 var _counter = 0;
 var _renderTime = 0;
-var _video = 0;
+var _captureNextFrame = 0;
 
+var _video = 0;
 var _workers = [];
 var _nextWorker = 0;
 
@@ -211,6 +212,10 @@ return {
 		const buff = new Uint8Array(size);
 		vf.copyTo(buff, {format: "RGBX"});
 		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: _video.videoWidth, height: _video.videoHeight });
+		if (_captureNextFrame == 1) {
+			_captureNextFrame = 0;
+			Dec.download_bytes(buff, _video.videoWidth + "x" + _video.videoHeight + "x" + _counter + ".rgba");
+		}
 	} catch (e) {
         console.log(e);
     }
@@ -220,6 +225,12 @@ return {
     // schedule the next one
 	_nextWorker += 1;
     _video.requestVideoFrameCallback(Dec.on_frame);
+  },
+
+  capture_frame : function()
+  {
+	_captureNextFrame = 1;
+	alert("about to capture!");
   },
 
   set_HTML : function(id, msg)
