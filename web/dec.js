@@ -208,13 +208,14 @@ return {
 	var vf = undefined;
 	try {
 		vf = new VideoFrame(_video);
+		const rect = vf.visibleRect;
 		const size = vf.allocationSize({format: "RGBX"});
 		const buff = new Uint8Array(size);
 		vf.copyTo(buff, {format: "RGBX"});
-		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: _video.videoWidth, height: _video.videoHeight });
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: rect.width, height: rect.height });
 		if (_captureNextFrame == 1) {
 			_captureNextFrame = 0;
-			Dec.download_bytes(buff, _video.videoWidth + "x" + _video.videoHeight + "x" + _counter + ".rgba");
+			Dec.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
 		}
 	} catch (e) {
         console.log(e);
