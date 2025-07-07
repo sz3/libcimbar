@@ -9,16 +9,19 @@
 <body>
 
 <style>
-    video {
+	#container {
 		position: fixed;
+		top: 0;
+		left: 0;
 		right: 0;
 		bottom: 0;
-		min-width: 20%;
-		min-height: 20%;
-		max-width: 100%;
-		min-height: 100%;
-		width: auto;
-		height: auto;
+		z-index: -100;
+		overflow: hidden; /* Hide scrollbars */
+	}
+
+    video {
+		height: 100%;
+		width: 100%;
 		z-index: -100;
 		background-size: cover;
 		transition: 1s opacity;
