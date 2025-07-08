@@ -16,6 +16,7 @@ return {
 	on_frame : function(data)
 	{
 		const pixels = data.pixels;
+		const format = data.format;
 		const width = data.width;
 		const height = data.height;
 		try {
@@ -27,11 +28,16 @@ return {
 		} catch (e) {
 		    console.log(e);
 		}
+
+		var type = 4;
+		if (format == "NV12") {
+			type = 12;
+		}
 		
 		try {
 		    // then decode in wasm, fool
 			const fountainBuff = DecWorker.fountainBuff();
-		    var len = Module._cimbard_scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, 4,  fountainBuff.byteOffset, fountainBuff.length);
+		    var len = Module._cimbard_scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, type, fountainBuff.byteOffset, fountainBuff.length);
 
 			if (len <= 0) {
 				var errmsg = DecWorker.get_error();

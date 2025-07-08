@@ -11,9 +11,10 @@ extern "C" {
 unsigned cimbard_get_report(unsigned char* buff, unsigned maxlen);
 unsigned cimbard_get_debug(unsigned char* buff, unsigned maxlen);
 
-// imgsize=width*height*channels. Stores results in `bufspace`
+// imgsize=width*height*channels for rgba. Other formats are weirder.
+// output of scan is stored in `bufspace`
 int cimbard_get_bufsize();
-int cimbard_scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, int channels, unsigned char* bufspace, unsigned bufsize);
+int cimbard_scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned imgh, int format, unsigned char* bufspace, unsigned bufsize);
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, negative on error
 // persists state, the return value (if >0) corresponds to a uint32_t id

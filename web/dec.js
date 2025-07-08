@@ -209,10 +209,14 @@ return {
 	try {
 		vf = new VideoFrame(_video);
 		const rect = vf.visibleRect;
-		const size = vf.allocationSize({format: "RGBX"});
+		let format = "RGBA";
+		const size = vf.allocationSize({format: format});
 		const buff = new Uint8Array(size);
-		vf.copyTo(buff, {format: "RGBX"});
-		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, width: rect.width, height: rect.height });
+		vf.copyTo(buff, {format: format});
+		if (size != rect.width * rect.height * 4) {
+			format = vf.format;
+		}
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height });
 		if (_captureNextFrame == 1) {
 			_captureNextFrame = 0;
 			Dec.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");

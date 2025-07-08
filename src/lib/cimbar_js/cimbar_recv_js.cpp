@@ -33,6 +33,23 @@ namespace {
 	{
 		return _modeVal == 4;
 	}
+
+	cv::UMat get_rgb(void* imgdata, int width, int height, int type)
+	{
+		cv::UMat img;
+		if (type == 12)
+		{
+			img = cv::Mat(height * 3/2, width, CV_8UC1, imgdata).getUMat(cv::ACCESS_RW).clone();
+			cv::cvtColor(img, img, cv::COLOR_YUV2RGB_NV12); // 12 or 21 :hmm:
+			return img;
+		}
+
+		int cvtype = type==4? CV_8UC4 : CV_8UC3;
+		img = cv::Mat(height, width, cvtype, imgdata).getUMat(cv::ACCESS_RW).clone();
+		if (type == 4)
+			cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
+		return img;
+	}
 }
 
 extern "C" {
@@ -66,11 +83,11 @@ int cimbard_get_bufsize()
 	return chunksPerFrame * chunkSize;
 }
 
-int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int channels, uchar* bufspace, unsigned bufsize)
+int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int format, uchar* bufspace, unsigned bufsize)
 {
-	if (channels <= 0)
-		channels = 3;
-	if (imgw == 0 or imgh == 0 or channels < 3 or channels > 4)
+	if (format <= 0)
+		format = 3;
+	if (imgw == 0 or imgh == 0)
 		return -1;
 
 	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
@@ -89,10 +106,7 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 	Extractor ext;
 	Decoder dec(-1, -1);
 
-	auto cvtype = channels==4? CV_8UC4 : CV_8UC3;
-	cv::UMat img = cv::Mat(imgh, imgw, cvtype, (void*)imgdata).getUMat(cv::ACCESS_RW).clone();
-	if (channels == 4)
-		cv::cvtColor(img, img, cv::COLOR_RGBA2RGB);
+	cv::UMat img = get_rgb((void*)imgdata, imgw, imgh, format);
 	_debugFrame = img.getMat(cv::ACCESS_READ).clone();
 
 	_reporting = fmt::format("sce: {}, imgdec: {}", _tScanExtract.avg(), _tImgDecode.avg());
