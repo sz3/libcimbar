@@ -20,7 +20,15 @@ return {
 	console.log('sink decode ' + _fountainBuff); //TODO: base64?
 	var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
 	console.log("on decode got res " + res);
-	Dec.set_HTML("tdec", "decode " + res + ". " + Sink.get_report());
+
+	const report = Sink.get_report();
+	if (Array.isArray(report)) {
+		Dec.render_preogress(report);
+	}
+	else {
+		Dec.set_HTML("tdec", "decode " + res + ". " + report);
+	}
+	
 	if (res > 0) {
 		const res32t = Number(res & 0xFFFFFFFFn);; // truncate BigInt res (int64_t) to a uint32_t
 		Sink.reassemble_file(res32t);
@@ -36,8 +44,13 @@ return {
 	const errlen = Module._cimbard_get_report(_errBuff, maxSize);
 	if (errlen > 0) {
 		const errview = new Uint8Array(Module.HEAPU8.buffer, _errBuff, errlen);
-		const decoder = new TextDecoder();
-		return decoder.decode(errview); 
+		const td = new TextDecoder();
+		const text = td.decode(errview);
+		try {
+			return JSON.parse(text);
+		} catch (error) {
+			return text;
+		}
 	}
   },
 
@@ -236,6 +249,39 @@ return {
   {
 	_captureNextFrame = 1;
 	alert("about to capture!");
+  },
+
+  render_progress : function(report)
+  {
+	console.log("progress!!!!" + report);
+	Dec.set_HTML("tdec", "progress " + report);
+	const progress_container = document.getElementById('progress_bars');
+	const query = '#progress_bars > div[class="progress"]';
+	const prev = document.querySelectorAll(query);
+	// el.remove() iff report len is shorter than current
+
+	if (!prev || prev.length < report.length) {
+		for (var i = (prev? prev.length : 0); i < report.length; i++) {
+			var aaa = document.createElement('div');
+			aaa.classList.add("progress");
+			progress_container.appendChild(aaa);
+		}
+	}
+	else if (report.length < prev.length) {
+		for (var i = report.length; i < prev.length; i++) {
+			prev[i].remove();
+		}
+	}
+
+	const current = document.querySelectorAll(query);
+	if (current) {
+		console.log(current.length);
+	}
+	alert('js sucks ass');
+	for (var i = 0; i < report.length; i++) {
+		console.log(report[i]*100 + "%");
+		current[i].style.width = report[i]*100 + "%";
+	}
   },
 
   set_HTML : function(id, msg)

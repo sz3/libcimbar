@@ -164,7 +164,7 @@ int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 	std::cout << "fountain decode res is " << res << std::endl;
 
 	// res will be the file id on completion, 0 otherwise
-	_reporting = fmt::format("progress: {}", turbo::str::join(_sink->get_progress()));
+	_reporting = fmt::format("[ {} ]", turbo::str::join(_sink->get_progress()), ',');
 	std::cout << _reporting << std::endl;
 	return res;
 }
