@@ -68,8 +68,6 @@ return {
 			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
 			return;
 		}
-		console.log("we did it fr fr");
-		alert("it's done! " + size);
 		// may need to slice() buff here to copy from wasm...
 		Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
 	} catch (error) {
@@ -277,11 +275,47 @@ return {
 	if (current) {
 		console.log(current.length);
 	}
-	alert('js sucks ass');
 	for (var i = 0; i < report.length; i++) {
 		console.log(report[i]*100 + "%");
 		current[i].style.width = report[i]*100 + "%";
 	}
+  },
+
+  toggleFullscreen : function()
+  {
+    // nothin yet
+  },
+
+  clickNav : function()
+  {
+    document.getElementById("nav-button").focus();
+  },
+
+  blurNav : function(pause)
+  {
+    if (pause === undefined) {
+       pause = true;
+    }
+    document.getElementById("nav-button").blur();
+    document.getElementById("nav-content").blur();
+  },
+
+  setMode : function(mode_str)
+  {
+    var is_4c = (mode_str == "4C");
+    Module._cimbard_configure_decode(255, is_4c? 4 : 68);
+
+    var nav = document.getElementById("nav-container");
+    if (is_4c) {
+      nav.classList.remove("mode-b");
+      nav.classList.add("mode-4c");
+    } else if (mode_str == "B") {
+      nav.classList.add("mode-b");
+      nav.classList.remove("mode-4c");
+    } else {
+      nav.classList.remove("mode-b");
+      nav.classList.remove("mode-4c");
+    }
   },
 
   set_HTML : function(id, msg)
