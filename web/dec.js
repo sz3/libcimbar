@@ -23,7 +23,7 @@ return {
 
 	const report = Sink.get_report();
 	if (Array.isArray(report)) {
-		Dec.render_preogress(report);
+		Dec.render_progress(report);
 	}
 	else {
 		Dec.set_HTML("tdec", "decode " + res + ". " + report);
