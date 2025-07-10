@@ -243,7 +243,7 @@ return {
     _video.requestVideoFrameCallback(Dec.on_frame);
   },
 
-  capture_frame : function()
+  captureFrame : function()
   {
 	_captureNextFrame = 1;
 	alert("about to capture!");
