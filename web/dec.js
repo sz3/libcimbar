@@ -227,7 +227,7 @@ return {
 		if (size != rect.width * rect.height * 4) {
 			format = vf.format;
 		}
-		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height });
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
 		if (_captureNextFrame == 1) {
 			_captureNextFrame = 0;
 			Dec.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
