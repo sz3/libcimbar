@@ -66,13 +66,14 @@ return {
 			alert("we biffed it. :( " + res);
 			console.log("we biffed it. :( " + res);
 			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
-			return;
 		}
-		// may need to slice() buff here to copy from wasm...
-		Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
+		else {
+			Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
+		}
 	} catch (error) {
-		Module._free(dataPtr);
+		console.log("failed finish copy or download?? " + error);
 	}
+	Module._free(dataPtr);
   }
 };
 }();
@@ -227,7 +228,7 @@ return {
 		if (size != rect.width * rect.height * 4) {
 			format = vf.format;
 		}
-		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height });
+		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
 		if (_captureNextFrame == 1) {
 			_captureNextFrame = 0;
 			Dec.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
@@ -302,14 +303,18 @@ return {
 
   setMode : function(mode_str)
   {
-    var is_4c = (mode_str == "4C");
-    Module._cimbard_configure_decode(255, is_4c? 4 : 68);
+	const modeVal = (mode_str == "4C")? 4 : 68;
+    Module._cimbard_configure_decode(255, modeVal);
+	for (let i = 0; i < _workers.length; i++) {
+		// cal config decode within the workers as well
+		_workers[i].postMessage({ config: true, color_bits: 255, mode_val: modeVal });
+	}
 
     var nav = document.getElementById("nav-container");
-    if (is_4c) {
+    if (mode_str == "4C") {
       nav.classList.remove("mode-b");
       nav.classList.add("mode-4c");
-    } else if (mode_str == "B") {
+    } else if (modeVal == "B") {
       nav.classList.add("mode-b");
       nav.classList.remove("mode-4c");
     } else {
