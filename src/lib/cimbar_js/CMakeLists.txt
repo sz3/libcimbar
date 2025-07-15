@@ -7,6 +7,8 @@ set (SOURCES
 	cimbar_js.cpp
 	cimbar_recv_js.h
 	cimbar_recv_js.cpp
+	cimbar_zstd_js.h
+	cimbar_zstd_js.cpp
 )
 
 if(DEFINED USE_WASM)
@@ -76,3 +78,4 @@ else()  # if no wasm, ignore all that and add in GLFW libraries
 		glfw
 	)
 endif()
+

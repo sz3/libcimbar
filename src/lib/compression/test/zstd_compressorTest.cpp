@@ -131,3 +131,46 @@ TEST_CASE( "zstd_compressorTest/testPad", "[unit]" )
 	assertEquals( 21, sizeof(expected) );
 	assertEquals( std::string(expected, 20), output.str() );
 }
+
+TEST_CASE( "zstd_compressorTest/testRoundTrip.BeeegRandom", "[unit]" )
+{
+	const int SIZE = 5000000;
+	string original = big_random(SIZE);
+
+	zstd_compressor<std::stringstream> comp;
+	assertTrue( comp.write(original.data(), original.size()) );
+
+	string output = comp.str();
+	assertInRange( SIZE-10000, output.size(), SIZE+10000 );
+
+	// point at decompressor
+	zstd_decompressor<std::stringstream> dec;
+	assertTrue( dec.write(output.data(), output.size()) );
+
+	string recovered = dec.str();
+	assertEquals( original.size(), recovered.size() );
+	assertEquals( original, recovered );
+}
+
+TEST_CASE( "zstd_compressorTest/testRoundTrip.BeeegNotSoRandom", "[unit]" )
+{
+	const int SIZE = 3000000;
+	string original = big_random(16);
+	while (original.size() < SIZE)
+		original += original;
+
+	zstd_compressor<std::stringstream> comp;
+	assertTrue( comp.write(original.data(), original.size()) );
+
+	string output = comp.str();
+	assertInRange( 7000, output.size(), 10000 );
+
+	// point at decompressor
+	zstd_decompressor<std::stringstream> dec;
+	assertTrue( dec.write(output.data(), output.size()) );
+
+	string recovered = dec.str();
+	assertEquals( original.size(), recovered.size() );
+	assertEquals( original, recovered );
+}
+
