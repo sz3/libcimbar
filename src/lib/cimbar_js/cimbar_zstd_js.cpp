@@ -25,7 +25,10 @@ int cimbarz_init_decompress(unsigned char* buffer, unsigned size)
 		_dec.reset();
 
 	_dec = std::make_unique<cimbar::zstd_decompressor<std::stringstream>>();
+	if (!_dec)
+		return -1;
 	_dec->init_decompress(reinterpret_cast<char*>(buffer), size);
+	return 0;
 }
 
 // cached in anon namespace from cimbarz_init_decompress call?
@@ -49,11 +52,11 @@ int cimbarz_decompress_read(unsigned char* buffer, unsigned size)
 	if (!_dec->good())
 		return -2;
 
-	_dec->clear();
+	_dec->str(std::string());
 	_dec->write_once();
 	std::string temp = _dec->str();
 	if (size > temp.size())
 		size = temp.size();
 	std::copy(temp.data(), temp.data()+size, buffer);
-	return 0;
+	return size;
 }
