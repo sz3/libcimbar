@@ -6,10 +6,11 @@ var Module = {
     onRuntimeInitialized: function load_done_callback() {
         console.info("The Module is loaded and is accessible here", Module);
         _wasmInitialized = true;
+	self.postMessage({ type: 'startWasm', ready: "ready!" });
     }
 };
 
-var DecWorker = function() {
+var RecvWorker = function() {
 
 // public interface
 return {
@@ -22,8 +23,8 @@ return {
 		try {
 		    //console.log(vf);
 			// malloc iff necessary
-			DecWorker.mallocAll(pixels.length);
-			const imgBuff = DecWorker.imgBuff();
+			RecvWorker.mallocAll(pixels.length);
+			const imgBuff = RecvWorker.imgBuff();
 			imgBuff.set(data.pixels, 0); // copy
 		} catch (e) {
 		    console.log(e);
@@ -36,11 +37,11 @@ return {
 		
 		try {
 		    // then decode in wasm, fool
-			const fountainBuff = DecWorker.fountainBuff();
-		    var len = Module._cimbard_scan_extract_decode(DecWorker.imgBuff().byteOffset, width, height, type, fountainBuff.byteOffset, fountainBuff.length);
+			const fountainBuff = RecvWorker.fountainBuff();
+		    var len = Module._cimbard_scan_extract_decode(RecvWorker.imgBuff().byteOffset, width, height, type, fountainBuff.byteOffset, fountainBuff.length);
 
 			if (len <= 0) {
-				var errmsg = DecWorker.get_error();
+				var errmsg = RecvWorker.get_error();
 				errmsg = len + " " + errmsg;
 				//console.log(errmsg);
 				if (len != -3) {
@@ -63,7 +64,7 @@ return {
 
 	get_error : function()
 	{
-		const errbuff = DecWorker.mallocPlease("error", 256);
+		const errbuff = RecvWorker.mallocPlease("error", 256);
 		const errlen = Module._cimbard_get_report(errbuff.byteOffset, errbuff.length);
 		if (errlen > 0) {
 			const errview = new Uint8Array(Module.HEAPU8.buffer, errbuff.byteOffset, errlen);
@@ -92,10 +93,10 @@ return {
 
 	mallocAll : function(imgsize)
 	{
-		DecWorker.mallocPlease("img", imgsize);
+		RecvWorker.mallocPlease("img", imgsize);
 
 		const bufsize = Module._cimbard_get_bufsize();
-		DecWorker.mallocPlease("fountain", bufsize);
+		RecvWorker.mallocPlease("fountain", bufsize);
 	},
 
 	imgBuff : function()
@@ -133,5 +134,5 @@ self.onmessage = async (event) => {
 	}
 	
 	// assert 'vf' in data?
-	DecWorker.on_frame(event.data)
+	RecvWorker.on_frame(event.data)
 };

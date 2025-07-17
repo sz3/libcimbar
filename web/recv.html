@@ -306,8 +306,8 @@ video {
 <div id="crosshair2"></div>
 
 <div id="nav-container" class="mode-b">
-    <div class="bg" onclick="Dec.blurNav();"></div>
-    <button id="nav-button" tabindex="0" onclick="Dec.clickNav();">
+    <div class="bg" onclick="Recv.blurNav();"></div>
+    <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -315,12 +315,12 @@ video {
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
-        <li><a href="javascript:void(0)" onclick="Dec.toggleFullscreen()">Fullscreen</a></li>
+        <li><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>
         <hr>
-        <li><a class="mode-b" href="javascript:void(0)" onclick="Dec.setMode('B')">Mode B</a></li>
-        <li><a class="mode-4c" href="javascript:void(0)" onclick="Dec.setMode('4C')">4C <small>(old apps)</small></a></li>
-		<li class="small"><a href="javascript:void(0)" onclick="Dec.captureFrame()">Capture</a></li>
-		<li class="small"><a href="javascript:void(0)" onclick="Dec.showDebug()">Debug</a></li>
+        <li><a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">Mode B</a></li>
+        <li><a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C <small>(old apps)</small></a></li>
+		<li class="small"><a href="javascript:void(0)" onclick="Recv.captureFrame()">Capture</a></li>
+		<li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>
@@ -345,13 +345,13 @@ video {
 
 	var Module = {};
 	Module.onRuntimeInitialized = () => {
-		Dec.init(video, 2);
-		Dec.render_progress([0.1, 0.5, 0.99]);
+		Recv.init(video, 2);
+		Recv.render_progress([0.1, 0.5, 0.99]);
 	};
 </script>
 
 <script src="cimbar_js.js"></script>
-<script src="dec.js"></script>
+<script src="recv.js"></script>
 
 </body>
 </html>
