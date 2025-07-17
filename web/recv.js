@@ -23,10 +23,10 @@ return {
 
 	const report = Sink.get_report();
 	if (Array.isArray(report)) {
-		Dec.render_progress(report);
+		Recv.render_progress(report);
 	}
 	else {
-		Dec.set_HTML("tdec", "decode " + res + ". " + report);
+		Recv.set_HTML("tdec", "decode " + res + ". " + report);
 	}
 	
 	if (res > 0) {
@@ -65,10 +65,10 @@ return {
 		if (res < 0) {
 			alert("we biffed it. :( " + res);
 			console.log("we biffed it. :( " + res);
-			Dec.set_HTML("errorbox", "reassemble_file failed :( " + res);
+			Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
 		}
 		else {
-			Dec.download_bytes(buff, size + ".zst"); // size -> name, eventually
+			Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
 		}
 	} catch (error) {
 		console.log("failed finish copy or download?? " + error);
@@ -79,7 +79,7 @@ return {
 }();
 
 
-var Dec = function() {
+var Recv = function() {
 
 var _counter = 0;
 var _renderTime = 0;
@@ -88,6 +88,7 @@ var _captureNextFrame = 0;
 var _video = 0;
 var _workers = [];
 var _nextWorker = 0;
+var _workerReady;
 
 var _fountainBuff = undefined;
 
@@ -116,15 +117,19 @@ function _downloadHelper(name, bloburl)
 return {
   init : function(video, num_workers)
   {
-    Dec.init_video(video);
-	Dec.init_ww(num_workers);
+	Recv.init_ww(num_workers);
+	Recv.init_video(video);
   },
 
   set_error : function(msg)
   {
-    Dec.set_HTML('errorbox', msg);
+    Recv.set_HTML('errorbox', msg);
     return false;
   },
+
+  ww_ready : new Promise(resolve => {
+    _workerReady = resolve;
+  }),
 
   init_ww : function(num_workers)
   {
@@ -132,10 +137,10 @@ return {
 	_workers = [];
 	for (let i = 0; i < num_workers; i++)
 	{
-		_workers.push(new Worker('dec-worker.js'));
+		_workers.push(new Worker('recv-worker.js'));
 
 		_workers[i].onmessage = (event) => {
-			Dec.on_decode(i, event.data);
+			Recv.on_decode(i, event.data);
 		};
 
 		_workers[i].onerror = (error) => {
@@ -163,7 +168,7 @@ return {
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
     {
-        return Dec.set_error('mediaDevices not supported? :(');
+        return Recv.set_error('mediaDevices not supported? :(');
     }
 
     navigator.mediaDevices.getUserMedia(constraints)
@@ -176,7 +181,7 @@ return {
         video.src = URL.createObjectURL(localMediaStream); //deprecated
       }
       video.play();
-      video.requestVideoFrameCallback(Dec.on_frame);
+      video.requestVideoFrameCallback(Recv.on_frame);
     })
     .catch(err => {
       console.error(`OH NO!!!!`, err);
@@ -198,12 +203,18 @@ return {
   {
 	console.log('Main thread received message from worker' + wid + ':', data);
 	if (data.res) {
-		Dec.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+		Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+		return;
+	}
+	if (data.ready)
+	{
+		if (_workerReady)
+			_workerReady();
 		return;
 	}
 
 	const buff = new Uint8Array(data);
-	Dec.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+	Recv.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
 	Sink.on_decode(buff);
   },
 
@@ -219,7 +230,7 @@ return {
 
 	var vf = undefined;
 	try {
-		vf = new VideoFrame(_video);
+		vf = new VideoFrame(_video, {timestamp: now});
 		const rect = vf.visibleRect;
 		let format = "RGBA";
 		const size = vf.allocationSize({format: format});
@@ -231,7 +242,7 @@ return {
 		_workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
 		if (_captureNextFrame == 1) {
 			_captureNextFrame = 0;
-			Dec.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
+			Recv.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
 		}
 	} catch (e) {
         console.log(e);
@@ -241,7 +252,7 @@ return {
 
     // schedule the next one
 	_nextWorker += 1;
-    _video.requestVideoFrameCallback(Dec.on_frame);
+    _video.requestVideoFrameCallback(Recv.on_frame);
   },
 
   captureFrame : function()
@@ -253,7 +264,7 @@ return {
   render_progress : function(report)
   {
 	console.log("progress!!!!" + report);
-	Dec.set_HTML("tdec", "progress " + report);
+	Recv.set_HTML("tdec", "progress " + report);
 	const progress_container = document.getElementById('progress_bars');
 	const query = '#progress_bars > div[class="progress"]';
 	const prev = document.querySelectorAll(query);

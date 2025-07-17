@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<title>cimbar recv js test</title>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.24.1.css">
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <div class="hidden">
+    <img id="example_frame" src="test/tr_0.png">
+  </div>
+  <div class="statusbox" id="errorbox">hi</div>
+	<div class="statusbox" id="t0">hi</div>
+	<div class="statusbox" id="t1">hi</div>
+	<div class="statusbox" id="tdec">hi</div>
+
+
+<script src="recv.js"></script>
+
+<script type="text/javascript">
+  Recv.init_ww(1);
+
+  let IS_READY;
+  const WAIT_UNTIL_READY = new Promise(resolve => {
+    IS_READY = resolve;
+  });
+	var Module = {};
+	Module.onRuntimeInitialized = () => {
+    IS_READY();
+  };
+</script>
+
+  <script src="cimbar_js.js"></script>
+
+  <script src="https://code.jquery.com/qunit/qunit-2.24.1.js"></script>
+  <script src="test/test_base.js"></script>
+</body>
+</html>
+
