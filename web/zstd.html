@@ -1,41 +1,41 @@
 <!doctype html>
 <html lang="en" data-framework="javascript">
+
 <head>
-<title>Cimbar Encoder</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no">
-<link rel="manifest" href="pwa.json">
+	<title>Cimbar Encoder</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<link rel="manifest" href="pwa.json">
 </head>
+
 <body>
 
-<style>
+	<style>
+		.statusbox {
+			color: red;
+			text-shadow: 2px 2px 2px white;
+		}
 
-	.statusbox {
-        color: red;
-        text-shadow: 2px 2px 2px white;
-    }
+		.buton {
+			background: green;
+			border: 5px inset cyan;
+		}
+	</style>
 
-	.buton {
-		background: green;
-		border: 5px inset cyan;
-	}
-        
-</style>
+	<div class="statusbox" id="errorbox">hi</div>
 
-<div class="statusbox" id="errorbox">hi</div>
+	<input style="display:none;" type="file" name="file_input" id="file_input" onchange="Zstd.fileInput(this);" />
+	<a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Zstd.clickFileInput()">Find File</a>
 
-<input style="display:none;" type="file" name="file_input" id="file_input" onchange="Zstd.fileInput(this);" />
-<a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Zstd.clickFileInput()">Find File</a>
+	<script type="text/javascript">
+		var Module = {};
+		Module.onRuntimeInitialized = () => {
+		};
+	</script>
 
-<script type="text/javascript">
-	var Module = {};
-	Module.onRuntimeInitialized = () => {
-	};
-</script>
-
-<script src="cimbar_js.js"></script>
-<script src="zstd.js"></script>
+	<script src="cimbar_js.js"></script>
+	<script src="zstd.js"></script>
 
 </body>
-</html>
 
+</html>
