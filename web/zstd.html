@@ -33,6 +33,54 @@
 		};
 	</script>
 
+	<script type="text/javascript">
+		var Main = function () {
+
+			function importFile(f) {
+				const fileReader = new FileReader();
+				fileReader.onload = (event) => {
+					const fileData = new Uint8Array(event.target.result);
+
+					Zstd.decompress(f.name, fileData);
+					Main.set_HTML("errorbox", f.name);
+				};
+				fileReader.onerror = () => {
+					console.error('Unable to read file ' + f.name + '.');
+				};
+
+				fileReader.readAsArrayBuffer(f);
+			}
+
+			// public interface
+			return {
+
+				set_error: function (msg) {
+					Main.set_HTML('errorbox', msg);
+					return false;
+				},
+
+				clickFileInput: function () {
+					document.getElementById("file_input").click();
+				},
+
+				fileInput: function (ev) {
+					console.log("file input: " + ev);
+					var file = document.getElementById('file_input').files[0];
+					if (file)
+						importFile(file);
+				},
+
+				set_HTML: function (id, msg) {
+					document.getElementById(id).innerHTML = msg;
+				},
+
+				set_title: function (msg) {
+					document.title = "Cimbar: " + msg;
+				}
+			};
+		}();
+	</script>
+
 	<script src="cimbar_js.js"></script>
 	<script src="zstd.js"></script>
 

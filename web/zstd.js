@@ -70,24 +70,27 @@ var Zstd = function () {
     }
   }
 
+  function _downloadHelper(name, bloburl) {
+    var aaa = document.createElement('a');
+    aaa.href = bloburl;
+    aaa.download = name;
+    document.body.appendChild(aaa);
+    aaa.style = 'display: none';
+    aaa.click();
+    aaa.remove();
+  }
+
   async function saveViaBlob(readstream, filename) {
-    // Create a new Response object from the stream
+    // Create Response object from the stream, get blob
     const response = new Response(readstream);
-
-    // Create a blob from the response
     const blob = await response.blob();
-
-    // Create an object URL from the blob
     const url = URL.createObjectURL(blob);
 
-    // Create a link element and simulate a click to download
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    _downloadHelper(filename, url);
+
+    setTimeout(function () {
+      return URL.revokeObjectURL(url);
+    }, 1000);
   }
 
   function saveToFile(readstream, filename) {
@@ -106,52 +109,6 @@ var Zstd = function () {
       const reader = getDecompressReader(_activeBuff);
 
       saveToFile(reader, name);
-    }
-  };
-}();
-
-var Main = function () {
-
-  function importFile(f) {
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      const fileData = new Uint8Array(event.target.result);
-
-      Zstd.decompress(f.name, fileData);
-      Main.set_HTML("errorbox", f.name);
-    };
-    fileReader.onerror = () => {
-      console.error('Unable to read file ' + f.name + '.');
-    };
-
-    fileReader.readAsArrayBuffer(f);
-  }
-
-  // public interface
-  return {
-
-    set_error: function (msg) {
-      Main.set_HTML('errorbox', msg);
-      return false;
-    },
-
-    clickFileInput: function () {
-      document.getElementById("file_input").click();
-    },
-
-    fileInput: function (ev) {
-      console.log("file input: " + ev);
-      var file = document.getElementById('file_input').files[0];
-      if (file)
-        importFile(file);
-    },
-
-    set_HTML: function (id, msg) {
-      document.getElementById(id).innerHTML = msg;
-    },
-
-    set_title: function (msg) {
-      document.title = "Cimbar: " + msg;
     }
   };
 }();
