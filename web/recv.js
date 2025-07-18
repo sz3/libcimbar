@@ -65,7 +65,8 @@ var Sink = function () {
           Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
         }
         else {
-          Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
+          //Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
+          Zstd.decompress(id + "." + size, buff);
         }
       } catch (error) {
         console.log("failed finish copy or download?? " + error);

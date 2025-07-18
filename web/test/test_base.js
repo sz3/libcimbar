@@ -26,16 +26,17 @@ function wait_for(assert, block) {
   });
 }
 
-
-QUnit.testStart(async function (details) {
-  const img = document.getElementById('example_frame');
+async function load_image(num) {
+  const img = document.getElementById('example_frame' + num);
   const imageBitmap = await window.createImageBitmap(img);
   imageBitmap.requestVideoFrameCallback = function () { };
 
   try {
     Recv.init_video(imageBitmap);
   } catch (ex) { }
+}
 
+QUnit.testStart(async function (details) {
   await WAIT_UNTIL_READY;
   await Recv.ww_ready;
 });
@@ -45,17 +46,45 @@ QUnit.testDone(function (details) {
 });
 
 QUnit.test("stable decode", async function (assert) {
-
+  await load_image(0);
   Recv.on_frame(0, '');
 
   const progress_container = document.getElementById('progress_bars');
   const query = '#progress_bars > div[class="progress"]';
 
-  const progress = await wait_for(assert, () => {
+  const pro0 = await wait_for(assert, () => {
     return document.querySelector(query);
   });
+  assert.equal(pro0.style.width, "30.7692%");
 
+  pro0.remove();
 
-  assert.ok(progress);
-  assert.equal(progress.style.width, "30.7692%");
+  await load_image(1);
+  Recv.on_frame(0, '');
+
+  const pro1 = await wait_for(assert, () => {
+    return document.querySelector(query);
+  });
+  assert.equal(pro1.style.width, "61.5385%");
+
+  pro1.remove();
+
+  await load_image(2);
+  Recv.on_frame(0, '');
+
+  const pro2 = await wait_for(assert, () => {
+    return document.querySelector(query);
+  });
+  assert.equal(pro2.style.width, "92.3077%");
+
+  pro2.remove();
+
+  // last one
+  await load_image(3);
+  Recv.on_frame(0, '');
+
+  const pro3 = await wait_for(assert, () => {
+    return document.querySelector(query);
+  });
+  assert.equal(pro3.style.width, "100%");
 });
