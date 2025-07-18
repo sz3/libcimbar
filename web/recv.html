@@ -18,6 +18,12 @@ html, body {
 	height: 100vh;
 }
 
+body {
+	background-color: white;
+	background-image: linear-gradient(135deg, rgb(0,0,0, 200) 65px, transparent 130px);
+	background-size: cover;
+}
+
 #container {
 	position: fixed;
 	top: 0;
@@ -46,14 +52,18 @@ video {
 	bottom: 0;
 	left: 0;
 	right: 0;
+	margin-bottom: 1vh;
 }
 
 .progress {
 	display: block;
-	height: 0.5em;
-	margin-bottom: 4px;
+	height: 1.2vh;
+	margin-bottom: 1vh;
 	background-color: white;
-	border: 4px solid blue;
+	border-top: 0.2vh inset navy;
+	border-bottom: 0.4vh inset navy;
+	border-right: 0.3vh inset navy;
+	border-radius: 0 0.5vh 0.5vh 0;
 	max-width: 100%;
 	width: 0;
 }
