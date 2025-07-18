@@ -1,0 +1,62 @@
+name: wasm
+
+on: push
+
+jobs:
+  test-cimbarjs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: "Install node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: "Install js packages (for running tests)"
+        run: npm install --no-package-lock puppeteer qunit http-server
+
+      - name: Install Puppeteer dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-6 libxcomposite1 libxcursor1 libxdamage1 libxext6 \
+            libxfixes3 libxi6 libxtst6 libnss3 libglib2.0-0 libgtk-3-0t64 \
+            libasound2t64 libxrandr2 libpangocairo-1.0-0 libatk1.0-0 \
+            libatk-bridge2.0-0 libcups2 libdbus-1-3 libdrm2 libgbm1 \
+            libgdk-pixbuf2.0-0
+
+      - name: Get openCV
+        run: |
+          git clone --recurse-submodules --depth 1 --branch 4.11.0 https://github.com/opencv/opencv.git opencv4
+
+      - name: Get npm deps
+        run: ls -l web/
+
+      - name: Run the build process with Docker
+        uses: addnab/docker-run-action@v3
+        with:
+          image: emscripten/emsdk:3.1.69
+          options: -v ${{ github.workspace }}:/usr/src/app
+          shell: bash
+          run: |
+            SKIP_JS=1 bash /usr/src/app/package-wasm.sh
+
+      - name: copy sample files
+        run: cp samples/b/tr_0.png web/test/
+
+      - name: Sanity check file contents
+        run: ls -l web/ && ls -l web/test/
+
+      - name: Run server
+        run: |
+          (cd web/ && npx http-server &)
+          while ! nc -z localhost 8080; do sleep 1; done
+
+      - name: Run tests
+        run: |
+          (cd web/test/ && node run-in-browser.js)
+
