@@ -24,11 +24,11 @@ function importFile(f)
 {
   const fileReader = new FileReader();
   fileReader.onload = (event) => {
-    const imageData = new Uint8Array(event.target.result);
-    const numBytes = imageData.length * imageData.BYTES_PER_ELEMENT;
+    const fileData = new Uint8Array(event.target.result);
+    const numBytes = fileData.length * fileData.BYTES_PER_ELEMENT;
     const dataPtr = Module._malloc(numBytes);
     const dataOnHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, numBytes);
-    dataOnHeap.set(imageData);
+    dataOnHeap.set(fileData);
     Main.encode(f.name, dataOnHeap);
     Module._free(dataPtr);
 
