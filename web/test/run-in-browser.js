@@ -7,7 +7,7 @@ const path = require('path');
 const QUnit = require('qunit');
 
 (async () => {
-  const browser = await puppeteer.launch({headless: true, args:['--no-sandbox', '--disable-setuid-sandbox']});
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
 
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
@@ -31,7 +31,7 @@ const QUnit = require('qunit');
   // Wait for QUnit to finish
   await page.evaluate(() => {
     return new Promise(resolve => {
-      QUnit.done(function(details) {
+      QUnit.done(function (details) {
         window.onQUnitDone(details.failed);
         resolve();
       });

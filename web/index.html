@@ -1,302 +1,336 @@
 <!doctype html>
 <html lang="en" data-framework="javascript">
+
 <head>
-<title>Cimbar Encoder</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, user-scalable=no">
-<link rel="manifest" href="pwa.json">
+  <title>Cimbar Encoder</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <link rel="manifest" href="pwa.json">
 </head>
+
 <body>
 
-<style>
-* {
-	margin: 0;
-	padding: 0;
-}
-
-html, body {
-	height: 100vh;
-}
-
-body {
-	background-color: white;
-	background-image: linear-gradient(135deg, rgb(0,0,0) 65px, transparent 130px),
-repeating-linear-gradient(135deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparent 1px, transparent 30px),
-repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparent 1px, transparent 30px);
-	background-size: cover;
-	color: gray;
-	display: grid;
-	align-items: center;
-	transition: opacity 0.4s ease-in;
-}
-
-#status {
-	position: fixed;
-	right: 0;
-	top: 0;
-}
-
-#nav-container:focus-within {
-	z-index: 1;
-}
-
-#nav-content, #nav-container .bg,  #nav-container:focus-within #nav-button {
- 	z-index: 1;
- }
-
-#canvas {
-	display: block;
-	position: relative;
-}
-
-#dragdrop {
-	background-color: #3C3D82;
-	background-image: linear-gradient(135deg, rgba(249, 249, 249, 0.1) 0%, rgba(249, 249, 249, 0.1) 18%,rgba(70, 70, 70, 0.1) 18%, rgba(70, 70, 70, 0.1) 33%,rgba(229, 229, 229, 0.1) 33%, rgba(229, 229, 229, 0.1) 35%,rgba(53, 53, 53, 0.1) 35%, rgba(53, 53, 53, 0.1) 47%,rgba(156, 156, 156, 0.1) 47%, rgba(156, 156, 156, 0.1) 100%),linear-gradient(135deg, rgba(106, 106, 106, 0.08) 0%, rgba(106, 106, 106, 0.08) 9%,rgba(123, 123, 123, 0.08) 9%, rgba(123, 123, 123, 0.08) 10%,rgba(69, 69, 69, 0.08) 10%, rgba(69, 69, 69, 0.08) 38%,rgba(33, 33, 33, 0.08) 38%, rgba(33, 33, 33, 0.08) 65%,rgba(24, 24, 24, 0.08) 65%, rgba(24, 24, 24, 0.08) 77%,rgba(210, 210, 210, 0.08) 77%, rgba(210, 210, 210, 0.08) 100%),linear-gradient(45deg, rgba(70, 70, 70, 0.02) 0%, rgba(70, 70, 70, 0.02) 23%,rgba(225, 225, 225, 0.02) 23%, rgba(225, 225, 225, 0.02) 29%,rgba(118, 118, 118, 0.02) 29%, rgba(118, 118, 118, 0.02) 36%,rgba(28, 28, 28, 0.02) 36%, rgba(28, 28, 28, 0.02) 42%,rgba(142, 142, 142, 0.02) 42%, rgba(142, 142, 142, 0.02) 85%,rgba(95, 95, 95, 0.02) 85%, rgba(95, 95, 95, 0.02) 93%,rgba(32, 32, 32, 0.02) 93%, rgba(32, 32, 32, 0.02) 98%,rgba(71, 71, 71, 0.02) 98%, rgba(71, 71, 71, 0.02) 100%),linear-gradient(135deg, rgba(207, 207, 207, 0.05) 0%, rgba(207, 207, 207, 0.05) 12%,rgba(32, 32, 32, 0.05) 12%, rgba(32, 32, 32, 0.05) 27%,rgba(79, 79, 79, 0.05) 27%, rgba(79, 79, 79, 0.05) 32%,rgba(139, 139, 139, 0.05) 32%, rgba(139, 139, 139, 0.05) 43%,rgba(150, 150, 150, 0.05) 43%, rgba(150, 150, 150, 0.05) 79%,rgba(139, 139, 139, 0.05) 79%, rgba(139, 139, 139, 0.05) 87%,rgba(55, 55, 55, 0.05) 87%, rgba(55, 55, 55, 0.05) 91%,rgba(68, 68, 68, 0.05) 91%, rgba(68, 68, 68, 0.05) 100%),linear-gradient(0deg, rgba(108, 108, 108, 0.1) 0%, rgba(108, 108, 108, 0.1) 16%,rgba(163, 163, 163, 0.1) 16%, rgba(163, 163, 163, 0.1) 18%,rgba(32, 32, 32, 0.1) 18%, rgba(32, 32, 32, 0.1) 29%,rgba(122, 122, 122, 0.1) 29%, rgba(122, 122, 122, 0.1) 61%,rgba(141, 141, 141, 0.1) 61%, rgba(141, 141, 141, 0.1) 67%,rgba(53, 53, 53, 0.1) 67%, rgba(53, 53, 53, 0.1) 78%,rgba(142, 142, 142, 0.1) 78%, rgba(142, 142, 142, 0.1) 100%),linear-gradient(0deg, rgba(160, 160, 160, 0.08) 0%, rgba(160, 160, 160, 0.08) 27%,rgba(163, 163, 163, 0.08) 27%, rgba(163, 163, 163, 0.08) 29%,rgba(37, 37, 37, 0.08) 29%, rgba(37, 37, 37, 0.08) 35%,rgba(96, 96, 96, 0.08) 35%, rgba(96, 96, 96, 0.08) 73%,rgba(250, 250, 250, 0.08) 73%, rgba(250, 250, 250, 0.08) 90%,rgba(91, 91, 91, 0.08) 90%, rgba(91, 91, 91, 0.08) 100%),linear-gradient(90deg, rgba(191, 191, 191, 0.08) 0%, rgba(191, 191, 191, 0.08) 2%,rgba(170, 170, 170, 0.08) 2%, rgba(170, 170, 170, 0.08) 7%,rgba(49, 49, 49, 0.08) 7%, rgba(49, 49, 49, 0.08) 9%,rgba(131, 131, 131, 0.08) 9%, rgba(131, 131, 131, 0.08) 23%,rgba(197, 197, 197, 0.08) 23%, rgba(197, 197, 197, 0.08) 29%,rgba(154, 154, 154, 0.08) 29%, rgba(154, 154, 154, 0.08) 91%,rgba(211, 211, 211, 0.08) 91%, rgba(211, 211, 211, 0.08) 100%),linear-gradient(90deg, rgb(0,119,100),rgb(0,0,119));
-	margin: 0 auto;
-	color: #F0F0F0;
-	outline: 6px solid black;
-	box-shadow: 0px 0px 12px black, 0px 0px 18px black;
-	transform-origin: 0;
-	transition: transform 0.3s;
-}
-
-.dragdrop::before {
-	content: "⌜ Tap to start! ⌟";
-	font: 1.5em serif;
-	padding-top: 2em;
-	position: absolute;
-	left: 0;
-	text-align: center;
-	width: 100%;
-	transform-origin: center center;
-	transition: transform 0.3s;
-}
-
-.dragdrop.rotated::before {
-	width: 100vh;
-	left: 0;
-	top: 0;
-	transform: rotate(-90deg) translateX(-20%) translateY(-5em);
-}
-
-.dragdrop.error:before {
-	content: "⌜ Error! WebGL is not enabled :( ⌟";
-}
-
-#invisible_click {
-	position: fixed;
-	opacity: 0;
-	pointer-events: auto;
-}
-#invisible_click.active {
-	cursor: none;
-}
-#nav-container:focus-within + #invisible_click {
-	pointer-events: none;
-	display: none;
-}
-
-/* options */
-#nav-container a.mode-b, #nav-container a.mode-4c {
-  color: #555;
-}
-#nav-container.mode-b a.mode-b, #nav-container.mode-4c a.mode-4c {
-  color: #9fa6b2;
-}
-
-/* nav stuff */
-/* built off of https://codepen.io/dannievinther/pen/NvZjvz */
-#nav-container {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-#nav-container .bg {
-  pointer-events: auto;
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  visibility: hidden;
-  opacity: 0;
-  transition: .3s;
-  background: black;
-}
-#nav-container:focus-within .bg {
-  visibility: visible;
-  opacity: .6;
-}
-#nav-container * {
-  visibility: visible;
-}
-
-#nav-button {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 60px;
-  width: 30px;
-  margin-left: 15px;
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-  border: 0;
-  outline: 0;
-  background-image: linear-gradient(180deg, rgb(0,0,0,0) 10%, rgb(0,0,0) 40%, rgb(0,0,0) 60%, rgb(0,0,0,0) 90%);
-  background-color: initial;
-}
-#nav-button.hide {
-  opacity: 0;
-  transition: .3s;
-}
-#nav-container:focus-within #nav-button.hide {
-  opacity: 1;
-}
-.icon-bar {
-  display: block;
-  width: 100%;
-  height: 3px;
-  transition: .3s;
-}
-.icon-bar + .icon-bar {
-  margin-top: 3px;
-}
-#nav-container .icon-bar:nth-of-type(1) {
-  background-color: #00ff00;
-  box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
-}
-#nav-container .icon-bar:nth-of-type(2) {
-  background-color: #ffff00;
-  box-shadow: 0px 0px 5px #ffff00, 0px 0px 2px #ffff00;
-}
-#nav-container .icon-bar:nth-of-type(3) {
-  background-color: #00ffff;
-  box-shadow: 0px 0px 5px #00ffff, 0px 0px 2px #00ffff;
-}
-#nav-container .icon-bar:nth-of-type(4) {
-  background-color: #ff00ff;
-  box-shadow: 0px 0px 5px #ff00ff, 0px 0px 2px #ff00ff;
-}
-
-#nav-container.mode-4c .icon-bar:nth-of-type(1) {
-  background-color: #00ffff;
-  box-shadow: 0px 0px 5px #00ffff, 0px 0px 2px #00ffff;
-}
-#nav-container.mode-4c .icon-bar:nth-of-type(2) {
-  background-color: #ffff00;
-  box-shadow: 0px 0px 5px #ffff00, 0px 0px 2px #ffff00;
-}
-#nav-container.mode-4c .icon-bar:nth-of-type(3) {
-  background-color: #00ff00;
-  box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
-}
-#nav-container.mode-4c .icon-bar:nth-of-type(4) {
-  background-color: #ff00ff;
-  box-shadow: 0px 0px 5px #ff00ff, 0px 0px 2px #ff00ff;
-}
-
-#nav-container:focus-within #nav-button {
-  pointer-events: none;
-}
-#nav-container:focus-within .icon-bar {
-  background-color: #aaa;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-#nav-button.attention:focus-within .icon-bar {
-  background-color: #00ffff;
-}
-#nav-container:focus-within .icon-bar:nth-of-type(1) {
-  transform: translate3d(0,9px,0) rotate(45deg);
-}
-#nav-container:focus-within .icon-bar:nth-of-type(2), #nav-container:focus-within .icon-bar:nth-of-type(3) {
-  opacity: 0;
-}
-#nav-container:focus-within .icon-bar:nth-of-type(4) {
-  transform: translate3d(0,-9px,0) rotate(-45deg);
-}
-
-#nav-content {
-  margin-top: 60px;
-  padding: 20px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: calc(100% - 60px);
-  overflow-x: clip;
-  background-color: #282C34;
-  text-align: center;
-  pointer-events: auto;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-  transform: translateX(-100%);
-  transition: transform .3s;
-}
-
-#nav-content ul {
-  height: calc(100% - 60px);
-  display: flex;
-  flex-direction: column;
-  list-style: none;
-}
-
-#nav-content hr {
-  border: 1px solid #444;
-}
-
-#nav-content li a {
-  display: block;
-  padding: 10px 5px;
-  color: #9fa6b2;
-  text-decoration: none;
-  transition: color .1s;
-}
-
-#nav-content li a.attention {
-    animation: glowing 1.5s infinite alternate;
-}
-#nav-content li a {
-  font-variant: small-caps;
-  font-size: 2em;
-}
-#nav-content li:hover {
-  background-color: #2c323c;
-}
-
-#nav-content li:not(.small) + .small {
-  margin-top: auto;
-}
-#nav-content li.small {
-  display: flex;
-  align-self: center;
-}
-#nav-content li.small a {
-  font-size: 1em;
-}
-
-#nav-container:focus-within #nav-content {
-  transform: none;
-}
-
-@keyframes glowing {
-    0% {
-        color: #00ffff;
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
     }
-}
-</style>
 
-<div id="status"></div>
-<div id="dragdrop" class="dragdrop" title="Drag and drop a file">
-	<canvas id="canvas" class="canvas"></canvas>
-</div>
+    html,
+    body {
+      height: 100vh;
+    }
 
-<input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
+    body {
+      background-color: white;
+      background-image: linear-gradient(135deg, rgb(0, 0, 0) 65px, transparent 130px),
+        repeating-linear-gradient(135deg, rgb(0, 0, 0) 0px, rgb(153, 197, 206) 1px, transparent 1px, transparent 30px),
+        repeating-linear-gradient(45deg, rgb(0, 0, 0) 0px, rgb(153, 197, 206) 1px, transparent 1px, transparent 30px);
+      background-size: cover;
+      color: gray;
+      display: grid;
+      align-items: center;
+      transition: opacity 0.4s ease-in;
+    }
 
-<a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
+    #status {
+      position: fixed;
+      right: 0;
+      top: 0;
+    }
 
-<div id="nav-container" class="mode-b">
+    #nav-container:focus-within {
+      z-index: 1;
+    }
+
+    #nav-content,
+    #nav-container .bg,
+    #nav-container:focus-within #nav-button {
+      z-index: 1;
+    }
+
+    #canvas {
+      display: block;
+      position: relative;
+    }
+
+    #dragdrop {
+      background-color: #3C3D82;
+      background-image: linear-gradient(135deg, rgba(249, 249, 249, 0.1) 0%, rgba(249, 249, 249, 0.1) 18%, rgba(70, 70, 70, 0.1) 18%, rgba(70, 70, 70, 0.1) 33%, rgba(229, 229, 229, 0.1) 33%, rgba(229, 229, 229, 0.1) 35%, rgba(53, 53, 53, 0.1) 35%, rgba(53, 53, 53, 0.1) 47%, rgba(156, 156, 156, 0.1) 47%, rgba(156, 156, 156, 0.1) 100%), linear-gradient(135deg, rgba(106, 106, 106, 0.08) 0%, rgba(106, 106, 106, 0.08) 9%, rgba(123, 123, 123, 0.08) 9%, rgba(123, 123, 123, 0.08) 10%, rgba(69, 69, 69, 0.08) 10%, rgba(69, 69, 69, 0.08) 38%, rgba(33, 33, 33, 0.08) 38%, rgba(33, 33, 33, 0.08) 65%, rgba(24, 24, 24, 0.08) 65%, rgba(24, 24, 24, 0.08) 77%, rgba(210, 210, 210, 0.08) 77%, rgba(210, 210, 210, 0.08) 100%), linear-gradient(45deg, rgba(70, 70, 70, 0.02) 0%, rgba(70, 70, 70, 0.02) 23%, rgba(225, 225, 225, 0.02) 23%, rgba(225, 225, 225, 0.02) 29%, rgba(118, 118, 118, 0.02) 29%, rgba(118, 118, 118, 0.02) 36%, rgba(28, 28, 28, 0.02) 36%, rgba(28, 28, 28, 0.02) 42%, rgba(142, 142, 142, 0.02) 42%, rgba(142, 142, 142, 0.02) 85%, rgba(95, 95, 95, 0.02) 85%, rgba(95, 95, 95, 0.02) 93%, rgba(32, 32, 32, 0.02) 93%, rgba(32, 32, 32, 0.02) 98%, rgba(71, 71, 71, 0.02) 98%, rgba(71, 71, 71, 0.02) 100%), linear-gradient(135deg, rgba(207, 207, 207, 0.05) 0%, rgba(207, 207, 207, 0.05) 12%, rgba(32, 32, 32, 0.05) 12%, rgba(32, 32, 32, 0.05) 27%, rgba(79, 79, 79, 0.05) 27%, rgba(79, 79, 79, 0.05) 32%, rgba(139, 139, 139, 0.05) 32%, rgba(139, 139, 139, 0.05) 43%, rgba(150, 150, 150, 0.05) 43%, rgba(150, 150, 150, 0.05) 79%, rgba(139, 139, 139, 0.05) 79%, rgba(139, 139, 139, 0.05) 87%, rgba(55, 55, 55, 0.05) 87%, rgba(55, 55, 55, 0.05) 91%, rgba(68, 68, 68, 0.05) 91%, rgba(68, 68, 68, 0.05) 100%), linear-gradient(0deg, rgba(108, 108, 108, 0.1) 0%, rgba(108, 108, 108, 0.1) 16%, rgba(163, 163, 163, 0.1) 16%, rgba(163, 163, 163, 0.1) 18%, rgba(32, 32, 32, 0.1) 18%, rgba(32, 32, 32, 0.1) 29%, rgba(122, 122, 122, 0.1) 29%, rgba(122, 122, 122, 0.1) 61%, rgba(141, 141, 141, 0.1) 61%, rgba(141, 141, 141, 0.1) 67%, rgba(53, 53, 53, 0.1) 67%, rgba(53, 53, 53, 0.1) 78%, rgba(142, 142, 142, 0.1) 78%, rgba(142, 142, 142, 0.1) 100%), linear-gradient(0deg, rgba(160, 160, 160, 0.08) 0%, rgba(160, 160, 160, 0.08) 27%, rgba(163, 163, 163, 0.08) 27%, rgba(163, 163, 163, 0.08) 29%, rgba(37, 37, 37, 0.08) 29%, rgba(37, 37, 37, 0.08) 35%, rgba(96, 96, 96, 0.08) 35%, rgba(96, 96, 96, 0.08) 73%, rgba(250, 250, 250, 0.08) 73%, rgba(250, 250, 250, 0.08) 90%, rgba(91, 91, 91, 0.08) 90%, rgba(91, 91, 91, 0.08) 100%), linear-gradient(90deg, rgba(191, 191, 191, 0.08) 0%, rgba(191, 191, 191, 0.08) 2%, rgba(170, 170, 170, 0.08) 2%, rgba(170, 170, 170, 0.08) 7%, rgba(49, 49, 49, 0.08) 7%, rgba(49, 49, 49, 0.08) 9%, rgba(131, 131, 131, 0.08) 9%, rgba(131, 131, 131, 0.08) 23%, rgba(197, 197, 197, 0.08) 23%, rgba(197, 197, 197, 0.08) 29%, rgba(154, 154, 154, 0.08) 29%, rgba(154, 154, 154, 0.08) 91%, rgba(211, 211, 211, 0.08) 91%, rgba(211, 211, 211, 0.08) 100%), linear-gradient(90deg, rgb(0, 119, 100), rgb(0, 0, 119));
+      margin: 0 auto;
+      color: #F0F0F0;
+      outline: 6px solid black;
+      box-shadow: 0px 0px 12px black, 0px 0px 18px black;
+      transform-origin: 0;
+      transition: transform 0.3s;
+    }
+
+    .dragdrop::before {
+      content: "⌜ Tap to start! ⌟";
+      font: 1.5em serif;
+      padding-top: 2em;
+      position: absolute;
+      left: 0;
+      text-align: center;
+      width: 100%;
+      transform-origin: center center;
+      transition: transform 0.3s;
+    }
+
+    .dragdrop.rotated::before {
+      width: 100vh;
+      left: 0;
+      top: 0;
+      transform: rotate(-90deg) translateX(-20%) translateY(-5em);
+    }
+
+    .dragdrop.error:before {
+      content: "⌜ Error! WebGL is not enabled :( ⌟";
+    }
+
+    #invisible_click {
+      position: fixed;
+      opacity: 0;
+      pointer-events: auto;
+    }
+
+    #invisible_click.active {
+      cursor: none;
+    }
+
+    #nav-container:focus-within+#invisible_click {
+      pointer-events: none;
+      display: none;
+    }
+
+    /* options */
+    #nav-container a.mode-b,
+    #nav-container a.mode-4c {
+      color: #555;
+    }
+
+    #nav-container.mode-b a.mode-b,
+    #nav-container.mode-4c a.mode-4c {
+      color: #9fa6b2;
+    }
+
+    /* nav stuff */
+    /* built off of https://codepen.io/dannievinther/pen/NvZjvz */
+    #nav-container {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #nav-container .bg {
+      pointer-events: auto;
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+      opacity: 0;
+      transition: .3s;
+      background: black;
+    }
+
+    #nav-container:focus-within .bg {
+      visibility: visible;
+      opacity: .6;
+    }
+
+    #nav-container * {
+      visibility: visible;
+    }
+
+    #nav-button {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 60px;
+      width: 30px;
+      margin-left: 15px;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      border: 0;
+      outline: 0;
+      background-image: linear-gradient(180deg, rgb(0, 0, 0, 0) 10%, rgb(0, 0, 0) 40%, rgb(0, 0, 0) 60%, rgb(0, 0, 0, 0) 90%);
+      background-color: initial;
+    }
+
+    #nav-button.hide {
+      opacity: 0;
+      transition: .3s;
+    }
+
+    #nav-container:focus-within #nav-button.hide {
+      opacity: 1;
+    }
+
+    .icon-bar {
+      display: block;
+      width: 100%;
+      height: 3px;
+      transition: .3s;
+    }
+
+    .icon-bar+.icon-bar {
+      margin-top: 3px;
+    }
+
+    #nav-container .icon-bar:nth-of-type(1) {
+      background-color: #00ff00;
+      box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
+    }
+
+    #nav-container .icon-bar:nth-of-type(2) {
+      background-color: #ffff00;
+      box-shadow: 0px 0px 5px #ffff00, 0px 0px 2px #ffff00;
+    }
+
+    #nav-container .icon-bar:nth-of-type(3) {
+      background-color: #00ffff;
+      box-shadow: 0px 0px 5px #00ffff, 0px 0px 2px #00ffff;
+    }
+
+    #nav-container .icon-bar:nth-of-type(4) {
+      background-color: #ff00ff;
+      box-shadow: 0px 0px 5px #ff00ff, 0px 0px 2px #ff00ff;
+    }
+
+    #nav-container.mode-4c .icon-bar:nth-of-type(1) {
+      background-color: #00ffff;
+      box-shadow: 0px 0px 5px #00ffff, 0px 0px 2px #00ffff;
+    }
+
+    #nav-container.mode-4c .icon-bar:nth-of-type(2) {
+      background-color: #ffff00;
+      box-shadow: 0px 0px 5px #ffff00, 0px 0px 2px #ffff00;
+    }
+
+    #nav-container.mode-4c .icon-bar:nth-of-type(3) {
+      background-color: #00ff00;
+      box-shadow: 0px 0px 5px #00ff00, 0px 0px 2px #00ff00;
+    }
+
+    #nav-container.mode-4c .icon-bar:nth-of-type(4) {
+      background-color: #ff00ff;
+      box-shadow: 0px 0px 5px #ff00ff, 0px 0px 2px #ff00ff;
+    }
+
+    #nav-container:focus-within #nav-button {
+      pointer-events: none;
+    }
+
+    #nav-container:focus-within .icon-bar {
+      background-color: #aaa;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
+
+    #nav-button.attention:focus-within .icon-bar {
+      background-color: #00ffff;
+    }
+
+    #nav-container:focus-within .icon-bar:nth-of-type(1) {
+      transform: translate3d(0, 9px, 0) rotate(45deg);
+    }
+
+    #nav-container:focus-within .icon-bar:nth-of-type(2),
+    #nav-container:focus-within .icon-bar:nth-of-type(3) {
+      opacity: 0;
+    }
+
+    #nav-container:focus-within .icon-bar:nth-of-type(4) {
+      transform: translate3d(0, -9px, 0) rotate(-45deg);
+    }
+
+    #nav-content {
+      margin-top: 60px;
+      padding: 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: calc(100% - 60px);
+      overflow-x: clip;
+      background-color: #282C34;
+      text-align: center;
+      pointer-events: auto;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      transform: translateX(-100%);
+      transition: transform .3s;
+    }
+
+    #nav-content ul {
+      height: calc(100% - 60px);
+      display: flex;
+      flex-direction: column;
+      list-style: none;
+    }
+
+    #nav-content hr {
+      border: 1px solid #444;
+    }
+
+    #nav-content li a {
+      display: block;
+      padding: 10px 5px;
+      color: #9fa6b2;
+      text-decoration: none;
+      transition: color .1s;
+    }
+
+    #nav-content li a.attention {
+      animation: glowing 1.5s infinite alternate;
+    }
+
+    #nav-content li a {
+      font-variant: small-caps;
+      font-size: 2em;
+    }
+
+    #nav-content li:hover {
+      background-color: #2c323c;
+    }
+
+    #nav-content li:not(.small)+.small {
+      margin-top: auto;
+    }
+
+    #nav-content li.small {
+      display: flex;
+      align-self: center;
+    }
+
+    #nav-content li.small a {
+      font-size: 1em;
+    }
+
+    #nav-container:focus-within #nav-content {
+      transform: none;
+    }
+
+    @keyframes glowing {
+      0% {
+        color: #00ffff;
+      }
+    }
+  </style>
+
+  <div id="status"></div>
+  <div id="dragdrop" class="dragdrop" title="Drag and drop a file">
+    <canvas id="canvas" class="canvas"></canvas>
+  </div>
+
+  <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
+
+  <a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
+
+  <div id="nav-container" class="mode-b">
     <div class="bg" onclick="Main.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
       <span class="icon-bar"></span>
@@ -307,33 +341,36 @@ repeating-linear-gradient(45deg, rgb(0,0,0) 0px, rgb(153,197,206) 1px,transparen
     <div id="nav-content" tabindex="-1">
       <span id="current-file">No file selected</span>
       <ul>
-        <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a></li>
+        <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find
+            File</a></li>
         <li><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
         <hr>
         <li><a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">Mode B</a></li>
-        <li><a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C <small>(old apps)</small></a></li>
+        <li><a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C <small>(old apps)</small></a>
+        </li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>
     </div>
-</div>
+  </div>
 
-<script type="text/javascript">
-	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('./sw.js');
-	}
-	var canvas = document.getElementById('canvas');
+  <script type="text/javascript">
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+    var canvas = document.getElementById('canvas');
 
-	var Module = {};
-	Module.canvas = canvas;
-	Module.onRuntimeInitialized = () => {
-		Main.init(canvas);
-		Main.nextFrame();
-	};
-</script>
+    var Module = {};
+    Module.canvas = canvas;
+    Module.onRuntimeInitialized = () => {
+      Main.init(canvas);
+      Main.nextFrame();
+    };
+  </script>
 
-<script src="cimbar_js.js"></script>
-<script src="main.js"></script>
+  <script src="cimbar_js.js"></script>
+  <script src="main.js"></script>
 
 </body>
+
 </html>
