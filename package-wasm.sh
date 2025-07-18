@@ -1,6 +1,7 @@
 #!/bin/bash
 #docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:3.1.69 bash
 
+SKIP_JS=${SKIP_JS:-0}
 CIMBAR_ROOT=${CIMBAR_ROOT:-/usr/src/app}
 cd $CIMBAR_ROOT
 
@@ -18,6 +19,10 @@ cd build-wasm
 emcmake cmake .. -DUSE_WASM=1 -DOPENCV_DIR=$CIMBAR_ROOT/opencv4
 make -j5 install
 (cd ../web/ && bash wasmgz.sh)
+
+if [ -n $SKIP_JS ]; then
+	exit 0
+fi
 
 cd $CIMBAR_ROOT
 mkdir build-asmjs
