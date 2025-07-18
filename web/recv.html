@@ -382,7 +382,10 @@
     <div class="progress"></div>
   </div>
 
+  <script src="recv.js"></script>
+
   <script type="text/javascript">
+    Recv.init_ww(2);
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
@@ -390,13 +393,12 @@
 
     var Module = {};
     Module.onRuntimeInitialized = () => {
-      Recv.init(video, 2);
+      Recv.init_video(video);
       Recv.render_progress([0.1, 0.5, 0.99]);
     };
   </script>
 
   <script src="cimbar_js.js"></script>
-  <script src="recv.js"></script>
 
 </body>
 

@@ -1,33 +1,7 @@
 var Zstd = function () {
 
-  var _counter = 0;
   var _activeBuff = undefined;
   var _decompBuff = undefined;
-
-  function _downloadHelper(name, bloburl) {
-    var aaa = document.createElement('a');
-    aaa.href = bloburl;
-    aaa.download = name;
-    document.body.appendChild(aaa);
-    aaa.style = 'display: none';
-    aaa.click();
-    aaa.remove();
-  }
-
-  function importFile(f) {
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      const fileData = new Uint8Array(event.target.result);
-
-      Zstd.decompress(f.name, fileData);
-      Zstd.set_HTML("errorbox", f.name);
-    };
-    fileReader.onerror = () => {
-      console.error('Unable to read file ' + f.name + '.');
-    };
-
-    fileReader.readAsArrayBuffer(f);
-  }
 
   function allocBuff(data) {
     freeBuff();
@@ -126,6 +100,36 @@ var Zstd = function () {
   // public interface
   return {
 
+    decompress: function (name, data) {
+      allocBuff(data);
+
+      const reader = getDecompressReader(_activeBuff);
+
+      saveToFile(reader, name);
+    }
+  };
+}();
+
+var Main = function () {
+
+  function importFile(f) {
+    const fileReader = new FileReader();
+    fileReader.onload = (event) => {
+      const fileData = new Uint8Array(event.target.result);
+
+      Zstd.decompress(f.name, fileData);
+      Main.set_HTML("errorbox", f.name);
+    };
+    fileReader.onerror = () => {
+      console.error('Unable to read file ' + f.name + '.');
+    };
+
+    fileReader.readAsArrayBuffer(f);
+  }
+
+  // public interface
+  return {
+
     set_error: function (msg) {
       Main.set_HTML('errorbox', msg);
       return false;
@@ -142,45 +146,6 @@ var Zstd = function () {
         importFile(file);
     },
 
-    decompress: function (name, data) {
-      allocBuff(data);
-
-      const reader = getDecompressReader(_activeBuff);
-
-      saveToFile(reader, name);
-    },
-
-    get_file: function () {
-      const size = 15000;
-      const dataPtr = Module._malloc(size);
-      const res = Module._fake_download(dataPtr, size);
-      if (res <= 0) {
-        console.log("fake download failed, feelsbadman: " + res);
-        return;
-      }
-
-      const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, res);
-      console.log(buff);
-      alert('we did it ' + res);
-
-      try {
-        Main.download_bytes(buff, "0.1234");
-      } catch (e) {
-        console.log(e);
-      }
-
-      Module._free(dataPtr);
-    },
-
-    download_bytes: function (buff, name) {
-      var blob = new Blob([buff], { type: 'application/octet-stream' });
-      var bloburl = window.URL.createObjectURL(blob);
-      _downloadHelper(name, bloburl);
-      setTimeout(function () {
-        return window.URL.revokeObjectURL(bloburl);
-      }, 1000);
-    },
-
     set_HTML: function (id, msg) {
       document.getElementById(id).innerHTML = msg;
     },
@@ -190,4 +155,3 @@ var Zstd = function () {
     }
   };
 }();
-
