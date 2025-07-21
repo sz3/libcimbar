@@ -88,8 +88,6 @@ var Recv = function () {
   var _nextWorker = 0;
   var _workerReady;
 
-  var _fountainBuff = undefined;
-
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
       return document.exitFullscreen();
@@ -176,7 +174,6 @@ var Recv = function () {
         .catch(err => {
           console.error(`OH NO!!!!`, err);
         });
-
     },
 
     download_bytes: function (buff, name) {
