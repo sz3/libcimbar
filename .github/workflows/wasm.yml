@@ -46,7 +46,7 @@ jobs:
             SKIP_JS=1 bash /usr/src/app/package-wasm.sh
 
       - name: copy sample files
-        run: cp samples/b/tr_0.png web/test/
+        run: cp samples/b/tr_*.png web/test/
 
       - name: Sanity check file contents
         run: ls -l web/ && ls -l web/test/
