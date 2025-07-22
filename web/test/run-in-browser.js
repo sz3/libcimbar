@@ -13,11 +13,20 @@ const QUnit = require('qunit');
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
   page.on('pageerror', err => console.error('PAGE ERROR:', err));
 
+  await page.exposeFunction('onLogMe', (details) => {
+    if (!details.result) {
+      details.expected = JSON.stringify(details.expected);
+      details.actual = JSON.stringify(details.actual);
+      console.error(details);
+    }
+  });
+
   // Expose a function to capture QUnit results
-  await page.exposeFunction('onQUnitDone', (failures) => {
-    if (failures > 0) {
-      console.error(`QUnit Tests Failed: ${failures} assertions failed.`);
-      process.exit(failures); // nonzero is failure
+  await page.exposeFunction('onQUnitDone', (stats) => {
+    if (stats.failed > 0) {
+      console.error(stats);
+      console.error(`QUnit Tests Failed: ${stats.failed} assertions failed.`);
+      process.exit(stats.failed); // nonzero is failure
     } else {
       console.log('All QUnit Tests Passed!');
       process.exit(0);
@@ -31,8 +40,12 @@ const QUnit = require('qunit');
   // Wait for QUnit to finish
   await page.evaluate(() => {
     return new Promise(resolve => {
-      QUnit.done(function (details) {
-        window.onQUnitDone(details.failed);
+      QUnit.log(details => {
+        window.onLogMe(details);
+      });
+
+      QUnit.done(stats => {
+        window.onQUnitDone(stats);
         resolve();
       });
     });

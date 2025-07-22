@@ -54,7 +54,7 @@ var Sink = function () {
 
     reassemble_file: function (id) {
       const size = Module._cimbard_get_filesize(id);
-      alert("we did it!?! " + size);
+      //alert("we did it!?! " + size);
       const dataPtr = Module._malloc(size);
       const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
       try {

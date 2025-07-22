@@ -1,6 +1,20 @@
 QUnit.module("base");
 QUnit.config.reorder = false;
 
+var Zstd = function () {
+
+  // public interface
+  return {
+
+    calls: [],
+
+    decompress: function (name, data) {
+      Zstd.calls.push({ decompress: [name, data.length] });
+    }
+  };
+}();
+
+
 function wait_for(assert, block) {
   var done = assert.async();
   return new Promise(resolve => {
@@ -76,6 +90,7 @@ QUnit.test("stable decode", async function (assert) {
     return document.querySelector(query);
   });
   assert.equal(pro2.style.width, "92.3077%");
+  assert.deepEqual(Zstd.calls, []);
 
   pro2.remove();
 
@@ -87,4 +102,8 @@ QUnit.test("stable decode", async function (assert) {
     return document.querySelector(query);
   });
   assert.equal(pro3.style.width, "100%");
+
+  assert.deepEqual(Zstd.calls, [
+    { decompress: ["576454656.23586", 23586] }
+  ]);
 });
