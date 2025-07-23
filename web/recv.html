@@ -47,8 +47,8 @@
     }
 
     .statusbox {
-      color: red;
-      text-shadow: 2px 2px 2px white;
+      color: white;
+      text-shadow: 1px 1px 1px green;
     }
 
     #progress_bars {
@@ -314,11 +314,11 @@
     }
 
     #nav-container:focus-within #nav-content,
-    #nav-container:focus-within .debug_menu {
+    #debug_menu:focus-within {
       transform: none;
     }
 
-    .debug_menu {
+    #debug_menu {
       transform: translateX(100%);
       margin-top: 60px;
       right: 0;
@@ -327,7 +327,8 @@
       top: 0;
       z-index: 2;
       transition: transform .3s;
-      background-color: white;
+      opacity: 95%;
+      background-color: black;
     }
 
     .invisible {
@@ -370,7 +371,8 @@
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>
     </div>
-    <div class="debug_menu">
+    <div id="debug_menu">
+      <button id="debug-button" onclick="Recv.showDebug();"></button>
       <div class="statusbox" id="errorbox">hi</div>
       <div class="statusbox" id="t0">hi</div>
       <div class="statusbox" id="t1">hi</div>
