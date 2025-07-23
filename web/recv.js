@@ -233,19 +233,20 @@ var Recv = function () {
       var vf = undefined;
       try {
         vf = new VideoFrame(_video, { timestamp: now });
-        const rect = vf.visibleRect;
+        const width = vf.displayWidth;
+        const height = vf.displayHeight;
         let format = "RGBA";
         const size = vf.allocationSize({ format: format });
         const buff = new Uint8Array(size);
         vf.copyTo(buff, { format: format });
-        if (size != rect.width * rect.height * 4) {
+        if (size != width * height * 4) {
           format = vf.format;
         }
         if (_captureNextFrame == 1) {
           _captureNextFrame = 0;
-          Recv.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
+          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + ".rgba");
         }
-        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
+        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height }, [buff.buffer]);
       } catch (e) {
         console.log(e);
       }
