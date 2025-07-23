@@ -51,6 +51,9 @@ var Zstd = function () {
   }
 
   async function saveViaStreaming(readstream, filename) {
+    // afaik there's no way to get the save file picker to activate
+    // without user input? Which ... sucks?
+    alert("download ready!");
     try {
       // 1. Prompt user for a file location.
       const fileHandle = await window.showSaveFilePicker({
@@ -70,38 +73,37 @@ var Zstd = function () {
     }
   }
 
-  function _downloadHelper(name, bloburl) {
-    var aaa = document.createElement('a');
-    aaa.href = bloburl;
-    aaa.download = name;
-    document.body.appendChild(aaa);
-    aaa.style = 'display: none';
-    aaa.click();
-    aaa.remove();
-  }
-
   async function saveViaBlob(readstream, filename) {
     // Create Response object from the stream, get blob
     const response = new Response(readstream);
     const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-
-    _downloadHelper(filename, url);
-
-    setTimeout(function () {
-      return URL.revokeObjectURL(url);
-    }, 1000);
+    Zstd.download_blob(filename, blob);
   }
 
   function saveToFile(readstream, filename) {
-    if (window.showSaveFilePicker == undefined)
-      saveViaBlob(readstream, filename);
-    else
-      saveViaStreaming(readstream, filename);
+    ///if (window.showSaveFilePicker == undefined)
+    saveViaBlob(readstream, filename);
+    //else
+    //  saveViaStreaming(readstream, filename);
   }
 
   // public interface
   return {
+
+    // helper
+    download_blob: function (name, blob) {
+      const url = URL.createObjectURL(blob);
+      var aaa = document.createElement('a');
+      aaa.href = url;
+      aaa.download = name;
+      document.body.appendChild(aaa);
+      aaa.style = 'display: none';
+      aaa.click();
+      aaa.remove();
+      setTimeout(function () {
+        return URL.revokeObjectURL(url);
+      }, 1000);
+    },
 
     decompress: function (name, data) {
       allocBuff(data);

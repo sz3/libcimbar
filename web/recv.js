@@ -71,7 +71,10 @@ var Sink = function () {
       } catch (error) {
         console.log("failed finish copy or download?? " + error);
       }
+      // this needs to happen after decompress() completes
+      // currently decompress is sync, so it's fine. But...
       Module._free(dataPtr);
+      Recv.restart_video();
     }
   };
 }();
@@ -176,6 +179,22 @@ var Recv = function () {
         });
     },
 
+    restart_video: function () {
+      console.log("restart video?");
+      if (_video) {
+        return;
+      }
+      if (!('srcObject' in _video)) {
+        console.log("can't restart video? :|")
+        return;
+      }
+      // ios cancels the feed after we download. Restart it
+      // check if localMediaStream.muted after a while???
+      if (_video.srcObject.muted) {
+        Recv.init_video(_video);
+      }
+    },
+
     download_bytes: function (buff, name) {
       var blob = new Blob([buff], { type: 'application/octet-stream' });
       var bloburl = window.URL.createObjectURL(blob);
@@ -222,11 +241,11 @@ var Recv = function () {
         if (size != rect.width * rect.height * 4) {
           format = vf.format;
         }
-        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
         if (_captureNextFrame == 1) {
           _captureNextFrame = 0;
           Recv.download_bytes(buff, rect.width + "x" + rect.height + "x" + _counter + ".rgba");
         }
+        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: rect.width, height: rect.height }, [buff.buffer]);
       } catch (e) {
         console.log(e);
       }
@@ -241,6 +260,11 @@ var Recv = function () {
     captureFrame: function () {
       _captureNextFrame = 1;
       alert("about to capture!");
+    },
+
+    download_bytes: function (buff, name) {
+      var blob = new Blob([buff], { type: 'application/octet-stream' });
+      Zstd.download_blob(name, blob);
     },
 
     render_progress: function (report) {
@@ -278,6 +302,10 @@ var Recv = function () {
       // nothin yet
     },
 
+    showDebug: function () {
+      document.getElementById("debug-button").focus();
+    },
+
     clickNav: function () {
       document.getElementById("nav-button").focus();
     },
@@ -302,7 +330,7 @@ var Recv = function () {
       if (mode_str == "4C") {
         nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
-      } else if (modeVal == "B") {
+      } else if (mode_str == "B") {
         nav.classList.add("mode-b");
         nav.classList.remove("mode-4c");
       } else {
