@@ -175,19 +175,6 @@ int cimbard_get_filesize(uint32_t id)
 	return md.file_size();
 }
 
-int cimbard_get_filename(uint32_t id, char* buf, unsigned size)
-{
-	if (!_sink)
-		return -1;
-
-	FountainMetadata md(id);
-	std::string filename = _sink->get_filename(md);
-	if (filename.size() > size)
-		filename.resize(size);
-	std::copy(filename.begin(), filename.end(), buf);
-	return filename.size();
-}
-
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
 int cimbard_finish_copy(uint32_t id, uchar* buffer, unsigned size)

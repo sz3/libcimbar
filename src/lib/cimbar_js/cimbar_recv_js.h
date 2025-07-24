@@ -20,9 +20,8 @@ int cimbard_scan_extract_decode(unsigned char* imgdata, unsigned imgw, unsigned 
 // persists state, the return value (if >0) corresponds to a uint32_t id
 int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size);
 
-// get filesize, filename from id
+// get filesize from id
 int cimbard_get_filesize(uint32_t id);
-int cimbard_get_filename(uint32_t id, char* buf, unsigned size);
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // wherever a uint32_t id is passed, it should be on the same js thread
