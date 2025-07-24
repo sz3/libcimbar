@@ -159,14 +159,8 @@ int main(int argc, char** argv)
 			// attempt save
 			uint32_t fileId = res;
 
-			std::string filename(256, '\0'); // max filename length tbd?
-			int fnsz = cimbard_get_filename(fileId, filename.data(), filename.size());
-			if (fnsz <= 0)
-				filename = "cimbar_recv_out";
-			else
-				filename.resize(fnsz);
-
 			unsigned size = cimbard_get_filesize(fileId);
+			std::string filename = fmt::format("0.{}", size);
 			std::cerr << "Saving file " << filename << " of size " << size << std::endl;
 
 			std::vector<unsigned char> data;

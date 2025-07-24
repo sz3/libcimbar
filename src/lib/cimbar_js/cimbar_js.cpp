@@ -27,7 +27,7 @@ namespace {
 
 extern "C" {
 
-int cimbare_initialize_GL(int width, int height)
+int cimbare_init_window(int width, int height)
 {
 	// must be divisible by 4???
 	if (width % 4 != 0)
@@ -41,9 +41,9 @@ int cimbare_initialize_GL(int width, int height)
 	else
 		_window = std::make_shared<cimbar::window_glfw>(width, height, "Cimbar Encoder");
 	if (!_window or !_window->is_good())
-		return 0;
+		return -1;
 
-	return 1;
+	return 0;
 }
 
 bool cimbare_auto_scale_window()
@@ -53,6 +53,20 @@ bool cimbare_auto_scale_window()
 
 	_window->auto_scale_to_window();
 	return true;
+}
+
+// we may change the api to accept an buff to next_frame()
+// rather than generating a fresh cv::Mat alloc each time
+// but for now, for non-JS purposes we expose this function
+int cimbare_get_frame_buff(unsigned char** buff)
+{
+	if (!_next)
+		return -2;
+	if (_next->cols == 0 or _next->rows == 0)
+		return -1;
+
+	*buff = _next->data;
+	return _next->cols * _next->rows * _next->channels();
 }
 
 // render() and next_frame() could be put in the same function,
@@ -74,8 +88,8 @@ int cimbare_render()
 
 int cimbare_next_frame()
 {
-	if (!_window or !_fes)
-		return 0;
+	if (!_fes)
+		return -1;
 
 	// we generate 8x the amount of required symbol blocks.
 	// this number is somewhat arbitrary, but needs to not be
@@ -85,7 +99,8 @@ int cimbare_next_frame()
 	if (_fes->block_count() > required)
 	{
 		_fes->restart();
-		_window->shake(0);
+		if (_window)
+			_window->shake(0);
 		_frameCount = 0;
 	}
 
@@ -94,7 +109,7 @@ int cimbare_next_frame()
 		enc.set_legacy_mode();
 
 	enc.set_encode_id(_encodeId);
-	_next = enc.encode_next(*_fes, cimbar::vec_xy{_window->width(), _window->height()});
+	_next = enc.encode_next(*_fes, _window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{});
 	return ++_frameCount;
 }
 
@@ -102,7 +117,10 @@ int cimbare_encode(unsigned char* buffer, unsigned size, int encode_id)
 {
 	_frameCount = 0;
 	if (!FountainInit::init())
+	{
 		std::cerr << "failed FountainInit :(" << std::endl;
+		return -5;
+	}
 
 	Encoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
 	if (_legacyMode)
@@ -117,10 +135,10 @@ int cimbare_encode(unsigned char* buffer, unsigned size, int encode_id)
 	_fes = enc.create_fountain_encoder(bis, _compressionLevel);
 
 	if (!_fes)
-		return 0;
+		return -1; // return -1 plz
 
 	_next.reset();
-	return 1;
+	return 0;
 }
 
 int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
@@ -136,7 +154,9 @@ int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool l
 	// make sure we've initialized
 	int window_size_x = cimbar::Config::image_size_x() + 16;
 	int window_size_y = cimbar::Config::image_size_y() + 16;
-	cimbare_initialize_GL(window_size_x, window_size_y);
+	int initRes = cimbare_init_window(window_size_x, window_size_y);
+	if (initRes < 0)
+		return initRes;
 
 	// check if we need to refresh the stream
 	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel or legacy_mode != _legacyMode);

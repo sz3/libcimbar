@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
 	int window_size_x = cimbar::Config::image_size_x() + 32;
 	int window_size_y = cimbar::Config::image_size_y() + 32;
-	if (!cimbare_initialize_GL(window_size_x, window_size_y))
+	if (cimbare_init_window(window_size_x, window_size_y) < 0)
 	{
 		std::cerr << "failed to create window :(" << std::endl;
 		return 70;
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 
 				// start encode_id is 109. This is mostly unimportant (it only needs to wrap between [0,127]), but useful
 				// for the decoder -- because it gives it a better distribution of colors in the first frame header it sees.
-				if (!cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i+109)))
+				if (cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i+109)) < 0)
 				{
 					std::cerr << "failed to encode file " << infiles[i] << std::endl;
 					continue;

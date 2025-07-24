@@ -129,7 +129,7 @@ var Main = function () {
     encode: function (filename, data) {
       console.log("encoding " + filename);
       var res = Module._cimbare_encode(data.byteOffset, data.length, -1);
-      console.log(res);
+      console.log("encode returned " + res);
       Main.setTitle(filename);
       Main.setActive(true);
     },
