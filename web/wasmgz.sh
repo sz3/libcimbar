@@ -5,7 +5,7 @@
 RENAME_FILES=$(ls cimbar_js.js cimbar_js.wasm main.js recv*.js zstd.js sw*.js pwa*.json)
 GSUB_FILES="index.html recv.html $(echo $RENAME_FILES | sed 's/cimbar_js\.wasm//g')"
 
-VERSION=${VERSION:-$(date --iso-8601=hours --utc | awk -F+ '{print $1}')}
+VERSION=${VERSION:-$(date --utc '+%Y-%m-%dT%H%M')}
 echo $VERSION
 
 mkdir $VERSION
@@ -18,7 +18,8 @@ done
 for f in $(echo $GSUB_FILES | xargs -n 1 | sort -u); do
 	for ren in $(echo $RENAME_FILES | xargs -n 1 | sort -u); do
 		renew=$(echo $ren"."$VERSION | awk -F. '{print $1 "." $3 "." $2}')
-		sed -i "s/$ren/$renew/g" $f
+		renold=$(echo $ren | sed 's/\./\\\./g')  # escape dots
+		sed -i "s/$renold/$renew/g" $f
 	done
 done
 

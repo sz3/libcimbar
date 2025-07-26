@@ -5,7 +5,7 @@
   <title>Cimbar Decoder</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no">
-  <link rel="manifest" href="pwa.json">
+  <link rel="manifest" href="pwa-recv.json">
 </head>
 
 <body>
@@ -390,7 +390,7 @@
   <script type="text/javascript">
     Recv.init_ww(2);
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js');
+      navigator.serviceWorker.register('./sw-recv.js');
     }
     var video = document.querySelector('#video');
 
