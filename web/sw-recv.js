@@ -2,7 +2,7 @@
 var _cacheName = 'cimbar-recv-js-vVERSION';
 var _cacheFiles = [
   '/',
-  '/index.html',
+  '/recv.html',
   '/cimbar_js.js',
   '/cimbar_js.wasm',
   '/favicon.ico',
