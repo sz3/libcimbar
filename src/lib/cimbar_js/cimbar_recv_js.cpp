@@ -37,11 +37,22 @@ namespace {
 	cv::UMat get_rgb(void* imgdata, int width, int height, int type)
 	{
 		cv::UMat img;
-		if (type == 12)
+		switch (type)
 		{
-			img = cv::Mat(height * 3/2, width, CV_8UC1, imgdata).getUMat(cv::ACCESS_RW).clone();
-			cv::cvtColor(img, img, cv::COLOR_YUV2RGB_NV12); // 12 or 21 :hmm:
-			return img;
+			case 12:
+			{
+				img = cv::Mat(height * 3/2, width, CV_8UC1, imgdata).getUMat(cv::ACCESS_RW).clone();
+				cv::cvtColor(img, img, cv::COLOR_YUV2RGB_NV12); // 12 or 21 :hmm:
+				return img;
+			}
+			case 420:
+			{
+				img = cv::Mat(height * 3/2, width, CV_8UC1, imgdata).getUMat(cv::ACCESS_RW).clone();
+				cv::cvtColor(img, img, cv::COLOR_YUV420p2RGB);
+				return img;
+			}
+			default:
+				break;
 		}
 
 		int cvtype = type==4? CV_8UC4 : CV_8UC3;
