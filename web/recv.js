@@ -60,7 +60,7 @@ var Sink = function () {
       try {
         var res = Module._cimbard_finish_copy(id, buff.byteOffset, buff.length);
         if (res < 0) {
-          alert("we biffed it. :( " + res);
+          alert("reassemble_file failed :(" + res);
           console.log("we biffed it. :( " + res);
           Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
         }
@@ -90,6 +90,7 @@ var Recv = function () {
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
+  var _supportedFormats = ["NV12"]; // have cimbard_* return this somehow?
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -235,12 +236,20 @@ var Recv = function () {
         vf = new VideoFrame(_video, { timestamp: now });
         const width = vf.displayWidth;
         const height = vf.displayHeight;
-        let format = "RGBA";
-        const size = vf.allocationSize({ format: format });
+        Recv.set_HTML("errorbox", vf.format, true);
+
+        // try to use the default format, but only if we can decode it...
+        let vfparams = {};
+        if (!_supportedFormats.includes(vf.format)) {
+          vfparams.format = "RGBA";
+        }
+        const size = vf.allocationSize(vfparams);
         const buff = new Uint8Array(size);
-        vf.copyTo(buff, { format: format });
-        if (size != width * height * 4) {
-          format = vf.format;
+        vf.copyTo(buff, vfparams);
+
+        let format = vfparams.format || vf.format;
+        if (format == "RGBA" && size != width * height * 4) {
+          format = vf.format; //fallback
         }
         if (_captureNextFrame == 1) {
           _captureNextFrame = 0;
@@ -340,8 +349,12 @@ var Recv = function () {
       }
     },
 
-    set_HTML: function (id, msg) {
-      document.getElementById(id).innerHTML = msg;
+    set_HTML: function (id, msg, only_if_unset) {
+      const elem = document.getElementById(id);
+      if (only_if_unset && elem.innerHTML) {
+        return;
+      }
+      elem.innerHTML = msg;
     },
 
     set_title: function (msg) {
