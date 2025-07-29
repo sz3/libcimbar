@@ -46,7 +46,10 @@ var RecvWorker = function () {
           var errmsg = RecvWorker.get_error();
           errmsg = len + " " + errmsg;
           //console.log(errmsg);
-          if (len != -3) {
+          if (len == 0) {
+            self.postMessage({ nodata: true, res: errmsg });
+          }
+          else if (len != -3) {
             self.postMessage({ error: true, res: errmsg });
           }
         }
