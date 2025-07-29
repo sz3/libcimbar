@@ -83,6 +83,8 @@ var Sink = function () {
 var Recv = function () {
 
   var _counter = 0;
+  var _recentDecode = -1;
+  var _recentExtract = -1;
   var _renderTime = 0;
   var _captureNextFrame = 0;
 
@@ -189,7 +191,7 @@ var Recv = function () {
         console.log("can't restart video? :|")
         return;
       }
-      // ios cancels the feed after we download. Restart it
+      // ios cancels the feed sometimes. Restart it...?
       // check if localMediaStream.muted after a while???
       if (_video.srcObject.muted) {
         Recv.init_video(_video);
@@ -207,6 +209,10 @@ var Recv = function () {
 
     on_decode: function (wid, data) {
       console.log('Main thread received message from worker' + wid + ':', data);
+      // if extract but no bytes, log extract counter
+      if (data.nodata) {
+        _recentExtract = _counter;
+      }
       if (data.res) {
         Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
         return;
@@ -217,6 +223,9 @@ var Recv = function () {
         return;
       }
 
+      // should be a decode with some bytes, so set decodecounter
+      _recentDecode = _counter;
+
       const buff = new Uint8Array(data);
       Recv.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
       Sink.on_decode(buff);
@@ -226,10 +235,14 @@ var Recv = function () {
       //console.log("on frame");
       // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
 
+      _counter += 1;
       if (_workers.length == 0)
         return;
       if (_nextWorker >= _workers.length)
         _nextWorker = 0;
+
+      // piggyback off this call to make sure our visual state is correct
+      Recv.update_visual_state();
 
       var vf = undefined;
       try {
@@ -253,7 +266,7 @@ var Recv = function () {
         }
         if (_captureNextFrame == 1) {
           _captureNextFrame = 0;
-          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + ".rgba");
+          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
         }
         _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height }, [buff.buffer]);
       } catch (e) {
@@ -277,13 +290,36 @@ var Recv = function () {
       Zstd.download_blob(name, blob);
     },
 
+    update_visual_state: function () {
+      // check counters
+      var xh1 = document.getElementById("crosshair1");
+      var xh2 = document.getElementById("crosshair2");
+      if (_recentDecode > 0 && _recentDecode + 30 > _counter) {
+        xh1.classList.add("active_xhairs");
+        xh1.classList.remove("scanning_xhairs");
+        xh2.classList.add("active_xhairs");
+        xh1.classList.remove("scanning_xhairs");
+      }
+      else if (_recentExtract > 0 && _recentExtract + 30 > _counter) {
+        xh1.classList.add("scanning_xhairs");
+        xh1.classList.remove("active_xhairs");
+        xh2.classList.add("scanning_xhairs");
+        xh2.classList.remove("active_xhairs");
+      }
+      else { // inactive
+        xh1.classList.remove("active_xhairs");
+        xh1.classList.remove("scanning_xhairs");
+        xh2.classList.remove("active_xhairs");
+        xh2.classList.remove("scanning_xhairs");
+      }
+    },
+
     render_progress: function (report) {
       console.log("progress!!!!" + report);
       Recv.set_HTML("tdec", "progress " + report);
       const progress_container = document.getElementById('progress_bars');
       const query = '#progress_bars > div[class="progress"]';
       const prev = document.querySelectorAll(query);
-      // el.remove() iff report len is shorter than current
 
       if (!prev || prev.length < report.length) {
         for (var i = (prev ? prev.length : 0); i < report.length; i++) {

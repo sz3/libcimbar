@@ -72,6 +72,18 @@
       width: 0;
     }
 
+    .crosshairs {
+      border-color: white !important;
+    }
+
+    .crosshairs.scanning_xhairs {
+      border-color: #FFFF00 !important;
+    }
+
+    .crosshairs.active_xhairs {
+      border-color: #00FF00 !important;
+    }
+
     #crosshair1 {
       position: fixed;
       top: 15%;
@@ -79,9 +91,9 @@
       width: 5%;
       height: 5%;
       z-index: -50;
-      border-right: 5px inset red;
-      border-top: 5px inset red;
-      box-shadow: inset 0 0 0 4px #eee,
+      border-right: 5px groove;
+      border-top: 5px groove;
+      box-shadow: inset 0 0 0 4px #555,
     }
 
     #crosshair2 {
@@ -91,9 +103,9 @@
       width: 5%;
       height: 5%;
       z-index: -50;
-      border-left: 5px inset red;
-      border-bottom: 5px inset red;
-      box-shadow: inset 0 0 0 4px #eee,
+      border-left: 5px groove;
+      border-bottom: 5px groove;
+      box-shadow: inset 0 0 0 4px #555,
     }
 
     #nav-container:focus-within {
@@ -347,8 +359,8 @@
     </video>
   </div>
 
-  <div id="crosshair1"></div>
-  <div id="crosshair2"></div>
+  <div id="crosshair1" class="crosshairs"></div>
+  <div id="crosshair2" class="crosshairs"></div>
 
   <div id="nav-container" class="mode-b">
     <div class="bg" onclick="Recv.blurNav();"></div>
