@@ -90,7 +90,7 @@ var Recv = function () {
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
-  var _supportedFormats = ["NV12"]; // have cimbard_* return this somehow?
+  var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {

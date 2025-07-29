@@ -33,6 +33,9 @@ var RecvWorker = function () {
       if (format == "NV12") {
         type = 12;
       }
+      else if (format == "I420") {
+        type = 420;
+      }
 
       try {
         // then decode in wasm, fool
