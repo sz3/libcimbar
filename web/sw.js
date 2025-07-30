@@ -6,14 +6,16 @@ var _cacheFiles = [
   '/cimbar_js.js',
   '/cimbar_js.wasm',
   '/favicon.ico',
+  '/icon-192x192.png',
+  '/icon-512x512.png',
   '/main.js',
   '/pwa.json'
 ];
 
 // fetch files
-self.addEventListener('install', function(e) {
+self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(_cacheName).then(function(cache) {
+    caches.open(_cacheName).then(function (cache) {
       return cache.addAll(_cacheFiles);
     })
   );
@@ -21,21 +23,21 @@ self.addEventListener('install', function(e) {
 });
 
 // serve from cache
-self.addEventListener('fetch', function(e) {
+self.addEventListener('fetch', function (e) {
   e.respondWith(
-    caches.match(e.request).then(function(response) {
+    caches.match(e.request).then(function (response) {
       return response || fetch(e.request);
     })
   );
 });
 
 // clean old caches
-self.addEventListener('activate', function(e) {
-  e.waitUntil(function() {
-    caches.keys().then(function(names) {
+self.addEventListener('activate', function (e) {
+  e.waitUntil(function () {
+    caches.keys().then(function (names) {
       for (var i in names)
-         if (names[i] != _cacheName)
-            caches.delete(names[i]);
+        if (names[i] != _cacheName)
+          caches.delete(names[i]);
     });
   });
 });
