@@ -8,6 +8,7 @@ set (SOURCES
 	EncoderTest.cpp
 	EncoderRoundTripTest.cpp
 	aligned_streamTest.cpp
+	escrow_buffer_writerTest.cpp
 	reed_solomon_streamTest.cpp
 )
 

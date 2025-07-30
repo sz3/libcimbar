@@ -111,9 +111,8 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 	if (bufsize < chunkSize * chunksPerFrame)
 		return -2;
 
-	// need a class that implements the writer/sink interface and writes to our "escrow" buffers
+	// interface to take the aligned output buffers of chunkSize and dump them into bufspace
 	escrow_buffer_writer ebw(bufspace, chunksPerFrame, chunkSize);
-
 	Extractor ext;
 	Decoder dec(-1, -1);
 
