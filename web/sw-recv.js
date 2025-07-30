@@ -8,6 +8,7 @@ var _cacheFiles = [
   '/favicon.ico',
   '/icon-192x192.png',
   '/icon-512x512.png',
+  '/icon-512x512-maskable.png',
   '/recv.js',
   '/recv-worker.js',
   '/pwa-recv.json',
