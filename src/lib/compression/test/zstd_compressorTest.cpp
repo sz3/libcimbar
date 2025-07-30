@@ -115,3 +115,19 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom.Buffs", "[unit]" )
 	assertEquals( original.size(), recovered.size() );
 	assertEquals( original, recovered );
 }
+
+TEST_CASE( "zstd_compressorTest/testPad", "[unit]" )
+{
+	zstd_compressor<std::stringstream> comp;
+	assertEquals( 0, comp.pad(20) );
+	assertEquals( 20, comp.size() );
+
+	std::stringstream output;
+	output << comp.rdbuf();
+
+	assertEquals( 20, output.str().size() );
+
+	char expected[] = "\x50\x2A\x4D\x18\x0c\x00\x00\x00" "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+	assertEquals( 21, sizeof(expected) );
+	assertEquals( std::string(expected, 20), output.str() );
+}
