@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-framework="javascript">
+
+<head>
+	<title>zstd test page</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+</head>
+
+<body>
+
+	<style>
+		.statusbox {
+			color: red;
+			text-shadow: 2px 2px 2px white;
+		}
+
+		.buton {
+			background: green;
+			border: 5px inset cyan;
+		}
+	</style>
+
+	<div class="statusbox" id="errorbox">hi</div>
+
+	<input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
+	<a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find File</a>
+
+	<script type="text/javascript">
+		var Module = {};
+		Module.onRuntimeInitialized = () => {
+		};
+	</script>
+
+	<script type="text/javascript">
+		var Main = function () {
+
+			function importFile(f) {
+				const fileReader = new FileReader();
+				fileReader.onload = (event) => {
+					const fileData = new Uint8Array(event.target.result);
+
+					Zstd.decompress(f.name, fileData);
+					Main.set_HTML("errorbox", f.name);
+				};
+				fileReader.onerror = () => {
+					console.error('Unable to read file ' + f.name + '.');
+				};
+
+				fileReader.readAsArrayBuffer(f);
+			}
+
+			// public interface
+			return {
+
+				set_error: function (msg) {
+					Main.set_HTML('errorbox', msg);
+					return false;
+				},
+
+				clickFileInput: function () {
+					document.getElementById("file_input").click();
+				},
+
+				fileInput: function (ev) {
+					console.log("file input: " + ev);
+					var file = document.getElementById('file_input').files[0];
+					if (file)
+						importFile(file);
+				},
+
+				set_HTML: function (id, msg) {
+					document.getElementById(id).innerHTML = msg;
+				},
+
+				set_title: function (msg) {
+					document.title = "Cimbar: " + msg;
+				}
+			};
+		}();
+	</script>
+
+	<script src="cimbar_js.js"></script>
+	<script src="zstd.js"></script>
+
+</body>
+
+</html>

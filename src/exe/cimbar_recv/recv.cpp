@@ -1,22 +1,25 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
+#include "cimbar_js/cimbar_recv_js.h"
+
 #include "cimb_translator/Config.h"
 #include "compression/zstd_decompressor.h"
-#include "encoder/Decoder.h"
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "gui/window_glfw.h"
 
 #include "cxxopts/cxxopts.hpp"
+#include "serialize/format.h"
 #include "serialize/str.h"
-#include "serialize/str_join.h"
 
 #include <GLFW/glfw3.h>
 #include <opencv2/videoio.hpp>
 
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 using std::string;
 
 namespace {
@@ -38,7 +41,7 @@ int main(int argc, char** argv)
 
 	unsigned colorBits = cimbar::Config::color_bits();
 	unsigned ecc = cimbar::Config::ecc_bytes();
-	unsigned defaultFps = 30;
+	unsigned defaultFps = 15;
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())
@@ -65,13 +68,15 @@ int main(int argc, char** argv)
 	colorBits = std::min(3, result["colorbits"].as<int>());
 	ecc = result["ecc"].as<unsigned>();
 
+	unsigned config_mode = 68;
 	bool legacy_mode = false;
 	if (result.count("mode"))
 	{
 		string mode = result["mode"].as<string>();
-		legacy_mode = (mode == "4c") or (mode == "4C");
+		if (mode == "4c" or mode == "4C")
+			config_mode = 4;
+		legacy_mode = config_mode == 4;
 	}
-	unsigned color_mode = legacy_mode? 0 : 1;
 
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
@@ -105,11 +110,12 @@ int main(int argc, char** argv)
 	}
 	window.auto_scale_to_window();
 
-	Extractor ext;
-	Decoder dec(-1, -1);
+	// allocate buffers, etc
+	cimbard_configure_decode(colorBits, config_mode);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, cimbar::Config::symbol_bits() + colorBits, legacy_mode);
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
-	fountain_decoder_sink<cimbar::zstd_decompressor<std::ofstream>> sink(outpath, chunkSize);
+	std::vector<unsigned char> bufspace;
+	bufspace.resize(cimbard_get_bufsize(), 0);
 
 	cv::Mat mat;
 
@@ -130,29 +136,41 @@ int main(int argc, char** argv)
 			continue;
 		}
 
-		cv::UMat img = mat.getUMat(cv::ACCESS_RW).clone();
+		cv::Mat img = mat.clone();
 		cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
 
 		// draw some stats on mat?
 		window.show(mat, 0);
 
-		// extract
-		bool shouldPreprocess = false;
-		int res = ext.extract(img, img);
-		if (!res)
+		// extract, decode, etc
+		int bytes = cimbard_scan_extract_decode(img.data, img.cols, img.rows, 3, bufspace.data(), bufspace.size());
+		if (bytes <= 0)
+			continue;
+
+		if (bytes % chunkSize != 0)
 		{
-			//std::cerr << "no extract " << mat.cols << "," << mat.rows << std::endl;
+			std::cerr << "WEIRD SEEMS BAD? " << count << std::endl;
 			continue;
 		}
-		else if (res == Extractor::NEEDS_SHARPEN)
-			shouldPreprocess = true;
 
-		// decode
-		int bytes = dec.decode_fountain(img, sink, color_mode, shouldPreprocess);
-		if (bytes > 0)
-			std::cerr << "got some bytes " << bytes << std::endl;
+		int64_t res = cimbard_fountain_decode(bufspace.data(), bytes);
+		if (res > 0)
+		{
+			// attempt save
+			uint32_t fileId = res;
 
-		std::cerr << turbo::str::join(sink.get_progress()) << std::endl;
+			unsigned size = cimbard_get_filesize(fileId);
+			std::string filename = fmt::format("0.{}", size);
+			std::cerr << "Saving file " << filename << " of size " << size << std::endl;
+
+			std::vector<unsigned char> data;
+			data.resize(size);
+			int res = cimbard_finish_copy(fileId, data.data(), size);
+			if (res != 0)
+				std::cerr << "failed fountain_finish_copy " << res << std::endl;
+
+			write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true)(filename, data);
+		}
 	}
 
 	return 0;

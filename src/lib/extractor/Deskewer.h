@@ -6,7 +6,6 @@
 #include "util/vec_xy.h"
 #include <opencv2/opencv.hpp>
 
-#include <string>
 #include <vector>
 
 class Deskewer
@@ -16,9 +15,6 @@ public:
 
 	template <typename MAT>
 	MAT deskew(const MAT& img, const Corners& corners);
-
-	cv::Mat deskew(std::string img, const Corners& corners);
-	bool save(const cv::Mat& img, std::string path);
 
 protected:
 	cimbar::vec_xy _imageSize;

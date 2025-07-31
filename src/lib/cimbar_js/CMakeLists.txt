@@ -5,6 +5,10 @@ project(cimbar_js)
 set (SOURCES
 	cimbar_js.h
 	cimbar_js.cpp
+	cimbar_recv_js.h
+	cimbar_recv_js.cpp
+	cimbar_zstd_js.h
+	cimbar_zstd_js.cpp
 )
 
 if(DEFINED USE_WASM)
@@ -22,6 +26,7 @@ endif()
 target_link_libraries(cimbar_js
 
 	cimb_translator
+	extractor
 
 	correct_static
 	wirehair
@@ -46,9 +51,10 @@ set (LINK_WASM_LIST
 	-s MIN_WEBGL_VERSION=2
 	-s MAX_WEBGL_VERSION=2
 	-s USE_GLFW=3
+	-s WASM_BIGINT=1
 	-s FILESYSTEM=0
 	-s TOTAL_MEMORY=134217728
-	-s EXPORTED_FUNCTIONS='["_render","_next_frame","_encode","_configure","_get_aspect_ratio","_malloc","_free"]'
+	-s EXPORTED_FUNCTIONS='["_cimbare_render","_cimbare_next_frame","_cimbare_encode","_cimbare_configure","_cimbare_get_aspect_ratio","_cimbard_get_report","_cimbard_scan_extract_decode","_cimbard_fountain_decode","_cimbard_get_bufsize","_cimbard_get_filesize","_cimbard_finish_copy","_cimbard_configure_decode","_cimbarz_init_decompress","_cimbarz_get_bufsize","_cimbarz_decompress_read","_malloc","_free"]'
 )
 string(REPLACE ";" " " LINK_WASM_FLAGS "${LINK_WASM_LIST}")
 
@@ -71,4 +77,8 @@ else()  # if no wasm, ignore all that and add in GLFW libraries
 		GL
 		glfw
 	)
+endif()
+
+if(NOT DEFINED DISABLE_TESTS)
+	add_subdirectory(test)
 endif()

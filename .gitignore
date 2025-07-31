@@ -4,6 +4,7 @@ Testing/
 build*/
 dist/
 opencv4/
+web/test/node_modules/
 web/cimbar_js.js
 web/cimbar_js.wasm
 CMakeCache.txt
