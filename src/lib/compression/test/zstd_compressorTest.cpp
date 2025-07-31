@@ -119,7 +119,7 @@ TEST_CASE( "zstd_compressorTest/testRoundTrip.BigRandom.Buffs", "[unit]" )
 TEST_CASE( "zstd_compressorTest/testPad", "[unit]" )
 {
 	zstd_compressor<std::stringstream> comp;
-	assertEquals( 0, comp.pad(20) );
+	assertEquals( 20, comp.pad(20) );
 	assertEquals( 20, comp.size() );
 
 	std::stringstream output;

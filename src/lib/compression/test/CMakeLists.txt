@@ -6,6 +6,7 @@ set (SOURCES
 	test.cpp
 	zstd_compressorTest.cpp
 	zstd_decompressorTest.cpp
+	zstd_header_checkTest.cpp
 )
 
 include_directories(
