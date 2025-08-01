@@ -113,7 +113,7 @@ int cimbare_next_frame()
 	return ++_frameCount;
 }
 
-int cimbare_encode(unsigned char* buffer, unsigned size, int encode_id)
+int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filename, unsigned fnsize, int encode_id)
 {
 	_frameCount = 0;
 	if (!FountainInit::init())
@@ -131,8 +131,8 @@ int cimbare_encode(unsigned char* buffer, unsigned size, int encode_id)
 	else
 		enc.set_encode_id(static_cast<uint8_t>(encode_id));
 
-	cimbar::byte_istream bis(reinterpret_cast<char*>(buffer), size);
-	_fes = enc.create_fountain_encoder(bis, _compressionLevel);
+	cimbar::byte_istream bis(reinterpret_cast<const char*>(buffer), size);
+	_fes = enc.create_fountain_encoder(bis, std::string_view(filename, fnsize), _compressionLevel);
 
 	if (!_fes)
 		return -1; // return -1 plz

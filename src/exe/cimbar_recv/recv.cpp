@@ -169,7 +169,7 @@ int main(int argc, char** argv)
 			if (res != 0)
 				std::cerr << "failed fountain_finish_copy " << res << std::endl;
 
-			write_on_store<cimbar::zstd_decompressor<std::ofstream>>(outpath, true)(filename, data);
+			decompress_on_store<std::ofstream>(outpath, true)(filename, data);
 		}
 	}
 

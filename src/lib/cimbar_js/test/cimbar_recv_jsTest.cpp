@@ -16,11 +16,11 @@
 namespace {
 	// a simple api for wirehair encoding
 	// might eventually expose something like these in the cimbare_* namespace
-	fountain_encoder_stream::ptr simp_wirehair_encode_init(unsigned char* buff, unsigned size, int compression_level)
+	fountain_encoder_stream::ptr simp_wirehair_encode_init(const unsigned char* buff, unsigned size, const char* filename, unsigned fnsize, int compression_level)
 	{
 		Encoder enc; // defaults
-		cimbar::byte_istream bis(reinterpret_cast<char*>(buff), size);
-		return enc.create_fountain_encoder(bis, compression_level);
+		cimbar::byte_istream bis(reinterpret_cast<const char*>(buff), size);
+		return enc.create_fountain_encoder(bis, std::string_view(filename, fnsize), compression_level);
 	}
 
 	int simp_wirehair_write(fountain_encoder_stream& fes, unsigned char* buff, unsigned size)
@@ -62,7 +62,10 @@ TEST_CASE( "cimbar_recv_jsTest/testWirehairReassemble", "[unit]" )
 
 	const int SIZE = 200000;
 	std::string contents = random_string(SIZE);
-	fountain_encoder_stream::ptr fes = simp_wirehair_encode_init(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), 0);
+
+	fountain_encoder_stream::ptr fes = simp_wirehair_encode_init(
+				reinterpret_cast<unsigned char*>(contents.data()), contents.size(),
+				nullptr, 0, 0);
 	assertTrue( fes );
 
 	int64_t dec = 0;
