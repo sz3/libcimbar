@@ -69,7 +69,7 @@ var Sink = function () {
           const fnsize = Module._cimbard_get_filename(buff.byteOffset, buff.length, _errBuff, _errBuffSize);
           if (fnsize > 0) {
             const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
-            name = new TextDecoder().decode(temparr);
+            name = new TextDecoder("utf-8").decode(temparr);
           }
           //Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
           Zstd.decompress(name, buff);
