@@ -88,6 +88,7 @@ set(PROJECTS
 	src/exe/cimbar
 	src/exe/cimbar_extract
 	src/exe/cimbar_recv
+	src/exe/cimbar_recv2
 	src/exe/cimbar_send
 	src/exe/build_image_assets
 )
