@@ -93,7 +93,7 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	EncoderPlus enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xa66a666543280e8e;
+	uint64_t hash = 0x84883d01a75f36cf;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( hash, image_hash::average_hash(img) );
@@ -107,19 +107,20 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string contents = File(inputFile).read_all();
+	assertEquals( 16727, contents.size() );
 
 	cimbar::byte_istream bis(contents.data(), contents.size());
 	// equivalent to:
 	// cimbar::bytebuf bb(contents.data(), contents.size());
 	// std::istream is(&bb);
 
-	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis);
+	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis, "LICENSE.txt");
 	assertTrue( fes );
 
 	std::optional<cv::Mat> frame = enc.encode_next(*fes);
 	assertTrue( frame );
 
-	uint64_t hash = 0xa810f60b46fb87b9;
+	uint64_t hash = 0xef84e600f45efa9;
 	assertEquals( hash, image_hash::average_hash(*frame) );
 }
 
@@ -133,7 +134,7 @@ TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
 	EncoderPlus enc(30, 4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6) );
 
-	uint64_t hash = 0xa66a666543280e8e;
+	uint64_t hash = 0x84883d01a75f36cf;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat img = cv::imread(path);
 	assertEquals( 1024, img.rows );

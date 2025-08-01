@@ -3,6 +3,8 @@
 
 #include "fountain_decoder_stream.h"
 #include "FountainMetadata.h"
+#include "compression/zstd_decompressor.h"
+#include "compression/zstd_header_check.h"
 #include "serialize/format.h"
 
 #include <cstdio>
@@ -25,6 +27,23 @@ std::function<void(const std::string&, const std::vector<uint8_t>&)> write_on_st
 			printf("%s\n", file_path.c_str());
 	};
 }
+
+template <typename OUTSTREAM>
+std::function<void(const std::string&, const std::vector<uint8_t>&)> decompress_on_store(std::string data_dir, bool log_writes=false)
+{
+	return [data_dir, log_writes](const std::string& filename, const std::vector<uint8_t>& data)
+	{
+		std::string file_path = cimbar::zstd_header_check::get_filename(data.data(), data.size());
+		if (file_path.empty())
+			file_path = filename;
+		file_path = fmt::format("{}/{}", data_dir, file_path);
+		cimbar::zstd_decompressor<OUTSTREAM> f(file_path, std::ios::binary);
+		f.write((char*)data.data(), data.size());
+		if (log_writes)
+			printf("%s\n", file_path.c_str());
+	};
+}
+
 
 class fountain_decoder_sink
 {
@@ -57,7 +76,7 @@ public:
 			auto res = s.recover();
 			if (!res)
 				return false;
-			_onStore(get_filename(md), *res);
+			_onStore(get_filename(md), *res); // TODO: have this return the filename so we can store it in _done?
 			mark_done(md);
 		}
 		return true;

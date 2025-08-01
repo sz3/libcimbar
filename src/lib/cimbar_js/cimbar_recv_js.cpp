@@ -2,6 +2,7 @@
 #include "cimbar_recv_js.h"
 
 #include "cimb_translator/Config.h"
+#include "compression/zstd_header_check.h"
 #include "encoder/Decoder.h"
 #include "encoder/escrow_buffer_writer.h"
 #include "extractor/Extractor.h"
@@ -105,7 +106,7 @@ int cimbard_get_bufsize()
 	return fountain_chunks_per_frame() * fountain_chunk_size();
 }
 
-int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int format, uchar* bufspace, unsigned bufsize)
+int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned imgh, int format, uchar* bufspace, unsigned bufsize)
 {
 	if (format <= 0)
 		format = 3;
@@ -149,7 +150,7 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 }
 
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
-int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
+int64_t cimbard_fountain_decode(const unsigned char* buffer, unsigned size)
 {
 	unsigned chunkSize = fountain_chunk_size();
 	if (!_sink) // lazy-create the sink on first run
@@ -163,7 +164,7 @@ int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 	{
 		/*std::cout << fmt::format("buff {} of {} -- {},{},{},{},{},{}", i, size, (unsigned)buffer[0+i], (unsigned)buffer[1+i],
 				(unsigned)buffer[2+i], (unsigned)buffer[3+i], (unsigned)buffer[4+i], (unsigned)buffer[5+i]) << std::endl;*/
-		res = _sink->decode_frame(reinterpret_cast<char*>(buffer+i), chunkSize);
+		res = _sink->decode_frame(reinterpret_cast<const char*>(buffer+i), chunkSize);
 	}
 
 	std::cout << "fountain decode res is " << res << std::endl;
@@ -178,6 +179,18 @@ int cimbard_get_filesize(uint32_t id)
 {
 	FountainMetadata md(id);
 	return md.file_size();
+}
+
+int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, unsigned fnsize)
+{
+	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
+	if (fn.empty())
+		return 0;
+
+	if (fnsize < fn.size())
+		fn.resize(fnsize);
+	std::copy(fn.begin(), fn.end(), filename);
+	return fn.size();
 }
 
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file

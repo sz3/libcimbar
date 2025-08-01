@@ -24,7 +24,7 @@ public:
 	std::optional<cv::Mat> encode_next(STREAM& stream, cimbar::vec_xy canvas_size={});
 
 	template <typename STREAM>
-	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, int compression_level=6);
+	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, const std::string_view& filename, int compression_level=16);
 
 protected:
 	template <typename STREAM>
@@ -164,7 +164,7 @@ inline std::optional<cv::Mat> Encoder::encode_next_coupled(STREAM& stream, cimba
 }
 
 template <typename STREAM>
-inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& stream, int compression_level)
+inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& stream, const std::string_view& filename, int compression_level)
 {
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol, (_colorMode==0 and _coupled));
 
@@ -174,6 +174,8 @@ inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& str
 	else
 	{
 		cimbar::zstd_compressor<std::stringstream> f;
+		if (!filename.empty())
+			f.write_header(filename.data(), filename.size());
 		if (!f.compress(stream))
 			return nullptr;
 

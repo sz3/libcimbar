@@ -88,9 +88,9 @@ public:
 
 	size_t write_header(const char* data, unsigned len)
 	{
-		// todo: I don't like the api -- requires us to fold everything into the buff at once.
-		// would rather do it piecemeal, e.g. roll my own. Seems simple enough. Maybe test this time...
-		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), data, len, 0);
+		std::string temp = "\x01";
+		temp += std::string(data, len);
+		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
 		STREAM::write(_compBuff.data(), writ);
 		return writ;
 	}
