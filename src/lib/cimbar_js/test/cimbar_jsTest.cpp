@@ -38,7 +38,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 	// TODOOOOOOOO!
 	// let's investigate...
 	// also TODO: utf-8 (:
-	std::string filename = "aahahahahahahahaha.txt";
+	std::string filename = "foobar.txt";
 
 	assertEquals( 0, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), filename.data(), filename.size(), 100) );
 
@@ -62,7 +62,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		uint32_t fileId = res;
 
 		unsigned size = cimbard_get_filesize(fileId);
-		assertEquals( 5278, size );
+		assertEquals( 5266, size );
 
 		std::vector<unsigned char> data;
 		data.resize(size);
@@ -72,7 +72,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		std::string actualFilename;
 		actualFilename.resize(255);
 		int fnsz = cimbard_get_filename(data.data(), size, actualFilename.data(), actualFilename.size());
-		assertEquals( 22, fnsz );
+		assertEquals( 10, fnsz );
 		actualFilename.resize(fnsz);
 		assertEquals( filename, actualFilename );
 
