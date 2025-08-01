@@ -2,6 +2,7 @@ var Sink = function () {
 
   var _fountainBuff = undefined;
   var _errBuff = undefined;
+  var _errBuffSize = 1024;
 
   // public interface
   return {
@@ -35,11 +36,10 @@ var Sink = function () {
     },
 
     get_report: function () {
-      const maxSize = 1024;
       if (_errBuff === undefined) {
-        _errBuff = Module._malloc(maxSize);
+        _errBuff = Module._malloc(_errBuffSize);
       }
-      const errlen = Module._cimbard_get_report(_errBuff, maxSize);
+      const errlen = Module._cimbard_get_report(_errBuff, _errBuffSize);
       if (errlen > 0) {
         const errview = new Uint8Array(Module.HEAPU8.buffer, _errBuff, errlen);
         const td = new TextDecoder();
@@ -65,8 +65,14 @@ var Sink = function () {
           Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
         }
         else {
+          var name = id + "." + size;
+          const fnsize = Module._cimbard_get_filename(buff.byteOffset, buff.length, _errBuff, _errBuffSize);
+          if (fnsize > 0) {
+            const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
+            name = new TextDecoder().decode(temparr);
+          }
           //Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
-          Zstd.decompress(id + "." + size, buff);
+          Zstd.decompress(name, buff);
         }
       } catch (error) {
         console.log("failed finish copy or download?? " + error);
