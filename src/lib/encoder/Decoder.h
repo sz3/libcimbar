@@ -163,7 +163,7 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 	CimbReader reader(img, _decoder, color_mode, should_preprocess, color_correction);
 	bool legacy_mode = color_mode == 0;
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerOp, legacy_mode);
-	auto update_md_fun = std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2);
+	auto update_md_fun = std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2, chunk_size);
 
 	// we don't want to feed the fountain stream bad data, so we eat the decode if we have a mismatch
 	// we still might succeed the decode, in which case (hopefully) the positive bytes we return will

@@ -92,6 +92,17 @@ namespace {
 		decoder.update_color_correction(color_correction::get_adaptation_matrix<adaptation_transform::von_kries>(white, {255.0, 255.0, 255.0}));
 		return true;
 	}
+
+	// we will always skip the last unaltered block of a file
+	// if it does not exactly match the chunk size
+	// -- specifically, the encoder will skip *any* block that does not
+	// match, but it so happens that it's only ever that one block.
+	unsigned computeRadioactiveBlockId(const FountainMetadata& md, unsigned chunk_size)
+	{
+		if (md.file_size() % chunk_size == 0)
+			return 0xFFFFFFFF; // there isn't one
+		return md.file_size() / chunk_size;
+	}
 }
 
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen, int color_correction)
@@ -107,6 +118,7 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 	, _good(_image.cols >= Config::image_size_x() and _image.rows >= Config::image_size_y())
 	, _colorCorrection(color_correction)
 	, _colorMode(color_mode)
+	, _radioactiveBlockId(0) // can only compute once we know the size
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction == 1)
@@ -177,6 +189,8 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 	unsigned end = cimbar::Config::capacity(color_bits) * 8 / color_bits;
 	unsigned headerStartInterval = cimbar::Config::capacity(_decoder.symbol_bits() + color_bits) * 8 / fountain_blocks / color_bits;
 	unsigned headerLen = (_fountainColorHeader.md_size) * 8 / color_bits; // shrink this to md_size-2 to discard the block_id bytes...
+	// we can ditch the "radioactive block id" conceit if you stick with md_size-2 (4),
+	// but having 6 bytes (50% more...) to work with seems like it might be more resilient in the face of errors?
 
 	//std::cout << fmt::format("fountain blocks={},capacity={}", fountain_blocks, cimbar::Config::capacity(_decoder.symbol_bits() + color_bits)) << std::endl;
 	//std::cout << fmt::format("fountain end={},headerstart={},headerlen={}", end, headerStartInterval, headerLen) << std::endl;
@@ -209,7 +223,7 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 			std::get<3>(it->second) += std::get<2>(col);
 		}
 
-		_fountainColorHeader.increment_block_id();
+		_fountainColorHeader.increment_block_id(_radioactiveBlockId);
 	}
 
 	// 4. compute avgs
@@ -252,7 +266,7 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 	_decoder.update_color_correction(color_correction::get_moore_penrose_lsm(actual, desired));
 }
 
-void CimbReader::update_metadata(char* buff, unsigned len)
+void CimbReader::update_metadata(char* buff, unsigned len, unsigned chunk_size)
 {
 	if (len == 0 and _fountainColorHeader.id() == 0)
 		return;
@@ -260,7 +274,9 @@ void CimbReader::update_metadata(char* buff, unsigned len)
 	if (_fountainColorHeader.id() == 0)
 		_fountainColorHeader = FountainMetadata(buff, len);
 
-	_fountainColorHeader.increment_block_id(); // we always want to be +1
+	if (_radioactiveBlockId == 0)
+		_radioactiveBlockId = computeRadioactiveBlockId(_fountainColorHeader, chunk_size);
+	_fountainColorHeader.increment_block_id(_radioactiveBlockId); // we always want to be +1
 }
 
 unsigned CimbReader::num_reads() const
