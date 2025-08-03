@@ -186,7 +186,7 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 	// this is the header value for the sample -- we could imitate what the Decoder does
 	// and compute it from the symbols, but that seems like overkill for this test.
 	FountainMetadata md(0, 23586, 7);
-	cr.update_metadata((char*)md.data(), md.md_size);
+	cr.update_metadata((char*)md.data(), md.md_size, 625);
 	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(), cimbar::Config::fountain_chunks_per_frame(6, false));
 
 	assertTrue( decoder.get_ccm().active() );
@@ -242,7 +242,7 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 	// this is the header value for the sample -- we could imitate what the Decoder does
 	// and compute it from the symbols, but that seems like overkill for this test.
 	FountainMetadata md(0, 23586, 7);
-	cr.update_metadata((char*)md.data(), md.md_size);
+	cr.update_metadata((char*)md.data(), md.md_size, 625);
 	cr.init_ccm(2, cimbar::Config::interleave_blocks(), cimbar::Config::interleave_partitions(), cimbar::Config::fountain_chunks_per_frame(6, false));
 
 	assertTrue( decoder.get_ccm().active() );
