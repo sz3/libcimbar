@@ -13,6 +13,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 
 
@@ -184,6 +185,8 @@ int cimbard_get_filesize(uint32_t id)
 int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, unsigned fnsize)
 {
 	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
+	if (!fn.empty())
+		fn = std::filesystem::path(fn).filename().string(); // strip path
 	if (fn.empty())
 		return 0;
 
