@@ -33,7 +33,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 
 	const int SIZE = 7000;
 	std::string contents = random_string(SIZE);
-	std::string filename = "/tmp/aahahahahahahahaha-c语言版.txt";
+	std::string filename = "/tmp/foobar-c语言版.txt";
 	assertEquals( 0, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), filename.data(), filename.size(), 100) );
 
 	assertEquals( 1, cimbare_next_frame() );
@@ -56,7 +56,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		uint32_t fileId = res;
 
 		unsigned size = cimbard_get_filesize(fileId);
-		assertEquals( 5294, size );
+		assertEquals( 5282, size );
 
 		std::vector<unsigned char> data;
 		data.resize(size);
@@ -66,9 +66,9 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		std::string actualFilename;
 		actualFilename.resize(255);
 		int fnsz = cimbard_get_filename(data.data(), size, actualFilename.data(), actualFilename.size());
-		assertEquals( 33, fnsz );
+		assertEquals( 21, fnsz );
 		actualFilename.resize(fnsz);
-		assertEquals( "aahahahahahahahaha-c语言版.txt", actualFilename );
+		assertEquals( "foobar-c语言版.txt", actualFilename );
 
 		assertEquals(0, cimbarz_init_decompress(data.data(), data.size()));
 
