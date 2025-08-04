@@ -185,6 +185,8 @@ var Recv = function () {
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
+          Recv.set_error("Failed to initialize camera. " + err);
+          Recv.set_HTML("crosshair1", "Failed to initialize camera. " + err);
         });
     },
 
@@ -351,7 +353,7 @@ var Recv = function () {
     },
 
     toggleFullscreen: function () {
-      // nothin yet
+      _toggleFullscreen();
     },
 
     showDebug: function () {
