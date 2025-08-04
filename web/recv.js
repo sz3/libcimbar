@@ -109,16 +109,6 @@ var Recv = function () {
     }
   }
 
-  function _downloadHelper(name, bloburl) {
-    var aaa = document.createElement('a');
-    aaa.href = bloburl;
-    aaa.download = name;
-    document.body.appendChild(aaa);
-    aaa.style = 'display: none';
-    aaa.click();
-    aaa.remove();
-  }
-
   // public interface
   return {
     init: function (video, num_workers) {
@@ -208,11 +198,7 @@ var Recv = function () {
 
     download_bytes: function (buff, name) {
       var blob = new Blob([buff], { type: 'application/octet-stream' });
-      var bloburl = window.URL.createObjectURL(blob);
-      _downloadHelper(name, bloburl);
-      setTimeout(function () {
-        return window.URL.revokeObjectURL(bloburl);
-      }, 1000);
+      Zstd.download_blob(name, blob);
     },
 
     on_decode: function (wid, data) {
