@@ -153,7 +153,7 @@ var Recv = function () {
           facingMode: 'environment',
           exposureMode: 'continuous',
           focusMode: 'continuous',
-          frameRate: { ideal: 15, max: 30 }, // we're not trying to set the user's phone on fire
+          frameRate: { ideal: 15, max: 20 }, // we're not trying to set the user's phone on fire
         }
       };
 
