@@ -220,6 +220,7 @@ var Recv = function () {
       // if extract but no bytes, log extract counter
       if (data.nodata) {
         _recentExtract = _counter;
+        return;
       }
       if (data.res) {
         Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
