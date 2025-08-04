@@ -17,6 +17,16 @@ var Zstd = function () {
     _activeBuff = undefined;
   }
 
+  function _downloadHelper(name, bloburl) {
+    var aaa = document.createElement('a');
+    aaa.href = bloburl;
+    aaa.download = name;
+    document.body.appendChild(aaa);
+    aaa.style = 'display: none';
+    aaa.click();
+    aaa.remove();
+  }
+
   function getDecompressReader(inbuff) {
     // allocate buffer once. We'll reuse it,
     // and slice() to copy to the local (non-wasm) heap
@@ -92,16 +102,10 @@ var Zstd = function () {
 
     // helper
     download_blob: function (name, blob) {
-      const url = URL.createObjectURL(blob);
-      var aaa = document.createElement('a');
-      aaa.href = url;
-      aaa.download = name;
-      document.body.appendChild(aaa);
-      aaa.style = 'display: none';
-      aaa.click();
-      aaa.remove();
+      var bloburl = window.URL.createObjectURL(blob);
+      _downloadHelper(name, bloburl);
       setTimeout(function () {
-        return URL.revokeObjectURL(url);
+        return window.URL.revokeObjectURL(bloburl);
       }, 1000);
     },
 
