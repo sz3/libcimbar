@@ -34,6 +34,23 @@ namespace {
 		return _modeVal == 4;
 	}
 
+	unsigned fountain_chunks_per_frame()
+	{
+		return cimbar::Config::fountain_chunks_per_frame(
+			cimbar::Config::symbol_bits() + _colorBits,
+			legacy_mode()
+		);
+	}
+
+	unsigned fountain_chunk_size()
+	{
+		return cimbar::Config::fountain_chunk_size(
+			cimbar::Config::ecc_bytes(),
+			cimbar::Config::symbol_bits() + _colorBits,
+			legacy_mode()
+		);
+	}
+
 	cv::UMat get_rgb(void* imgdata, int width, int height, int type)
 	{
 		cv::UMat img;
@@ -85,13 +102,7 @@ unsigned cimbard_get_debug(uchar* buff, unsigned maxlen)
 
 int cimbard_get_bufsize()
 {
-	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-				cimbar::Config::ecc_bytes(),
-				cimbar::Config::symbol_bits() + _colorBits,
-				legacy_mode()
-	);
-	return chunksPerFrame * chunkSize;
+	return fountain_chunks_per_frame() * fountain_chunk_size();
 }
 
 int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, int format, uchar* bufspace, unsigned bufsize)
@@ -101,12 +112,8 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 	if (imgw == 0 or imgh == 0)
 		return -1;
 
-	unsigned chunksPerFrame = cimbar::Config::fountain_chunks_per_frame(cimbar::Config::symbol_bits() + _colorBits, legacy_mode());
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-				cimbar::Config::ecc_bytes(),
-				cimbar::Config::symbol_bits() + _colorBits,
-				legacy_mode()
-	);
+	unsigned chunksPerFrame = fountain_chunks_per_frame();
+	unsigned chunkSize = fountain_chunk_size();
 	// early bail if bufsize doesn't match config params (fountain chunk size * count)
 	if (bufsize < chunkSize * chunksPerFrame)
 		return -2;
@@ -144,22 +151,10 @@ int cimbard_scan_extract_decode(uchar* imgdata, unsigned imgw, unsigned imgh, in
 // returns id of final file (can be used to get size of `finish_copy`'s buffer) if complete, 0 if success, -1 on error
 int64_t cimbard_fountain_decode(unsigned char* buffer, unsigned size)
 {
-	if (!_sink)
-	{
-		// lazy-create the sink on first run
-		unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-					cimbar::Config::ecc_bytes(),
-					cimbar::Config::symbol_bits() + _colorBits,
-					legacy_mode()
-		);
+	unsigned chunkSize = fountain_chunk_size();
+	if (!_sink) // lazy-create the sink on first run
 		_sink = std::make_shared<fountain_decoder_sink>(chunkSize);
-	}
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-				cimbar::Config::ecc_bytes(),
-				cimbar::Config::symbol_bits() + _colorBits,
-				legacy_mode()
-	);
 	if (size == 0 or size % chunkSize != 0)
 		return -5;
 
