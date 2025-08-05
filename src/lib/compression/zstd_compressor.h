@@ -77,8 +77,6 @@ public:
 		if (len < 9)
 			len = 9;
 
-		// test what this actually does with ZSTD_isSkippableFrame and ZSTD_readSkippableFrame
-		// then, replace it with ZSTD_writeSkippableFrame...
 		std::string temp(len-8, '\0');
 		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
 
@@ -89,7 +87,7 @@ public:
 	size_t write_header(const char* data, unsigned len)
 	{
 		std::string temp = "\x01";
-		temp += std::string(data, len);
+		temp += std::string_view(data, len);
 		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
 		STREAM::write(_compBuff.data(), writ);
 		return writ;
