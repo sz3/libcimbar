@@ -43,7 +43,7 @@ public:
 		return _decoder.good();
 	}
 
-	std::optional<std::vector<uint8_t>> decode()
+	bool decode()
 	{
 		// if we're full
 		_buffIndex = 0;
@@ -57,7 +57,7 @@ public:
 	// 1. all packet header locations + current location in frame buffer to correlate
 	// 2. current location in frame buffer to see if we're at a packet header location
 	// 3. special case of #2, where we just roll forward every _bufferSize bytes?
-	std::optional<std::vector<uint8_t>> write(const char* data, unsigned length)
+	bool write(const char* data, unsigned length)
 	{
 		while (length > 0 and good())
 		{
@@ -71,12 +71,22 @@ public:
 
 			if (_buffIndex == _buffer.size())
 			{
-				auto res = decode();
+				bool res = decode();
 				if (res)
 					return res;
 			}
 		}
-		return std::nullopt;
+		return false;
+	}
+
+	bool recover(unsigned char* data, unsigned size)
+	{
+		return _decoder.recover(data, size);
+	}
+
+	std::optional<std::vector<uint8_t>> recover()
+	{
+		return _decoder.recover();
 	}
 
 protected:

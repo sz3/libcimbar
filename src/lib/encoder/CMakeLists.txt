@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
 	Decoder.h
+	DecoderPlus.h
 	Encoder.h
+	EncoderPlus.h
 	ReedSolomon.h
-	SimpleEncoder.h
+	aligned_stream.h
+	escrow_buffer_writer.h
 	reed_solomon_stream.h
 )
 

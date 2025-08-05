@@ -46,21 +46,31 @@ public:
 		return _res;
 	}
 
-	std::optional<std::vector<uint8_t>> decode(unsigned block_num, uint8_t* data, size_t length)
+	bool decode(unsigned block_num, uint8_t* data, size_t length)
 	{
 		auto pear = _seenBlocks.insert(block_num);
 		if (!pear.second)
-			return std::nullopt;
+			return false;
 
 		_res = wirehair_decode(_codec, block_num, data, length);
 		if (_res != Wirehair_Success)
-			return std::nullopt;
+			return false;
 
-		// or, we're theoretically done
+		// we're theoretically done
+		return true;
+	}
+
+	bool recover(unsigned char* data, unsigned size)
+	{
+		_res = wirehair_recover(_codec, data, size);
+		return _res == Wirehair_Success;
+	}
+
+	std::optional<std::vector<uint8_t>> recover()
+	{
 		std::vector<uint8_t> bytes;
 		bytes.resize(_length);
-		_res = wirehair_recover(_codec, bytes.data(), bytes.size());
-		if (_res != Wirehair_Success)
+		if (!recover(bytes.data(), bytes.size()))
 			return std::nullopt; // :(
 
 		return bytes;

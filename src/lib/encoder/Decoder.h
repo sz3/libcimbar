@@ -7,7 +7,6 @@
 #include "cimb_translator/CimbReader.h"
 #include "cimb_translator/Config.h"
 #include "cimb_translator/Interleave.h"
-#include "util/File.h"
 #include "util/null_stream.h"
 
 #include <opencv2/opencv.hpp>
@@ -24,11 +23,6 @@ public:
 
 	template <typename MAT, typename STREAM>
 	unsigned decode_fountain(const MAT& img, STREAM& ostream, unsigned color_mode=1, bool should_preprocess=false, int color_correction=2);
-
-	unsigned decode(std::string filename, std::string output, unsigned color_mode=1);
-
-	bool load_ccm(std::string filename);
-	bool save_ccm(std::string filename);
 
 protected:
 	template <typename STREAM>
@@ -164,7 +158,7 @@ inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, unsigned color_
 }
 
 template <typename MAT, typename FOUNTAINSTREAM>
-inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream,  unsigned color_mode, bool should_preprocess, int color_correction)
+inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, unsigned color_mode, bool should_preprocess, int color_correction)
 {
 	CimbReader reader(img, _decoder, color_mode, should_preprocess, color_correction);
 	bool legacy_mode = color_mode == 0;
@@ -184,39 +178,3 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 	aligned_stream aligner(ostream, ostream.chunk_size(), 0, update_md_fun);
 	return do_decode(reader, aligner, legacy_mode);
 }
-
-inline unsigned Decoder::decode(std::string filename, std::string output, unsigned color_mode)
-{
-	cv::Mat img = cv::imread(filename);
-	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
-
-	std::ofstream f(output);
-	return decode(img, f, color_mode, false);
-}
-
-inline bool Decoder::load_ccm(std::string filename)
-{
-	File f(filename);
-	std::string data = f.read_all();
-	if (data.size() < 3*3*4)
-		return false;
-
-	cv::Mat temp(3, 3, CV_32F, data.data());
-
-	_decoder.update_color_correction(temp);
-	return true;
-}
-
-inline bool Decoder::save_ccm(std::string filename)
-{
-	if (not _decoder.get_ccm().active())
-		return false;
-
-	cv::Mat temp(_decoder.get_ccm().mat());
-
-	File f(filename, true);
-	if (f.write(reinterpret_cast<const char*>(temp.data), temp.rows * temp.cols * temp.elemSize()) == 0)  // len will be 9*elemsize, but...
-		return false;
-	return true;
-}
-

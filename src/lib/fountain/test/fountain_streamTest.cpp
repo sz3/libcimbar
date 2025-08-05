@@ -204,15 +204,17 @@ TEST_CASE( "FountainStreamTest/testDecode", "[unit]" )
 		unsigned res = fes->readsome(buff.data(), buff.size());
 		assertEquals( res, buff.size() );
 
-		auto output = fds.write(buff.data(), buff.size());
+		bool output = fds.write(buff.data(), buff.size());
 		if (output)
 		{
-			assertEquals( input.str().size(), output->size() );
-			assertEquals( input.str(), string(output->begin(), output->end()) );
+			auto reassembled = fds.recover();
+			assertTrue( reassembled );
+			assertEquals( input.str().size(), reassembled->size() );
+			assertEquals( input.str(), string(reassembled->begin(), reassembled->end()) );
 			break;
 		}
 		else if (i == 999)
-			assertMsg((bool)output, "couldn't decode :(");
+			assertMsg(output, "couldn't decode :(");
 	}
 
 	assertEquals( 824, fds.block_size() );
@@ -246,15 +248,17 @@ TEST_CASE( "FountainStreamTest/testDecode_BigPackets", "[unit]" )
 		unsigned res = fes->readsome(buff.data(), buff.size());
 		assertEquals( res, buff.size() );
 
-		auto output = fds.write(buff.data(), buff.size());
+		bool output = fds.write(buff.data(), buff.size());
 		if (output)
 		{
-			assertEquals( input.str().size(), output->size() );
-			assertEquals( input.str(), string(output->begin(), output->end()) );
+			auto reassembled = fds.recover();
+			assertTrue( reassembled );
+			assertEquals( input.str().size(), reassembled->size() );
+			assertEquals( input.str(), string(reassembled->begin(), reassembled->end()) );
 			break;
 		}
 		else if (i == 999)
-			assertMsg((bool)output, "couldn't decode :(");
+			assertMsg(output, "couldn't decode :(");
 	}
 
 	assertEquals( 824, fds.block_size() );

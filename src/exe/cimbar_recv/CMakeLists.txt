@@ -13,12 +13,8 @@ add_executable (
 
 target_link_libraries(cimbar_recv
 
-	cimb_translator
+	cimbar_js
 	extractor
-
-	correct_static
-	wirehair
-	zstd
 
 	GL
 	glfw

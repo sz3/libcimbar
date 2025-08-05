@@ -75,12 +75,13 @@ TEST_CASE( "FountainEncodingTest/testEncodingAndDecoding", "[unit]" )
 		assertEquals( expectedSize, encoder.encode(block_id, block.data(), block.size()) );
 		if (block_id != 11)
 		{
-			assertMsg( std::nullopt == decoder.decode(block_id, block.data(), expectedSize), fmt::format("block {}", block_id) );
+			assertMsg( not decoder.decode(block_id, block.data(), expectedSize), fmt::format("block {}", block_id) );
 			assertEquals( 1, decoder.last_result() );
 		}
 		else
 		{
-			std::optional<vector<uint8_t>> res = decoder.decode(block_id, block.data(), expectedSize);
+			assertTrue( decoder.decode(block_id, block.data(), expectedSize) );
+			std::optional<vector<uint8_t>> res = decoder.recover();
 			assertTrue( res );
 
 			vector<uint8_t>& out = *res;
@@ -126,11 +127,13 @@ TEST_CASE( "FountainEncodingTest/testConsistency", "[unit]" )
 		if (block_id == 1)
 			continue;
 		std::string block_data = base91::decode(precomputed[block_id]);
-		std::optional<vector<uint8_t>> res = decoder.decode(block_id, (uint8_t*)block_data.data(), block_data.size());
+		bool res = decoder.decode(block_id, (uint8_t*)block_data.data(), block_data.size());
 		if (block_id == 2)
 		{
 			assertTrue( res );
-			std::string actual = std::string((char*)res->data(), res->size());
+			std::optional<vector<uint8_t>> reassembled = decoder.recover();
+			assertTrue( reassembled );
+			std::string actual = std::string((char*)reassembled->data(), reassembled->size());
 			assertEquals( message, actual );
 		}
 	}
@@ -159,10 +162,12 @@ TEST_CASE( "FountainEncodingTest/testWhichN", "[unit]" )
 	for (; block_id >= 0; block_id -= 1)
 	{
 		unsigned bites = encoder.encode(block_id, block.data(), block.size());
-		std::optional<vector<uint8_t>> res = decoder.decode(block_id, block.data(), bites);
+		bool res = decoder.decode(block_id, block.data(), bites);
 		if (res)
 		{
-			final_result = *res;
+			std::optional<vector<uint8_t>> reassembled = decoder.recover();
+			assertTrue(	reassembled );
+			final_result = *reassembled;
 			break;
 		}
 	}
