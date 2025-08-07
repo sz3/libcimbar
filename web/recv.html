@@ -29,6 +29,12 @@
       background-size: cover;
     }
 
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: black;
+      }
+    }
+
     #container {
       position: fixed;
       top: 0;
@@ -403,7 +409,7 @@
   <script type="text/javascript">
     Recv.init_ww(2);
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw-recv.js');
+      navigator.serviceWorker.register('./recv-sw.js');
     }
     var video = document.querySelector('#video');
 
