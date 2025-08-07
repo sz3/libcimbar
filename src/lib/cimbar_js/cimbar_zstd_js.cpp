@@ -6,11 +6,6 @@
 #include <memory>
 #include <sstream>
 
-// wasm api will be something like
-// zstd_init_stream(bytes) -> constructor, reads skippable frame at start? (needs to for ofstream case)
-// get_filename(buff, size) -> cached in wasmjs api from constructor call?
-// get_bytes(buff, size) -> "decompress_chunk()/write()"
-
 namespace {
 	// maybe a map eventually
 	std::unique_ptr<cimbar::zstd_decompressor<std::stringstream>> _dec;
@@ -28,14 +23,6 @@ int cimbarz_init_decompress(unsigned char* buffer, unsigned size)
 	if (!_dec)
 		return -1;
 	_dec->init_decompress(reinterpret_cast<char*>(buffer), size);
-	return 0;
-}
-
-// cached in anon namespace from cimbarz_init_decompress call?
-int cimbarz_get_filename(char* buffer, unsigned size)
-{
-	if (!_dec)
-		return -1;
 	return 0;
 }
 

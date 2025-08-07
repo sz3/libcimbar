@@ -95,3 +95,24 @@ TEST_CASE( "zstd_decompressorTest/testDecompress.ToFile", "[unit]" )
 	string actual = File(tempdir.path() / "decompress.txt").read_all();
 	assertEquals( expectedOutput.str(), actual );
 }
+
+TEST_CASE( "zstd_decompressorTest/testDecompress.Pad", "[unit]" )
+{
+	char inputC[] = "(\xb5" "/\xfd" "`\xe8\x02\x8d\x00\x00" "P0123456789\x01\x00\xdb[\x15$";
+	std::stringstream ss;
+	ss << string(inputC, 27);
+
+	std::stringstream expectedOutput;
+	for (int i = 0; i < 1000; i+=10)
+		expectedOutput << "0123456789";
+
+	zstd_decompressor<std::stringstream> dec;
+	assertEquals( 27, dec.decompress(ss) );
+
+	std::stringstream output;
+	output << dec.rdbuf();
+
+	assertEquals( 1000, output.str().size() );
+	assertEquals( expectedOutput.str(), output.str() );
+}
+

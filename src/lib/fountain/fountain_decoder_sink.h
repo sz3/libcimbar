@@ -3,18 +3,20 @@
 
 #include "fountain_decoder_stream.h"
 #include "FountainMetadata.h"
+#include "compression/zstd_decompressor.h"
+#include "compression/zstd_header_check.h"
 #include "serialize/format.h"
+#include "util/File.h"
 
 #include <cstdio>
+#include <filesystem>
 #include <functional>
-#include <set>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 template <typename OUTSTREAM>
-std::function<void(const std::string&, const std::vector<uint8_t>&)> write_on_store(std::string data_dir, bool log_writes=false)
+std::function<std::string(const std::string&, const std::vector<uint8_t>&)> write_on_store(std::string data_dir, bool log_writes=false)
 {
 	return [data_dir, log_writes](const std::string& filename, const std::vector<uint8_t>& data)
 	{
@@ -23,13 +25,35 @@ std::function<void(const std::string&, const std::vector<uint8_t>&)> write_on_st
 		f.write((char*)data.data(), data.size());
 		if (log_writes)
 			printf("%s\n", file_path.c_str());
+		return filename;
 	};
 }
+
+template <typename OUTSTREAM>
+std::function<std::string(const std::string&, const std::vector<uint8_t>&)> decompress_on_store(std::string data_dir, bool log_writes=false)
+{
+	return [data_dir, log_writes](const std::string& fallback_name, const std::vector<uint8_t>& data)
+	{
+		std::string filename = cimbar::zstd_header_check::get_filename(data.data(), data.size());
+		if (!filename.empty())
+			filename = File::basename(filename);
+		if (filename.empty())
+			filename = fallback_name;
+
+		std::string file_path = fmt::format("{}/{}", data_dir, filename);
+		cimbar::zstd_decompressor<OUTSTREAM> f(file_path, std::ios::binary);
+		f.write((char*)data.data(), data.size());
+		if (log_writes)
+			printf("%s\n", file_path.c_str());
+		return filename;
+	};
+}
+
 
 class fountain_decoder_sink
 {
 public:
-	fountain_decoder_sink(unsigned chunk_size, const std::function<void(const std::string&, const std::vector<uint8_t>&)>& on_store=nullptr)
+	fountain_decoder_sink(unsigned chunk_size, const std::function<std::string(const std::string&, const std::vector<uint8_t>&)>& on_store=nullptr)
 		: _chunkSize(chunk_size)
 		, _onStore(on_store)
 	{
@@ -57,15 +81,15 @@ public:
 			auto res = s.recover();
 			if (!res)
 				return false;
-			_onStore(get_filename(md), *res);
-			mark_done(md);
+			std::string filename = _onStore(get_filename(md), *res);
+			mark_done(md, filename);
 		}
 		return true;
 	}
 
-	void mark_done(const FountainMetadata& md)
+	void mark_done(const FountainMetadata& md, const std::string& filename)
 	{
-		_done.insert(md.id());
+		_done[md.id()] = filename;
 		auto it = _streams.find(stream_slot(md));
 		if (it != _streams.end())
 			_streams.erase(it);
@@ -84,8 +108,8 @@ public:
 	std::vector<std::string> get_done() const
 	{
 		std::vector<std::string> done;
-		for (uint32_t id : _done)
-			done.push_back( get_filename(FountainMetadata(id)) );
+		for (auto&& [id, filename] : _done)
+			done.push_back( filename );
 		return done;
 	}
 
@@ -165,7 +189,7 @@ public:
 
 		fountain_decoder_stream& s = p->second;
 		bool res = s.recover(data, size);
-		mark_done(md);
+		mark_done(md, get_filename(md));
 		return res;
 	}
 
@@ -178,13 +202,13 @@ protected:
 
 protected:
 	unsigned _chunkSize;
-	std::function<void(const std::string&, const std::vector<uint8_t>&)> _onStore;
+	std::function<std::string(const std::string&, const std::vector<uint8_t>&)> _onStore;
 
 	// maybe instead of unordered_map+set, something where we can "age out" old streams?
 	// e.g. most recent 16/8, or something?
 	// question is what happens to _done/_streams when we wrap for continuous data streaming...
 	std::unordered_map<uint8_t, fountain_decoder_stream> _streams;
 	// track the uint32_t combo of (encode_id,size) to avoid redundant work
-	std::set<uint32_t> _done;
+	std::unordered_map<uint32_t, std::string> _done;
 	bool _logWrites;
 };

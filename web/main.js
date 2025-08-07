@@ -23,20 +23,20 @@ var Main = function () {
     const fileReader = new FileReader();
     fileReader.onload = (event) => {
       const fileData = new Uint8Array(event.target.result);
-      const numBytes = fileData.length * fileData.BYTES_PER_ELEMENT;
-      const dataPtr = Module._malloc(numBytes);
-      const dataOnHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, numBytes);
-      dataOnHeap.set(fileData);
-      Main.encode(f.name, dataOnHeap);
-      Module._free(dataPtr);
-
-      Main.setHTML("current-file", f.name);
+      Main.encode(f.name, fileData);
     };
     fileReader.onerror = () => {
       console.error('Unable to read file ' + f.name + '.');
     };
 
     fileReader.readAsArrayBuffer(f);
+  }
+
+  function copyToWasmHeap(abuff) {
+    const dataPtr = Module._malloc(abuff.length);
+    const wasmData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, abuff.length);
+    wasmData.set(abuff);
+    return wasmData;
   }
 
   // public interface
@@ -128,9 +128,19 @@ var Main = function () {
 
     encode: function (filename, data) {
       console.log("encoding " + filename);
-      var res = Module._cimbare_encode(data.byteOffset, data.length, -1);
-      console.log("encode returned " + res);
+      const wasmData = copyToWasmHeap(data);
+      const wasmFn = copyToWasmHeap(new TextEncoder("utf-8").encode(filename));
+
+      try {
+        var res = Module._cimbare_encode(wasmData.byteOffset, wasmData.length, wasmFn.byteOffset, wasmFn.length, -1);
+        console.log("encode returned " + res);
+      } finally {
+        Module._free(wasmData.byteOffset);
+        Module._free(wasmFn.byteOffset);
+      }
+
       Main.setTitle(filename);
+      Main.setHTML("current-file", filename);
       Main.setActive(true);
     },
 

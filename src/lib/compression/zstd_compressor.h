@@ -72,23 +72,25 @@ public:
 		return totalBytesRead;
 	}
 
-	unsigned pad(unsigned len)
+	size_t pad(unsigned len)
 	{
 		if (len < 9)
 			len = 9;
 
-		len -= 8;
-		std::array<char, 8> header = {0x50, 0x2A, 0x4D, 0x18, (char)(len&0xFF), (char)((len&0xFF00) >> 8), (char)((len&0xFF0000) >> 16), 0};
-		STREAM::write(header.data(), header.size());
+		std::string temp(len-8, '\0');
+		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
 
-		std::fill(_compBuff.begin(), _compBuff.end(), 0);
-		for (size_t writeLen = CHUNK_SIZE; len > 0; len -= writeLen)
-		{
-			if (len < writeLen)
-				writeLen = len;
-			STREAM::write(_compBuff.data(), writeLen);
-		}
-		return len;
+		STREAM::write(_compBuff.data(), writ);
+		return writ;
+	}
+
+	size_t write_header(const char* data, unsigned len)
+	{
+		std::string temp = "\x01";
+		temp += std::string_view(data, len);
+		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
+		STREAM::write(_compBuff.data(), writ);
+		return writ;
 	}
 
 	size_t size()
