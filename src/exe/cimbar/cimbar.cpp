@@ -13,7 +13,7 @@
 #include "cxxopts/cxxopts.hpp"
 
 #include <cstdio>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	string outpath = std::experimental::filesystem::current_path().string();
+	string outpath = std::filesystem::current_path().string();
 	if (result.count("out"))
 		outpath = result["out"].as<string>();
 	std::cerr << "Output files will appear in " << outpath << std::endl;

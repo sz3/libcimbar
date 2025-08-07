@@ -8,6 +8,7 @@
 #include "extractor/Extractor.h"
 #include "fountain/fountain_decoder_sink.h"
 #include "serialize/str_join.h"
+#include "util/File.h"
 #include "util/Timer.h"
 
 #include <opencv2/opencv.hpp>
@@ -186,7 +187,7 @@ int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, 
 {
 	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
 	if (!fn.empty())
-		fn = std::filesystem::path(fn).filename().string(); // strip path
+		fn = File::basename(fn);
 	if (fn.empty())
 		return 0;
 

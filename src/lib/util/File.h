@@ -3,11 +3,18 @@
 
 #include <array>
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
 class File
 {
+public:
+	static std::string basename(const std::string& fullpath)
+	{
+		return std::filesystem::path(fullpath).filename().string();
+	}
+
 public:
 	File(std::string filename, bool write=false)
 	{

@@ -6,6 +6,7 @@
 #include "compression/zstd_decompressor.h"
 #include "compression/zstd_header_check.h"
 #include "serialize/format.h"
+#include "util/File.h"
 
 #include <cstdio>
 #include <filesystem>
@@ -35,7 +36,7 @@ std::function<std::string(const std::string&, const std::vector<uint8_t>&)> deco
 	{
 		std::string filename = cimbar::zstd_header_check::get_filename(data.data(), data.size());
 		if (!filename.empty())
-			filename = std::filesystem::path(filename).filename().string(); // strip path
+			filename = File::basename(filename);
 		if (filename.empty())
 			filename = fallback_name;
 
