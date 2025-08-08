@@ -94,6 +94,8 @@ var Recv = function () {
   var _renderTime = 0;
   var _captureNextFrame = 0;
 
+  var _watchmanEnabled = 0;
+
   var _video = 0;
   var _workers = [];
   var _nextWorker = 0;
@@ -180,9 +182,19 @@ var Recv = function () {
         });
     },
 
-    restart_video: function () {
-      console.log("restart video?");
-      if (_video) {
+    watch_for_camera_pause: function () {
+      // only call this after our first success
+      if (_watchmanEnabled) {
+        return;
+      }
+      _watchmanEnabled = true;
+
+      // periodically make sure the camera capture is running
+      setInterval(Recv.restart_video, 1000);
+    },
+
+    restart_video: function (force) {
+      if (!_video) {
         return;
       }
       if (!('srcObject' in _video)) {
@@ -190,8 +202,7 @@ var Recv = function () {
         return;
       }
       // ios cancels the feed sometimes. Restart it...?
-      // check if localMediaStream.muted after a while???
-      if (_video.srcObject.muted) {
+      if (force || _video.srcObject.muted) {
         Recv.init_video(_video);
       }
     },
@@ -238,6 +249,8 @@ var Recv = function () {
 
       // piggyback off this call to make sure our visual state is correct
       Recv.update_visual_state();
+      // make sure the camera feed stays up
+      Recv.watch_for_camera_pause();
 
       var vf = undefined;
       try {
