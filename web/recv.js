@@ -80,7 +80,6 @@ var Sink = function () {
       // this needs to happen after decompress() completes
       // currently decompress is sync, so it's fine. But...
       Module._free(dataPtr);
-      Recv.restart_video();
     }
   };
 }();
@@ -95,6 +94,7 @@ var Recv = function () {
   var _captureNextFrame = 0;
 
   var _watchmanEnabled = 0;
+  var _watchmanLastSeen = 0;
 
   var _video = 0;
   var _workers = [];
@@ -190,21 +190,22 @@ var Recv = function () {
       _watchmanEnabled = true;
 
       // periodically make sure the camera capture is running
-      setInterval(Recv.restart_video, 1000);
+      setInterval(Recv.restart_paused_camera, 1000);
     },
 
-    restart_video: function (force) {
+    restart_paused_camera: function () {
       if (!_video) {
         return;
       }
-      if (!('srcObject' in _video)) {
-        console.log("can't restart video? :|")
+
+      // if we're still incrementing, do nothing
+      if (_counter > _watchmanLastSeen) {
+        _watchmanLastSeen = _counter;
         return;
       }
-      // ios cancels the feed sometimes. Restart it...?
-      if (force || _video.srcObject.muted) {
-        Recv.init_video(_video);
-      }
+
+      // if not, we're stuck?
+      Recv.init_video(_video);
     },
 
     download_bytes: function (buff, name) {
