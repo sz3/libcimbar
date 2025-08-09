@@ -94,18 +94,19 @@ int main(int argc, char** argv)
 			// TODO: maybe delay is the wrong thing to do here. Might be best to just kick out any files that fail to read?
 			// we can then error out properly if all inputs are bad, which would be nice.
 			{
-				string contents = File(infiles[i]).read_all();
+				const string& filename = infiles[i];
+				string contents = File(filename).read_all();
 				if (contents.empty())
 				{
-					std::cerr << "failed to read file " << infiles[i] << std::endl;
+					std::cerr << "failed to read file " << filename << std::endl;
 					continue;
 				}
 
 				// start encode_id is 109. This is mostly unimportant (it only needs to wrap between [0,127]), but useful
 				// for the decoder -- because it gives it a better distribution of colors in the first frame header it sees.
-				if (cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), static_cast<int>(i+109)) < 0)
+				if (cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), filename.data(), filename.size(), static_cast<int>(i+109)) < 0)
 				{
-					std::cerr << "failed to encode file " << infiles[i] << std::endl;
+					std::cerr << "failed to encode file " << filename << std::endl;
 					continue;
 				}
 			}

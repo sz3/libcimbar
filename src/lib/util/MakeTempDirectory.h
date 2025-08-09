@@ -2,7 +2,7 @@
 #pragma once
 
 #include <cstdio>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <string>
 
 class MakeTempDirectory
@@ -12,7 +12,7 @@ public:
 		: _cleanup(cleanup)
 	{
 		_path = std::tmpnam(nullptr);
-		std::experimental::filesystem::create_directory(_path);
+		std::filesystem::create_directory(_path);
 	}
 
 	~MakeTempDirectory()
@@ -20,16 +20,16 @@ public:
 		if (_cleanup)
 		{
 			std::error_code ec;
-			std::experimental::filesystem::remove_all(_path, ec);
+			std::filesystem::remove_all(_path, ec);
 		}
 	}
 
-	std::experimental::filesystem::path path() const
+	std::filesystem::path path() const
 	{
 		return _path;
 	}
 
 protected:
 	bool _cleanup;
-	std::experimental::filesystem::path _path;
+	std::filesystem::path _path;
 };

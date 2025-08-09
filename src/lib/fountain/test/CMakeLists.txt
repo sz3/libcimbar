@@ -26,6 +26,7 @@ add_test(fountain_test fountain_test)
 
 target_link_libraries(fountain_test
 	wirehair
+	zstd
 
 	${CPPFILESYSTEM}
 )

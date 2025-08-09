@@ -5,8 +5,10 @@
 #include "cimb_translator/Config.h"
 #include "extractor/Scanner.h"
 #include "serialize/format.h"
+#include "util/File.h"
 
 #include <opencv2/opencv.hpp>
+#include <filesystem>
 #include <functional>
 #include <string>
 
@@ -43,7 +45,7 @@ inline unsigned EncoderPlus::encode(const std::string& filename, std::string out
 inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const std::function<bool(const cv::Mat&, unsigned)>& on_frame, int compression_level, double redundancy)
 {
 	std::ifstream infile(filename, std::ios::binary);
-	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, compression_level);
+	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, File::basename(filename), compression_level);
 	if (!fes)
 		return 0;
 
