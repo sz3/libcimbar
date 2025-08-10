@@ -20,7 +20,7 @@ public:
 	bool done() const;
 
 	void init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks);
-	void update_metadata(char* buff, unsigned len);
+	void update_metadata(char* buff, unsigned len, unsigned chunk_size);
 
 	unsigned num_reads() const;
 
@@ -28,6 +28,7 @@ protected:
 	cv::Mat _image;
 	bitbuffer _grayscale;
 	FountainMetadata _fountainColorHeader;
+	unsigned _radioactiveBlockId;
 
 	unsigned _cellSize;
 	FloodDecodePositions _positions;

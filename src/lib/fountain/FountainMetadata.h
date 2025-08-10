@@ -65,9 +65,12 @@ public:
 		return res;
 	}
 
-	void increment_block_id()
+	void increment_block_id(unsigned radioactive_block_id)
 	{
-		update_block_id_internal(block_id()+1, _data.data()+4);
+		unsigned next = block_id()+1;
+		if (next == radioactive_block_id)
+			next += 1;
+		update_block_id_internal(next, _data.data()+4);
 	}
 
 	unsigned file_size() const
