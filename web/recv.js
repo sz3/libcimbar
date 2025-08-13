@@ -110,6 +110,11 @@ var Recv = function () {
     }
   }
 
+  function isIOS() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  }
+
   // public interface
   return {
     init: function (video, num_workers) {
@@ -187,6 +192,11 @@ var Recv = function () {
         return;
       }
       _watchmanEnabled = true;
+
+      // ios only for now, since desktop behavior is weird
+      if (!isIOS()) {
+        return;
+      }
 
       // periodically make sure the camera capture is running
       setInterval(Recv.restart_paused_camera, 1000);
