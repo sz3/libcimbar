@@ -1,5 +1,5 @@
 
-var _cacheName = 'cimbar-recv-js-vVERSION';
+var _cacheName = 'cimbar-recv-js-v%VERSION%';
 var _cacheFiles = [
   '/',
   '/recv.html',

@@ -23,8 +23,8 @@ for f in $(echo $GSUB_FILES | xargs -n 1 | sort -u); do
 	done
 done
 
-for f in $(ls sw*.js); do
-	sed -i "s/VERSION/$VERSION/g" $f
+for f in $(ls recv.html *sw.js); do
+	sed -i "s/%VERSION%/$VERSION/g" $f
 done
 
 for f in $(echo $RENAME_FILES | xargs -n 1 | sort -u); do

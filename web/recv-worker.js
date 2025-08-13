@@ -12,22 +12,49 @@ var Module = {
 
 var RecvWorker = function () {
 
+  var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
+  var _format = undefined;
+  var _vfparams = undefined;
+
+  function vf_get_size_and_params(vf) {
+    const width = vf.displayWidth;
+    const height = vf.displayHeight;
+    // send message to main thread with format iff _format is undefined???
+
+    _vfparams = {};
+    if (!_supportedFormats.includes(vf.format)) {
+      _vfparams.format = "RGBA";
+    }
+    const size = vf.allocationSize(_vfparams);
+
+    _format = _vfparams.format || vf.format;
+    if (_format == "RGBA" && size != width * height * 4) {
+      _format = vf.format; //fallback
+    }
+    return size;
+  }
+
   // public interface
   return {
     on_frame: function (data) {
-      const pixels = data.pixels;
-      const format = data.format;
-      const width = data.width;
-      const height = data.height;
+      // prime the pump
+      const vf = data.vf;
+      let size = vf_get_size_and_params(vf);
+      let format = _format; // cached from get_size call
+      const width = vf.displayWidth;
+      const height = vf.displayHeight;
+
       try {
         //console.log(vf);
         // malloc iff necessary
-        RecvWorker.mallocAll(pixels.length);
+        RecvWorker.mallocAll(size);
         const imgBuff = RecvWorker.imgBuff();
-        imgBuff.set(data.pixels, 0); // copy
+        // _vfparams cached from vf_to_size() call
+        vf.copyTo(imgBuff, _vfparams);
       } catch (e) {
         console.log(e);
       }
+      vf.close();
 
       var type = 4;
       if (format == "NV12") {
