@@ -112,8 +112,10 @@ var Recv = function () {
   }
 
   function isIOS() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    return /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAppleDevice = navigator.userAgent.includes('Macintosh');
+    const isTouchScreen = navigator.maxTouchPoints >= 1;
+    return isIOS || (isAppleDevice && isTouchScreen);
   }
 
   // public interface
