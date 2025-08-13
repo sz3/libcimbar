@@ -100,6 +100,7 @@ var Recv = function () {
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
+  var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -265,8 +266,28 @@ var Recv = function () {
       var vf = undefined;
       try {
         vf = new VideoFrame(_video, { timestamp: now });
-        _workers[_nextWorker].postMessage({ type: 'proc', vf: vf }, [vf]);
-        vf = undefined;
+        const width = vf.displayWidth;
+        const height = vf.displayHeight;
+        Recv.set_HTML("errorbox", vf.format, true);
+
+        // try to use the default format, but only if we can decode it...
+        let vfparams = {};
+        if (!_supportedFormats.includes(vf.format)) {
+          vfparams.format = "RGBA";
+        }
+        const size = vf.allocationSize(vfparams);
+        const buff = new Uint8Array(size);
+        vf.copyTo(buff, vfparams);
+
+        let format = vfparams.format || vf.format;
+        if (format == "RGBA" && size != width * height * 4) {
+          format = vf.format; //fallback
+        }
+        if (_captureNextFrame == 1) {
+          _captureNextFrame = 0;
+          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
+        }
+        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height }, [buff.buffer]);
       } catch (e) {
         console.log(e);
       }
