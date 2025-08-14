@@ -8,7 +8,7 @@ set (SOURCES
 )
 
 # only if we're using wasm
-if(USE_WASM EQUAL "1")
+if(NOT USE_WASM EQUAL "2")
 set(SOURCES
 	${SOURCES}
 
@@ -61,7 +61,7 @@ set (LINK_WASM_EXPORTED_FUNCTIONS
 	"_cimbare_get_aspect_ratio"
 )
 
-if(USE_WASM EQUAL "1")
+if(NOT USE_WASM EQUAL "2")
 set(LINK_WASM_EXPORTED_FUNCTIONS
 	${LINK_WASM_EXPORTED_FUNCTIONS}
 
