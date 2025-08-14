@@ -24,7 +24,7 @@ var RecvWorker = function () {
         // malloc iff necessary
         RecvWorker.mallocAll(pixels.length);
         const imgBuff = RecvWorker.imgBuff();
-        imgBuff.set(data.pixels, 0); // copy
+        imgBuff.set(pixels, 0); // copy
       } catch (e) {
         console.log(e);
       }

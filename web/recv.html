@@ -23,8 +23,17 @@
 
     body {
       background-color: white;
-      background-image: linear-gradient(135deg, rgb(0, 0, 0, 200) 65px, transparent 130px);
+      background-image: linear-gradient(135deg, rgb(0, 0, 0) 65px, transparent 130px),
+        repeating-linear-gradient(135deg, rgb(0, 0, 0) 0px, rgb(153, 197, 206) 1px, transparent 1px, transparent 30px),
+        repeating-linear-gradient(45deg, rgb(0, 0, 0) 0px, rgb(153, 197, 206) 1px, transparent 1px, transparent 30px);
       background-size: cover;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: black;
+        color: white;
+      }
     }
 
     #container {
@@ -337,6 +346,7 @@
       padding: 20px;
       position: absolute;
       top: 0;
+      max-width: 95%;
       z-index: 2;
       transition: transform .3s;
       opacity: 95%;
@@ -372,13 +382,11 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
-        <li><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>
-        <hr>
         <li><a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">Mode B</a></li>
         <li><a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C <small>(old apps)</small></a>
         </li>
-        <li class="small"><a href="javascript:void(0)" onclick="Recv.captureFrame()">Capture</a></li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
+        <li class="small"><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>
@@ -388,7 +396,7 @@
       <div class="statusbox" id="errorbox"></div>
       <div class="statusbox" id="t0">hi</div>
       <div class="statusbox" id="t1">hi</div>
-      <div class="statusbox" id="tdec">hi</div>
+      <div class="statusbox" id="tdec">%VERSION%</div>
     </div>
   </div>
 
@@ -402,14 +410,13 @@
   <script type="text/javascript">
     Recv.init_ww(2);
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw-recv.js');
+      navigator.serviceWorker.register('./recv-sw.js');
     }
     var video = document.querySelector('#video');
 
     var Module = {};
     Module.onRuntimeInitialized = () => {
       Recv.init_video(video);
-      Recv.render_progress([0.1, 0.5, 0.99]);
     };
   </script>
 

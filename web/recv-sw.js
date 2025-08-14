@@ -1,15 +1,18 @@
 
-var _cacheName = 'cimbar-js-v%VERSION%';
+var _cacheName = 'cimbar-recv-js-v%VERSION%';
 var _cacheFiles = [
   '/',
-  '/index.html',
+  '/recv.html',
   '/cimbar_js.js',
   '/cimbar_js.wasm',
   '/favicon.ico',
   '/icon-192x192.png',
   '/icon-512x512.png',
-  '/main.js',
-  '/pwa.json'
+  '/icon-512x512-maskable.png',
+  '/recv.js',
+  '/recv-worker.js',
+  '/pwa-recv.json',
+  '/zstd.js'
 ];
 
 // fetch files

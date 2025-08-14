@@ -80,7 +80,6 @@ var Sink = function () {
       // this needs to happen after decompress() completes
       // currently decompress is sync, so it's fine. But...
       Module._free(dataPtr);
-      Recv.restart_video();
     }
   };
 }();
@@ -93,6 +92,9 @@ var Recv = function () {
   var _recentExtract = -1;
   var _renderTime = 0;
   var _captureNextFrame = 0;
+
+  var _watchmanEnabled = 0;
+  var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
   var _video = 0;
   var _workers = [];
@@ -109,14 +111,11 @@ var Recv = function () {
     }
   }
 
-  function _downloadHelper(name, bloburl) {
-    var aaa = document.createElement('a');
-    aaa.href = bloburl;
-    aaa.download = name;
-    document.body.appendChild(aaa);
-    aaa.style = 'display: none';
-    aaa.click();
-    aaa.remove();
+  function isIOS() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAppleDevice = navigator.userAgent.includes('Macintosh');
+    const isTouchScreen = navigator.maxTouchPoints >= 1;
+    return isIOS || (isAppleDevice && isTouchScreen);
   }
 
   // public interface
@@ -163,7 +162,7 @@ var Recv = function () {
           facingMode: 'environment',
           exposureMode: 'continuous',
           focusMode: 'continuous',
-          frameRate: { ideal: 15, max: 30 }, // we're not trying to set the user's phone on fire
+          frameRate: { ideal: 15 }, // we're not trying to set the user's phone on fire
         }
       };
 
@@ -185,32 +184,45 @@ var Recv = function () {
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
+          Recv.set_error("Failed to initialize camera. " + err);
+          Recv.set_HTML("crosshair1", "Failed to initialize camera. " + err);
         });
     },
 
-    restart_video: function () {
-      console.log("restart video?");
-      if (_video) {
+    watch_for_camera_pause: function () {
+      // only call this after our first success
+      if (_watchmanEnabled) {
         return;
       }
-      if (!('srcObject' in _video)) {
-        console.log("can't restart video? :|")
+      _watchmanEnabled = true;
+
+      // ios only for now, since desktop behavior is weird
+      if (!isIOS()) {
         return;
       }
-      // ios cancels the feed sometimes. Restart it...?
-      // check if localMediaStream.muted after a while???
-      if (_video.srcObject.muted) {
-        Recv.init_video(_video);
+
+      // periodically make sure the camera capture is running
+      setInterval(Recv.restart_paused_camera, 1000);
+    },
+
+    restart_paused_camera: function () {
+      if (!_video) {
+        return;
       }
+
+      // if we're still incrementing, do nothing
+      if (_counter > _watchmanLastSeen) {
+        _watchmanLastSeen = _counter;
+        return;
+      }
+
+      // if not, we're stuck?
+      Recv.init_video(_video);
     },
 
     download_bytes: function (buff, name) {
       var blob = new Blob([buff], { type: 'application/octet-stream' });
-      var bloburl = window.URL.createObjectURL(blob);
-      _downloadHelper(name, bloburl);
-      setTimeout(function () {
-        return window.URL.revokeObjectURL(bloburl);
-      }, 1000);
+      Zstd.download_blob(name, blob);
     },
 
     on_decode: function (wid, data) {
@@ -218,6 +230,7 @@ var Recv = function () {
       // if extract but no bytes, log extract counter
       if (data.nodata) {
         _recentExtract = _counter;
+        return;
       }
       if (data.res) {
         Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
@@ -249,6 +262,8 @@ var Recv = function () {
 
       // piggyback off this call to make sure our visual state is correct
       Recv.update_visual_state();
+      // make sure the camera feed stays up
+      Recv.watch_for_camera_pause();
 
       var vf = undefined;
       try {
@@ -351,7 +366,7 @@ var Recv = function () {
     },
 
     toggleFullscreen: function () {
-      // nothin yet
+      _toggleFullscreen();
     },
 
     showDebug: function () {
