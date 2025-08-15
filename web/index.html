@@ -272,6 +272,13 @@
       list-style: none;
     }
 
+    @media (max-height: 500px) {
+      #nav-content ul {
+        display: inline-block;
+        column-count: 2;
+      }
+    }
+
     #nav-content hr {
       border: 1px solid #444;
     }
@@ -302,7 +309,7 @@
     }
 
     #nav-content li.small {
-      display: flex;
+      display: block;
       align-self: center;
     }
 
@@ -339,8 +346,8 @@
       <span class="icon-bar"></span>
     </button>
     <div id="nav-content" tabindex="-1">
-      <span id="current-file">No file selected</span>
       <ul>
+        <span id="current-file">No file selected</span>
         <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find
             File</a></li>
         <li><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
