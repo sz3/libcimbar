@@ -108,6 +108,7 @@ namespace {
 CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen, int color_correction)
 	: _image(img)
 	, _fountainColorHeader(0U)
+	, _radioactiveBlockId(0) // can only compute once we know the file size
 	, _cellSize(Config::cell_size() + 2)
 	, _positions(
 		  cimbar::vec_xy{Config::cell_spacing_x(), Config::cell_spacing_y()},
@@ -118,7 +119,6 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 	, _good(_image.cols >= Config::image_size_x() and _image.rows >= Config::image_size_y())
 	, _colorCorrection(color_correction)
 	, _colorMode(color_mode)
-	, _radioactiveBlockId(0) // can only compute once we know the size
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction == 1)
