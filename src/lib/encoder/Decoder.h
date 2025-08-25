@@ -19,14 +19,14 @@ public:
 	Decoder(int ecc_bytes=-1, int color_bits=-1, bool interleave=true);
 
 	template <typename MAT, typename STREAM>
-	unsigned decode(const MAT& img, STREAM& ostream, unsigned color_mode=1, bool should_preprocess=false, int color_correction=2);
+	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false, int color_correction=2);
 
 	template <typename MAT, typename STREAM>
-	unsigned decode_fountain(const MAT& img, STREAM& ostream, unsigned color_mode=1, bool should_preprocess=false, int color_correction=2);
+	unsigned decode_fountain(const MAT& img, STREAM& ostream, bool should_preprocess=false, int color_correction=2);
 
 protected:
 	template <typename STREAM>
-	unsigned do_decode(CimbReader& reader, STREAM& ostream, bool legacy_mode);
+	unsigned do_decode(CimbReader& reader, STREAM& ostream);
 
 	template <typename STREAM>
 	unsigned do_decode_coupled(CimbReader& reader, STREAM& ostream);
@@ -65,9 +65,9 @@ inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
  *
  * */
 template <typename STREAM>
-inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream, bool legacy_mode)
+inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 {
-	if (legacy_mode)
+	if (cimbar::Config::legacy_mode())
 		return do_decode_coupled(reader, ostream);
 
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
@@ -99,7 +99,7 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream, bool leg
 	}
 
 	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
-	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp, legacy_mode));
+	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp));
 
 	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
 	// then decode colors.
@@ -151,18 +151,17 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 }
 
 template <typename MAT, typename STREAM>
-inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, unsigned color_mode, bool should_preprocess, int color_correction)
+inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess, int color_correction)
 {
-	CimbReader reader(img, _decoder, color_mode, should_preprocess, color_correction);
-	return do_decode(reader, ostream, color_mode==0);
+	CimbReader reader(img, _decoder, should_preprocess, color_correction);
+	return do_decode(reader, ostream);
 }
 
 template <typename MAT, typename FOUNTAINSTREAM>
-inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, unsigned color_mode, bool should_preprocess, int color_correction)
+inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess, int color_correction)
 {
-	CimbReader reader(img, _decoder, color_mode, should_preprocess, color_correction);
-	bool legacy_mode = color_mode == 0;
-	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerOp, legacy_mode);
+	CimbReader reader(img, _decoder, should_preprocess, color_correction);
+	unsigned chunk_size = cimbar::Config::fountain_chunk_size();
 	auto update_md_fun = std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2, chunk_size);
 
 	// we don't want to feed the fountain stream bad data, so we eat the decode if we have a mismatch
@@ -172,9 +171,9 @@ inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream
 	{
 		null_stream devnull;
 		aligned_stream aligner(devnull, chunk_size, 0, update_md_fun);
-		return do_decode(reader, aligner, legacy_mode);
+		return do_decode(reader, aligner);
 	}
 
 	aligned_stream aligner(ostream, ostream.chunk_size(), 0, update_md_fun);
-	return do_decode(reader, aligner, legacy_mode);
+	return do_decode(reader, aligner);
 }

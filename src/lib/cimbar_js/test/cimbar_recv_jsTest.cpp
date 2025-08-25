@@ -25,11 +25,7 @@ namespace {
 
 	int simp_wirehair_write(fountain_encoder_stream& fes, unsigned char* buff, unsigned size)
 	{
-		unsigned chunkSize = cimbar::Config::fountain_chunk_size(
-					cimbar::Config::ecc_bytes(),
-					cimbar::Config::bits_per_cell(),
-					false
-		);
+		unsigned chunkSize = cimbar::Config::fountain_chunk_size();
 
 		unsigned written = 0;
 		while (size >= chunkSize)
@@ -103,7 +99,7 @@ TEST_CASE( "cimbar_recv_jsTest/testFullDecode", "[unit]" )
 	int bytes = cimbard_scan_extract_decode(img.data, img.cols, img.rows, 3, buff.data(), buff.size());
 	assertEquals(bytes, 7500);
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(cimbar::Config::ecc_bytes(), cimbar::Config::bits_per_cell(), 0);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size();
 	assertEquals(0, bytes % chunkSize);
 
 	int64_t res = cimbard_fountain_decode(buff.data(), bytes);

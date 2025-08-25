@@ -17,7 +17,6 @@ class Encoder
 {
 public:
 	Encoder(int ecc_bytes=-1, unsigned bits_per_symbol=0, int bits_per_color=-1);
-	void set_legacy_mode();
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
@@ -47,16 +46,11 @@ inline Encoder::Encoder(int ecc_bytes, unsigned bits_per_symbol, int bits_per_co
 	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
 	, _dark(cimbar::Config::dark())
-	, _coupled(false)
+	, _coupled(cimbar::Config::legacy_mode())
 	, _colorMode(cimbar::Config::color_mode())
 {
 }
 
-inline void Encoder::set_legacy_mode()
-{
-	_coupled = true;
-	_colorMode = 0;
-}
 
 // TODO: why does this exist here vs just being passed to create_fountain_encoder?
 // seems confusing...
@@ -166,7 +160,7 @@ inline std::optional<cv::Mat> Encoder::encode_next_coupled(STREAM& stream, cimba
 template <typename STREAM>
 inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& stream, const std::string_view& filename, int compression_level)
 {
-	unsigned chunk_size = cimbar::Config::fountain_chunk_size(_eccBytes, _bitsPerColor + _bitsPerSymbol, (_colorMode==0 and _coupled));
+	unsigned chunk_size = cimbar::Config::fountain_chunk_size();
 
 	std::stringstream ss;
 	if (compression_level <= 0)

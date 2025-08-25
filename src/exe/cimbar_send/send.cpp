@@ -63,11 +63,12 @@ int main(int argc, char** argv)
 	compressionLevel = result["compression"].as<int>();
 	ecc = result["ecc"].as<unsigned>();
 
-	bool legacy_mode = false;
+	unsigned config_mode = 68;
 	if (result.count("mode"))
 	{
 		string mode = result["mode"].as<string>();
-		legacy_mode = (mode == "4c") or (mode == "4C");
+		if (mode == "4c" or mode == "4C")
+			config_mode = 4;
 	}
 
 	unsigned fps = result["fps"].as<unsigned>();
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
 		return 70;
 	}
 	cimbare_auto_scale_window();
-	cimbare_configure(colorBits, ecc, compressionLevel, legacy_mode);
+	cimbare_configure(config_mode, compressionLevel);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)

@@ -39,14 +39,10 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video decoder", "Use the camera to decode data!");
 
-	unsigned colorBits = cimbar::Config::color_bits();
-	unsigned ecc = cimbar::Config::ecc_bytes();
 	unsigned defaultFps = 15;
 	options.add_options()
 		("i,in", "Video source.", cxxopts::value<string>())
 		("o,out", "Output directory (decoding).", cxxopts::value<string>())
-		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
-		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target decode FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
 		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,4C]", cxxopts::value<string>()->default_value("B"))
 		("h,help", "Print usage")
@@ -65,17 +61,12 @@ int main(int argc, char** argv)
 	string source = result["in"].as<string>();
 	string outpath = result["out"].as<string>();
 
-	colorBits = std::min(3, result["colorbits"].as<int>());
-	ecc = result["ecc"].as<unsigned>();
-
 	unsigned config_mode = 68;
-	bool legacy_mode = false;
 	if (result.count("mode"))
 	{
 		string mode = result["mode"].as<string>();
-		if (mode == "4c" or mode == "4C")
+		if (mode == "4" or mode == "4c" or mode == "4C")
 			config_mode = 4;
-		legacy_mode = config_mode == 4;
 	}
 
 	unsigned fps = result["fps"].as<unsigned>();
@@ -111,8 +102,8 @@ int main(int argc, char** argv)
 	window.auto_scale_to_window();
 
 	// allocate buffers, etc
-	cimbard_configure_decode(colorBits, config_mode);
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, cimbar::Config::symbol_bits() + colorBits, legacy_mode);
+	cimbard_configure_decode(config_mode);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size();
 
 	std::vector<unsigned char> bufspace;
 	bufspace.resize(cimbard_get_bufsize(), 0);

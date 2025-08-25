@@ -45,8 +45,8 @@ TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
+	cimbar::Config::update(4);
 	EncoderPlus enc(40, 4, 2);
-	enc.set_legacy_mode();
 	assertEquals( 3, enc.encode_fountain(inputFile, outPrefix, 0) );
 
 	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x93a3830d042966e1};

@@ -32,7 +32,7 @@ int cimbard_finish_copy(uint32_t id, unsigned char* finbuffer, unsigned size);
 // get filename from reassembled file
 int cimbard_get_filename(const unsigned char* finbuffer, unsigned size, char* filename, unsigned fnsize);
 
-int cimbard_configure_decode(unsigned color_bits, int mode_val);
+int cimbard_configure_decode(int mode_val);
 
 #ifdef __cplusplus
 }

@@ -8,119 +8,151 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf8x8;
+		static cimbar::conf& active_conf()
+		{
+			static thread_local cimbar::conf cc = cimbar::Conf8x8();
+			return cc;
+		}
 
 	public:
-		static constexpr bool dark()
+		static void update(int val)
+		{
+			switch (val)
+			{
+				case 4:
+					active_conf() = cimbar::Conf8x8();
+					active_conf().color_bits = 2;
+					active_conf().legacy_mode = true;
+					break;
+				case 8:
+					active_conf() = cimbar::Conf8x8();
+					active_conf().color_bits = 3;
+					active_conf().legacy_mode = true;
+					break;
+				case 68:
+				default:
+					active_conf() = cimbar::Conf8x8();
+			}
+		}
+
+		static bool dark()
 		{
 			return true;
 		}
 
-		static constexpr unsigned color_mode()
+
+		static bool legacy_mode()
 		{
-			return 1; // unless we override per-thread?
+			return active_conf().legacy_mode;
 		}
 
-		static constexpr unsigned color_bits()
+		static unsigned color_mode()
 		{
-			return GridConf::color_bits;
+			return active_conf().legacy_mode? 0 : 1; // unless we override per-thread?
 		}
 
-		static constexpr unsigned symbol_bits()
+		static unsigned color_bits()
 		{
-			return GridConf::symbol_bits;
+			return active_conf().color_bits;
 		}
 
-		static constexpr unsigned bits_per_cell()
+		static unsigned symbol_bits()
+		{
+			return active_conf().symbol_bits;
+		}
+
+		static unsigned bits_per_cell()
 		{
 			return color_bits() + symbol_bits();
 		}
 
-		static constexpr unsigned ecc_bytes()
+		static unsigned ecc_bytes()
 		{
-			return GridConf::ecc_bytes;
+			return active_conf().ecc_bytes;
 		}
 
-		static constexpr unsigned ecc_block_size()
+		static unsigned ecc_block_size()
 		{
-			return GridConf::ecc_block_size;
+			return active_conf().ecc_block_size;
 		}
 
-		static constexpr unsigned image_size_x()
+		static unsigned image_size_x()
 		{
-			return GridConf::image_size_x;
+			return active_conf().image_size_x;
 		}
 
-		static constexpr unsigned image_size_y()
+		static unsigned image_size_y()
 		{
-			return GridConf::image_size_y;
+			return active_conf().image_size_y;
 		}
 
-		static constexpr unsigned anchor_size()
+		static unsigned anchor_size()
 		{
 			return 30;
 		}
 
 		static constexpr unsigned cell_size()
 		{
-			return GridConf::cell_size;
+			return 8;
 		}
 
-		static constexpr unsigned cell_spacing_x()
+		static unsigned cell_spacing_x()
 		{
-			return GridConf::cell_spacing_x;
+			return active_conf().cell_spacing_x;
 		}
 
-		static constexpr unsigned cell_spacing_y()
+		static unsigned cell_spacing_y()
 		{
-			return GridConf::cell_spacing_y;
+			return active_conf().cell_spacing_y;
 		}
 
 		static unsigned corner_padding_x();
 
 		static unsigned corner_padding_y();
 
-		static constexpr unsigned cell_offset()
+		static unsigned cell_offset()
 		{
-			return GridConf::cell_offset;
+			return active_conf().cell_offset;
 		}
 
-		static constexpr unsigned cells_per_col_x()
+		static unsigned cells_per_col_x()
 		{
-			return GridConf::cells_per_col_x;
+			return active_conf().cells_per_col_x;
 		}
 
-		static constexpr unsigned cells_per_col_y()
+		static unsigned cells_per_col_y()
 		{
-			return GridConf::cells_per_col_y;
+			return active_conf().cells_per_col_y;
 		}
 
 		static unsigned total_cells();
 
 		static unsigned decode_window_bits();
 
+		// leave bitspercell here
 		static unsigned capacity(unsigned bitspercell=0);
 
-		static constexpr unsigned interleave_blocks()
+		static unsigned interleave_blocks()
 		{
 			return ecc_block_size();
 		}
 
-		static constexpr unsigned interleave_partitions()
+		static unsigned interleave_partitions()
 		{
 			return 2;
 		}
 
-		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell, bool legacy_mode)
+		// leave bitspercell here
+		static unsigned fountain_chunks_per_frame(unsigned bitspercell)
 		{
-			if (legacy_mode or !GridConf::fountain_chunks_per_frame)
+			if (legacy_mode() or !active_conf().fountain_chunks_per_frame)
 				return 10;
-			return bitspercell * GridConf::fountain_chunks_per_frame;
+			return bitspercell * active_conf().fountain_chunks_per_frame;
 		}
 
-		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode);
+		static unsigned fountain_chunk_size();
 
-		static constexpr unsigned compression_level()
+		static unsigned compression_level()
 		{
 			return 16;
 		}

@@ -29,29 +29,18 @@ namespace {
 	TimeAccumulator _tImgDecode;
 
 	// settings
-	unsigned _colorBits = 2;
 	int _modeVal = 68;
-
-	bool legacy_mode()
-	{
-		return _modeVal == 4;
-	}
 
 	unsigned fountain_chunks_per_frame()
 	{
 		return cimbar::Config::fountain_chunks_per_frame(
-			cimbar::Config::symbol_bits() + _colorBits,
-			legacy_mode()
+			cimbar::Config::bits_per_cell()
 		);
 	}
 
 	unsigned fountain_chunk_size()
 	{
-		return cimbar::Config::fountain_chunk_size(
-			cimbar::Config::ecc_bytes(),
-			cimbar::Config::symbol_bits() + _colorBits,
-			legacy_mode()
-		);
+		return cimbar::Config::fountain_chunk_size();
 	}
 
 	cv::UMat get_rgb(void* imgdata, int width, int height, int type)
@@ -145,7 +134,7 @@ int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned im
 	int bytes = 0;
 	{
 		Timer t(_tImgDecode);
-		dec.decode_fountain(img, ebw, legacy_mode()? 0 : 1, shouldPreprocess);
+		dec.decode_fountain(img, ebw, shouldPreprocess);
 	}
 	_reporting = fmt::format("sce: {}, imgdec: {}, decoded {} bytes!!! {}", _tScanExtract.avg(), _tImgDecode.avg(), bytes, ebw.buffers_in_use() * chunkSize);
 	return ebw.buffers_in_use() * chunkSize;
@@ -208,20 +197,18 @@ int cimbard_finish_copy(uint32_t id, uchar* buffer, unsigned size)
 	return 0;
 }
 
-int cimbard_configure_decode(unsigned color_bits, int mode_val)
+int cimbard_configure_decode(int mode_val)
 {
 	// defaults
-	if (color_bits > 3)
-		color_bits = cimbar::Config::color_bits();
 	if (mode_val <= 0)
 		mode_val = 68;
 
-	bool refresh = (color_bits != _colorBits or mode_val != _modeVal);
+	bool refresh = (mode_val != _modeVal);
 	if (refresh)
 	{
 		// update config
-		_colorBits = color_bits;
 		_modeVal = mode_val;
+		cimbar::Config::update(mode_val);
 		_sink.reset();
 	}
 

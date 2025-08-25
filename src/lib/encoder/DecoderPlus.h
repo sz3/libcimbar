@@ -13,19 +13,19 @@ public:
 	using Decoder::Decoder;
 	using Decoder::decode;
 
-	unsigned decode(std::string filename, std::string output, unsigned color_mode=1);
+	unsigned decode(std::string filename, std::string output);
 
 	bool load_ccm(std::string filename);
 	bool save_ccm(std::string filename);
 };
 
-inline unsigned DecoderPlus::decode(std::string filename, std::string output, unsigned color_mode)
+inline unsigned DecoderPlus::decode(std::string filename, std::string output)
 {
 	cv::Mat img = cv::imread(filename);
 	cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
 
 	std::ofstream f(output);
-	return Decoder::decode(img, f, color_mode, false);
+	return Decoder::decode(img, f, false);
 }
 
 inline bool DecoderPlus::load_ccm(std::string filename)
