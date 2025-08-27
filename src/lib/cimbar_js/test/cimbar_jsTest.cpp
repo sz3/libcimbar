@@ -58,17 +58,17 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		unsigned size = cimbard_get_filesize(fileId);
 		assertEquals( 5282, size );
 
+		std::string actualFilename;
+		actualFilename.resize(255);
+		int fnsz = cimbard_get_filename(fileId, actualFilename.data(), actualFilename.size());
+		assertEquals( 21, fnsz );
+		actualFilename.resize(fnsz);
+		assertEquals( "foobar-c语言版.txt", actualFilename );
+
 		std::vector<unsigned char> data;
 		data.resize(size);
 		int res = cimbard_finish_copy(fileId, data.data(), size);
 		assertEquals( 0, res );
-
-		std::string actualFilename;
-		actualFilename.resize(255);
-		int fnsz = cimbard_get_filename(data.data(), size, actualFilename.data(), actualFilename.size());
-		assertEquals( 21, fnsz );
-		actualFilename.resize(fnsz);
-		assertEquals( "foobar-c语言版.txt", actualFilename );
 
 		assertEquals(0, cimbarz_init_decompress(data.data(), data.size()));
 
