@@ -9,6 +9,7 @@
 #include "fountain/fountain_decoder_sink.h"
 #include "image_hash/average_hash.h"
 #include "serialize/format.h"
+#include "util/ConfigScope.h"
 #include "util/File.h"
 #include "util/MakeTempDirectory.h"
 
@@ -28,7 +29,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	}
 
 	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
-	EncoderPlus enc(30, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
 	uint64_t hash = 0xefcc8800efcea808;
@@ -39,7 +40,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 
 	SECTION ("default filename") {
 		// decoder
-		Decoder dec(30);
+		Decoder dec;
 		fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path()));
 
 		unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
@@ -52,7 +53,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	}
 
 	SECTION ("parsed filename") {
-		Decoder dec(30);
+		Decoder dec;
 		fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), decompress_on_store<std::ofstream>(tempdir.path()));
 
 		unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
@@ -68,6 +69,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 {
 	MakeTempDirectory tempdir;
+	ConfigScope cs(4);
 
 	std::string inputFile = tempdir.path() / "hello.txt";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
@@ -77,10 +79,8 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 		f << "hello"; // 5 bytes!
 	}
 
-	cimbar::Config::update(4);
-
 	// will be padded so the fountain encoding is happy. The encoded image looks suspiciously non-random!
-	EncoderPlus enc(30, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
 	uint64_t hash = 0xaecc8800efce8c28;
@@ -94,8 +94,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	// sink with a mismatched fountain_chunk_size
 	// importantly, the sink expects a *smaller* chunk than we'll give it...
 	// because that's a more interesting test...
-	cimbar::Config::update(68);
-	fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path()));
+	fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size()-125, write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path()));
 
 	unsigned bytesDecoded = dec.decode_fountain(encodedImg, fds);
 	assertEquals( 7500, bytesDecoded );
@@ -111,7 +110,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
 
 	// create encoder
-	EncoderPlus enc(30, 4, 2);
+	EncoderPlus enc(4, 2);
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(infile, "");
 	assertTrue( fes );
 	assertTrue( fes->good() );

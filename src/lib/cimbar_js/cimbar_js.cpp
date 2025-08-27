@@ -155,8 +155,7 @@ int cimbare_configure(int mode_val, int compression)
 		// update config
 		_modeVal = mode_val;
 		_compressionLevel = compression;
-
-		cimbar::Config::update(mode_val);
+		cimbar::Config::update(_modeVal);
 
 		// try to refresh the stream
 		if (_window and _fes)

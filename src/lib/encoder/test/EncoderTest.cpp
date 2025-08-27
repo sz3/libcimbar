@@ -7,6 +7,7 @@
 #include "image_hash/average_hash.h"
 #include "serialize/format.h"
 #include "util/byte_istream.h"
+#include "util/ConfigScope.h"
 #include "util/File.h"
 #include "util/MakeTempDirectory.h"
 
@@ -19,11 +20,13 @@
 TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 {
 	MakeTempDirectory tempdir;
+	ConfigScope cs;
+	cs.active_conf().ecc_bytes = 40;
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.vanilla";
 
-	EncoderPlus enc(40, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 3, enc.encode(inputFile, outPrefix) );
 
 	std::vector<uint64_t> hashes = {0xe727a520684bccec, 0x46a06f002dcded87, 0x4eb1e3646fce8c08};
@@ -41,12 +44,13 @@ TEST_CASE( "EncoderTest/testVanilla", "[unit]" )
 TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
 {
 	MakeTempDirectory tempdir;
+	ConfigScope cs(4);
+	cs.active_conf().ecc_bytes = 40;
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
-	cimbar::Config::update(4);
-	EncoderPlus enc(40, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 3, enc.encode_fountain(inputFile, outPrefix, 0) );
 
 	std::vector<uint64_t> hashes = {0xbb1cc62b662abfe5, 0xf586f6466a5b194, 0x93a3830d042966e1};
@@ -64,11 +68,13 @@ TEST_CASE( "EncoderTest/testFountain.4c", "[unit]" )
 TEST_CASE( "EncoderTest/testFountain.B", "[unit]" )
 {
 	MakeTempDirectory tempdir;
+	ConfigScope cs;
+	cs.active_conf().ecc_bytes = 40;
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
-	EncoderPlus enc(40, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 4, enc.encode_fountain(inputFile, outPrefix, 0) );
 
 	std::vector<uint64_t> hashes = {0xcf09eb067c876ea6, 0x4697a76025a40c43, 0x666aaca0ec8d6d43, 0xe6e44ca8ec33a260};
@@ -90,7 +96,7 @@ TEST_CASE( "EncoderTest/testFountain.Compress", "[unit]" )
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
-	EncoderPlus enc(30, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
 	uint64_t hash = 0x84883d01a75f36cf;
@@ -103,7 +109,10 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 {
 	// use the fountain_encoder_stream directly on a char*,int pair
 	MakeTempDirectory tempdir;
-	EncoderPlus enc(40, 4, 2);
+	ConfigScope cs;
+	cs.active_conf().ecc_bytes = 40;
+
+	EncoderPlus enc(4, 2);
 
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string contents = File(inputFile).read_all();
@@ -131,7 +140,7 @@ TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )
 	std::string inputFile = TestCimbar::getProjectDir() + "/LICENSE";
 	std::string outPrefix = tempdir.path() / "encoder.fountain";
 
-	EncoderPlus enc(30, 4, 2);
+	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix, 16, 1.6) );
 
 	uint64_t hash = 0x84883d01a75f36cf;

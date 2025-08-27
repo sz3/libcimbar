@@ -16,7 +16,7 @@
 class Encoder
 {
 public:
-	Encoder(int ecc_bytes=-1, unsigned bits_per_symbol=0, int bits_per_color=-1);
+	Encoder(unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
 	template <typename STREAM>
@@ -40,8 +40,8 @@ protected:
 	uint8_t _encodeId = 0;
 };
 
-inline Encoder::Encoder(int ecc_bytes, unsigned bits_per_symbol, int bits_per_color)
-	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
+inline Encoder::Encoder(unsigned bits_per_symbol, int bits_per_color)
+	: _eccBytes(cimbar::Config::ecc_bytes())
 	, _eccBlockSize(cimbar::Config::ecc_block_size())
 	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())

@@ -28,8 +28,6 @@ namespace {
 
 TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 {
-	cimbare_configure(68, -1);
-
 	std::vector<unsigned char> decbuff;
 	decbuff.resize(cimbard_get_bufsize());
 

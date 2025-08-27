@@ -153,14 +153,14 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 template <typename MAT, typename STREAM>
 inline unsigned Decoder::decode(const MAT& img, STREAM& ostream, bool should_preprocess, int color_correction)
 {
-	CimbReader reader(img, _decoder, should_preprocess, color_correction);
+	CimbReader reader(img, _decoder, cimbar::Config::color_mode(), should_preprocess, color_correction);
 	return do_decode(reader, ostream);
 }
 
 template <typename MAT, typename FOUNTAINSTREAM>
 inline unsigned Decoder::decode_fountain(const MAT& img, FOUNTAINSTREAM& ostream, bool should_preprocess, int color_correction)
 {
-	CimbReader reader(img, _decoder, should_preprocess, color_correction);
+	CimbReader reader(img, _decoder, cimbar::Config::color_mode(), should_preprocess, color_correction);
 	unsigned chunk_size = cimbar::Config::fountain_chunk_size();
 	auto update_md_fun = std::bind(&CimbReader::update_metadata, &reader, std::placeholders::_1, std::placeholders::_2, chunk_size);
 

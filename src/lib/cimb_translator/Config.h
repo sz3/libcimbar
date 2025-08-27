@@ -15,9 +15,9 @@ namespace cimbar
 		}
 
 	public:
-		static void update(int val)
+		static void update(int mode_val=0)
 		{
-			switch (val)
+			switch (mode_val)
 			{
 				case 4:
 					active_conf() = cimbar::Conf8x8();
