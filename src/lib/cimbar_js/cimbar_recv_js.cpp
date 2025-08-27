@@ -21,6 +21,8 @@
 namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
+	std::unordered_map<uint32_t, std::vector<uchar>> _reassembled;
+
 	std::string _reporting;
 
 	cv::Mat _debugFrame;
@@ -30,6 +32,26 @@ namespace {
 
 	// settings
 	int _modeVal = 68;
+
+	int recover_contents(uint32_t id, std::unordered_map<uint32_t, std::vector<uchar>>::const_iterator& it)
+	{
+		it = _reassembled.find(id);
+		if (it == _reassembled.end())
+		{
+			if (_sink->is_done(id))
+				return -2; // it's gone man
+			std::vector<uchar> contents;
+			contents.resize(cimbard_get_filesize(id));
+
+			if (!_sink->recover(id, contents.data(), contents.size()))
+				return -3;
+			auto res = _reassembled.emplace(id, std::move(contents));
+			it = res.first;
+		}
+		if (it->second.empty())
+			return -5;
+		return 0;
+	}
 
 	unsigned fountain_chunks_per_frame()
 	{
@@ -166,14 +188,28 @@ int64_t cimbard_fountain_decode(const unsigned char* buffer, unsigned size)
 	return res;
 }
 
-int cimbard_get_filesize(uint32_t id)
+// internal, don't need to surface it in api
+unsigned cimbard_get_filesize(uint32_t id)
 {
 	FountainMetadata md(id);
 	return md.file_size();
 }
 
-int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, unsigned fnsize)
+// do recover() if does not exist (fail with appropriate neg values), if it does use the bytes.
+// stateful against a map (same as cimbard_decompress_read()
+int cimbard_get_filename(uint32_t id, char* filename, unsigned fnsize)
 {
+	if (!_sink)
+		return -1;
+
+	std::unordered_map<uint32_t, std::vector<uchar>>::const_iterator contents;
+	int	res = recover_contents(id, contents);
+	if (res < 0)
+		return res;
+
+	const uchar* finbuffer = contents->second.data();
+	unsigned size = contents->second.size();
+
 	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
 	if (!fn.empty())
 		fn = File::basename(fn);
@@ -186,6 +222,8 @@ int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, 
 	return fn.size();
 }
 
+// goes away
+// cimbarz_init_decompress also goes away
 // if fountain_decode returned a >0 value, call this to retrieve the reassembled file
 // bouth fountain_*() calls should be from the same js webworker/thread
 int cimbard_finish_copy(uint32_t id, uchar* buffer, unsigned size)
