@@ -90,7 +90,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	assertEquals( hash, image_hash::average_hash(encodedImg) );
 
 	// decoder
-	Decoder dec(30);
+	Decoder dec;
 	// sink with a mismatched fountain_chunk_size
 	// importantly, the sink expects a *smaller* chunk than we'll give it...
 	// because that's a more interesting test...
@@ -116,7 +116,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	assertTrue( fes->good() );
 
 	// create decoder
-	Decoder dec(30);
+	Decoder dec;
 	fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path()));
 
 	// encode frames, then pass to decoder

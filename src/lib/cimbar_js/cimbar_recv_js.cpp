@@ -113,7 +113,7 @@ int cimbard_scan_extract_decode(const uchar* imgdata, unsigned imgw, unsigned im
 	// interface to take the aligned output buffers of chunkSize and dump them into bufspace
 	escrow_buffer_writer ebw(bufspace, chunksPerFrame, chunkSize);
 	Extractor ext;
-	Decoder dec(-1, -1);
+	Decoder dec;
 
 	cv::UMat img = get_rgb((void*)imgdata, imgw, imgh, format);
 	_debugFrame = img.getMat(cv::ACCESS_READ).clone();

@@ -16,7 +16,7 @@
 class Decoder
 {
 public:
-	Decoder(int ecc_bytes=-1, int color_bits=-1, bool interleave=true);
+	Decoder(bool use_ecc=true, bool interleave=true);
 
 	template <typename MAT, typename STREAM>
 	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false, int color_correction=2);
@@ -32,23 +32,15 @@ protected:
 	unsigned do_decode_coupled(CimbReader& reader, STREAM& ostream);
 
 protected:
-	unsigned _eccBytes;
-	unsigned _eccBlockSize;
-	unsigned _colorBits;
-	unsigned _bitsPerOp;
-	unsigned _interleaveBlocks;
-	unsigned _interleavePartitions;
+	bool _useEcc;
+	bool _interleave;
 	CimbDecoder _decoder;
 };
 
-inline Decoder::Decoder(int ecc_bytes, int color_bits, bool interleave)
-	: _eccBytes(ecc_bytes >= 0? ecc_bytes : cimbar::Config::ecc_bytes())
-	, _eccBlockSize(cimbar::Config::ecc_block_size())
-	, _colorBits(color_bits >= 0? color_bits : cimbar::Config::color_bits())
-	, _bitsPerOp(cimbar::Config::symbol_bits() + _colorBits)
-	, _interleaveBlocks(interleave? cimbar::Config::interleave_blocks() : 0)
-	, _interleavePartitions(cimbar::Config::interleave_partitions())
-	, _decoder(cimbar::Config::symbol_bits(), _colorBits, cimbar::Config::dark(), 0xFF)
+inline Decoder::Decoder(bool use_ecc, bool interleave)
+	: _useEcc(use_ecc)
+	, _interleave(interleave)
+	, _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits(), cimbar::Config::dark(), 0xFF)
 {
 }
 
@@ -70,13 +62,19 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	if (cimbar::Config::legacy_mode())
 		return do_decode_coupled(reader, ostream);
 
-	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
+	unsigned eccBytes = _useEcc? cimbar::Config::ecc_bytes() : 0;
+	unsigned eccBlockSize = cimbar::Config::ecc_block_size();
+	unsigned colorBits = cimbar::Config::color_bits();
+	unsigned interleaveBlocks = _interleave? cimbar::Config::interleave_blocks() : 0;
+	unsigned interleavePartitions = cimbar::Config::interleave_partitions();
+
+	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), interleaveBlocks, interleavePartitions);
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
 	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
 	{
-		bitbuffer symbolBits(cimbar::Config::capacity(bitsPerSymbol));
+		bitbuffer symbolBuff(cimbar::Config::capacity(bitsPerSymbol));
 		// read symbols first
 		while (!reader.done())
 		{
@@ -86,32 +84,33 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 			unsigned bits = reader.read(pos);
 
 			unsigned bitPos = interleaveLookup[pos.i] * bitsPerSymbol; // bitspersymbol, *iff* we're in the new mode
-			symbolBits.write(bits, bitPos, bitsPerSymbol);
+			symbolBuff.write(bits, bitPos, bitsPerSymbol);
 
 			// TODO: simplify this function by not storing colorPositions?
 			// this is how it was originally done (see `do_decode_coupled()`), but we should be able to calculate them on the fly now
-			colorPositions[pos.i] = {interleaveLookup[pos.i] * _colorBits, pos.x, pos.y};
+			colorPositions[pos.i] = {interleaveLookup[pos.i] * colorBits, pos.x, pos.y};
 		}
 
 		// flush symbols
-		reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
-		symbolBits.flush(rss);
+		reed_solomon_stream rss(ostream, eccBytes, eccBlockSize);
+		symbolBuff.flush(rss);
 	}
 
 	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
-	reader.init_ccm(_colorBits, _interleaveBlocks, _interleavePartitions, cimbar::Config::fountain_chunks_per_frame(_bitsPerOp));
+	unsigned bitsPerOp = cimbar::Config::bits_per_cell();
+	reader.init_ccm(colorBits, interleaveBlocks, interleavePartitions, cimbar::Config::fountain_chunks_per_frame(bitsPerOp));
 
-	bitbuffer colorBits(cimbar::Config::capacity(_colorBits));
+	bitbuffer colorBuff(cimbar::Config::capacity(colorBits));
 	// then decode colors.
 	for (const PositionData& p : colorPositions)
 	{
 		unsigned bits = reader.read_color(p);
-		colorBits.write(bits, p.i, _colorBits);
+		colorBuff.write(bits, p.i, colorBits);
 	}
 
-	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
+	reed_solomon_stream rss(ostream, eccBytes, eccBlockSize);
 	// flush() will return the (good) cumulative bytes written to the underlying stream
-	return colorBits.flush(rss);
+	return colorBuff.flush(rss);
 }
 
 template <typename STREAM>
@@ -119,8 +118,15 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 {
 	// the legacy decoder function. Symbol and color bits are grouped together (an individual cell is treated as ex:6 bits),
 	// and the decode is done in two passes only for performance benefits (caching).
-	bitbuffer bb(cimbar::Config::capacity(_bitsPerOp));
-	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), _interleaveBlocks, _interleavePartitions);
+	unsigned eccBytes = _useEcc? cimbar::Config::ecc_bytes() : 0;
+	unsigned eccBlockSize = cimbar::Config::ecc_block_size();
+	unsigned colorBits = cimbar::Config::color_bits();
+	unsigned bitsPerOp = cimbar::Config::bits_per_cell();
+	unsigned interleaveBlocks = _interleave? cimbar::Config::interleave_blocks() : 0;
+	unsigned interleavePartitions = cimbar::Config::interleave_partitions();
+
+	bitbuffer bb(cimbar::Config::capacity(bitsPerOp));
+	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), interleaveBlocks, interleavePartitions);
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads());
 
@@ -132,8 +138,8 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 		PositionData pos;
 		unsigned bits = reader.read(pos);
 
-		unsigned bitPos = interleaveLookup[pos.i] * _bitsPerOp;
-		bb.write(bits, bitPos, _bitsPerOp);
+		unsigned bitPos = interleaveLookup[pos.i] * bitsPerOp;
+		bb.write(bits, bitPos, bitsPerOp);
 
 		colorPositions[pos.i] = {bitPos, pos.x, pos.y};
 	}
@@ -143,10 +149,10 @@ inline unsigned Decoder::do_decode_coupled(CimbReader& reader, STREAM& ostream)
 	for (const PositionData& p : colorPositions)
 	{
 		unsigned bits = reader.read_color(p);
-		bb.write(bits, p.i, _colorBits);
+		bb.write(bits, p.i, colorBits);
 	}
 
-	reed_solomon_stream rss(ostream, _eccBytes, _eccBlockSize);
+	reed_solomon_stream rss(ostream, eccBytes, eccBlockSize);
 	return bb.flush(rss);
 }
 
