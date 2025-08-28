@@ -83,9 +83,14 @@ TEST_CASE( "cimbar_recv_jsTest/testWirehairReassemble", "[unit]" )
 	assertTrue(dec > 0);
 	assertEquals(SIZE, cimbard_get_filesize(dec));
 
-	std::string reassembled(SIZE, '\0');
-	assertEquals(0, cimbard_finish_copy(dec, reinterpret_cast<unsigned char*>(reassembled.data()), SIZE));
+	// first call to cimbard_get_filename or cimbard_decompress_read() reassembles file
+	std::string actualFilename;
+	actualFilename.resize(255);
+	assertEquals(0, cimbard_get_filename(dec, actualFilename.data(), actualFilename.size())); // no filename though
 
+	unsigned char* data = cimbard_get_reassembled_file_buff();
+	assertFalse( data == nullptr );
+	std::string_view reassembled(reinterpret_cast<const char*>(data), SIZE);
 	assertEquals(contents, reassembled);
 }
 
@@ -109,18 +114,26 @@ TEST_CASE( "cimbar_recv_jsTest/testFullDecode", "[unit]" )
 	{
 		uint32_t fileId = res;
 
-		unsigned size = cimbard_get_filesize(fileId);
-		assertEquals( 7347, size );
+		assertEquals( 7347, cimbard_get_filesize(fileId) );
+
+		unsigned size = cimbard_get_decompress_bufsize();
+		assertEquals( 131072, size ); // defined by zstd. sanity check
 
 		std::vector<unsigned char> data;
 		data.resize(size);
-		int res = cimbard_finish_copy(fileId, data.data(), size);
-		assertEquals( 0, res );
 
-		cimbar::zstd_decompressor<std::stringstream> dss;
-		assertTrue( dss.write(reinterpret_cast<char*>(data.data()), data.size()) );
+		std::stringstream ss;
+		int res = 1;
+		while (res > 0)
+		{
+			res = cimbard_decompress_read(fileId, data.data(), data.size());
+			if (res == 0)
+				break;
+			assertTrue( res > 0 );
+			ss.write(reinterpret_cast<const char*>(data.data()), res);
+		}
 
-		assertEquals( 7538, dss.str().size() );
+		assertEquals( 7538, ss.str().size() ); // decompressed
 	}
 
 }

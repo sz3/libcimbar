@@ -21,7 +21,11 @@
 namespace {
 
 	std::shared_ptr<fountain_decoder_sink> _sink;
-	std::unordered_map<uint32_t, std::vector<uchar>> _reassembled;
+
+	// for decompress
+	uint32_t _decId = 0;
+	std::vector<uchar> _reassembled;
+	std::unique_ptr<cimbar::zstd_decompressor<std::stringstream>> _dec;
 
 	std::string _reporting;
 
@@ -33,23 +37,45 @@ namespace {
 	// settings
 	int _modeVal = 68;
 
-	int recover_contents(uint32_t id, std::unordered_map<uint32_t, std::vector<uchar>>::const_iterator& it)
+	// set up stateful decompressor
+	// for api simplicity, this is coupled to recover_contents()
+	// ... but it doesn't *have* to be
+	int init_decompress(uint32_t id)
 	{
-		it = _reassembled.find(id);
-		if (it == _reassembled.end())
+		if (id != _decId)
+			return -11;
+		if (_dec)
+			_dec.reset();
+		_dec = std::make_unique<cimbar::zstd_decompressor<std::stringstream>>();
+		if (!_dec)
+			return -12;
+		_dec->init_decompress(reinterpret_cast<char*>(_reassembled.data()), _reassembled.size());
+		return 0;
+	}
+
+	// recovers file contents into _reassembled, and sets _decId = id if so
+	// if the contents cannot be recovered, amounts to a no-op with error
+	int recover_contents(uint32_t id)
+	{
+		if (id != _decId)
 		{
+			if (!_sink)
+				return -1;
 			if (_sink->is_done(id))
 				return -2; // it's gone man
-			std::vector<uchar> contents;
-			contents.resize(cimbard_get_filesize(id));
 
-			if (!_sink->recover(id, contents.data(), contents.size()))
+			_reassembled.resize(cimbard_get_filesize(id));
+			if (!_sink->recover(id, _reassembled.data(), _reassembled.size()))
 				return -3;
-			auto res = _reassembled.emplace(id, std::move(contents));
-			it = res.first;
+			_decId = id;
+
+			int res = init_decompress(id);
+			if (res < 0)
+				return res;
 		}
-		if (it->second.empty())
+		if (_reassembled.empty())
 			return -5;
+
 		return 0;
 	}
 
@@ -199,16 +225,12 @@ unsigned cimbard_get_filesize(uint32_t id)
 // stateful against a map (same as cimbard_decompress_read()
 int cimbard_get_filename(uint32_t id, char* filename, unsigned fnsize)
 {
-	if (!_sink)
-		return -1;
-
-	std::unordered_map<uint32_t, std::vector<uchar>>::const_iterator contents;
-	int	res = recover_contents(id, contents);
+	int	res = recover_contents(id);
 	if (res < 0)
 		return res;
 
-	const uchar* finbuffer = contents->second.data();
-	unsigned size = contents->second.size();
+	const uchar* finbuffer = _reassembled.data();
+	unsigned size = _reassembled.size();
 
 	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
 	if (!fn.empty())
@@ -221,6 +243,32 @@ int cimbard_get_filename(uint32_t id, char* filename, unsigned fnsize)
 	std::copy(fn.begin(), fn.end(), filename);
 	return fn.size();
 }
+
+int cimbard_decompress_read(uint32_t id, unsigned char* buffer, unsigned size)
+{
+	int	res = recover_contents(id);
+	if (res < 0)
+		return res;
+
+	if (!_dec)
+		return -13;
+	if (!_dec->good())
+		return -14;
+
+	_dec->str(std::string());
+	_dec->write_once();
+	std::string temp = _dec->str();
+	if (size > temp.size())
+		size = temp.size();
+	std::copy(temp.data(), temp.data()+size, buffer);
+	return size;
+}
+
+int cimbard_get_decompress_bufsize()
+{
+	return ZSTD_DStreamOutSize();
+}
+
 
 // goes away
 // cimbarz_init_decompress also goes away
@@ -251,6 +299,14 @@ int cimbard_configure_decode(int mode_val)
 	}
 
 	return 0;
+}
+
+// testing
+unsigned char* cimbard_get_reassembled_file_buff()
+{
+	if (_reassembled.empty())
+		return nullptr;
+	return _reassembled.data();
 }
 
 }
