@@ -29,6 +29,9 @@ namespace cimbar
 					active_conf().color_bits = 3;
 					active_conf().legacy_mode = true;
 					break;
+				case 67:
+					active_conf() = cimbar::Conf8x8_mini();
+					break;
 				case 68:
 				default:
 					active_conf() = cimbar::Conf8x8();

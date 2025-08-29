@@ -23,6 +23,7 @@ set(SOURCES
 	Config.h
 	FloodDecodePositions.cpp
 	FloodDecodePositions.h
+	GridConf.h
 	Interleave.h
 	LinearDecodePositions.h
 	PositionData.h
