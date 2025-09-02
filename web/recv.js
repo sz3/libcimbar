@@ -55,31 +55,22 @@ var Sink = function () {
     reassemble_file: function (id) {
       const size = Module._cimbard_get_filesize(id);
       //alert("we did it!?! " + size);
-      const dataPtr = Module._malloc(size);
-      const buff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
       try {
-        var res = Module._cimbard_finish_copy(id, buff.byteOffset, buff.length);
-        if (res < 0) {
+        var name = id + "." + size;
+        const fnsize = Module._cimbard_get_filename(id, _errBuff, _errBuffSize);
+        if (fnsize < 0) {
           alert("reassemble_file failed :(" + res);
           console.log("we biffed it. :( " + res);
           Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
         }
-        else {
-          var name = id + "." + size;
-          const fnsize = Module._cimbard_get_filename(buff.byteOffset, buff.length, _errBuff, _errBuffSize);
-          if (fnsize > 0) {
-            const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
-            name = new TextDecoder("utf-8").decode(temparr);
-          }
-          //Recv.download_bytes(buff, size + ".zst"); // size -> name, eventually
-          Zstd.decompress(name, buff);
+        else if (fnsize > 0) {
+          const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
+          name = new TextDecoder("utf-8").decode(temparr);
         }
+        Zstd.decompress(name, id);
       } catch (error) {
         console.log("failed finish copy or download?? " + error);
       }
-      // this needs to happen after decompress() completes
-      // currently decompress is sync, so it's fine. But...
-      Module._free(dataPtr);
     }
   };
 }();

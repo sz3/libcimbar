@@ -150,17 +150,16 @@ int main(int argc, char** argv)
 			// attempt save
 			uint32_t fileId = res;
 
+			int size = cimbard_get_filesize(fileId);
+
 			std::string filename;
 			filename.resize(255, '\0');
-			int size = cimbard_get_filename(fileId, filename.data(), filename.size());
-			if (size > 0)
-				filename.resize(size);
+			int fnsize = cimbard_get_filename(fileId, filename.data(), filename.size());
+			if (fnsize > 0)
+				filename.resize(fnsize);
 			else // fallback
-			{
-				size = cimbard_get_filesize(fileId);
 				filename = fmt::format("0.{}", size);
-			}
-			std::cerr << "Saving file " << filename << " of size " << size << std::endl;
+			std::cerr << "Saving file " << filename << " of (compressed) size " << size << std::endl;
 
 			std::string file_path = fmt::format("{}/{}", outpath, filename);
 			std::ofstream outs(file_path, std::ios::binary);
@@ -169,7 +168,7 @@ int main(int argc, char** argv)
 			data.resize(cimbard_get_decompress_bufsize());
 
 			int res = 1;
-			while (res = cimbard_decompress_read(fileId, data.data(), data.size()) > 0)
+			while ((res = cimbard_decompress_read(fileId, data.data(), data.size())) > 0)
 				outs.write(reinterpret_cast<const char*>(data.data()), res);
 			if (res < 0)
 				std::cerr << "failed cimbard_decompress_read " << res << std::endl;
