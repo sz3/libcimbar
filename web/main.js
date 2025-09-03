@@ -61,6 +61,7 @@ var Main = function () {
       var height = window.innerHeight - 10;
       Main.scaleCanvas(canvas, width, height);
       Main.alignInvisibleClick(canvas);
+      Main.checkNavButtonOverlap();
     },
 
     toggleFullscreen: function () {
@@ -209,10 +210,6 @@ var Main = function () {
       if (_showStats && frameCount) {
         _renderTime += elapsed;
         Main.setHTML("status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime / frameCount));
-      }
-      if (!(_counter & 15)) {
-        Main.resize();
-        Main.checkNavButtonOverlap();
       }
     },
 
@@ -365,3 +362,7 @@ window.addEventListener("drop", function (e) {
   Main.dragDrop(e);
   document.body.style["opacity"] = 1.0;
 }, false);
+
+window.addEventListener('resize', () => {
+  Main.resize();
+});
