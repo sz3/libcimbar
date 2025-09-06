@@ -56,7 +56,9 @@ set (LINK_WASM_EXPORTED_FUNCTIONS
 	, "_free"
 	, "_cimbare_render"
 	, "_cimbare_next_frame"
+	, "_cimbare_init_encode"
 	, "_cimbare_encode"
+	, "_cimbare_encode_bufsize"
 	, "_cimbare_configure"
 	, "_cimbare_get_aspect_ratio"
 )
