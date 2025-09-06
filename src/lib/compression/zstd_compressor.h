@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 namespace cimbar {
 
@@ -14,6 +15,7 @@ class zstd_compressor : public STREAM
 {
 public:
 	using STREAM::STREAM; // pull in constructors
+	static const size_t CHUNK_SIZE = 0x4000;
 
 public:
 	~zstd_compressor()
@@ -22,6 +24,8 @@ public:
 			ZSTD_freeCCtx(_cctx);
 	}
 
+	// if you call write directly, len should be a multiple of CHUNK_SIZE
+	// .. or the final bytes of the input
 	bool write(const char* data, size_t len)
 	{
 		size_t writeLen = CHUNK_SIZE;
@@ -102,7 +106,6 @@ public:
 	}
 
 protected:
-	static const size_t CHUNK_SIZE = 0x4000;
 	int _compressionLevel = 16;
 	ZSTD_CCtx* _cctx = ZSTD_createCCtx();
 	std::vector<char> _compBuff = std::vector<char>(ZSTD_compressBound(CHUNK_SIZE));
