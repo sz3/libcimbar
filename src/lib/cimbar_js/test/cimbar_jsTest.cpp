@@ -33,7 +33,8 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 	const int SIZE = 7000;
 	std::string contents = random_string(SIZE);
 	std::string filename = "/tmp/foobar-c语言版.txt";
-	assertEquals( 0, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), filename.data(), filename.size(), 100) );
+	assertEquals( 0, cimbare_init_encode(filename.data(), filename.size(), 100) );
+	assertEquals( 0, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size()) );
 
 	assertEquals( 1, cimbare_next_frame() );
 
