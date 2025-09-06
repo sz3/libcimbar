@@ -9,6 +9,7 @@ var Main = function () {
 
   // cached
   var _idealRatio = 1;
+  var _compressBuff = undefined;
 
   function toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -19,17 +20,45 @@ var Main = function () {
     }
   }
 
-  function importFile(f) {
-    const fileReader = new FileReader();
-    fileReader.onload = (event) => {
-      const fileData = new Uint8Array(event.target.result);
-      Main.encode(f.name, fileData);
-    };
-    fileReader.onerror = () => {
-      console.error('Unable to read file ' + f.name + '.');
+  function importFile(file) {
+    let chunkSize = Module._cimbare_encode_bufsize();
+    if (_compressBuff === undefined) {
+      const dataPtr = Module._malloc(chunkSize);
+      _compressBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, chunkSize);
+    }
+    let offset = 0;
+    let reader = new FileReader();
+
+    Main.encode_init(file.name);
+
+    reader.onload = function (event) {
+      const datalen = event.target.result.byteLength;
+      if (datalen > 0) {
+        // copy to wasm buff and write
+        const uint8View = new Uint8Array(event.target.result);
+        _compressBuff.set(uint8View);
+        const buffView = new Uint8Array(Module.HEAPU8.buffer, _compressBuff.byteOffset, datalen);
+        Main.encode_bytes(buffView);
+
+        offset += chunkSize;
+        readNext();
+      } else {
+        // Done reading file
+        console.log("Finished reading file.");
+
+        // this null call is functionally a flush()
+        // so a no-op, unless it isn't
+        const nullBuff = new Uint8Array(Module.HEAPU8.buffer, _compressBuff.byteOffset, 0);
+        Main.encode_bytes(nullBuff);
+      }
     };
 
-    fileReader.readAsArrayBuffer(f);
+    function readNext() {
+      let slice = file.slice(offset, offset + chunkSize);
+      reader.readAsArrayBuffer(slice);
+    }
+
+    readNext();
   }
 
   function copyToWasmHeap(abuff) {
@@ -127,22 +156,27 @@ var Main = function () {
       invisible_click.style.zoom = canvas.style.zoom;
     },
 
-    encode: function (filename, data) {
+    encode_init: function (filename) {
       console.log("encoding " + filename);
-      const wasmData = copyToWasmHeap(data);
       const wasmFn = copyToWasmHeap(new TextEncoder("utf-8").encode(filename));
-
       try {
-        var res = Module._cimbare_encode(wasmData.byteOffset, wasmData.length, wasmFn.byteOffset, wasmFn.length, -1);
-        console.log("encode returned " + res);
+        var res = Module._cimbare_init_encode(wasmFn.byteOffset, wasmFn.length, -1);
+        console.log("init_encode returned " + res);
       } finally {
-        Module._free(wasmData.byteOffset);
         Module._free(wasmFn.byteOffset);
       }
 
       Main.setTitle(filename);
       Main.setHTML("current-file", filename);
-      Main.setActive(true);
+    },
+
+    encode_bytes: function (wasmData) {
+      var res = Module._cimbare_encode(wasmData.byteOffset, wasmData.length);
+      console.log("encode returned " + res);
+
+      if (res == 0) {
+        Main.setActive(true);
+      }
     },
 
     dragDrop: function (event) {
