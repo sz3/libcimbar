@@ -2,6 +2,7 @@
 #include "cimbar_js.h"
 
 #include "cimb_translator/Config.h"
+#include "compression/zstd_compressor.h"
 #include "encoder/Encoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
@@ -15,7 +16,12 @@ namespace {
 	std::shared_ptr<fountain_encoder_stream> _fes;
 	std::optional<cv::Mat> _next;
 
+	// compressing the file
+	std::unique_ptr<cimbar::zstd_compressor<std::stringstream>> _comp;
+
 	int _frameCount = 0;
+	// start encode_id is 109. This is mostly unimportant (it only needs to wrap between [0,127]), but useful
+	// for the decoder -- because it gives it a better distribution of colors in the first frame header it sees.
 	uint8_t _encodeId = 109;
 
 	// settings, will be overriden by first call to configure()
@@ -108,7 +114,11 @@ int cimbare_next_frame()
 	return ++_frameCount;
 }
 
-int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filename, unsigned fnsize, int encode_id)
+// maybe init_encode w/ filename,size,encode_id,
+// then encode() with buff,size? ... when size < chunksize (or size ==0), we're done
+// return 0 on done, 1 iff work to continue?
+
+int cimbare_init_encode(const char* filename, unsigned fnsize, int encode_id)
 {
 	_frameCount = 0;
 	if (!FountainInit::init())
@@ -117,17 +127,51 @@ int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filen
 		return -5;
 	}
 
-	Encoder enc;
 	if (encode_id < 0)
-		enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
+		++_encodeId; // increment _encodeId every time we change files
 	else
-		enc.set_encode_id(static_cast<uint8_t>(encode_id));
+		_encodeId = encode_id;
 
-	cimbar::byte_istream bis(reinterpret_cast<const char*>(buffer), size);
-	_fes = enc.create_fountain_encoder(bis, std::string_view(filename, fnsize), _compressionLevel);
+	_comp = std::make_unique<cimbar::zstd_compressor<std::stringstream>>();
+	if (!_comp)
+		return -1;
 
+	_comp->set_compression_level(_compressionLevel);
+
+	if (fnsize > 0 and filename != nullptr)
+		_comp->write_header(filename, fnsize);
+	return 0;
+}
+
+int cimbare_encode_bufsize()
+{
+	return cimbar::zstd_compressor<std::stringstream>::CHUNK_SIZE;
+}
+
+int cimbare_encode(const unsigned char* buffer, unsigned size)
+{
+	if (!_comp)
+		return -1;
+
+	if (size > 0)
+	{
+		if (!_comp->write(reinterpret_cast<const char*>(buffer), size))
+			return -2;
+	}
+	if (size == cimbare_encode_bufsize())
+		return 1; // more to do
+
+	// otherwise, we're ready
+	unsigned fountainChunkSize = cimbar::Config::fountain_chunk_size();
+	size_t compressedSize = _comp->size();
+	if (compressedSize < fountainChunkSize)
+		_comp->pad(fountainChunkSize - compressedSize + 1);
+
+	// create the encoder stream
+	_fes = fountain_encoder_stream::create(*_comp, fountainChunkSize, _encodeId);
+	_comp.reset();
 	if (!_fes)
-		return -1; // return -1 plz
+		return -3;
 
 	_next.reset();
 	return 0;

@@ -103,11 +103,21 @@ int main(int argc, char** argv)
 					continue;
 				}
 
-				// start encode_id is 109. This is mostly unimportant (it only needs to wrap between [0,127]), but useful
-				// for the decoder -- because it gives it a better distribution of colors in the first frame header it sees.
-				if (cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size(), filename.data(), filename.size(), static_cast<int>(i+109)) < 0)
+				if (cimbare_init_encode(filename.data(), filename.size(), -1) < 0)
 				{
-					std::cerr << "failed to encode file " << filename << std::endl;
+					std::cerr << "failed to 'init encode' file " << filename << std::endl;
+					continue; // abort??
+				}
+
+				int res = cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size());
+				if (res < 0)
+				{
+					std::cerr << "failed to compress file " << filename << std::endl;
+					continue;
+				}
+				else if (res == 1 and cimbare_encode(nullptr, 0) != 0) // fallback finish encode
+				{
+					std::cerr << "failed to encode for file" << filename << std::endl;
 					continue;
 				}
 			}
