@@ -15,7 +15,7 @@ var Zstd = function () {
   function getDecompressReader(id) {
     // allocate buffer once. We'll reuse it,
     // and slice() to copy to the local (non-wasm) heap
-    const bufferSize = Module._cimbard_get_bufsize(); // chunk size
+    const bufferSize = Module._cimbard_get_decompress_bufsize(); // chunk size
     if (_decompBuff === undefined)
       _decompBuff = Module._malloc(bufferSize);
 
