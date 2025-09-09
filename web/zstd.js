@@ -67,6 +67,7 @@ var Zstd = function () {
     // Create Response object from the stream, get blob
     const response = new Response(readstream);
     const blob = await response.blob();
+    console.log("download is ready for " + filename + ", size " + blob.size);
     Zstd.download_blob(filename, blob);
   }
 
