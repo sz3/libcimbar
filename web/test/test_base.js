@@ -1,19 +1,12 @@
 QUnit.module("base");
 QUnit.config.reorder = false;
 
-var Zstd = function () {
+let _zstdCalls = [];
 
-  // public interface
-  return {
-
-    calls: [],
-
-    decompress: function (name, data) {
-      Zstd.calls.push({ decompress: [name, data.length] });
-    }
-  };
-}();
-
+Zstd.download_blob = function (name, blob) {
+  console.log(blob);
+  _zstdCalls.push({ download_blob: [name, blob.size] });
+};
 
 function wait_for(assert, block) {
   var done = assert.async();
@@ -90,7 +83,7 @@ QUnit.test("stable decode", async function (assert) {
     return document.querySelector(query);
   });
   assert.equal(pro2.style.width, "92.3077%");
-  assert.deepEqual(Zstd.calls, []);
+  assert.deepEqual(_zstdCalls, []);
 
   pro2.remove();
 
@@ -103,7 +96,7 @@ QUnit.test("stable decode", async function (assert) {
   });
   assert.equal(pro3.style.width, "100%");
 
-  assert.deepEqual(Zstd.calls, [
-    { decompress: ["576454656.23586", 23586] }
+  assert.deepEqual(_zstdCalls, [
+    { download_blob: ["576454656.23586", 23947] }
   ]);
 });
