@@ -1,10 +1,11 @@
 QUnit.module("base");
 QUnit.config.reorder = false;
+QUnit.config.testTimeout = 10000;
 
 let _zstdCalls = [];
 
 Zstd.download_blob = function (name, blob) {
-  console.log(blob);
+  console.log("in fake download blob for " + name);
   _zstdCalls.push({ download_blob: [name, blob.size] });
 };
 
@@ -49,7 +50,7 @@ QUnit.testStart(async function (details) {
 });
 
 QUnit.testDone(function (details) {
-
+  _zstdCalls = [];
 });
 
 QUnit.test("stable decode", async function (assert) {
@@ -96,6 +97,10 @@ QUnit.test("stable decode", async function (assert) {
   });
   assert.equal(pro3.style.width, "100%");
 
+  // might be something better to wait on, but for now this is fine.
+  const numCalls = await wait_for(assert, () => {
+    return _zstdCalls.length > 0;
+  });
   assert.deepEqual(_zstdCalls, [
     { download_blob: ["576454656.23586", 23947] }
   ]);
