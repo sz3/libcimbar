@@ -84,6 +84,7 @@ var Recv = function () {
   var _renderTime = 0;
   var _captureNextFrame = 0;
 
+  var _videoDeviceId = undefined;
   var _watchmanEnabled = 0;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
@@ -143,13 +144,21 @@ var Recv = function () {
 
     init_video: function (video) {
       _video = video;
+      Recv.start_camera();
+    },
 
+    start_camera: function (videoDeviceId) {
+      console.log("start camera " + videoDeviceId);
+      if (videoDeviceId != undefined) {
+        _videoDeviceId = videoDeviceId;
+      }
       var constraints = {
         audio: false,
         video: {
+          deviceId: _videoDeviceId ? { exact: _videoDeviceId } : undefined,
           width: { min: 720, ideal: 1920 }, // Request HD but allow flexibility
           height: { min: 720, ideal: 1080 },
-          aspectRatio: matchMedia('all and (orientation:landscape)').matches ? 16 / 9 : 9 / 16,
+          aspectRatio: matchMedia('all and (orientation:landscape)').matches ? 16 / 10 : 10 / 16,
           facingMode: 'environment',
           exposureMode: 'continuous',
           focusMode: 'continuous',
@@ -164,19 +173,38 @@ var Recv = function () {
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
           //console.log(localMediaStream);
-          //console.dir(video);
-          if ('srcObject' in video) {
+          //console.dir(_video);
+          if ('srcObject' in _video) {
             video.srcObject = localMediaStream;
           } else {
             video.src = URL.createObjectURL(localMediaStream); //deprecated
           }
-          video.play();
-          video.requestVideoFrameCallback(Recv.on_frame);
+          _video.play();
+          _video.requestVideoFrameCallback(Recv.on_frame);
+          Recv.populate_camera_list();
         })
         .catch(err => {
-          console.error(`OH NO!!!!`, err);
+          console.error("OH NO!!!!", err);
           Recv.set_error("Failed to initialize camera. " + err);
           Recv.set_HTML("crosshair1", "Failed to initialize camera. " + err);
+        });
+    },
+
+    populate_camera_list: async function () {
+      var cameraSelect = document.getElementById('camera-select');
+      if (cameraSelect.hasChildNodes()) { //noop
+        return;
+      }
+
+      const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+      mediaDevices.filter((device) => device.kind === 'videoinput')
+        .forEach(({ deviceId, label }) => {
+          const btn = document.createElement('button');
+          btn.value = deviceId;
+          btn.innerText = label || deviceId;
+          console.log("cam " + label + " ... " + deviceId);
+          btn.setAttribute("onclick", "Recv.start_camera(this.value);");
+          cameraSelect.appendChild(btn);
         });
     },
 
@@ -208,7 +236,7 @@ var Recv = function () {
       }
 
       // if not, we're stuck?
-      Recv.init_video(_video);
+      Recv.start_camera();
     },
 
     download_bytes: function (buff, name) {
@@ -374,6 +402,8 @@ var Recv = function () {
       }
       document.getElementById("nav-button").blur();
       document.getElementById("nav-content").blur();
+      document.getElementById('debug_menu').classList.remove('active');
+      document.getElementById('debug_menu').blur();
     },
 
     setMode: function (mode_str) {
