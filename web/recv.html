@@ -341,6 +341,7 @@
 
     #debug_menu {
       pointer-events: auto;
+      transform: translateX(100%);
       margin-top: 60px;
       right: 0;
       padding: 20px;
@@ -373,6 +374,7 @@
   <div id="crosshair2" class="crosshairs"></div>
 
   <div id="nav-container" class="mode-b">
+    <div class="bg" onclick="Recv.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -392,7 +394,9 @@
     </div>
     <div id="debug_menu">
       <button id="debug-button" onclick="Recv.showDebug();"></button>
-      <div id="camera-select"></div>
+      <select id="camera-select" onchange="Recv.start_camera(this.value)">
+        <option value="">Select camera</option>
+      </select>
       <div class="statusbox" id="errorbox"></div>
       <div class="statusbox" id="t0">hi</div>
       <div class="statusbox" id="t1">hi</div>

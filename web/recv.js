@@ -148,7 +148,6 @@ var Recv = function () {
     },
 
     start_camera: function (videoDeviceId) {
-      console.log("start camera " + videoDeviceId);
       if (videoDeviceId != undefined) {
         _videoDeviceId = videoDeviceId;
       }
@@ -192,19 +191,18 @@ var Recv = function () {
 
     populate_camera_list: async function () {
       var cameraSelect = document.getElementById('camera-select');
-      if (cameraSelect.hasChildNodes()) { //noop
-        return;
-      }
+      cameraSelect.addEventListener('focus', () => {
+        document.getElementById('debug_menu').classList.add('active');
+      });
+      cameraSelect.querySelectorAll(':scope > option:not(:first-child)').forEach((e) => e.remove());
 
       const mediaDevices = await navigator.mediaDevices.enumerateDevices();
       mediaDevices.filter((device) => device.kind === 'videoinput')
         .forEach(({ deviceId, label }) => {
-          const btn = document.createElement('button');
-          btn.value = deviceId;
-          btn.innerText = label || deviceId;
-          console.log("cam " + label + " ... " + deviceId);
-          btn.setAttribute("onclick", "Recv.start_camera(this.value);");
-          cameraSelect.appendChild(btn);
+          const option = document.createElement('option');
+          option.value = deviceId;
+          option.text = label || deviceId;
+          cameraSelect.appendChild(option);
         });
     },
 
