@@ -68,13 +68,18 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	unsigned interleaveBlocks = _interleave? cimbar::Config::interleave_blocks() : 0;
 	unsigned interleavePartitions = cimbar::Config::interleave_partitions();
 
+	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
+	unsigned symCapacity = cimbar::Config::capacity(bitsPerSymbol);
+	unsigned colorCapacity = cimbar::Config::capacity(colorBits);
+	unsigned bitsPerOp = cimbar::Config::bits_per_cell();
+	unsigned fountain_chunks_per_frame = cimbar::Config::fountain_chunks_per_frame(bitsPerOp);
+
 	std::vector<unsigned> interleaveLookup = Interleave::interleave_reverse(reader.num_reads(), interleaveBlocks, interleavePartitions);
 	std::vector<PositionData> colorPositions;
 	colorPositions.resize(reader.num_reads()); // the number of cells == reader.num_reads(). Can we calculate this from config at compile time? Do we care?
 
-	unsigned bitsPerSymbol = cimbar::Config::symbol_bits();
 	{
-		bitbuffer symbolBuff(cimbar::Config::capacity(bitsPerSymbol));
+		bitbuffer symbolBuff(symCapacity);
 		// read symbols first
 		while (!reader.done())
 		{
@@ -97,10 +102,9 @@ inline unsigned Decoder::do_decode(CimbReader& reader, STREAM& ostream)
 	}
 
 	// do color correction init, now that we (hopefully) have some fountain headers from the symbol decode
-	unsigned bitsPerOp = cimbar::Config::bits_per_cell();
-	reader.init_ccm(colorBits, interleaveBlocks, interleavePartitions, cimbar::Config::fountain_chunks_per_frame(bitsPerOp));
+	reader.init_ccm(colorBits, interleaveBlocks, interleavePartitions, fountain_chunks_per_frame);
 
-	bitbuffer colorBuff(cimbar::Config::capacity(colorBits));
+	bitbuffer colorBuff(colorCapacity);
 	// then decode colors.
 	for (const PositionData& p : colorPositions)
 	{

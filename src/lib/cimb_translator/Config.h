@@ -14,35 +14,40 @@ namespace cimbar
 			return cc;
 		}
 
+
 	public:
-		static void update(int mode_val=0)
+		static cimbar::conf temp_conf(int mode_val=0)
 		{
+			cimbar::conf cc;
 			switch (mode_val)
 			{
 				case 4:
-					active_conf() = cimbar::Conf8x8();
-					active_conf().color_bits = 2;
-					active_conf().legacy_mode = true;
-					break;
+					cc = cimbar::Conf8x8();
+					cc.color_bits = 2;
+					cc.legacy_mode = true;
+					return cc;
 				case 8:
-					active_conf() = cimbar::Conf8x8();
-					active_conf().color_bits = 3;
-					active_conf().legacy_mode = true;
-					break;
+					cc = cimbar::Conf8x8();
+					cc.color_bits = 3;
+					cc.legacy_mode = true;
+					return cc;
 				case 67:
-					active_conf() = cimbar::Conf8x8_mini();
-					break;
+					return cimbar::Conf8x8_mini();
 				case 68:
 				default:
-					active_conf() = cimbar::Conf8x8();
+					return cimbar::Conf8x8();
 			}
+		}
+
+		static void update(int mode_val=0)
+		{
+			active_conf() = temp_conf(mode_val);
 		}
 
 		static bool dark()
 		{
 			return true;
 		}
-
 
 		static bool legacy_mode()
 		{
@@ -66,7 +71,7 @@ namespace cimbar
 
 		static unsigned bits_per_cell()
 		{
-			return color_bits() + symbol_bits();
+			return active_conf().bits_per_cell();
 		}
 
 		static unsigned ecc_bytes()
@@ -109,9 +114,15 @@ namespace cimbar
 			return active_conf().cell_spacing_y;
 		}
 
-		static unsigned corner_padding_x();
+		static unsigned corner_padding_x()
+		{
+			return active_conf().corner_padding_x();
+		}
 
-		static unsigned corner_padding_y();
+		static unsigned corner_padding_y()
+		{
+			return active_conf().corner_padding_y();
+		}
 
 		static unsigned cell_offset()
 		{
@@ -128,12 +139,16 @@ namespace cimbar
 			return active_conf().cells_per_col_y;
 		}
 
-		static unsigned total_cells();
-
-		static unsigned decode_window_bits();
+		static unsigned total_cells()
+		{
+			return active_conf().total_cells();
+		}
 
 		// leave bitspercell here
-		static unsigned capacity(unsigned bitspercell=0);
+		static unsigned capacity(unsigned bitspercell=0)
+		{
+			return active_conf().capacity(bitspercell);
+		}
 
 		static unsigned interleave_blocks()
 		{
@@ -145,15 +160,15 @@ namespace cimbar
 			return 2;
 		}
 
-		// leave bitspercell here
-		static unsigned fountain_chunks_per_frame(unsigned bitspercell)
+		static unsigned fountain_chunks_per_frame(unsigned bitspercell=0)
 		{
-			if (legacy_mode() or !active_conf().fountain_chunks_per_frame)
-				return 10;
-			return bitspercell * active_conf().fountain_chunks_per_frame;
+			return active_conf().fountain_chunks_per_frame(bitspercell);
 		}
 
-		static unsigned fountain_chunk_size();
+		static unsigned fountain_chunk_size(unsigned bitspercell=0)
+		{
+			return active_conf().fountain_chunk_size(bitspercell);
+		}
 
 		static unsigned compression_level()
 		{
