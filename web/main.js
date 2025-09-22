@@ -72,7 +72,6 @@ var Main = function () {
   return {
     init: function (canvas) {
       Main.setMode('B');
-      Main.resize();
       Main.check_GL_enabled(canvas);
     },
 
@@ -221,8 +220,9 @@ var Main = function () {
     fileInput: function (ev) {
       console.log("file input: " + ev);
       var file = document.getElementById('file_input').files[0];
-      if (file)
+      if (file) {
         importFile(file);
+      }
       Main.blurNav(false);
     },
 
@@ -255,8 +255,14 @@ var Main = function () {
     },
 
     setMode: function (mode_str) {
-      const modeVal = (mode_str == "4C") ? 4 : 68;
-      Module._cimbare_configure(modeVal, 255);
+      let modeVal = 68;
+      if (mode_str == "4C") {
+        modeVal = 4;
+      }
+      else if (mode_str == "Bm") {
+        modeVal = 67;
+      }
+      Module._cimbare_configure(modeVal, -1);
       _idealRatio = Module._cimbare_get_aspect_ratio();
       Main.resize();
 
@@ -264,11 +270,19 @@ var Main = function () {
       if (modeVal == 4) {
         nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
-      } else if (mode_str == "B") {
+        nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
+      } else if (modeVal == 68) {
         nav.classList.add("mode-b");
+        nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-4c");
+      } else if (modeVal == 67) {
+        nav.classList.add("mode-bm");
+        nav.classList.remove("mode-b");
         nav.classList.remove("mode-4c");
       } else {
         nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       }
     },

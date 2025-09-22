@@ -181,9 +181,7 @@ int cimbare_encode(const unsigned char* buffer, unsigned size)
 
 int cimbare_configure(int mode_val, int compression)
 {
-	// defaults
-	if (mode_val == 0)
-		mode_val = 68;
+	cimbar::Config::update(mode_val);
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
 
