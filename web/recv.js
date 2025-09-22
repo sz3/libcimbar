@@ -387,10 +387,10 @@ var Recv = function () {
 
     setMode: function (mode_str) {
       const modeVal = (mode_str == "4C") ? 4 : 68;
-      Module._cimbard_configure_decode(255, modeVal);
+      Module._cimbard_configure_decode(modeVal);
       for (let i = 0; i < _workers.length; i++) {
         // cal config decode within the workers as well
-        _workers[i].postMessage({ config: true, color_bits: 255, mode_val: modeVal });
+        _workers[i].postMessage({ config: true, mode_val: modeVal });
       }
 
       var nav = document.getElementById("nav-container");
