@@ -129,11 +129,13 @@
 
     /* options */
     #nav-container a.mode-b,
+    #nav-container a.mode-bm,
     #nav-container a.mode-4c {
       color: #555;
     }
 
     #nav-container.mode-b a.mode-b,
+    #nav-container.mode-bm a.mode-bm,
     #nav-container.mode-4c a.mode-4c {
       color: #9fa6b2;
     }
@@ -317,6 +319,17 @@
       font-size: 2em;
     }
 
+    #nav-content h4 {
+      color: gray;
+      font-variant: small-caps;
+      padding-top: 1em;
+    }
+
+    #nav-content li.modesel a {
+      display: inline-block;
+      width: 2em;
+    }
+
     #nav-content li:hover {
       background-color: #2c323c;
     }
@@ -382,8 +395,11 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
-        <li><a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">Mode B</a></li>
-        <li><a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C <small>(old apps)</small></a>
+        <li class="modesel">
+          <h4>Mode</h4>
+          <a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">B</a>
+          <a class="mode-bm" href="javascript:void(0)" onclick="Recv.setMode('Bm')">Bm</a>
+          <a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C</a>
         </li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>
