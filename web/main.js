@@ -103,6 +103,9 @@ var Main = function () {
         pause = !Main.isPaused();
       }
       _pause = pause ? 15 : 0;
+
+      // silly workaround for css transform race condition
+      Main.checkNavButtonOverlap();
     },
 
     isPaused: function () {
