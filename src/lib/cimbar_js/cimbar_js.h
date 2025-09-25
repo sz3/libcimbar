@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 int cimbare_init_window(int width, int height);
+int cimbare_rotate_window(bool rotate);
 int cimbare_render();
 int cimbare_next_frame();
 int cimbare_init_encode(const char* filename, unsigned fnsize, int encode_id);

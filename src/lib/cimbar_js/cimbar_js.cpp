@@ -50,6 +50,20 @@ int cimbare_init_window(int width, int height)
 	return 0;
 }
 
+int cimbare_rotate_window(bool rotate)
+{
+	if (!_window or !_window->is_good())
+		return -1;
+
+	_window->rotate(0);
+	if (rotate) // 90 degrees
+	{
+		_window->rotate();
+		_window->rotate();
+	}
+	return 0;
+}
+
 bool cimbare_auto_scale_window()
 {
 	if (!_window or !_window->is_good())

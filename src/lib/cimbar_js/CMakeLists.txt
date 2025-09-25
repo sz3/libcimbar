@@ -58,6 +58,7 @@ set (LINK_WASM_EXPORTED_FUNCTIONS
 	, "_cimbare_encode"
 	, "_cimbare_encode_bufsize"
 	, "_cimbare_configure"
+	, "_cimbare_rotate_window"
 	, "_cimbare_get_aspect_ratio"
 )
 

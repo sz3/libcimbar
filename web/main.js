@@ -103,9 +103,6 @@ var Main = function () {
         pause = !Main.isPaused();
       }
       _pause = pause ? 15 : 0;
-
-      // silly workaround for css transform race condition
-      Main.checkNavButtonOverlap();
     },
 
     isPaused: function () {
@@ -116,6 +113,8 @@ var Main = function () {
       // using ratio from current config,
       // determine optimal dimensions and rotation
       var needRotate = _idealRatio > 1 && height > width;
+      Module._cimbare_rotate_window(needRotate);
+
       var ourRatio = needRotate ? height / width : width / height;
 
       var xdim = needRotate ? height : width;
@@ -128,22 +127,13 @@ var Main = function () {
       }
 
       console.log(xdim + "x" + ydim);
-      canvas.style.width = xdim + "px";
-      canvas.style.height = ydim + "px";
       if (needRotate) {
-        // TODO: rotating #dragdrop around the center doesn't work for inane
-        //  css reasons. So here's a hack to move it where it should be. css sucks.
-        // if at some point this is understood/fixed, we should define a static css rule
-        //  to match against `.rotated`
-        var translate = -Math.floor(width / 2) - Math.floor(width / 96) + "px";
-        var dragdrop = document.getElementById('dragdrop');
-        dragdrop.style.transform = "rotate(90deg) translateX(-50%) translateY(" + translate + ")";
-        dragdrop.classList.add("rotated");
+        canvas.style.width = ydim + "px";
+        canvas.style.height = xdim + "px";
       }
       else {
-        var dragdrop = document.getElementById('dragdrop');
-        dragdrop.style.transform = "";
-        dragdrop.classList.remove("rotated");
+        canvas.style.width = xdim + "px";
+        canvas.style.height = ydim + "px";
       }
     },
 

@@ -61,8 +61,6 @@
       color: #F0F0F0;
       outline: 6px solid black;
       box-shadow: 0px 0px 12px black, 0px 0px 18px black;
-      transform-origin: 0;
-      transition: transform 0.3s;
     }
 
     .dragdrop::before {
@@ -73,15 +71,6 @@
       left: 0;
       text-align: center;
       width: 100%;
-      transform-origin: center center;
-      transition: transform 0.3s;
-    }
-
-    .dragdrop.rotated::before {
-      width: 100vh;
-      left: 0;
-      top: 0;
-      transform: rotate(-90deg) translateX(-20%) translateY(-5em);
     }
 
     .dragdrop.error:before {
