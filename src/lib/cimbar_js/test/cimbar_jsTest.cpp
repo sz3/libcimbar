@@ -5,7 +5,6 @@
 #include "cimb_translator/Config.h"
 #include "cimbar_js/cimbar_js.h"
 #include "cimbar_js/cimbar_recv_js.h"
-#include "cimbar_js/cimbar_zstd_js.h"
 #include "serialize/format.h"
 
 #include <iostream>
@@ -63,7 +62,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		assertEquals( "foobar-c语言版.txt", actualFilename );
 
 		std::vector<unsigned char> zstdbuff;
-		zstdbuff.resize(cimbarz_get_bufsize());
+		zstdbuff.resize(cimbard_get_decompress_bufsize());
 
 		int outsize = cimbard_decompress_read(fileId, zstdbuff.data(), zstdbuff.size());
 		assertEquals(contents.size(), outsize);

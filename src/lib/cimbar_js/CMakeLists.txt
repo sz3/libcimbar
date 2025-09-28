@@ -14,8 +14,6 @@ set(SOURCES
 
 	cimbar_recv_js.h
 	cimbar_recv_js.cpp
-	cimbar_zstd_js.h
-	cimbar_zstd_js.cpp
 )
 endif()
 
