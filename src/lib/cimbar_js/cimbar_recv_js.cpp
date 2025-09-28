@@ -19,10 +19,16 @@
 
 
 namespace {
-
+	// for decode
 	std::shared_ptr<fountain_decoder_sink> _sink;
-	std::string _reporting;
 
+	// for decompress
+	// we support only one decompress at a time!
+	uint32_t _decId = 0;
+	std::vector<uchar> _reassembled;
+	std::unique_ptr<cimbar::zstd_decompressor<std::stringstream>> _dec;
+
+	std::string _reporting;
 	cv::Mat _debugFrame;
 
 	TimeAccumulator _tScanExtract;
@@ -30,6 +36,48 @@ namespace {
 
 	// settings
 	int _modeVal = 68;
+
+	// set up stateful decompressor
+	// for api simplicity, this is coupled to recover_contents()
+	// ... but we *could* split them up
+	int init_decompress(uint32_t id)
+	{
+		if (id != _decId)
+			return -11;
+		if (_dec)
+			_dec.reset();
+		_dec = std::make_unique<cimbar::zstd_decompressor<std::stringstream>>();
+		if (!_dec)
+			return -12;
+		_dec->init_decompress(reinterpret_cast<char*>(_reassembled.data()), _reassembled.size());
+		return 0;
+	}
+
+	// recovers file contents into _reassembled, and sets _decId = id if so.
+	// if the contents cannot be recovered, amounts to a no-op with error
+	int recover_contents(uint32_t id)
+	{
+		if (id != _decId)
+		{
+			if (!_sink)
+				return -1;
+			if (_sink->is_done(id))
+				return -2; // it's gone man
+
+			_reassembled.resize(cimbard_get_filesize(id));
+			if (!_sink->recover(id, _reassembled.data(), _reassembled.size()))
+				return -3;
+			_decId = id;
+
+			int res = init_decompress(id);
+			if (res < 0)
+				return res;
+		}
+		if (_reassembled.empty())
+			return -5;
+
+		return 0;
+	}
 
 	unsigned fountain_chunks_per_frame()
 	{
@@ -166,14 +214,24 @@ int64_t cimbard_fountain_decode(const unsigned char* buffer, unsigned size)
 	return res;
 }
 
-int cimbard_get_filesize(uint32_t id)
+// mostly for internal use, but also helpful for debugging
+unsigned cimbard_get_filesize(uint32_t id)
 {
 	FountainMetadata md(id);
 	return md.file_size();
 }
 
-int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, unsigned fnsize)
+// do recover() if does not exist (fail with appropriate neg values), if it does use the bytes.
+// stateful against a map (same as cimbard_decompress_read()
+int cimbard_get_filename(uint32_t id, char* filename, unsigned fnsize)
 {
+	int	res = recover_contents(id);
+	if (res < 0)
+		return res;
+
+	const uchar* finbuffer = _reassembled.data();
+	unsigned size = _reassembled.size();
+
 	std::string fn = cimbar::zstd_header_check::get_filename(finbuffer, size);
 	if (!fn.empty())
 		fn = File::basename(fn);
@@ -186,15 +244,29 @@ int cimbard_get_filename(const uchar* finbuffer, unsigned size, char* filename, 
 	return fn.size();
 }
 
-// if fountain_decode returned a >0 value, call this to retrieve the reassembled file
-// bouth fountain_*() calls should be from the same js webworker/thread
-int cimbard_finish_copy(uint32_t id, uchar* buffer, unsigned size)
+int cimbard_decompress_read(uint32_t id, unsigned char* buffer, unsigned size)
 {
-	if (!_sink)
-		return -1;
-	if (!_sink->recover(id, buffer, size))
-		return -2;
-	return 0;
+	int	res = recover_contents(id);
+	if (res < 0)
+		return res;
+
+	if (!_dec)
+		return -13;
+	if (!_dec->good())
+		return -14;
+
+	_dec->str(std::string());
+	_dec->write_once();
+	std::string temp = _dec->str();
+	if (size > temp.size())
+		size = temp.size();
+	std::copy(temp.data(), temp.data()+size, buffer);
+	return size;
+}
+
+int cimbard_get_decompress_bufsize()
+{
+	return ZSTD_DStreamOutSize();
 }
 
 int cimbard_configure_decode(int mode_val)
@@ -213,6 +285,14 @@ int cimbard_configure_decode(int mode_val)
 	}
 
 	return 0;
+}
+
+// testing
+unsigned char* cimbard_get_reassembled_file_buff()
+{
+	if (_reassembled.empty())
+		return nullptr;
+	return _reassembled.data();
 }
 
 }

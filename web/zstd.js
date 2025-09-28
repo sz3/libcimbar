@@ -1,21 +1,6 @@
 var Zstd = function () {
 
-  var _activeBuff = undefined;
   var _decompBuff = undefined;
-
-  function allocBuff(data) {
-    freeBuff();
-    const numBytes = data.length * data.BYTES_PER_ELEMENT;
-    const dataPtr = Module._malloc(numBytes);
-    _activeBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, numBytes);
-    _activeBuff.set(data);
-  }
-
-  function freeBuff() {
-    if (_activeBuff)
-      Module._free(_activeBuff.byteOffset);
-    _activeBuff = undefined;
-  }
 
   function _downloadHelper(name, bloburl) {
     var aaa = document.createElement('a');
@@ -27,22 +12,17 @@ var Zstd = function () {
     aaa.remove();
   }
 
-  function getDecompressReader(inbuff) {
+  function getDecompressReader(id) {
     // allocate buffer once. We'll reuse it,
     // and slice() to copy to the local (non-wasm) heap
-    const bufferSize = Module._cimbarz_get_bufsize(); // chunk size
+    const bufferSize = Module._cimbard_get_decompress_bufsize(); // chunk size
     if (_decompBuff === undefined)
       _decompBuff = Module._malloc(bufferSize);
 
     const readstream = new ReadableStream({
-      start(controller) {
-        const res = Module._cimbarz_init_decompress(inbuff.byteOffset, inbuff.length);
-        if (res < 0) {
-          console.log("init decompress failed, res " + res);
-        }
-      },
+      start(controller) { },
       pull(controller) {
-        const bytesRead = Module._cimbarz_decompress_read(_decompBuff, bufferSize);
+        const bytesRead = Module._cimbard_decompress_read(id, _decompBuff, bufferSize);
         console.log("reader got " + bytesRead);
         if (bytesRead <= 0) {
           // No more data, close the stream
@@ -87,6 +67,7 @@ var Zstd = function () {
     // Create Response object from the stream, get blob
     const response = new Response(readstream);
     const blob = await response.blob();
+    console.log("download is ready for " + filename + ", size " + blob.size);
     Zstd.download_blob(filename, blob);
   }
 
@@ -109,10 +90,8 @@ var Zstd = function () {
       }, 1000);
     },
 
-    decompress: function (name, data) {
-      allocBuff(data);
-
-      const reader = getDecompressReader(_activeBuff);
+    decompress: function (name, id) {
+      const reader = getDecompressReader(id);
 
       saveToFile(reader, name);
     }

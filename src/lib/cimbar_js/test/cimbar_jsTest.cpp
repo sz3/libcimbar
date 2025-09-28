@@ -5,7 +5,6 @@
 #include "cimb_translator/Config.h"
 #include "cimbar_js/cimbar_js.h"
 #include "cimbar_js/cimbar_recv_js.h"
-#include "cimbar_js/cimbar_zstd_js.h"
 #include "serialize/format.h"
 
 #include <iostream>
@@ -55,27 +54,17 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 	{
 		uint32_t fileId = res;
 
-		unsigned size = cimbard_get_filesize(fileId);
-		assertEquals( 5282, size );
-
-		std::vector<unsigned char> data;
-		data.resize(size);
-		int res = cimbard_finish_copy(fileId, data.data(), size);
-		assertEquals( 0, res );
-
 		std::string actualFilename;
 		actualFilename.resize(255);
-		int fnsz = cimbard_get_filename(data.data(), size, actualFilename.data(), actualFilename.size());
+		int fnsz = cimbard_get_filename(fileId, actualFilename.data(), actualFilename.size());
 		assertEquals( 21, fnsz );
 		actualFilename.resize(fnsz);
 		assertEquals( "foobar-c语言版.txt", actualFilename );
 
-		assertEquals(0, cimbarz_init_decompress(data.data(), data.size()));
-
 		std::vector<unsigned char> zstdbuff;
-		zstdbuff.resize(cimbarz_get_bufsize());
+		zstdbuff.resize(cimbard_get_decompress_bufsize());
 
-		int outsize = cimbarz_decompress_read(zstdbuff.data(), zstdbuff.size());
+		int outsize = cimbard_decompress_read(fileId, zstdbuff.data(), zstdbuff.size());
 		assertEquals(contents.size(), outsize);
 		std::string_view finalOutput{reinterpret_cast<char*>(zstdbuff.data()), contents.size()};
 
