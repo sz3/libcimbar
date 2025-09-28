@@ -45,7 +45,7 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 	int bytes = cimbard_scan_extract_decode(imgbuff, 1024, 1024, 3, decbuff.data(), decbuff.size());
 	assertEquals(bytes, 7500);
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(cimbar::Config::ecc_bytes(), cimbar::Config::bits_per_cell(), 0);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size();
 	assertEquals(0, bytes % chunkSize);
 
 	int64_t res = cimbard_fountain_decode(decbuff.data(), bytes);

@@ -19,10 +19,10 @@ set(SOURCES
 	CimbWriter.h
 	Common.cpp
 	Common.h
-	Config.cpp
 	Config.h
 	FloodDecodePositions.cpp
 	FloodDecodePositions.h
+	GridConf.h
 	Interleave.h
 	LinearDecodePositions.h
 	PositionData.h

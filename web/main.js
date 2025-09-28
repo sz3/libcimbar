@@ -224,12 +224,13 @@ var Main = function () {
     },
 
     setMode: function (mode_str) {
-      var is_4c = (mode_str == "4C");
-      Module._cimbare_configure(2, 255, 255, is_4c);
+      const modeVal = (mode_str == "4C") ? 4 : 68;
+      Module._cimbare_configure(modeVal, 255);
       _idealRatio = Module._cimbare_get_aspect_ratio();
+      Main.resize();
 
       var nav = document.getElementById("nav-container");
-      if (is_4c) {
+      if (modeVal == 4) {
         nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
       } else if (mode_str == "B") {

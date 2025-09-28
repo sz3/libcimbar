@@ -122,7 +122,7 @@ self.onmessage = async (event) => {
   if (event.data.config) {
     console.log('attempting config');
     try {
-      Module._cimbard_configure_decode(event.data.color_bits, event.data.mode_val);
+      Module._cimbard_configure_decode(event.data.mode_val);
     } catch (e) {
       self.postMessage({ type: 'config', error: e });
     }

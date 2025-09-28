@@ -19,10 +19,8 @@ namespace {
 	uint8_t _encodeId = 109;
 
 	// settings, will be overriden by first call to configure()
-	unsigned _ecc = cimbar::Config::ecc_bytes();
-	unsigned _colorBits = cimbar::Config::color_bits();
+	int _modeVal = 68;
 	int _compressionLevel = cimbar::Config::compression_level();
-	bool _legacyMode = false;
 }
 
 extern "C" {
@@ -104,10 +102,7 @@ int cimbare_next_frame()
 		_frameCount = 0;
 	}
 
-	Encoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
-	if (_legacyMode)
-		enc.set_legacy_mode();
-
+	Encoder enc;
 	enc.set_encode_id(_encodeId);
 	_next = enc.encode_next(*_fes, _window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{});
 	return ++_frameCount;
@@ -122,10 +117,7 @@ int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filen
 		return -5;
 	}
 
-	Encoder enc(_ecc, cimbar::Config::symbol_bits(), _colorBits);
-	if (_legacyMode)
-		enc.set_legacy_mode();
-
+	Encoder enc;
 	if (encode_id < 0)
 		enc.set_encode_id(++_encodeId); // increment _encodeId every time we change files
 	else
@@ -141,13 +133,11 @@ int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filen
 	return 0;
 }
 
-int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode)
+int cimbare_configure(int mode_val, int compression)
 {
 	// defaults
-	if (color_bits > 3)
-		color_bits = cimbar::Config::color_bits();
-	if (ecc >= 150)
-		ecc = cimbar::Config::ecc_bytes();
+	if (mode_val == 0)
+		mode_val = 68;
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
 
@@ -159,19 +149,18 @@ int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool l
 		return initRes;
 
 	// check if we need to refresh the stream
-	bool refresh = (color_bits != _colorBits or ecc != _ecc or compression != _compressionLevel or legacy_mode != _legacyMode);
+	bool refresh = (mode_val != _modeVal or compression != _compressionLevel);
 	if (refresh)
 	{
 		// update config
-		_colorBits = color_bits;
-		_ecc = ecc;
+		_modeVal = mode_val;
 		_compressionLevel = compression;
-		_legacyMode = legacy_mode;
+		cimbar::Config::update(_modeVal);
 
 		// try to refresh the stream
 		if (_window and _fes)
 		{
-			unsigned buff_size_new = cimbar::Config::fountain_chunk_size(_ecc, cimbar::Config::symbol_bits() + _colorBits, _legacyMode);
+			unsigned buff_size_new = cimbar::Config::fountain_chunk_size();
 			if (!_fes->restart_and_resize_buffer(buff_size_new))
 			{
 				// if the data is too small, we should throw out _fes -- and clear the canvas.

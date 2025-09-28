@@ -10,7 +10,7 @@ int cimbare_init_window(int width, int height);
 int cimbare_render();
 int cimbare_next_frame();
 int cimbare_encode(const unsigned char* buffer, unsigned size, const char* filename, unsigned fnsize, int encode_id);  // encode_id == -1 -> auto-increment
-int cimbare_configure(unsigned color_bits, unsigned ecc, int compression, bool legacy_mode);
+int cimbare_configure(int mode_val, int compression);
 float cimbare_get_aspect_ratio();
 
 // internal usage

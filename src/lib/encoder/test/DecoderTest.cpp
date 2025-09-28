@@ -3,6 +3,7 @@
 #include "TestHelpers.h"
 
 #include "DecoderPlus.h"
+#include "util/ConfigScope.h"
 #include "util/MakeTempDirectory.h"
 
 #include "PicoSHA2/picosha2.h"
@@ -26,7 +27,7 @@ TEST_CASE( "DecoderTest/testDecode", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
-	DecoderPlus dec(0);
+	DecoderPlus dec(false);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/tr_0.png"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
@@ -38,7 +39,7 @@ TEST_CASE( "DecoderTest/testDecodeEcc", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
-	DecoderPlus dec(30);
+	DecoderPlus dec;
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/tr_0.png"), decodedFile);
 	assertEquals( 7500, bytesDecoded );
@@ -51,7 +52,7 @@ TEST_CASE( "DecoderTest/testDecode.Sample", "[unit]" )
 	// regression test -- useful for now, but is very brittle
 	MakeTempDirectory tempdir;
 
-	DecoderPlus dec(0);
+	DecoderPlus dec(false);
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
 	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("b/scan2434.jpg"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
@@ -64,10 +65,12 @@ TEST_CASE( "DecoderTest/testDecode.4c", "[unit]" )
 {
 	// legacy format
 	MakeTempDirectory tempdir;
+	ConfigScope cs(4);
+	cs.active_conf().ecc_bytes = 0;
 
-	DecoderPlus dec(0, 2, true);
+	DecoderPlus dec;
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
-	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile, 0);
+	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
 
 	assertEquals( "7e1919b1210ccc332fc56e8b35cccd622d980f03c6c3b32338bb00aa4b6a22a2", get_hash(decodedFile) );
@@ -76,10 +79,11 @@ TEST_CASE( "DecoderTest/testDecode.4c", "[unit]" )
 TEST_CASE( "DecoderTest/testDecodeEcc.4c", "[unit]" )
 {
 	MakeTempDirectory tempdir;
+	ConfigScope cs(4);
 
-	DecoderPlus dec(30, 2, true);
+	DecoderPlus dec;
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
-	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile, 0);
+	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4color_ecc30_fountain_0.png"), decodedFile);
 	assertEquals( 7500, bytesDecoded );
 
 	assertEquals( "382c76644a4dff475c5793c5fe061e35e47be252010d29aeaf8d93ee6a3f7045", get_hash(decodedFile) );
@@ -89,10 +93,12 @@ TEST_CASE( "DecoderTest/testDecode.Sample4c", "[unit]" )
 {
 	// regression test -- useful for now, but is very brittle
 	MakeTempDirectory tempdir;
+	ConfigScope cs(4);
+	cs.active_conf().ecc_bytes = 0;
 
-	DecoderPlus dec(0, 2, true);
+	DecoderPlus dec;
 	std::string decodedFile = tempdir.path() / "testDecode.txt";
-	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg"), decodedFile, 0);
+	unsigned bytesDecoded = dec.decode(TestCimbar::getSample("6bit/4_30_f0_627_extract.jpg"), decodedFile);
 	assertEquals( 9300, bytesDecoded );
 
 	if (CV_VERSION_MAJOR == 4)

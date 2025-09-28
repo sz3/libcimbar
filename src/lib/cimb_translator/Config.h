@@ -8,119 +8,169 @@ namespace cimbar
 	class Config
 	{
 	protected:
-		using GridConf = Conf8x8;
+		static cimbar::conf& active_conf()
+		{
+			static thread_local cimbar::conf cc = cimbar::Conf8x8();
+			return cc;
+		}
+
 
 	public:
-		static constexpr bool dark()
+		static cimbar::conf temp_conf(int mode_val=0)
+		{
+			cimbar::conf cc;
+			switch (mode_val)
+			{
+				case 4:
+					cc = cimbar::Conf8x8();
+					cc.color_bits = 2;
+					cc.legacy_mode = true;
+					return cc;
+				case 8:
+					cc = cimbar::Conf8x8();
+					cc.color_bits = 3;
+					cc.legacy_mode = true;
+					return cc;
+				case 67:
+					return cimbar::Conf8x8_mini();
+				case 68:
+				default:
+					return cimbar::Conf8x8();
+			}
+		}
+
+		static void update(int mode_val=0)
+		{
+			active_conf() = temp_conf(mode_val);
+		}
+
+		static bool dark()
 		{
 			return true;
 		}
 
-		static constexpr unsigned color_mode()
+		static bool legacy_mode()
 		{
-			return 1; // unless we override per-thread?
+			return active_conf().legacy_mode;
 		}
 
-		static constexpr unsigned color_bits()
+		static unsigned color_mode()
 		{
-			return GridConf::color_bits;
+			return active_conf().legacy_mode? 0 : 1; // unless we override per-thread?
 		}
 
-		static constexpr unsigned symbol_bits()
+		static unsigned color_bits()
 		{
-			return GridConf::symbol_bits;
+			return active_conf().color_bits;
 		}
 
-		static constexpr unsigned bits_per_cell()
+		static unsigned symbol_bits()
 		{
-			return color_bits() + symbol_bits();
+			return active_conf().symbol_bits;
 		}
 
-		static constexpr unsigned ecc_bytes()
+		static unsigned bits_per_cell()
 		{
-			return GridConf::ecc_bytes;
+			return active_conf().bits_per_cell();
 		}
 
-		static constexpr unsigned ecc_block_size()
+		static unsigned ecc_bytes()
 		{
-			return GridConf::ecc_block_size;
+			return active_conf().ecc_bytes;
 		}
 
-		static constexpr unsigned image_size_x()
+		static unsigned ecc_block_size()
 		{
-			return GridConf::image_size_x;
+			return active_conf().ecc_block_size;
 		}
 
-		static constexpr unsigned image_size_y()
+		static unsigned image_size_x()
 		{
-			return GridConf::image_size_y;
+			return active_conf().image_size_x;
 		}
 
-		static constexpr unsigned anchor_size()
+		static unsigned image_size_y()
+		{
+			return active_conf().image_size_y;
+		}
+
+		static unsigned anchor_size()
 		{
 			return 30;
 		}
 
 		static constexpr unsigned cell_size()
 		{
-			return GridConf::cell_size;
+			return 8;
 		}
 
-		static constexpr unsigned cell_spacing_x()
+		static unsigned cell_spacing_x()
 		{
-			return GridConf::cell_spacing_x;
+			return active_conf().cell_spacing_x;
 		}
 
-		static constexpr unsigned cell_spacing_y()
+		static unsigned cell_spacing_y()
 		{
-			return GridConf::cell_spacing_y;
+			return active_conf().cell_spacing_y;
 		}
 
-		static unsigned corner_padding_x();
-
-		static unsigned corner_padding_y();
-
-		static constexpr unsigned cell_offset()
+		static unsigned corner_padding_x()
 		{
-			return GridConf::cell_offset;
+			return active_conf().corner_padding_x();
 		}
 
-		static constexpr unsigned cells_per_col_x()
+		static unsigned corner_padding_y()
 		{
-			return GridConf::cells_per_col_x;
+			return active_conf().corner_padding_y();
 		}
 
-		static constexpr unsigned cells_per_col_y()
+		static unsigned cell_offset()
 		{
-			return GridConf::cells_per_col_y;
+			return active_conf().cell_offset;
 		}
 
-		static unsigned total_cells();
+		static unsigned cells_per_col_x()
+		{
+			return active_conf().cells_per_col_x;
+		}
 
-		static unsigned decode_window_bits();
+		static unsigned cells_per_col_y()
+		{
+			return active_conf().cells_per_col_y;
+		}
 
-		static unsigned capacity(unsigned bitspercell=0);
+		static unsigned total_cells()
+		{
+			return active_conf().total_cells();
+		}
 
-		static constexpr unsigned interleave_blocks()
+		// leave bitspercell here
+		static unsigned capacity(unsigned bitspercell=0)
+		{
+			return active_conf().capacity(bitspercell);
+		}
+
+		static unsigned interleave_blocks()
 		{
 			return ecc_block_size();
 		}
 
-		static constexpr unsigned interleave_partitions()
+		static unsigned interleave_partitions()
 		{
 			return 2;
 		}
 
-		static constexpr unsigned fountain_chunks_per_frame(unsigned bitspercell, bool legacy_mode)
+		static unsigned fountain_chunks_per_frame(unsigned bitspercell=0)
 		{
-			if (legacy_mode or !GridConf::fountain_chunks_per_frame)
-				return 10;
-			return bitspercell * GridConf::fountain_chunks_per_frame;
+			return active_conf().fountain_chunks_per_frame(bitspercell);
 		}
 
-		static unsigned fountain_chunk_size(unsigned ecc, unsigned bitspercell, bool legacy_mode);
+		static unsigned fountain_chunk_size(unsigned bitspercell=0)
+		{
+			return active_conf().fountain_chunk_size(bitspercell);
+		}
 
-		static constexpr unsigned compression_level()
+		static unsigned compression_level()
 		{
 			return 16;
 		}

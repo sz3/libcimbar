@@ -106,9 +106,9 @@ int main(int argc, char** argv)
 	window.auto_scale_to_window();
 
 	Extractor ext;
-	Decoder dec(-1, -1);
+	Decoder dec;
 
-	unsigned chunkSize = cimbar::Config::fountain_chunk_size(ecc, colorBits+cimbar::Config::symbol_bits(), legacy_mode);
+	unsigned chunkSize = cimbar::Config::fountain_chunk_size();
 	fountain_decoder_sink sink(chunkSize, decompress_on_store<std::ofstream>(outpath, true));
 
 	cv::Mat mat;
