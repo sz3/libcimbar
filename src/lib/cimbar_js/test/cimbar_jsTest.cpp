@@ -66,11 +66,30 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 		zstdbuff.resize(cimbard_get_decompress_bufsize());
 
 		int outsize = cimbard_decompress_read(fileId, zstdbuff.data(), zstdbuff.size());
-		assertEquals(contents.size(), outsize);
+		assertTrue( outsize > 0 );
+		assertEquals(contents.size(), (unsigned)outsize);
 		std::string_view finalOutput{reinterpret_cast<char*>(zstdbuff.data()), contents.size()};
 
 		assertEquals(contents, finalOutput);
 	}
 
+}
+
+TEST_CASE( "cimbar_jsTest/testEncodeFlushNoop", "[unit]" )
+{
+	std::vector<unsigned char> decbuff;
+	decbuff.resize(cimbard_get_bufsize());
+
+	const int size = cimbare_encode_bufsize();
+	std::string contents = random_string(size);
+	std::string filename = "/tmp/foobar-c语言版.txt";
+	assertEquals( 0, cimbare_init_encode(filename.data(), filename.size(), 100) );
+	assertEquals( 1, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size()) );
+	assertEquals( -1, cimbare_next_frame() );
+
+	assertEquals( 0, cimbare_encode(nullptr, 0) );
+	assertEquals( 1, cimbare_next_frame() );
+
+	assertEquals( -1, cimbare_encode(nullptr, 0) );
 }
 

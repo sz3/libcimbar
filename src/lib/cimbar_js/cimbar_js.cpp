@@ -140,6 +140,8 @@ int cimbare_init_encode(const char* filename, unsigned fnsize, int encode_id)
 
 	if (fnsize > 0 and filename != nullptr)
 		_comp->write_header(filename, fnsize);
+
+	_fes.reset();
 	return 0;
 }
 
