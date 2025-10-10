@@ -1,4 +1,5 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
+#include "cimb_translator/Config.h"
 #include "extractor/ExtractorPlus.h"
 
 #include "cxxopts/cxxopts.hpp"
@@ -13,7 +14,7 @@ int main(int argc, char** argv)
 	options.add_options()
 	    ("i,in", "Encoded png/jpg/etc", cxxopts::value<std::string>())
 	    ("o,out", "Output image", cxxopts::value<std::string>())
-	    ("d,dark", "Dark mode", cxxopts::value<bool>()->default_value("true"))
+	    ("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,4C]", cxxopts::value<string>()->default_value("B"))
 	    ("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -27,10 +28,20 @@ int main(int argc, char** argv)
 	  exit(0);
 	}
 
+	// really, you only need to supply mode for non 1024x1024 configs
+	unsigned config_mode = 68;
+	if (result.count("mode"))
+	{
+		string mode = result["mode"].as<string>();
+		if (mode == "4c" or mode == "4C")
+			config_mode = 4;
+		else if (mode == "Bm" or mode == "BM")
+			config_mode = 67;
+	}
+	cimbar::Config::update(config_mode);
+
 	std::string infile = result["in"].as<std::string>();
 	std::string outfile = result["out"].as<std::string>();
-	bool dark = result["dark"].as<bool>();
-
 	ExtractorPlus ext;
 	if (!ext.extract(infile, outfile))
 		return 1;
