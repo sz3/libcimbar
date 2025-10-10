@@ -65,13 +65,16 @@ int main(int argc, char** argv)
 	colorBits = std::min(3, result["colorbits"].as<int>());
 	ecc = result["ecc"].as<unsigned>();
 
-	bool legacy_mode = false;
+	unsigned config_mode = 68;
 	if (result.count("mode"))
 	{
 		string mode = result["mode"].as<string>();
-		legacy_mode = (mode == "4c") or (mode == "4C");
+		if (mode == "4c" or mode == "4C")
+			config_mode = 4;
+		else if (mode == "Bm" or mode == "BM")
+			config_mode = 67;
 	}
-	unsigned color_mode = legacy_mode? 0 : 1;
+	cimbar::Config::update(config_mode);
 
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
@@ -148,7 +151,7 @@ int main(int argc, char** argv)
 			shouldPreprocess = true;
 
 		// decode
-		int bytes = dec.decode_fountain(img, sink, color_mode, shouldPreprocess);
+		int bytes = dec.decode_fountain(img, sink, shouldPreprocess);
 		if (bytes > 0)
 			std::cerr << "got some bytes " << bytes << std::endl;
 
