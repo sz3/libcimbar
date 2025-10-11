@@ -61,8 +61,6 @@
       color: #F0F0F0;
       outline: 6px solid black;
       box-shadow: 0px 0px 12px black, 0px 0px 18px black;
-      transform-origin: 0;
-      transition: transform 0.3s;
     }
 
     .dragdrop::before {
@@ -73,15 +71,6 @@
       left: 0;
       text-align: center;
       width: 100%;
-      transform-origin: center center;
-      transition: transform 0.3s;
-    }
-
-    .dragdrop.rotated::before {
-      width: 100vh;
-      left: 0;
-      top: 0;
-      transform: rotate(-90deg) translateX(-20%) translateY(-5em);
     }
 
     .dragdrop.error:before {
@@ -105,11 +94,13 @@
 
     /* options */
     #nav-container a.mode-b,
+    #nav-container a.mode-bm,
     #nav-container a.mode-4c {
       color: #555;
     }
 
     #nav-container.mode-b a.mode-b,
+    #nav-container.mode-bm a.mode-bm,
     #nav-container.mode-4c a.mode-4c {
       color: #9fa6b2;
     }
@@ -293,6 +284,16 @@
       font-size: 2em;
     }
 
+    #nav-content h4 {
+      font-variant: small-caps;
+      padding-top: 1em;
+    }
+
+    #nav-content li.modesel a {
+      display: inline-block;
+      width: 2em;
+    }
+
     #nav-content li:hover {
       background-color: #2c323c;
     }
@@ -343,11 +344,14 @@
       <ul>
         <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find
             File</a></li>
-        <li><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
         <hr>
-        <li><a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">Mode B</a></li>
-        <li><a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C <small>(old apps)</small></a>
+        <li class="modesel">
+          <h4>Mode</h4>
+          <a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">B</a>
+          <a class="mode-bm" href="javascript:void(0)" onclick="Main.setMode('Bm')">Bm</a>
+          <a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C</a>
         </li>
+        <li class="small"><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>

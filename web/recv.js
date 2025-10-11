@@ -377,7 +377,13 @@ var Recv = function () {
     },
 
     setMode: function (mode_str) {
-      const modeVal = (mode_str == "4C") ? 4 : 68;
+      let modeVal = 68;
+      if (mode_str == "4C") {
+        modeVal = 4;
+      }
+      else if (mode_str == "Bm") {
+        modeVal = 67;
+      }
       Module._cimbard_configure_decode(modeVal);
       for (let i = 0; i < _workers.length; i++) {
         // cal config decode within the workers as well
@@ -385,14 +391,22 @@ var Recv = function () {
       }
 
       var nav = document.getElementById("nav-container");
-      if (mode_str == "4C") {
+      if (modeVal == 4) {
         nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
-      } else if (mode_str == "B") {
+        nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
+      } else if (modeVal == 68) {
         nav.classList.add("mode-b");
+        nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-4c");
+      } else if (modeVal == 67) {
+        nav.classList.add("mode-bm");
+        nav.classList.remove("mode-b");
         nav.classList.remove("mode-4c");
       } else {
         nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       }
     },

@@ -72,7 +72,6 @@ var Main = function () {
   return {
     init: function (canvas) {
       Main.setMode('B');
-      Main.resize();
       Main.check_GL_enabled(canvas);
     },
 
@@ -114,6 +113,8 @@ var Main = function () {
       // using ratio from current config,
       // determine optimal dimensions and rotation
       var needRotate = _idealRatio > 1 && height > width;
+      Module._cimbare_rotate_window(needRotate);
+
       var ourRatio = needRotate ? height / width : width / height;
 
       var xdim = needRotate ? height : width;
@@ -126,22 +127,13 @@ var Main = function () {
       }
 
       console.log(xdim + "x" + ydim);
-      canvas.style.width = xdim + "px";
-      canvas.style.height = ydim + "px";
       if (needRotate) {
-        // TODO: rotating #dragdrop around the center doesn't work for inane
-        //  css reasons. So here's a hack to move it where it should be. css sucks.
-        // if at some point this is understood/fixed, we should define a static css rule
-        //  to match against `.rotated`
-        var translate = -Math.floor(width / 2) - Math.floor(width / 96) + "px";
-        var dragdrop = document.getElementById('dragdrop');
-        dragdrop.style.transform = "rotate(90deg) translateX(-50%) translateY(" + translate + ")";
-        dragdrop.classList.add("rotated");
+        canvas.style.width = ydim + "px";
+        canvas.style.height = xdim + "px";
       }
       else {
-        var dragdrop = document.getElementById('dragdrop');
-        dragdrop.style.transform = "";
-        dragdrop.classList.remove("rotated");
+        canvas.style.width = xdim + "px";
+        canvas.style.height = ydim + "px";
       }
     },
 
@@ -221,8 +213,9 @@ var Main = function () {
     fileInput: function (ev) {
       console.log("file input: " + ev);
       var file = document.getElementById('file_input').files[0];
-      if (file)
+      if (file) {
         importFile(file);
+      }
       Main.blurNav(false);
     },
 
@@ -255,8 +248,14 @@ var Main = function () {
     },
 
     setMode: function (mode_str) {
-      const modeVal = (mode_str == "4C") ? 4 : 68;
-      Module._cimbare_configure(modeVal, 255);
+      let modeVal = 68;
+      if (mode_str == "4C") {
+        modeVal = 4;
+      }
+      else if (mode_str == "Bm") {
+        modeVal = 67;
+      }
+      Module._cimbare_configure(modeVal, -1);
       _idealRatio = Module._cimbare_get_aspect_ratio();
       Main.resize();
 
@@ -264,11 +263,19 @@ var Main = function () {
       if (modeVal == 4) {
         nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
-      } else if (mode_str == "B") {
+        nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
+      } else if (modeVal == 68) {
         nav.classList.add("mode-b");
+        nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-4c");
+      } else if (modeVal == 67) {
+        nav.classList.add("mode-bm");
+        nav.classList.remove("mode-b");
         nav.classList.remove("mode-4c");
       } else {
         nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       }
     },

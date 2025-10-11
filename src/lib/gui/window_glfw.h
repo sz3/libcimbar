@@ -33,7 +33,7 @@ public:
 		glfwMakeContextCurrent(_w);
 		glfwSwapInterval(1);
 
-		_display = std::make_shared<cimbar::gl_2d_display>(std::min(width, height));
+		_display = std::make_shared<cimbar::gl_2d_display>(std::max(width, height));
 		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}
@@ -72,7 +72,13 @@ public:
 	void resize(unsigned width, unsigned height)
 	{
 		if (_w)
+		{
+			_width = width;
+			_height = height;
+			glfwSetWindowAspectRatio(_w, width, height);
 			glfwSetWindowSize(_w, width, height);
+			init_opengl(width, height);
+		}
 	}
 
 	void rotate(unsigned i=1)
