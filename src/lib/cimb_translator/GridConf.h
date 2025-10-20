@@ -163,4 +163,27 @@ namespace cimbar
 			fountain_chunks_scalar = 2;
 		}
 	};
+
+	struct Conf8x8_wide : conf
+	{
+		Conf8x8_wide()
+			: conf()
+		{
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 45;
+			ecc_block_size = 225;
+			image_size_x = 1474;
+			image_size_y = 1024;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 162;
+			cells_per_col_y = 112;
+
+			fountain_chunks_scalar = 3;
+		}
+	};
 }

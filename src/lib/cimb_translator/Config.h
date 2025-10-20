@@ -33,6 +33,8 @@ namespace cimbar
 					return cc;
 				case 67:
 					return cimbar::Conf8x8_mini();
+				case 69:
+					return cimbar::Conf8x8_wide();
 				case 68:
 				default:
 					return cimbar::Conf8x8();
