@@ -162,7 +162,7 @@
 
     #nav-container:focus-within .bg {
       visibility: visible;
-      opacity: .6;
+      opacity: .1;
     }
 
     #nav-container * {
@@ -345,6 +345,10 @@
       font-size: 1em;
     }
 
+    #nav-content li .range {
+      //width: 50%;
+    }
+
     #nav-container:focus-within #nav-content,
     #debug_menu:focus-within {
       transform: none;
@@ -397,6 +401,16 @@
           <h4>Mode</h4>
           <a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Auto</a>
           <a class="mode-b" id="mode-val" href="javascript:void(0)" onclick="Recv.setMode(this.textContent)">B</a>
+        </li>
+        <li>
+          <h4>Focus</h4>
+          <input type="range" class="range" id="focus-slider" oninput="Recv.updateFocus(this.value)"
+            onchange="Recv.updateFocus(this.value)" />
+        </li>
+        <li>
+          <h4>Exposure</h4>
+          <input type="range" class="range" id="exposure-slider" oninput="Recv.updateExposure(this.value)"
+            onchange="Recv.updateExposure(this.value)" />
         </li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>

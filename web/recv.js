@@ -95,6 +95,8 @@ var Recv = function () {
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
   var _video = 0;
+  var _videoTrack = undefined;
+
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
@@ -192,12 +194,50 @@ var Recv = function () {
           }
           video.play();
           video.requestVideoFrameCallback(Recv.on_frame);
+
+          _videoTrack = localMediaStream.getVideoTracks()[0];
+          Recv.enable_manual_focus();
+          Recv.enable_manual_exposure();
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
           Recv.set_error("Failed to initialize camera. " + err);
           Recv.set_HTML("crosshair1", "Failed to initialize camera. " + err);
         });
+    },
+
+    enable_manual_focus: function () {
+      if (!_videoTrack) {
+        console.log("uh oh, no videotrack");
+        return;
+      }
+      const capabilities = _videoTrack.getCapabilities();
+      const settings = _videoTrack.getSettings();
+
+      let slider = document.getElementById('focus-slider');
+      //console.log(JSON.stringify(capabilities));
+      //console.log(capabilities);
+      //console.log(settings);
+      slider.min = capabilities.focusDistance.min;
+      slider.max = capabilities.focusDistance.max;
+      slider.step = capabilities.focusDistance.step;
+      slider.value = settings.focusDistance;
+    },
+
+    enable_manual_exposure: function () {
+      if (!_videoTrack) {
+        return;
+      }
+      const capabilities = _videoTrack.getCapabilities();
+      const settings = _videoTrack.getSettings();
+
+      let slider = document.getElementById('exposure-slider');
+      console.log(capabilities);
+      console.log(settings);
+      slider.min = capabilities.exposureTime.min;
+      slider.max = capabilities.exposureTime.max;
+      slider.step = capabilities.exposureTime.step;
+      slider.value = settings.exposureTime;
     },
 
     watch_for_camera_pause: function () {
@@ -391,6 +431,30 @@ var Recv = function () {
         console.log(report[i] * 100 + "%");
         current[i].style.width = report[i] * 100 + "%";
       }
+    },
+
+    updateFocus: async function (val) {
+      console.log("focus is " + val);
+      Recv.set_HTML("crosshair2", "focus " + val);
+      if (!_videoTrack) {
+        return;
+      }
+      console.log("setting focus, maybe");
+      await _videoTrack.applyConstraints({
+        advanced: [{ focusMode: 'manual', focusDistance: val }]
+      });
+    },
+
+    updateExposure: async function (val) {
+      console.log("exposure is " + val);
+      Recv.set_HTML("crosshair2", "exposure " + val);
+      if (!_videoTrack) {
+        return;
+      }
+      console.log("setting exposure, maybe");
+      await _videoTrack.applyConstraints({
+        advanced: [{ exposureMode: 'manual', exposureTime: val }]
+      });
     },
 
     toggleFullscreen: function () {
