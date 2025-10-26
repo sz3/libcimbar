@@ -128,12 +128,14 @@
     }
 
     /* options */
+    #nav-container a.mode-auto,
     #nav-container a.mode-b,
     #nav-container a.mode-bm,
     #nav-container a.mode-4c {
       color: #555;
     }
 
+    #nav-container.mode-auto a.mode-auto,
     #nav-container.mode-b a.mode-b,
     #nav-container.mode-bm a.mode-bm,
     #nav-container.mode-4c a.mode-4c {
@@ -385,7 +387,7 @@
   <div id="crosshair1" class="crosshairs"></div>
   <div id="crosshair2" class="crosshairs"></div>
 
-  <div id="nav-container" class="mode-b">
+  <div id="nav-container" class="mode-auto">
     <div class="bg" onclick="Recv.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
       <span class="icon-bar"></span>
@@ -395,8 +397,8 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
+        <li><a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Mode auto</a></li>
         <li class="modesel">
-          <h4>Mode</h4>
           <a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">B</a>
           <a class="mode-bm" href="javascript:void(0)" onclick="Recv.setMode('Bm')">Bm</a>
           <a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C</a>

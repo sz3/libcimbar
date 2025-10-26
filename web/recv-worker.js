@@ -19,6 +19,11 @@ var RecvWorker = function () {
       const format = data.format;
       const width = data.width;
       const height = data.height;
+      const mode = data.mode;
+      if (mode) {
+        Module._cimbard_configure_decode(mode);
+      }
+
       try {
         //console.log(vf);
         // malloc iff necessary
@@ -55,12 +60,11 @@ var RecvWorker = function () {
         }
         else { //if (len > 0) {
           console.log('len is ' + len);
-          //self.postMessage({ error: true, res: len });
           const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, len).slice();
-          console.log(msgbuf);
-          self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
+          //console.log(msgbuf);
+          self.postMessage({ mode: mode, buff: msgbuf }, [msgbuf.buffer]);
         }
-        // in main, const receivedArray = new Uint8Array(event.data);
+        // in main, const receivedArray = event.data.buff;
       } catch (e) {
         console.log(e);
       }
@@ -130,5 +134,5 @@ self.onmessage = async (event) => {
   }
 
   // assert 'vf' in data?
-  RecvWorker.on_frame(event.data)
+  RecvWorker.on_frame(event.data);
 };

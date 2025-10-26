@@ -93,6 +93,8 @@ var Recv = function () {
   var _workerReady;
   var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
+  var _mode = 0;
+
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
       return document.exitFullscreen();
@@ -224,7 +226,7 @@ var Recv = function () {
         return;
       }
       if (data.res) {
-        Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+        Recv.set_HTML("t" + wid, "msg is " + data.res);
         return;
       }
       if (data.ready) {
@@ -236,8 +238,11 @@ var Recv = function () {
       // should be a decode with some bytes, so set decodecounter
       _recentDecode = _counter;
 
-      const buff = new Uint8Array(data);
-      Recv.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+      const buff = data.buff;
+      if (buff.length > 0) {
+        Recv.setMode(data.mode); // call *before* we send it to the sink. This is our autodetect confirm.
+      }
+      Recv.set_HTML("t" + wid, "mode is " + _mode + ", len() is " + buff.length + ", buff: " + buff);
       Sink.on_decode(buff);
     },
 
@@ -255,6 +260,8 @@ var Recv = function () {
       Recv.update_visual_state();
       // make sure the camera feed stays up
       Recv.watch_for_camera_pause();
+
+      const modeVals = [67, 68, 4];
 
       var vf = undefined;
       try {
@@ -280,7 +287,9 @@ var Recv = function () {
           _captureNextFrame = 0;
           Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
         }
-        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height }, [buff.buffer]);
+
+        let mode = _mode || modeVals[_counter % modeVals.length];
+        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
       } catch (e) {
         console.log(e);
       }
@@ -377,34 +386,43 @@ var Recv = function () {
     },
 
     setMode: function (mode_str) {
-      let modeVal = 68;
-      if (mode_str == "4C") {
+      let modeVal = mode_str;
+      if (modeVal == "4C") {
         modeVal = 4;
       }
-      else if (mode_str == "Bm") {
+      else if (modeVal == "Bm") {
         modeVal = 67;
       }
-      Module._cimbard_configure_decode(modeVal);
-      for (let i = 0; i < _workers.length; i++) {
-        // cal config decode within the workers as well
-        _workers[i].postMessage({ config: true, mode_val: modeVal });
+      else if (modeVal == "B") {
+        modeVal = 68;
+      }
+      else if (modeVal == "Auto") {
+        modeVal = 0;
+      }
+      // set in main thread
+      _mode = modeVal;
+      if (_mode > 0) {
+        Module._cimbard_configure_decode(_mode);
       }
 
       var nav = document.getElementById("nav-container");
       if (modeVal == 4) {
-        nav.classList.remove("mode-b");
         nav.classList.add("mode-4c");
+        nav.classList.remove("mode-auto");
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
       } else if (modeVal == 68) {
         nav.classList.add("mode-b");
+        nav.classList.remove("mode-auto");
         nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       } else if (modeVal == 67) {
         nav.classList.add("mode-bm");
+        nav.classList.remove("mode-auto");
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-4c");
       } else {
+        nav.classList.add("mode-auto");
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
