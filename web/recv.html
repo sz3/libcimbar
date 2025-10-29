@@ -129,13 +129,25 @@
 
     /* options */
     #nav-container a.mode-auto,
-    #nav-container a.mode-b {
+    #nav-container a.mode-b,
+    #nav-container a.exposure-auto,
+    #nav-container a.exposure-manual,
+    #nav-container a.focus-auto,
+    #nav-container a.focus-manual {
       color: #555;
     }
 
     #nav-container.mode-auto a.mode-auto,
-    #nav-container.mode-b a.mode-b {
+    #nav-container.mode-b a.mode-b,
+    #nav-container.exposure-auto a.exposure-auto,
+    #nav-container.exposure-manual a.exposure-manual,
+    #nav-container.focus-auto a.focus-auto,
+    #nav-container.focus-manual a.focus-manual {
       color: #9fa6b2;
+    }
+
+    #nav-container.focus-disabled li {
+      display: none;
     }
 
     /* nav stuff */
@@ -328,6 +340,11 @@
       width: 4em;
     }
 
+    #nav-content li.autosel a {
+      display: inline-block;
+      width: 5em;
+    }
+
     #nav-content li:hover {
       background-color: #2c323c;
     }
@@ -346,7 +363,12 @@
     }
 
     #nav-content li .range {
-      //width: 50%;
+      width: 100%;
+      transition: display .3s;
+    }
+
+    #nav-content li .range:disabled {
+      display: none;
     }
 
     #nav-container:focus-within #nav-content,
@@ -387,7 +409,7 @@
   <div id="crosshair1" class="crosshairs"></div>
   <div id="crosshair2" class="crosshairs"></div>
 
-  <div id="nav-container" class="mode-auto">
+  <div id="nav-container" class="mode-auto focus-auto exposure-auto">
     <div class="bg" onclick="Recv.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
       <span class="icon-bar"></span>
@@ -402,15 +424,23 @@
           <a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Auto</a>
           <a class="mode-b" id="mode-val" href="javascript:void(0)" onclick="Recv.setMode(this.textContent)">B</a>
         </li>
-        <li>
+        <li class="autosel focus-select">
           <h4>Focus</h4>
-          <input type="range" class="range" id="focus-slider" oninput="Recv.updateFocus(this.value)"
-            onchange="Recv.updateFocus(this.value)" />
+          <a class="focus-auto" href="javascript:void(0)" onclick="Recv.setAutoFocus(true)">Auto</a>
+          <a class="focus-manual" href="javascript:void(0)" onclick="Recv.setAutoFocus(false)">Manual</a>
         </li>
-        <li>
+        <li class="focus-select">
+          <input type="range" class="range" id="focus-slider" oninput="Recv.updateFocus(this.value)"
+            onchange="Recv.updateFocus(this.value)" disabled />
+        </li>
+        <li class="autosel exposure-select">
           <h4>Exposure</h4>
+          <a class="exposure-auto" href="javascript:void(0)" onclick="Recv.setAutoExposure(true)">Auto</a>
+          <a class="exposure-manual" href="javascript:void(0)" onclick="Recv.setAutoExposure(false)">Manual</a>
+        </li>
+        <li class="exposure-select">
           <input type="range" class="range" id="exposure-slider" oninput="Recv.updateExposure(this.value)"
-            onchange="Recv.updateExposure(this.value)" />
+            onchange="Recv.updateExposure(this.value)" disabled />
         </li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>

@@ -196,8 +196,12 @@ var Recv = function () {
           video.requestVideoFrameCallback(Recv.on_frame);
 
           _videoTrack = localMediaStream.getVideoTracks()[0];
-          Recv.enable_manual_focus();
-          Recv.enable_manual_exposure();
+          try {
+            //Recv.check_capabilities(); // ?
+          }
+          catch (ex) {
+            console.log(ex);
+          }
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
@@ -206,38 +210,80 @@ var Recv = function () {
         });
     },
 
-    enable_manual_focus: function () {
+    setAutoFocus: async function (auto) {
       if (!_videoTrack) {
         console.log("uh oh, no videotrack");
         return;
       }
-      const capabilities = _videoTrack.getCapabilities();
-      const settings = _videoTrack.getSettings();
+
+      var nav = document.getElementById("nav-container");
+      if (auto) {
+        nav.classList.add("focus-auto");
+        nav.classList.remove("focus-manual");
+      }
+      else {
+        nav.classList.add("focus-manual");
+        nav.classList.remove("focus-auto");
+      }
 
       let slider = document.getElementById('focus-slider');
-      //console.log(JSON.stringify(capabilities));
-      //console.log(capabilities);
-      //console.log(settings);
-      slider.min = capabilities.focusDistance.min;
-      slider.max = capabilities.focusDistance.max;
-      slider.step = capabilities.focusDistance.step;
-      slider.value = settings.focusDistance;
+      slider.disabled = auto;
+      console.log("slider disabled is " + slider.disabled);
+      if (auto) {
+        await _videoTrack.applyConstraints({
+          advanced: [{ focusMode: 'continuous' }]
+        });
+        return;
+      }
+
+      const capabilities = _videoTrack.getCapabilities();
+      const settings = _videoTrack.getSettings();
+      try {
+        slider.min = capabilities.focusDistance.min;
+        slider.max = capabilities.focusDistance.max;
+        slider.step = capabilities.focusDistance.step;
+        slider.value = settings.focusDistance;
+      } catch (ex) {
+        console.log(ex);
+        Recv.setAutoFocus(true);
+      }
     },
 
-    enable_manual_exposure: function () {
+    setAutoExposure: async function (auto) {
       if (!_videoTrack) {
         return;
       }
-      const capabilities = _videoTrack.getCapabilities();
-      const settings = _videoTrack.getSettings();
+
+      var nav = document.getElementById("nav-container");
+      if (auto) {
+        nav.classList.add("exposure-auto");
+        nav.classList.remove("exposure-manual");
+      }
+      else {
+        nav.classList.add("exposure-manual");
+        nav.classList.remove("exposure-auto");
+      }
 
       let slider = document.getElementById('exposure-slider');
-      console.log(capabilities);
-      console.log(settings);
-      slider.min = capabilities.exposureTime.min;
-      slider.max = capabilities.exposureTime.max;
-      slider.step = capabilities.exposureTime.step;
-      slider.value = settings.exposureTime;
+      slider.disabled = auto;
+      if (auto) {
+        await _videoTrack.applyConstraints({
+          advanced: [{ exposureMode: 'continuous' }]
+        });
+        return;
+      }
+
+      const capabilities = _videoTrack.getCapabilities();
+      const settings = _videoTrack.getSettings();
+      try {
+        slider.min = capabilities.exposureTime.min;
+        slider.max = capabilities.exposureTime.max;
+        slider.step = capabilities.exposureTime.step;
+        slider.value = settings.exposureTime;
+      } catch (ex) {
+        console.log(ex);
+        Recv.setAutoExposure(true);
+      }
     },
 
     watch_for_camera_pause: function () {
@@ -434,27 +480,39 @@ var Recv = function () {
     },
 
     updateFocus: async function (val) {
-      console.log("focus is " + val);
-      Recv.set_HTML("crosshair2", "focus " + val);
       if (!_videoTrack) {
         return;
       }
-      console.log("setting focus, maybe");
-      await _videoTrack.applyConstraints({
-        advanced: [{ focusMode: 'manual', focusDistance: val }]
-      });
+
+      try {
+        await _videoTrack.applyConstraints({
+          advanced: [{ focusMode: 'manual', focusDistance: val }]
+        });
+      } catch (ex) {
+        console.log(ex);
+        Recv.setAutoFocus(true);
+      }
+
+      console.log("focus is " + val);
+      Recv.set_HTML("crosshair2", "focus " + val);
     },
 
     updateExposure: async function (val) {
-      console.log("exposure is " + val);
-      Recv.set_HTML("crosshair2", "exposure " + val);
       if (!_videoTrack) {
         return;
       }
-      console.log("setting exposure, maybe");
-      await _videoTrack.applyConstraints({
-        advanced: [{ exposureMode: 'manual', exposureTime: val }]
-      });
+
+      try {
+        await _videoTrack.applyConstraints({
+          advanced: [{ exposureMode: 'manual', exposureTime: val }]
+        });
+      } catch (ex) {
+        console.log(ex);
+        Recv.setAutoFocus(true);
+      }
+
+      console.log("exposure is " + val);
+      Recv.set_HTML("crosshair2", "exposure " + val);
     },
 
     toggleFullscreen: function () {
