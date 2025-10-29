@@ -6,12 +6,19 @@ var Sink = function () {
 
   // public interface
   return {
-    on_decode: function (buff) {
+    allocate: function () {
+      const size = Module._cimbard_get_bufsize(); // max length of buff. We could also resize as we go...
+      if (_fountainBuff && size > _fountainBuff.length) {
+        Module._free(_fountainBuff.byteOffset);
+        _fountainBuff = undefined;
+      }
       if (_fountainBuff === undefined) {
-        const size = Module._cimbard_get_bufsize(); // max length of buff. We could also resize as we go...
         const dataPtr = Module._malloc(size);
         _fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
       }
+    },
+
+    on_decode: function (buff) {
       if (buff.length == 0) { // sanity check
         return;
       }
@@ -403,6 +410,7 @@ var Recv = function () {
       _mode = modeVal;
       if (_mode > 0) {
         Module._cimbard_configure_decode(_mode);
+        Sink.allocate();
       }
 
       var nav = document.getElementById("nav-container");
