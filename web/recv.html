@@ -129,16 +129,12 @@
 
     /* options */
     #nav-container a.mode-auto,
-    #nav-container a.mode-b,
-    #nav-container a.mode-bm,
-    #nav-container a.mode-4c {
+    #nav-container a.mode-b {
       color: #555;
     }
 
     #nav-container.mode-auto a.mode-auto,
-    #nav-container.mode-b a.mode-b,
-    #nav-container.mode-bm a.mode-bm,
-    #nav-container.mode-4c a.mode-4c {
+    #nav-container.mode-b a.mode-b {
       color: #9fa6b2;
     }
 
@@ -329,7 +325,7 @@
 
     #nav-content li.modesel a {
       display: inline-block;
-      width: 2em;
+      width: 4em;
     }
 
     #nav-content li:hover {
@@ -397,11 +393,10 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
-        <li><a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Mode auto</a></li>
         <li class="modesel">
-          <a class="mode-b" href="javascript:void(0)" onclick="Recv.setMode('B')">B</a>
-          <a class="mode-bm" href="javascript:void(0)" onclick="Recv.setMode('Bm')">Bm</a>
-          <a class="mode-4c" href="javascript:void(0)" onclick="Recv.setMode('4C')">4C</a>
+          <h4>Mode</h4>
+          <a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Auto</a>
+          <a class="mode-b" id="mode-val" href="javascript:void(0)" onclick="Recv.setMode(this.textContent)">B</a>
         </li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.showDebug()">Debug</a></li>
         <li class="small"><a href="javascript:void(0)" onclick="Recv.toggleFullscreen()">Fullscreen</a></li>

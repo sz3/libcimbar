@@ -392,48 +392,45 @@ var Recv = function () {
       document.getElementById("nav-content").blur();
     },
 
-    setMode: function (mode_str) {
-      let modeVal = mode_str;
-      if (modeVal == "4C") {
-        modeVal = 4;
+    setMode: function (modeVal) {
+      // these should be moved elsewhere...
+      const modeToString = {
+        4: "4C",
+        8: "8C",
+        67: "Bm",
+        68: "B"
+      };
+      let modeStringToVal = {
+        "Auto": 0
+      };
+      for (const val in modeToString) {
+        modeStringToVal[modeToString[val]] = val;
       }
-      else if (modeVal == "Bm") {
-        modeVal = 67;
+
+      if (modeVal in modeStringToVal) {
+        modeVal = modeStringToVal[modeVal];
       }
-      else if (modeVal == "B") {
-        modeVal = 68;
-      }
-      else if (modeVal == "Auto") {
-        modeVal = 0;
-      }
-      // set in main thread
+
+      // configure wasm in main thread
       _mode = modeVal;
       if (_mode > 0) {
         Module._cimbard_configure_decode(_mode);
         Sink.allocate();
       }
 
+      // update ui
+      if (_mode > 0) {
+        var nav = document.getElementById("mode-val");
+        nav.innerHTML = modeToString[_mode];
+      }
+
       var nav = document.getElementById("nav-container");
-      if (modeVal == 4) {
-        nav.classList.add("mode-4c");
-        nav.classList.remove("mode-auto");
-        nav.classList.remove("mode-b");
-        nav.classList.remove("mode-bm");
-      } else if (modeVal == 68) {
-        nav.classList.add("mode-b");
-        nav.classList.remove("mode-auto");
-        nav.classList.remove("mode-bm");
-        nav.classList.remove("mode-4c");
-      } else if (modeVal == 67) {
-        nav.classList.add("mode-bm");
-        nav.classList.remove("mode-auto");
-        nav.classList.remove("mode-b");
-        nav.classList.remove("mode-4c");
-      } else {
+      if (_mode == 0) {
         nav.classList.add("mode-auto");
         nav.classList.remove("mode-b");
-        nav.classList.remove("mode-bm");
-        nav.classList.remove("mode-4c");
+      } else {
+        nav.classList.add("mode-b");
+        nav.classList.remove("mode-auto");
       }
     },
 
