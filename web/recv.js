@@ -98,6 +98,7 @@ var Recv = function () {
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
+  var _framesInFlight = 0;
   var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
   var _mode = 0;
@@ -133,6 +134,16 @@ var Recv = function () {
     ww_ready: new Promise(resolve => {
       _workerReady = resolve;
     }),
+
+    frames_in_flight_incr: function () {
+      _framesInFlight += 1;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+    },
+
+    frames_in_flight_decr: function () {
+      _framesInFlight -= 1;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+    },
 
     init_ww: function (num_workers) {
       // clean up _workers if exists?
@@ -226,10 +237,14 @@ var Recv = function () {
     },
 
     on_decode: function (wid, data) {
-      console.log('Main thread received message from worker' + wid + ':', data);
-      // if extract but no bytes, log extract counter
+      //console.log('Main thread received message from worker' + wid + ':', data);
+      Recv.frames_in_flight_decr();
+      // if extract but no bytes, log extract counte
       if (data.nodata) {
         _recentExtract = _counter;
+        return;
+      }
+      if (data.failed_extract) { // very common, nothing to do
         return;
       }
       if (data.res) {
@@ -271,40 +286,46 @@ var Recv = function () {
       const modeVals = [67, 68, 4];
 
       var vf = undefined;
-      try {
-        vf = new VideoFrame(_video, { timestamp: now });
-        const width = vf.displayWidth;
-        const height = vf.displayHeight;
-        Recv.set_HTML("errorbox", vf.format, true);
+      if (_framesInFlight > 20) {
+        console.log("stalling, worker queues are full");
+      }
+      else {
+        Recv.frames_in_flight_incr();
+        try {
+          vf = new VideoFrame(_video, { timestamp: now });
+          const width = vf.displayWidth;
+          const height = vf.displayHeight;
+          Recv.set_HTML("errorbox", vf.format, true);
 
-        // try to use the default format, but only if we can decode it...
-        let vfparams = {};
-        if (!_supportedFormats.includes(vf.format)) {
-          vfparams.format = "RGBA";
-        }
-        const size = vf.allocationSize(vfparams);
-        const buff = new Uint8Array(size);
-        vf.copyTo(buff, vfparams);
+          // try to use the default format, but only if we can decode it...
+          let vfparams = {};
+          if (!_supportedFormats.includes(vf.format)) {
+            vfparams.format = "RGBA";
+          }
+          const size = vf.allocationSize(vfparams);
+          const buff = new Uint8Array(size);
+          vf.copyTo(buff, vfparams);
 
-        let format = vfparams.format || vf.format;
-        if (format == "RGBA" && size != width * height * 4) {
-          format = vf.format; //fallback
-        }
-        if (_captureNextFrame == 1) {
-          _captureNextFrame = 0;
-          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
-        }
+          let format = vfparams.format || vf.format;
+          if (format == "RGBA" && size != width * height * 4) {
+            format = vf.format; //fallback
+          }
+          if (_captureNextFrame == 1) {
+            _captureNextFrame = 0;
+            Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
+          }
 
-        let mode = _mode || modeVals[_counter % modeVals.length];
-        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
-      } catch (e) {
-        console.log(e);
+          let mode = _mode || modeVals[_counter % modeVals.length];
+          _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
+        } catch (e) {
+          console.log(e);
+        }
+        _nextWorker += 1;
       }
       if (vf)
         vf.close();
 
       // schedule the next one
-      _nextWorker += 1;
       _video.requestVideoFrameCallback(Recv.on_frame);
     },
 

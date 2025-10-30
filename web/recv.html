@@ -407,8 +407,11 @@
     <div id="debug_menu">
       <button id="debug-button" onclick="Recv.showDebug();"></button>
       <div class="statusbox" id="errorbox"></div>
-      <div class="statusbox" id="t0">hi</div>
-      <div class="statusbox" id="t1">hi</div>
+      <div class="statusbox" id="t0">hi0</div>
+      <div class="statusbox" id="t1">hi1</div>
+      <div class="statusbox" id="t2">hi2</div>
+      <div class="statusbox" id="t3">hi3</div>
+      <div class="statusbox" id="framesInFlight"></div>
       <div class="statusbox" id="tdec">%VERSION%</div>
     </div>
   </div>
@@ -421,7 +424,7 @@
   <script src="zstd.js"></script>
 
   <script type="text/javascript">
-    Recv.init_ww(2);
+    Recv.init_ww(4);
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./recv-sw.js');
     }
