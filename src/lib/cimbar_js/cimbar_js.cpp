@@ -130,10 +130,6 @@ int cimbare_next_frame(bool color_balance)
 	return ++_frameCount;
 }
 
-// maybe init_encode w/ filename,size,encode_id,
-// then encode() with buff,size? ... when size < chunksize (or size ==0), we're done
-// return 0 on done, 1 iff work to continue?
-
 int cimbare_init_encode(const char* filename, unsigned fnsize, int encode_id)
 {
 	_frameCount = 0;
