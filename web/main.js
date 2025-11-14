@@ -258,6 +258,9 @@ var Main = function () {
       else if (mode_str == "Bm") {
         modeVal = 67;
       }
+      else if (mode_str == "Bw") {
+        modeVal = 69;
+      }
       Module._cimbare_configure(modeVal, -1);
       _idealRatio = Module._cimbare_get_aspect_ratio();
       Main.resize();
@@ -268,17 +271,26 @@ var Main = function () {
         nav.classList.add("mode-4c");
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-bw");
       } else if (modeVal == 68) {
         nav.classList.add("mode-b");
         nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-bw");
         nav.classList.remove("mode-4c");
       } else if (modeVal == 67) {
         nav.classList.add("mode-bm");
         nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bw");
+        nav.classList.remove("mode-4c");
+      } else if (modeVal == 69) {
+        nav.classList.add("mode-bw");
+        nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       } else {
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-bw");
         nav.classList.remove("mode-4c");
       }
     },

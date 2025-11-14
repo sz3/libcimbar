@@ -283,7 +283,7 @@ var Recv = function () {
       // make sure the camera feed stays up
       Recv.watch_for_camera_pause();
 
-      const modeVals = [67, 68, 4];
+      const modeVals = [67, 68, 69, 4];
 
       var vf = undefined;
       if (_framesInFlight > 20) {
@@ -419,7 +419,8 @@ var Recv = function () {
         4: "4C",
         8: "8C",
         67: "Bm",
-        68: "B"
+        68: "B",
+        69: "Bw"
       };
       let modeStringToVal = {
         "Auto": 0
