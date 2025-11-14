@@ -104,7 +104,7 @@ int cimbare_render()
 	return 0;
 }
 
-int cimbare_next_frame()
+int cimbare_next_frame(bool color_balance)
 {
 	if (!_fes)
 		return -1;
@@ -123,6 +123,8 @@ int cimbare_next_frame()
 	}
 
 	Encoder enc;
+	if (color_balance) // default is: disabled
+		enc.set_color_mode(cimbar::Config::color_mode() + 0x100);
 	enc.set_encode_id(_encodeId);
 	_next = enc.encode_next(*_fes, _window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{});
 	return ++_frameCount;
