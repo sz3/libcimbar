@@ -1,8 +1,11 @@
 var Main = function () {
 
+  // configurable
   var _interval = 66;
-  var _pause = 0;
+  var _colorBalance = true;
 
+  // internal
+  var _pause = 0;
   var _showStats = false;
   var _counter = 0;
   var _renderTime = 0;
@@ -227,7 +230,7 @@ var Main = function () {
       var start = performance.now();
       if (!Main.isPaused()) {
         Module._cimbare_render();
-        var frameCount = Module._cimbare_next_frame();
+        var frameCount = Module._cimbare_next_frame(_colorBalance);
       }
 
       var elapsed = performance.now() - start;

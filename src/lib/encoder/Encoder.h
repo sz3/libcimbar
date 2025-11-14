@@ -18,6 +18,7 @@ class Encoder
 public:
 	Encoder(unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
+	void set_color_mode(unsigned color_mode);
 
 	template <typename STREAM>
 	std::optional<cv::Mat> encode_next(STREAM& stream, cimbar::vec_xy canvas_size={});
@@ -57,6 +58,11 @@ inline Encoder::Encoder(unsigned bits_per_symbol, int bits_per_color)
 inline void Encoder::set_encode_id(uint8_t encode_id)
 {
 	_encodeId = encode_id;
+}
+
+inline void Encoder::set_color_mode(unsigned color_mode)
+{
+	_colorMode = color_mode;
 }
 
 template <typename STREAM>
