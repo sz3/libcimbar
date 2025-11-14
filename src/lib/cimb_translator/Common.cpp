@@ -25,7 +25,19 @@ namespace {
 			RGB(0, 0xFF, 0),
 			RGB(0, 0xFF, 0xFF),
 			RGB(0xFF, 0xFF, 0),
-			RGB(0xFF, 0, 0xFF), // RGB(0xFF, 0x55, 0xFF),
+			RGB(0xFF, 0, 0xFF),
+		};
+		return colors[index];
+	}
+
+	RGB getColor4_enc(unsigned index)
+	{
+		// opencv uses BGR, but we don't have to conform to its tyranny
+		static constexpr array<RGB, 4> colors = {
+			RGB(0, 0xFF, 0),
+			RGB(0, 0xFF, 0xFF),
+			RGB(0xFF, 0xFF, 0),
+			RGB(0xFF, 0x55, 0xFF),
 		};
 		return colors[index];
 	}
@@ -75,9 +87,9 @@ namespace {
 	{
 		// opencv uses BGR, but we don't have to conform to its tyranny
 		static constexpr array<RGB, 4> colors = {
-			RGB(0, 0, 0), //RGB(0, 0x20, 0),
-			RGB(0, 0, 0),//RGB(0, 0, 0xFF),
-			RGB(0, 0, 0), //RGB(0x7F, 0, 0),
+			RGB(0, 0x20, 0),
+			RGB(0, 0, 0xFF),
+			RGB(0x7F, 0, 0),
 			RGB(0, 0, 0),
 		};
 		return colors[index];
@@ -109,7 +121,7 @@ cv::Mat load_img(string path)
 
 RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 {
-	if (color_mode == 0)
+	if ((color_mode & 0xFF) == 0)
 	{
 		if (num_colors <= 4)
 			return getColor4_old(index);
@@ -117,16 +129,19 @@ RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 			return getColor8_old(index);
 	}
 
-	if (num_colors <= 4)
-		return getColor4(index);
-	else
+	if (num_colors > 4)
 		return getColor8(index);
+	else if (color_mode > 0x100)
+		return getColor4_enc(index);
+	else
+		return getColor4(index);
+
 }
 
 RGB getBgColor(unsigned index, unsigned num_colors, unsigned color_mode)
 {
-
-	if (color_mode == 1 and num_colors <= 4)
+	// >0x100 because color_mode=0 will use default bg
+	if (color_mode > 0x100 and num_colors <= 4)
 		return getBgColor4(index);
 	else
 		return RGB(0,0,0);
