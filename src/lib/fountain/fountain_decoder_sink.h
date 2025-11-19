@@ -159,10 +159,10 @@ public:
 
 		// when you provide a write callback,
 		// store() will call mark_done() afterwards
-		// -- and the assembled file will we dropped from RAM.
+		// -- and the assembled file will be dropped from RAM.
 		// but if no callback is provided, you can do something else.
 		store(md, s);
-		return (int64_t)md.id();
+		return (int64_t)0 + md.id();
 	}
 
 	bool write(const char* data, unsigned length)

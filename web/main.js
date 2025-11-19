@@ -2,7 +2,7 @@ var Main = function () {
 
   // configurable
   var _interval = 66;
-  var _colorBalance = true;
+  var _colorBalance = false;
 
   // internal
   var _pause = 0;
