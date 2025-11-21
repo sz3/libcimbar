@@ -67,6 +67,18 @@ QUnit.test("stable decode", async function (assert) {
 
   pro0.remove();
 
+  // test mode autodetect
+  const navcont = await wait_for(assert, () => {
+    return document.querySelector('#nav-container');
+  });
+  assert.equal("mode-b", navcont.classList.toString());
+
+  const modebutton = await wait_for(assert, () => {
+    return document.querySelector('#mode-val');
+  });
+  assert.equal("B", modebutton.textContent);
+
+  // next frame
   await load_image(1);
   Recv.on_frame(0, '');
 

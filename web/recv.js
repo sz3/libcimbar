@@ -6,12 +6,19 @@ var Sink = function () {
 
   // public interface
   return {
-    on_decode: function (buff) {
+    allocate: function () {
+      const size = Module._cimbard_get_bufsize(); // max length of buff. We could also resize as we go...
+      if (_fountainBuff && size > _fountainBuff.length) {
+        Module._free(_fountainBuff.byteOffset);
+        _fountainBuff = undefined;
+      }
       if (_fountainBuff === undefined) {
-        const size = Module._cimbard_get_bufsize(); // max length of buff. We could also resize as we go...
         const dataPtr = Module._malloc(size);
         _fountainBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
       }
+    },
+
+    on_decode: function (buff) {
       if (buff.length == 0) { // sanity check
         return;
       }
@@ -91,7 +98,10 @@ var Recv = function () {
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
+  var _framesInFlight = 0;
   var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
+
+  var _mode = 0;
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -124,6 +134,16 @@ var Recv = function () {
     ww_ready: new Promise(resolve => {
       _workerReady = resolve;
     }),
+
+    frames_in_flight_incr: function () {
+      _framesInFlight += 1;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+    },
+
+    frames_in_flight_decr: function () {
+      _framesInFlight -= 1;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+    },
 
     init_ww: function (num_workers) {
       // clean up _workers if exists?
@@ -217,14 +237,18 @@ var Recv = function () {
     },
 
     on_decode: function (wid, data) {
-      console.log('Main thread received message from worker' + wid + ':', data);
-      // if extract but no bytes, log extract counter
+      //console.log('Main thread received message from worker' + wid + ':', data);
+      Recv.frames_in_flight_decr();
+      // if extract but no bytes, log extract counte
       if (data.nodata) {
         _recentExtract = _counter;
         return;
       }
+      if (data.failed_extract) { // very common, nothing to do
+        return;
+      }
       if (data.res) {
-        Recv.set_HTML("t" + wid, "avg red " + wid + " is " + data.res);
+        Recv.set_HTML("t" + wid, "msg is " + data.res);
         return;
       }
       if (data.ready) {
@@ -236,8 +260,11 @@ var Recv = function () {
       // should be a decode with some bytes, so set decodecounter
       _recentDecode = _counter;
 
-      const buff = new Uint8Array(data);
-      Recv.set_HTML("t" + wid, "len() is " + buff.length + ", buff: " + buff);
+      const buff = data.buff;
+      if (buff.length > 0) {
+        Recv.setMode(data.mode); // call *before* we send it to the sink. This is our autodetect confirm.
+      }
+      Recv.set_HTML("t" + wid, "mode is " + _mode + ", len() is " + buff.length + ", buff: " + buff);
       Sink.on_decode(buff);
     },
 
@@ -256,39 +283,49 @@ var Recv = function () {
       // make sure the camera feed stays up
       Recv.watch_for_camera_pause();
 
+      const modeVals = [67, 68, 4];
+
       var vf = undefined;
-      try {
-        vf = new VideoFrame(_video, { timestamp: now });
-        const width = vf.displayWidth;
-        const height = vf.displayHeight;
-        Recv.set_HTML("errorbox", vf.format, true);
+      if (_framesInFlight > 20) {
+        console.log("stalling, worker queues are full");
+      }
+      else {
+        Recv.frames_in_flight_incr();
+        try {
+          vf = new VideoFrame(_video, { timestamp: now });
+          const width = vf.displayWidth;
+          const height = vf.displayHeight;
+          Recv.set_HTML("errorbox", vf.format, true);
 
-        // try to use the default format, but only if we can decode it...
-        let vfparams = {};
-        if (!_supportedFormats.includes(vf.format)) {
-          vfparams.format = "RGBA";
-        }
-        const size = vf.allocationSize(vfparams);
-        const buff = new Uint8Array(size);
-        vf.copyTo(buff, vfparams);
+          // try to use the default format, but only if we can decode it...
+          let vfparams = {};
+          if (!_supportedFormats.includes(vf.format)) {
+            vfparams.format = "RGBA";
+          }
+          const size = vf.allocationSize(vfparams);
+          const buff = new Uint8Array(size);
+          vf.copyTo(buff, vfparams);
 
-        let format = vfparams.format || vf.format;
-        if (format == "RGBA" && size != width * height * 4) {
-          format = vf.format; //fallback
+          let format = vfparams.format || vf.format;
+          if (format == "RGBA" && size != width * height * 4) {
+            format = vf.format; //fallback
+          }
+          if (_captureNextFrame == 1) {
+            _captureNextFrame = 0;
+            Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
+          }
+
+          let mode = _mode || modeVals[_counter % modeVals.length];
+          _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
+        } catch (e) {
+          console.log(e);
         }
-        if (_captureNextFrame == 1) {
-          _captureNextFrame = 0;
-          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
-        }
-        _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height }, [buff.buffer]);
-      } catch (e) {
-        console.log(e);
+        _nextWorker += 1;
       }
       if (vf)
         vf.close();
 
       // schedule the next one
-      _nextWorker += 1;
       _video.requestVideoFrameCallback(Recv.on_frame);
     },
 
@@ -376,38 +413,45 @@ var Recv = function () {
       document.getElementById("nav-content").blur();
     },
 
-    setMode: function (mode_str) {
-      let modeVal = 68;
-      if (mode_str == "4C") {
-        modeVal = 4;
+    setMode: function (modeVal) {
+      // these should be moved elsewhere...
+      const modeToString = {
+        4: "4C",
+        8: "8C",
+        67: "Bm",
+        68: "B"
+      };
+      let modeStringToVal = {
+        "Auto": 0
+      };
+      for (const val in modeToString) {
+        modeStringToVal[modeToString[val]] = val;
       }
-      else if (mode_str == "Bm") {
-        modeVal = 67;
+
+      if (modeVal in modeStringToVal) {
+        modeVal = modeStringToVal[modeVal];
       }
-      Module._cimbard_configure_decode(modeVal);
-      for (let i = 0; i < _workers.length; i++) {
-        // cal config decode within the workers as well
-        _workers[i].postMessage({ config: true, mode_val: modeVal });
+
+      // configure wasm in main thread
+      _mode = modeVal;
+      if (_mode > 0) {
+        Module._cimbard_configure_decode(_mode);
+        Sink.allocate();
+      }
+
+      // update ui
+      if (_mode > 0) {
+        var nav = document.getElementById("mode-val");
+        nav.innerHTML = modeToString[_mode];
       }
 
       var nav = document.getElementById("nav-container");
-      if (modeVal == 4) {
+      if (_mode == 0) {
+        nav.classList.add("mode-auto");
         nav.classList.remove("mode-b");
-        nav.classList.add("mode-4c");
-        nav.classList.remove("mode-b");
-        nav.classList.remove("mode-bm");
-      } else if (modeVal == 68) {
-        nav.classList.add("mode-b");
-        nav.classList.remove("mode-bm");
-        nav.classList.remove("mode-4c");
-      } else if (modeVal == 67) {
-        nav.classList.add("mode-bm");
-        nav.classList.remove("mode-b");
-        nav.classList.remove("mode-4c");
       } else {
-        nav.classList.remove("mode-b");
-        nav.classList.remove("mode-bm");
-        nav.classList.remove("mode-4c");
+        nav.classList.add("mode-b");
+        nav.classList.remove("mode-auto");
       }
     },
 

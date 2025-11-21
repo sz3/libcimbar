@@ -19,6 +19,11 @@ var RecvWorker = function () {
       const format = data.format;
       const width = data.width;
       const height = data.height;
+      const mode = data.mode;
+      if (mode) {
+        Module._cimbard_configure_decode(mode);
+      }
+
       try {
         //console.log(vf);
         // malloc iff necessary
@@ -37,34 +42,28 @@ var RecvWorker = function () {
         type = 420;
       }
 
-      try {
-        // then decode in wasm, fool
-        const fountainBuff = RecvWorker.fountainBuff();
-        var len = Module._cimbard_scan_extract_decode(RecvWorker.imgBuff().byteOffset, width, height, type, fountainBuff.byteOffset, fountainBuff.length);
-
-        if (len <= 0) {
-          var errmsg = RecvWorker.get_error();
-          errmsg = len + " " + errmsg;
-          //console.log(errmsg);
-          if (len == 0) {
-            self.postMessage({ nodata: true, res: errmsg });
-          }
-          else if (len != -3) {
-            self.postMessage({ error: true, res: errmsg });
-          }
-        }
-        else { //if (len > 0) {
-          console.log('len is ' + len);
-          //self.postMessage({ error: true, res: len });
-          const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, len).slice();
-          console.log(msgbuf);
-          self.postMessage(msgbuf.buffer, [msgbuf.buffer]);
-        }
-        // in main, const receivedArray = new Uint8Array(event.data);
-      } catch (e) {
-        console.log(e);
+      // then decode in wasm, fool
+      const fountainBuff = RecvWorker.fountainBuff();
+      var len = Module._cimbard_scan_extract_decode(RecvWorker.imgBuff().byteOffset, width, height, type, fountainBuff.byteOffset, fountainBuff.length);
+      if (len <= 0) {
+        var errmsg = RecvWorker.get_error();
+        errmsg = len + " " + errmsg;
+        let msg = { res: errmsg };
+        if (len == 0)
+          msg.nodata = true;
+        else if (len == -3)
+          msg.failed_extract = true;
+        else
+          msg.error = true;
+        self.postMessage(msg);
       }
-
+      else { //if (len > 0) {
+        console.log('len is ' + len);
+        const msgbuf = new Uint8Array(Module.HEAPU8.buffer, fountainBuff.byteOffset, len).slice();
+        //console.log(msgbuf);
+        self.postMessage({ mode: mode, buff: msgbuf }, [msgbuf.buffer]);
+      }
+      // in main, const receivedArray = event.data.buff;
     },
 
     get_error: function () {
@@ -119,16 +118,11 @@ self.onmessage = async (event) => {
     return;
   }
 
-  if (event.data.config) {
-    console.log('attempting config');
-    try {
-      Module._cimbard_configure_decode(event.data.mode_val);
-    } catch (e) {
-      self.postMessage({ type: 'config', error: e });
-    }
-    return;
+  try {
+    // assert 'vf' in data?
+    RecvWorker.on_frame(event.data);
+  } catch (ex) {
+    console.log("unexpected error: " + ex);
+    self.postMessage({ error: true, res: ex });
   }
-
-  // assert 'vf' in data?
-  RecvWorker.on_frame(event.data)
 };

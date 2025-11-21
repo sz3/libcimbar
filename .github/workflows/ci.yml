@@ -10,9 +10,9 @@ jobs:
       fail-fast: true
       matrix:
         config:
-        - name: "linux gcc9"
+        - name: "linux gcc11"
           os: ubuntu-22.04
-          env: CXX="g++-9" CC="gcc-9"
+          env: CXX="g++-11" CC="gcc-11"
 
         - name: "linux gcc-latest"
           os: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       run: python3 -m unittest
 
   cppcheck:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
