@@ -141,6 +141,31 @@ namespace cimbar
 		}
 	};
 
+
+	struct Conf5x5_mini : conf
+	{
+		Conf5x5_mini()
+			: conf()
+		{
+			color_bits = 1;
+			symbol_bits = 2;
+			ecc_bytes = 41;
+			ecc_block_size = 203;
+			image_size_x = 952;
+			image_size_y = 778;
+
+			cell_size = 5;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 156;
+			cells_per_col_y = 127;
+
+			fountain_chunks_scalar = 3;
+		}
+	};
+
+
 	struct Conf8x8 : conf
 	{
 		Conf8x8()
