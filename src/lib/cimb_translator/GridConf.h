@@ -55,8 +55,8 @@ namespace cimbar
 		{
 			if (!bitspercell)
 				bitspercell = bits_per_cell();
-			if (legacy_mode or !fountain_chunks_scalar)
-				return 10;
+			if (fountain_chunks_scalar < 0)
+				return -fountain_chunks_scalar;
 			return bitspercell * fountain_chunks_scalar;
 		}
 
@@ -118,6 +118,29 @@ namespace cimbar
 		}
 	};
 
+	struct Conf5x5_exp : conf
+	{
+		Conf5x5_exp()
+			: conf()
+		{
+			color_bits = 1;
+			symbol_bits = 2;
+			ecc_bytes = 32;
+			ecc_block_size = 157;
+			image_size_x = 1252;
+			image_size_y = 940;
+
+			cell_size = 5;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 206;
+			cells_per_col_y = 154;
+
+			fountain_chunks_scalar = 5;
+		}
+	};
+
 	struct Conf8x8 : conf
 	{
 		Conf8x8()
@@ -171,8 +194,8 @@ namespace cimbar
 		{
 			color_bits = 2;
 			symbol_bits = 4;
-			ecc_bytes = 45;
-			ecc_block_size = 225;
+			ecc_bytes = 50;
+			ecc_block_size = 250;
 			image_size_x = 1474;
 			image_size_y = 1024;
 
@@ -183,7 +206,7 @@ namespace cimbar
 			cells_per_col_x = 162;
 			cells_per_col_y = 112;
 
-			fountain_chunks_scalar = 3;
+			fountain_chunks_scalar = 3; // or -20
 		}
 	};
 }

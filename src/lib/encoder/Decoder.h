@@ -17,6 +17,7 @@ class Decoder
 {
 public:
 	Decoder(bool use_ecc=true, bool interleave=true);
+	unsigned symbol_bits() const;
 
 	template <typename MAT, typename STREAM>
 	unsigned decode(const MAT& img, STREAM& ostream, bool should_preprocess=false, int color_correction=2);
@@ -42,6 +43,11 @@ inline Decoder::Decoder(bool use_ecc, bool interleave)
 	, _interleave(interleave)
 	, _decoder(cimbar::Config::symbol_bits(), cimbar::Config::color_bits(), cimbar::Config::dark(), 0xFF)
 {
+}
+
+inline unsigned Decoder::symbol_bits() const
+{
+	return _decoder.symbol_bits();
 }
 
 /* while bits == f.read_tile()

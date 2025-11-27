@@ -236,6 +236,10 @@ int main(int argc, char** argv)
 			config_mode = 8;
 		else if (mode == "Bm" or mode == "BM")
 			config_mode = 67;
+		else if (mode == "Bw" or mode == "BW")
+			config_mode = 69;
+		else if (mode == "S")
+			config_mode = 72;
 	}
 	cimbar::Config::update(config_mode);
 

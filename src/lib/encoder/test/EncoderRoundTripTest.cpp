@@ -102,15 +102,16 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	assertEquals( 0, fds.num_done() );
 }
 
-TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
+TEST_CASE( "EncoderRoundTripTest/testFiver", "[unit]" )
 {
 	MakeTempDirectory tempdir;
 
 	//input
 	std::ifstream infile(TestCimbar::getProjectDir() + "/LICENSE");
+	cimbar::Config::update(72);
 
 	// create encoder
-	EncoderPlus enc(4, 2);
+	EncoderPlus enc(2, 1);
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(infile, "");
 	assertTrue( fes );
 	assertTrue( fes->good() );
@@ -126,7 +127,7 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 		assertTrue( frame );
 
 		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
-		assertEquals( 7500, bytesDecoded );
+		assertEquals( 12500, bytesDecoded );
 
 		if (fds.num_done())
 			break;

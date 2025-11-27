@@ -18,6 +18,15 @@ using std::string;
 using std::vector;
 
 namespace {
+	RGB getColor2(unsigned index)
+	{
+		static constexpr array<RGB, 2> colors = {
+			RGB(0, 0xFF, 0),
+			RGB(0xFF, 0, 0xFF),
+		};
+		return colors[index];
+	}
+
 	RGB getColor4(unsigned index)
 	{
 		// opencv uses BGR, but we don't have to conform to its tyranny
@@ -131,6 +140,8 @@ RGB getColor(unsigned index, unsigned num_colors, unsigned color_mode)
 
 	if (num_colors > 4)
 		return getColor8(index);
+	else if (num_colors == 2)
+		return getColor2(index);
 	else if (color_mode > 0x100)
 		return getColor4_enc(index);
 	else
