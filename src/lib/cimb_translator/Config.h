@@ -10,7 +10,7 @@ namespace cimbar
 	protected:
 		static cimbar::conf& active_conf()
 		{
-			static thread_local cimbar::conf cc = cimbar::Conf5x5_exp();
+			static thread_local cimbar::conf cc = cimbar::Conf8x8();
 			return cc;
 		}
 
@@ -38,8 +38,8 @@ namespace cimbar
 				case 69:
 					return cimbar::Conf8x8_wide();
 				case 72:
+					return cimbar::Conf5x5_mini();
 				default:
-					return cimbar::Conf5x5_exp();
 				case 68:
 					return cimbar::Conf8x8();
 			}
