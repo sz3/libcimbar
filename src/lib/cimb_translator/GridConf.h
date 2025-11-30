@@ -24,6 +24,9 @@ namespace cimbar
 		int fountain_chunks_scalar = 2;
 		bool legacy_mode = false;
 
+		// settings
+		int preprocessing_block_size = 5;
+
 		unsigned bits_per_cell() const
 		{
 			return color_bits + symbol_bits;
@@ -92,6 +95,7 @@ namespace cimbar
 			cells_per_col_y = cells_per_col_x;
 
 			fountain_chunks_scalar = 3;
+			preprocessing_block_size = 3;
 		}
 	};
 
@@ -115,32 +119,9 @@ namespace cimbar
 			cells_per_col_y = 157;
 
 			fountain_chunks_scalar = 4;
+			preprocessing_block_size = 3;
 		}
 	};
-
-	struct Conf5x5_exp : conf
-	{
-		Conf5x5_exp()
-			: conf()
-		{
-			color_bits = 1;
-			symbol_bits = 2;
-			ecc_bytes = 32;
-			ecc_block_size = 157;
-			image_size_x = 1252;
-			image_size_y = 940;
-
-			cell_size = 5;
-			cell_spacing_x = cell_size+1;
-			cell_spacing_y = cell_size+1;
-			cell_offset = 9;
-			cells_per_col_x = 206;
-			cells_per_col_y = 154;
-
-			fountain_chunks_scalar = 5;
-		}
-	};
-
 
 	struct Conf5x5_great : conf
 	{
@@ -162,6 +143,7 @@ namespace cimbar
 			cells_per_col_y = 127;
 
 			fountain_chunks_scalar = 3;
+			preprocessing_block_size = 3;
 		}
 	};
 
@@ -186,6 +168,33 @@ namespace cimbar
 			cells_per_col_y = 98;
 
 			fountain_chunks_scalar = 2;
+			preprocessing_block_size = 3;
+		}
+	};
+
+
+	struct Conf5x5_micro : conf
+	{
+		Conf5x5_micro()
+			: conf()
+		{
+			//101,84 = 8160, 3060 bytes
+			color_bits = 2;
+			symbol_bits = 2;
+			ecc_bytes = 51;
+			ecc_block_size = 255;
+			image_size_x = 622;
+			image_size_y = 520;
+
+			cell_size = 5;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 8;
+			cells_per_col_x = 101;
+			cells_per_col_y = 84;
+
+			fountain_chunks_scalar = 2;
+			preprocessing_block_size = 3;
 		}
 	};
 

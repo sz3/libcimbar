@@ -38,7 +38,7 @@ namespace cimbar
 				case 69:
 					return cimbar::Conf8x8_wide();
 				case 72:
-					return cimbar::Conf5x5_mini();
+					return cimbar::Conf5x5_micro();
 				default:
 				case 68:
 					return cimbar::Conf8x8();
@@ -109,6 +109,11 @@ namespace cimbar
 		{
 			// TODO: runtime
 			return 8;
+		}
+
+		static int preprocessing_block_size()
+		{
+			return active_conf().preprocessing_block_size;
 		}
 
 		static unsigned cell_spacing_x()

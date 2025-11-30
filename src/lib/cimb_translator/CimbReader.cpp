@@ -29,18 +29,17 @@ namespace {
 	template <typename MAT>
 	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
-		int blockSize = 5; // default: no preprocessing
+		int blockSize = Config::preprocessing_block_size(); // default: no preprocessing
 
 		cv::Mat symbols;
 		cv::cvtColor(img, symbols, cv::COLOR_RGB2GRAY);
 		if (needs_sharpen)
 		{
-			blockSize = 7;
+			//blockSize = 7;
 			sharpenSymbolGrid(symbols, symbols);
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
-		// TODO: this should be on capacity, not image_size... right??
 		bitbuffer bb(Config::image_size_x() * Config::image_size_y() / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
