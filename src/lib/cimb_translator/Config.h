@@ -25,18 +25,22 @@ namespace cimbar
 					cc = cimbar::Conf8x8();
 					cc.color_bits = 2;
 					cc.legacy_mode = true;
+					cc.fountain_chunks_scalar = -10;
 					return cc;
 				case 8:
 					cc = cimbar::Conf8x8();
 					cc.color_bits = 3;
 					cc.legacy_mode = true;
+					cc.fountain_chunks_scalar = -10;
 					return cc;
+				case 66:
+					return cimbar::Conf8x8_micro();
 				case 67:
 					return cimbar::Conf8x8_mini();
 				case 69:
 					return cimbar::Conf8x8_wide();
-				case 68:
 				default:
+				case 68:
 					return cimbar::Conf8x8();
 			}
 		}
@@ -103,6 +107,7 @@ namespace cimbar
 
 		static constexpr unsigned cell_size()
 		{
+			// TODO: runtime
 			return 8;
 		}
 
@@ -178,4 +183,3 @@ namespace cimbar
 		}
 	};
 }
-

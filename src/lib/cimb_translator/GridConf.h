@@ -55,8 +55,8 @@ namespace cimbar
 		{
 			if (!bitspercell)
 				bitspercell = bits_per_cell();
-			if (legacy_mode or !fountain_chunks_scalar)
-				return 10;
+			if (fountain_chunks_scalar < 0)
+				return -fountain_chunks_scalar;
 			return bitspercell * fountain_chunks_scalar;
 		}
 
@@ -118,6 +118,8 @@ namespace cimbar
 		}
 	};
 
+
+
 	struct Conf8x8 : conf
 	{
 		Conf8x8()
@@ -164,15 +166,112 @@ namespace cimbar
 		}
 	};
 
+	struct Conf8x8_micro : conf
+	{
+		Conf8x8_micro()
+			: conf()
+		{
+			// 80,69 = 5376, 4032 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 33;
+			ecc_block_size = 168;
+			image_size_x = 736;
+			image_size_y = 637;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 80;
+			cells_per_col_y = 69;
+
+			fountain_chunks_scalar = 1;
+		}
+	};
+
 	struct Conf8x8_wide : conf
+	{
+		Conf8x8_wide()
+			: conf()
+		{
+			// 147,112 = 16320, 12240 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 34;//51;
+			ecc_block_size = 170;//255;
+			image_size_x = 1339;
+			image_size_y = 1024;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 147;
+			cells_per_col_y = 112;
+
+			fountain_chunks_scalar = 3;
+		}
+	};
+
+	/*struct Conf8x8_wide3 : conf
+	{
+		Conf8x8_wide()
+			: conf()
+		{
+			// 135,112 = 14976, 11232 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 31;
+			ecc_block_size = 156;
+			image_size_x = 1231;
+			image_size_y = 1024;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 135;
+			cells_per_col_y = 112;
+
+			fountain_chunks_scalar = 3;
+		}
+	};*/
+
+	/*struct Conf8x8_wide4 : conf
+	{
+		Conf8x8_wide()
+			: conf()
+		{
+			// 127,112 = 14080, 10560 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 35;
+			ecc_block_size = 176;
+			image_size_x = 1159;
+			image_size_y = 1024;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 127;
+			cells_per_col_y = 112;
+
+			fountain_chunks_scalar = 3;
+		}
+	};*/
+
+
+	/*struct Conf8x8_wide : conf
 	{
 		Conf8x8_wide()
 			: conf()
 		{
 			color_bits = 2;
 			symbol_bits = 4;
-			ecc_bytes = 45;
-			ecc_block_size = 225;
+			ecc_bytes = 50;
+			ecc_block_size = 250;
 			image_size_x = 1474;
 			image_size_y = 1024;
 
@@ -183,7 +282,7 @@ namespace cimbar
 			cells_per_col_x = 162;
 			cells_per_col_y = 112;
 
-			fountain_chunks_scalar = 3;
+			fountain_chunks_scalar = 3; // or -20
 		}
-	};
+	};*/
 }
