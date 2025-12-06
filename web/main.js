@@ -283,6 +283,14 @@ var Main = function () {
       }
     },
 
+    setFPS: function (val) {
+      if (!val) {
+        return;
+      }
+      _interval = Math.floor(1000 / val);
+      console.log("new frame delay interval is " + _interval);
+    },
+
     setHTML: function (id, msg) {
       document.getElementById(id).innerHTML = msg;
     },

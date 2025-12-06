@@ -311,6 +311,10 @@
       font-size: 1em;
     }
 
+    #nav-content li .range {
+      width: 100%;
+    }
+
     #nav-container:focus-within #nav-content {
       transform: none;
     }
@@ -350,6 +354,11 @@
           <a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">B</a>
           <a class="mode-bm" href="javascript:void(0)" onclick="Main.setMode('Bm')">Bm</a>
           <a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C</a>
+        </li>
+        <li>
+          <h4>Framerate</h4>
+          <input type="range" class="range" min="5" max="20" step="5" value="15" oninput="Main.setFPS(this.value)"
+            onchange="Main.setFPS(this.value)" />
         </li>
         <li class="small"><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
