@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
 		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target decode FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
-		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,4C]", cxxopts::value<string>()->default_value("B"))
+		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,Bu,4C]", cxxopts::value<string>()->default_value("B"))
 		("h,help", "Print usage")
 	;
 	options.show_positional_help();
@@ -71,6 +71,8 @@ int main(int argc, char** argv)
 		string mode = result["mode"].as<string>();
 		if (mode == "4c" or mode == "4C")
 			config_mode = 4;
+		else if (mode == "Bu" or mode == "BU")
+			config_mode = 66;
 		else if (mode == "Bm" or mode == "BM")
 			config_mode = 67;
 	}

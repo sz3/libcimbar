@@ -31,6 +31,8 @@ namespace cimbar
 					cc.color_bits = 3;
 					cc.legacy_mode = true;
 					return cc;
+				case 66:
+					return cimbar::Conf8x8_micro();
 				case 67:
 					return cimbar::Conf8x8_mini();
 				case 68:
