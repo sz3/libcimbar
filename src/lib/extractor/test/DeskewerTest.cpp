@@ -9,7 +9,7 @@
 TEST_CASE( "DeskewerTest/testSimple", "[unit]" )
 {
 	Corners corners({312, 519}, {323, 2586}, {2405, 461}, {2425, 2594});
-	DeskewerPlus de({1024, 1024}, 30);
+	DeskewerPlus de(0, {1024, 1024}, 30);
 
 	cv::Mat actual = de.deskew(TestCimbar::getSample("6bit/4_30_f0_big.jpg"), corners);
 	assertEquals(cv::Size(1024, 1024), actual.size());
@@ -20,9 +20,9 @@ TEST_CASE( "DeskewerTest/testSimple", "[unit]" )
 TEST_CASE( "DeskewerTest/testPadded", "[unit]" )
 {
 	Corners corners({312, 519}, {323, 2586}, {2405, 461}, {2425, 2594});
-	DeskewerPlus de({1024, 1024}, 30);
+	DeskewerPlus de(8, {1024, 1024}, 30);
 
-	cv::Mat actual = de.deskew(TestCimbar::getSample("6bit/4_30_f0_big.jpg"), corners, 8);
+	cv::Mat actual = de.deskew(TestCimbar::getSample("6bit/4_30_f0_big.jpg"), corners);
 	assertEquals(cv::Size(1040, 1040), actual.size());
 
 	cv::Rect crop(8, 8, 1024, 1024);

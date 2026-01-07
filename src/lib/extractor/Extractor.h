@@ -36,8 +36,8 @@ inline int Extractor::extract(const MAT& img, MAT& out)
 		return FAILURE;
 
 	Corners corners(points);
-	Deskewer de(_imageSize, _anchorSize);
-	out = de.deskew(img, corners, _padding);
+	Deskewer de(_padding, _imageSize, _anchorSize);
+	out = de.deskew(img, corners);
 
 	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
