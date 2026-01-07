@@ -11,17 +11,17 @@ public:
 	using Deskewer::Deskewer;
 	using Deskewer::deskew;
 
-	cv::Mat deskew(std::string img, const Corners& corners);
+	cv::Mat deskew(std::string img, const Corners& corners, unsigned padding=0);
 	bool save(const cv::Mat& img, std::string path);
 
 protected:
 };
 
-inline cv::Mat DeskewerPlus::deskew(std::string img, const Corners& corners)
+inline cv::Mat DeskewerPlus::deskew(std::string img, const Corners& corners, unsigned padding)
 {
 	cv::Mat mat = cv::imread(img);
 	cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
-	return Deskewer::deskew(mat, corners);
+	return Deskewer::deskew(mat, corners, padding);
 }
 
 inline bool DeskewerPlus::save(const cv::Mat& img, std::string path)

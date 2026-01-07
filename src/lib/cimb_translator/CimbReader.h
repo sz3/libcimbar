@@ -31,6 +31,7 @@ protected:
 	unsigned _radioactiveBlockId;
 
 	unsigned _cellSize;
+	unsigned _gridPadding;
 	FloodDecodePositions _positions;
 	CimbDecoder& _decoder;
 	bool _good;

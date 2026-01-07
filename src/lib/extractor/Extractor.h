@@ -16,7 +16,7 @@ public:
 	static constexpr int NEEDS_SHARPEN = 2;
 
 public:
-	Extractor(cimbar::vec_xy image_size={}, unsigned anchor_size=0);
+	Extractor(unsigned padding=0, cimbar::vec_xy image_size={}, unsigned anchor_size=0);
 
 	template <typename MAT>
 	int extract(const MAT& img, MAT& out);
@@ -24,6 +24,7 @@ public:
 protected:
 	cimbar::vec_xy _imageSize;
 	unsigned _anchorSize;
+	unsigned _padding;
 };
 
 template <typename MAT>
@@ -36,7 +37,7 @@ inline int Extractor::extract(const MAT& img, MAT& out)
 
 	Corners corners(points);
 	Deskewer de(_imageSize, _anchorSize);
-	out = de.deskew(img, corners);
+	out = de.deskew(img, corners, _padding);
 
 	if ( !corners.is_granular_scale(_imageSize) )
 		return NEEDS_SHARPEN;
