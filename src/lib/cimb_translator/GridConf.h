@@ -143,6 +143,58 @@ namespace cimbar
 		}
 	};
 
+	/*
+	 *
+	 * 	struct Conf8x8_mini : conf
+	{
+		Conf8x8_mini()
+			: conf()
+		{
+			//96,91 = 8592, 6444 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 36;
+			ecc_block_size = 179;
+			image_size_x = 880;
+			image_size_y = 835;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 96;
+			cells_per_col_y = 91;
+
+			fountain_chunks_scalar = 2;
+		}
+	};
+
+	*/
+	/*
+	 * 	struct Conf8x8_mini : conf
+	{
+		Conf8x8_mini()
+			: conf()
+		{
+			// 93,80 = 7296, 5472 bytes
+			color_bits = 2;
+			symbol_bits = 4;
+			ecc_bytes = 46;
+			ecc_block_size = 228;
+			image_size_x = 853;
+			image_size_y = 736;
+
+			cell_size = 8;
+			cell_spacing_x = cell_size+1;
+			cell_spacing_y = cell_size+1;
+			cell_offset = 9;
+			cells_per_col_x = 93;
+			cells_per_col_y = 80;
+
+			fountain_chunks_scalar = 1;
+		}
+	};*/
+
 	struct Conf8x8_mini : conf
 	{
 		Conf8x8_mini()
