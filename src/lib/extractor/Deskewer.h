@@ -11,26 +11,28 @@
 class Deskewer
 {
 public:
-	Deskewer(cimbar::vec_xy image_size={}, unsigned anchor_size=0);
+	Deskewer(unsigned padding=0, cimbar::vec_xy image_size={}, unsigned anchor_size=0);
 
 	template <typename MAT>
 	MAT deskew(const MAT& img, const Corners& corners);
 
 protected:
 	cimbar::vec_xy _imageSize;
-	int _anchorSize;
+	unsigned _anchorSize;
+	unsigned _padding;
 };
 
 template <typename MAT>
 inline MAT Deskewer::deskew(const MAT& img, const Corners& corners)
 {
 	std::vector<cv::Point2f> outputPoints;
-	outputPoints.push_back(cv::Point2f(_anchorSize, _anchorSize));
-	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize, _anchorSize));
-	outputPoints.push_back(cv::Point2f(_anchorSize, _imageSize.height() - _anchorSize));
-	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize, _imageSize.height() - _anchorSize));
+	outputPoints.push_back(cv::Point2f(_anchorSize+_padding, _anchorSize+_padding));
+	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize+_padding, _anchorSize+_padding));
+	outputPoints.push_back(cv::Point2f(_anchorSize+_padding, _imageSize.height() - _anchorSize+_padding));
+	outputPoints.push_back(cv::Point2f(_imageSize.width() - _anchorSize+_padding, _imageSize.height() - _anchorSize+_padding));
 
-	MAT output(_imageSize.height(), _imageSize.width(), img.type());
+	// + 2*padding ?
+	MAT output(_imageSize.height() + (_padding*2), _imageSize.width() + (_padding*2), img.type());
 	cv::Mat transform = cv::getPerspectiveTransform(corners.all(), outputPoints);
 
 	cv::warpPerspective(img, output, transform, output.size(), cv::INTER_LINEAR);

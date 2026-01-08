@@ -40,8 +40,7 @@ namespace {
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
-		// TODO: this should be on capacity, not image_size... right??
-		bitbuffer bb(Config::image_size_x() * Config::image_size_y() / 8);
+		bitbuffer bb(symbols.rows * symbols.cols / 8);
 		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 		return bb;
 	}
@@ -53,14 +52,14 @@ namespace {
 		std::get<2>(max_color) = std::max(std::get<2>(max_color), static_cast<float>(c[2]));
 	}
 
-	std::tuple<float, float, float> calculateWhite(const cv::Mat& img, bool dark)
+	std::tuple<float, float, float> calculateWhite(const cv::Mat& img, unsigned padding, bool dark)
 	{
 		std::tuple<float, float, float> bestColor({1, 1, 1});
 		if (dark)
 		{
-			unsigned tl = Config::anchor_size() - 2;
-			unsigned right = Config::image_size_x() - Config::anchor_size() - 2;
-			unsigned bottom = Config::image_size_y() - Config::anchor_size() - 2;
+			unsigned tl = Config::anchor_size() + padding - 2;
+			unsigned right = Config::image_size_x() + padding - Config::anchor_size() - 2;
+			unsigned bottom = Config::image_size_y() + padding - Config::anchor_size() - 2;
 			std::array<std::pair<unsigned, unsigned>, 3> anchors = {{ {tl, tl}, {tl, bottom}, {right, tl} }};
 			for (auto [x, y] : anchors)
 			{
@@ -72,9 +71,9 @@ namespace {
 		else // light
 		{
 			// TODO ONO: this is wrong, fix it
-			unsigned tl = (Config::anchor_size() << 1) + 6;
-			unsigned right = Config::image_size_x() - tl - 4;
-			unsigned bottom = Config::image_size_y() - tl - 4;
+			unsigned tl = (Config::anchor_size() << 1) + padding + 6;
+			unsigned right = Config::image_size_x() + padding - tl - 4;
+			unsigned bottom = Config::image_size_y() + padding - tl - 4;
 			std::array<std::pair<unsigned, unsigned>, 4> anchors = {{ {0, tl}, {tl, 0}, {0, bottom}, {right, 0} }};
 			for (auto [x, y] : anchors)
 			{
@@ -86,9 +85,9 @@ namespace {
 		return bestColor;
 	}
 
-	bool simpleColorCorrection(const cv::Mat& img, CimbDecoder& decoder)
+	bool simpleColorCorrection(const cv::Mat& img, CimbDecoder& decoder, unsigned padding)
 	{
-		std::tuple<float, float, float> white = calculateWhite(img, Config::dark());
+		std::tuple<float, float, float> white = calculateWhite(img, padding, Config::dark());
 		decoder.update_color_correction(color_correction::get_adaptation_matrix<adaptation_transform::von_kries>(white, {255.0, 255.0, 255.0}));
 		return true;
 	}
@@ -110,10 +109,11 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 	, _fountainColorHeader(0U)
 	, _radioactiveBlockId(0) // can only compute once we know the file size
 	, _cellSize(Config::cell_size() + 2)
+	, _gridPadding(std::min(_image.cols - Config::image_size_x(), _image.rows - Config::image_size_y())/2)
 	, _positions(
 		  cimbar::vec_xy{Config::cell_spacing_x(), Config::cell_spacing_y()},
 		  cimbar::vec_xy{Config::cells_per_col_x(), Config::cells_per_col_y()},
-		  Config::cell_offset(), cimbar::vec_xy{Config::corner_padding_x(), Config::corner_padding_y()}
+		  Config::cell_offset()+_gridPadding, cimbar::vec_xy{Config::corner_padding_x(), Config::corner_padding_y()}
 	)
 	, _decoder(decoder)
 	, _good(_image.cols >= Config::image_size_x() and _image.rows >= Config::image_size_y())
@@ -122,7 +122,7 @@ CimbReader::CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_
 {
 	_grayscale = preprocessSymbolGrid(img, needs_sharpen);
 	if (_good and color_correction == 1)
-		simpleColorCorrection(_image, decoder);
+		simpleColorCorrection(_image, decoder, _gridPadding);
 }
 
 CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen, int color_correction)
@@ -254,7 +254,7 @@ void CimbReader::init_ccm(unsigned color_bits, unsigned interleave_blocks, unsig
 
 	// 5. sample corners
 	{
-		std::tuple<float, float, float> white = calculateWhite(_image, Config::dark());
+		std::tuple<float, float, float> white = calculateWhite(_image, _gridPadding, Config::dark());
 		cv::Mat arow = (cv::Mat_<float>(1,3) << std::get<0>(white), std::get<1>(white), std::get<2>(white));
 		actual.push_back(arow);
 
