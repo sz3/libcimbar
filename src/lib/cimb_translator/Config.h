@@ -25,11 +25,13 @@ namespace cimbar
 					cc = cimbar::Conf8x8();
 					cc.color_bits = 2;
 					cc.legacy_mode = true;
+					cc.fountain_chunks_scalar = -10;
 					return cc;
 				case 8:
 					cc = cimbar::Conf8x8();
 					cc.color_bits = 3;
 					cc.legacy_mode = true;
+					cc.fountain_chunks_scalar = -10;
 					return cc;
 				case 66:
 					return cimbar::Conf8x8_micro();
@@ -103,6 +105,7 @@ namespace cimbar
 
 		static constexpr unsigned cell_size()
 		{
+			// TODO: runtime
 			return 8;
 		}
 

@@ -55,8 +55,8 @@ namespace cimbar
 		{
 			if (!bitspercell)
 				bitspercell = bits_per_cell();
-			if (legacy_mode or !fountain_chunks_scalar)
-				return 10;
+			if (fountain_chunks_scalar < 0)
+				return -fountain_chunks_scalar;
 			return bitspercell * fountain_chunks_scalar;
 		}
 
