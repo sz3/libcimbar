@@ -75,10 +75,9 @@ var Main = function () {
 
   // public interface
   return {
-    init: async function (canvas) {
+    init: function (canvas) {
       Main.setMode('B');
       Main.check_GL_enabled(canvas);
-      Main.prevent_sleep();
     },
 
     check_GL_enabled: function (canvas) {
@@ -179,9 +178,7 @@ var Main = function () {
           _wakeLock.addEventListener('release', () => {
             _wakeLock = undefined;
           });
-        } catch (err) {
-          console.error(`${err.name}, ${err.message}`);
-        }
+        } catch (err) { }
       };
       requestWakeLock();
     },
@@ -191,7 +188,7 @@ var Main = function () {
       console.log("encode returned " + res);
 
       if (res == 0) {
-        Main.setActive(true);
+        Main.setActive();
       }
     },
 
@@ -261,6 +258,10 @@ var Main = function () {
       if (_showStats && frameCount) {
         _renderTime += elapsed;
         Main.setHTML("status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime / frameCount));
+      }
+
+      if (!Main.isPaused() && _counter % 16 == 0) {
+        setTimeout(Main.prevent_sleep, 0);
       }
     },
 
