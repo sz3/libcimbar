@@ -10,6 +10,8 @@ var Main = function () {
   var _counter = 0;
   var _renderTime = 0;
 
+  var _wakeLock = undefined;
+
   // cached
   var _idealRatio = 1;
   var _compressBuff = undefined;
@@ -73,9 +75,10 @@ var Main = function () {
 
   // public interface
   return {
-    init: function (canvas) {
+    init: async function (canvas) {
       Main.setMode('B');
       Main.check_GL_enabled(canvas);
+      Main.prevent_sleep();
     },
 
     check_GL_enabled: function (canvas) {
@@ -163,6 +166,24 @@ var Main = function () {
 
       Main.setTitle(filename);
       Main.setHTML("current-file", filename);
+    },
+
+    prevent_sleep: async function () {
+      if (_wakeLock) {
+        return;
+      }
+      const requestWakeLock = async () => {
+        try {
+          _wakeLock = await navigator.wakeLock.request('screen');
+          console.log('got wake lock!');
+          _wakeLock.addEventListener('release', () => {
+            _wakeLock = undefined;
+          });
+        } catch (err) {
+          console.error(`${err.name}, ${err.message}`);
+        }
+      };
+      requestWakeLock();
     },
 
     encode_bytes: function (wasmData) {
