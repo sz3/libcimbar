@@ -10,6 +10,8 @@ var Main = function () {
   var _counter = 0;
   var _renderTime = 0;
 
+  var _wakeLock = undefined;
+
   // cached
   var _idealRatio = 1;
   var _compressBuff = undefined;
@@ -165,12 +167,28 @@ var Main = function () {
       Main.setHTML("current-file", filename);
     },
 
+    prevent_sleep: async function () {
+      if (_wakeLock) {
+        return;
+      }
+      const requestWakeLock = async () => {
+        try {
+          _wakeLock = await navigator.wakeLock.request('screen');
+          console.log('got wake lock!');
+          _wakeLock.addEventListener('release', () => {
+            _wakeLock = undefined;
+          });
+        } catch (err) { }
+      };
+      requestWakeLock();
+    },
+
     encode_bytes: function (wasmData) {
       var res = Module._cimbare_encode(wasmData.byteOffset, wasmData.length);
       console.log("encode returned " + res);
 
       if (res == 0) {
-        Main.setActive(true);
+        Main.setActive();
       }
     },
 
@@ -240,6 +258,10 @@ var Main = function () {
       if (_showStats && frameCount) {
         _renderTime += elapsed;
         Main.setHTML("status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime / frameCount));
+      }
+
+      if (!Main.isPaused() && _counter % 16 == 0) {
+        setTimeout(Main.prevent_sleep, 0);
       }
     },
 
