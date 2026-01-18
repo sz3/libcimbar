@@ -255,6 +255,9 @@ var Main = function () {
       if (mode_str == "4C") {
         modeVal = 4;
       }
+      else if (mode_str == "Bu") {
+        modeVal = 66;
+      }
       else if (mode_str == "Bm") {
         modeVal = 67;
       }
@@ -268,17 +271,26 @@ var Main = function () {
         nav.classList.add("mode-4c");
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
-      } else if (modeVal == 68) {
-        nav.classList.add("mode-b");
+        nav.classList.remove("mode-bu");
+      } else if (modeVal == 66) {
+        nav.classList.add("mode-bu");
+        nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
         nav.classList.remove("mode-4c");
       } else if (modeVal == 67) {
         nav.classList.add("mode-bm");
         nav.classList.remove("mode-b");
+        nav.classList.remove("mode-bu");
+        nav.classList.remove("mode-4c");
+      } else if (modeVal == 68) {
+        nav.classList.add("mode-b");
+        nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-bu");
         nav.classList.remove("mode-4c");
       } else {
         nav.classList.remove("mode-b");
         nav.classList.remove("mode-bm");
+        nav.classList.remove("mode-bu");
         nav.classList.remove("mode-4c");
       }
     },

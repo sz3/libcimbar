@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 		("n,encode", "Run the encoder!", cxxopts::value<bool>())
 		("i,in", "Encoded pngs/jpgs/etc (for decode), or file to encode", cxxopts::value<vector<string>>())
 		("o,out", "Output file prefix (encoding) or directory (decoding).", cxxopts::value<string>())
-		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,4C]", cxxopts::value<string>()->default_value("B"))
+		("m,mode", "Select a cimbar mode. B (the default) is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,Bu,4C]", cxxopts::value<string>()->default_value("B"))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 		("color-correct", "Toggle decoding color correction. 2 == full (fountain mode only). 1 == simple. 0 == off.", cxxopts::value<int>()->default_value("2"))
 		("color-correction-file", "Debug -- save color correction matrix generated during fountain decode, or use it for non-fountain decodes", cxxopts::value<string>())
@@ -234,6 +234,8 @@ int main(int argc, char** argv)
 			config_mode = 4;
 		else if (mode == "8c" or mode == "8C")
 			config_mode = 8;
+		else if (mode == "Bu" or mode == "BU")
+			config_mode = 66;
 		else if (mode == "Bm" or mode == "BM")
 			config_mode = 67;
 	}

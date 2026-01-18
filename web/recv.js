@@ -283,7 +283,7 @@ var Recv = function () {
       // make sure the camera feed stays up
       Recv.watch_for_camera_pause();
 
-      const modeVals = [67, 68, 4];
+      const modeVals = [66, 68, 67, 4];
 
       var vf = undefined;
       if (_framesInFlight > 20) {
@@ -418,6 +418,7 @@ var Recv = function () {
       const modeToString = {
         4: "4C",
         8: "8C",
+        66: "Bu",
         67: "Bm",
         68: "B"
       };
@@ -468,4 +469,3 @@ var Recv = function () {
     }
   };
 }();
-
