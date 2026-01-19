@@ -2,7 +2,6 @@
 #pragma once
 
 #include "FountainDecoder.h"
-#include <iostream>
 #include <optional>
 #include <string>
 

@@ -6,10 +6,7 @@
 #include "encoder/Encoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
-
-#include <iostream>
 #include <sstream>
-
 
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;

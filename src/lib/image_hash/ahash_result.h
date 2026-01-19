@@ -5,7 +5,6 @@
 #include "intx/intx.hpp"
 #include <array>
 #include <cmath>
-#include <iostream>
 #include <utility>
 
 namespace image_hash

@@ -5,7 +5,6 @@
 
 #include "zstd/zstd.h"
 #include <array>
-#include <iostream>
 #include <sstream>
 #include <vector>
 
