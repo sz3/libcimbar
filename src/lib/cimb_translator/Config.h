@@ -149,7 +149,6 @@ namespace cimbar
 			return active_conf().total_cells();
 		}
 
-		// leave bitspercell here
 		static unsigned capacity(unsigned bitspercell=0)
 		{
 			return active_conf().capacity(bitspercell);

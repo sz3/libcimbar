@@ -44,7 +44,7 @@ namespace cimbar
 			return cells_per_col_x*cells_per_col_y - (corner_padding_x()*corner_padding_y() * 4);
 		}
 
-		unsigned capacity(unsigned bitspercell) const
+		unsigned capacity(unsigned bitspercell=0) const
 		{
 			if (!bitspercell)
 				bitspercell = bits_per_cell();
