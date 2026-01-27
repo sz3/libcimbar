@@ -202,7 +202,8 @@ inline constexpr result_with_carry<uint64_t> addc(
 inline constexpr result_with_carry<uint64_t> subc(
     uint64_t x, uint64_t y, bool carry = false) noexcept
 {
-#if __has_builtin(__builtin_subcll)
+    // Use __builtin_subcll if available (except buggy Xcode 14.3.1 on arm64).
+#if __has_builtin(__builtin_subcll) && __apple_build_version__ != 14030022
     if (!is_constant_evaluated())
     {
         unsigned long long carryout = 0;  // NOLINT(google-runtime-int)
