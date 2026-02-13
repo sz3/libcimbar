@@ -16,6 +16,11 @@ public:
 		return _it != _c.end();
 	}
 
+	decltype(auto) operator*() const
+	{
+		return *_it;
+	}
+
 	operator CONTAINER_IT() const
 	{
 		return _it;
