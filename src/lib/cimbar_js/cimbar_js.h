@@ -17,7 +17,7 @@ int cimbare_configure(int mode_val, int compression);
 float cimbare_get_aspect_ratio();
 
 // internal usage
-bool cimbare_auto_scale_window();
+bool cimbare_auto_scale_window(unsigned padding);
 int cimbare_get_frame_buff(unsigned char** buff);
 
 #ifdef __cplusplus

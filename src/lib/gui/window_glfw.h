@@ -13,10 +13,17 @@ namespace cimbar {
 
 class window_glfw
 {
+protected:
+	struct runtime_ctx
+	{
+		unsigned width;
+		unsigned height;
+		unsigned padding;
+	};
+
 public:
 	window_glfw(unsigned width, unsigned height, std::string title)
-		: _width(width)
-		, _height(height)
+		: _ctx({width, height, 0})
 	{
 		if (!glfwInit())
 		{
@@ -32,6 +39,7 @@ public:
 		}
 		glfwMakeContextCurrent(_w);
 		glfwSwapInterval(1);
+		glfwSetWindowUserPointer(_w, &_ctx);
 
 		_display = std::make_shared<cimbar::gl_2d_display>(std::max(width, height));
 		glGenTextures(1, &_texid);
@@ -60,12 +68,40 @@ public:
 		return glfwWindowShouldClose(_w);
 	}
 
-	void auto_scale_to_window()
+	void auto_scale_to_window(unsigned padding=0)
 	{
 		if (!is_good())
 			return;
-		glfwSetWindowAspectRatio(_w, _width, _height);
-		auto fun = [](GLFWwindow*, int w, int h){ glViewport(0, 0, w, h); };
+		_ctx.padding = padding;
+		glfwSetWindowAspectRatio(_w, _ctx.width, _ctx.height);
+		auto fun = [](GLFWwindow* win, int w, int h) {
+			if (h == 0)
+				return;
+
+			auto* appCtx = static_cast<runtime_ctx*>(glfwGetWindowUserPointer(win));
+			float targetAspect = static_cast<float>(appCtx->width - appCtx->padding)/(appCtx->height - appCtx->padding);
+			float currentAspect = static_cast<float>(w-appCtx->padding) / static_cast<float>(h-appCtx->padding);
+
+			int viewportWidth, viewportHeight;
+			int xOffset = 0, yOffset = 0;
+
+			if (currentAspect > targetAspect)
+			{
+				viewportHeight = h - appCtx->padding;
+				viewportWidth = static_cast<int>(h * targetAspect) - appCtx->padding;
+				xOffset = (w - viewportWidth) / 2;
+				yOffset = appCtx->padding / 2;
+			}
+			else
+			{
+				viewportWidth = w - appCtx->padding;
+				viewportHeight = static_cast<int>(w / targetAspect) - appCtx->padding;
+				yOffset = (h - viewportHeight) / 2;
+				xOffset = appCtx->padding / 2;
+			}
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glViewport(xOffset, yOffset, viewportWidth, viewportHeight);
+		};
 		glfwSetWindowSizeCallback(_w, fun);
 	}
 
@@ -73,11 +109,11 @@ public:
 	{
 		if (_w)
 		{
-			_width = width;
-			_height = height;
+			_ctx.width = width;
+			_ctx.height = height;
 			glfwSetWindowAspectRatio(_w, width, height);
-			glfwSetWindowSize(_w, width, height);
-			init_opengl(width, height);
+			glfwSetWindowSize(_w, width +_ctx.padding, height+_ctx.padding);
+			init_opengl(width +_ctx.padding, height+_ctx.padding);
 		}
 	}
 
@@ -122,12 +158,12 @@ public:
 
 	unsigned width() const
 	{
-		return _width;
+		return _ctx.width;
 	}
 
 	unsigned height() const
 	{
-		return _height;
+		return _ctx.height;
 	}
 
 protected:
@@ -150,10 +186,9 @@ protected:
 
 protected:
 	GLFWwindow* _w = nullptr;
+	runtime_ctx _ctx;
 	GLuint _texid;
 	std::shared_ptr<cimbar::gl_2d_display> _display;
-	unsigned _width;
-	unsigned _height;
 	bool _good = true;
 };
 
