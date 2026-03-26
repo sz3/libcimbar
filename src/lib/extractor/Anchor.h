@@ -3,7 +3,6 @@
 
 #include "Point.h"
 #include <cmath>
-#include <iostream>
 #include <utility>
 
 class Anchor

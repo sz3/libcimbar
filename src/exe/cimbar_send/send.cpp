@@ -33,16 +33,14 @@ int main(int argc, char** argv)
 {
 	cxxopts::Options options("cimbar video encoder", "Draw a bunch of weird static on the screen!");
 
-	unsigned colorBits = cimbar::Config::color_bits();
 	unsigned compressionLevel = cimbar::Config::compression_level();
-	unsigned ecc = cimbar::Config::ecc_bytes();
 	unsigned defaultFps = 15;
+	unsigned defaultPadding = 32;
 	options.add_options()
 		("i,in", "Source file", cxxopts::value<vector<string>>())
-		("c,colorbits", "Color bits. [0-3]", cxxopts::value<int>()->default_value(turbo::str::str(colorBits)))
-		("e,ecc", "ECC level", cxxopts::value<unsigned>()->default_value(turbo::str::str(ecc)))
 		("f,fps", "Target FPS", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultFps)))
-		("m,mode", "Select a cimbar mode. B is new to 0.6.x. 4C is the 0.5.x config. [B,Bm,Bu,4C]", cxxopts::value<string>()->default_value("4C"))
+		("m,mode", "Select a cimbar mode. B modes are new to 0.6.x. 4C is the 0.5.x config. [B,Bm,Bu,4C]", cxxopts::value<string>()->default_value("B"))
+		("p,padding", "Black padding around image in pixels.", cxxopts::value<unsigned>()->default_value(turbo::str::str(defaultPadding)))
 		("z,compression", "Compression level. 0 == no compression.", cxxopts::value<int>()->default_value(turbo::str::str(compressionLevel)))
 		("h,help", "Print usage")
 	;
@@ -58,10 +56,7 @@ int main(int argc, char** argv)
 	}
 
 	vector<string> infiles = result["in"].as<vector<string>>();
-
-	colorBits = std::min(3, result["colorbits"].as<int>());
 	compressionLevel = result["compression"].as<int>();
-	ecc = result["ecc"].as<unsigned>();
 
 	unsigned config_mode = 68;
 	if (result.count("mode"))
@@ -74,20 +69,25 @@ int main(int argc, char** argv)
 		else if (mode == "Bm" or mode == "BM")
 			config_mode = 67;
 	}
+	cimbar::Config::update(config_mode);
+
+	unsigned padding = result["padding"].as<unsigned>();
+	if (padding == 0)
+		padding = defaultPadding;
 
 	unsigned fps = result["fps"].as<unsigned>();
 	if (fps == 0)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
-	int window_size_x = cimbar::Config::image_size_x() + 32;
-	int window_size_y = cimbar::Config::image_size_y() + 32;
+	int window_size_x = cimbar::Config::image_size_x();
+	int window_size_y = cimbar::Config::image_size_y();
 	if (cimbare_init_window(window_size_x, window_size_y) < 0)
 	{
 		std::cerr << "failed to create window :(" << std::endl;
 		return 70;
 	}
-	cimbare_auto_scale_window();
+	cimbare_auto_scale_window(padding);
 	cimbare_configure(config_mode, compressionLevel);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();

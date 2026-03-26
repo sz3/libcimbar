@@ -1,5 +1,5 @@
 #!/bin/bash
-#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:3.1.69 bash
+#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:5.0.0 bash
 
 SKIP_JS=${SKIP_JS:-}
 CIMBAR_ROOT=${CIMBAR_ROOT:-/usr/src/app}

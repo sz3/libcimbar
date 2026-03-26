@@ -2,9 +2,9 @@
 #pragma once
 
 #include "zstd/zstd.h"
+
+#include "serialize/format.h"
 #include <array>
-#include <fstream>
-#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -36,7 +36,7 @@ public:
 			size_t compressedBytes = ZSTD_compressCCtx(_cctx, _compBuff.data(), _compBuff.size(), data, writeLen, _compressionLevel);
 			if (ZSTD_isError(compressedBytes))
 			{
-				std::cerr << "error? " << ZSTD_getErrorName(compressedBytes) << std::endl;
+				fmt::print("error? {}\n", ZSTD_getErrorName(compressedBytes));
 				return false;
 			}
 			STREAM::write(_compBuff.data(), compressedBytes);

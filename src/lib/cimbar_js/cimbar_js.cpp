@@ -6,10 +6,7 @@
 #include "encoder/Encoder.h"
 #include "gui/window_glfw.h"
 #include "util/byte_istream.h"
-
-#include <iostream>
 #include <sstream>
-
 
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
@@ -64,12 +61,12 @@ int cimbare_rotate_window(bool rotate)
 	return 0;
 }
 
-bool cimbare_auto_scale_window()
+bool cimbare_auto_scale_window(unsigned padding)
 {
 	if (!_window or !_window->is_good())
 		return false;
 
-	_window->auto_scale_to_window();
+	_window->auto_scale_to_window(padding);
 	return true;
 }
 

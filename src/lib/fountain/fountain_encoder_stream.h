@@ -3,7 +3,6 @@
 
 #include "FountainEncoder.h"
 #include "FountainMetadata.h"
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
