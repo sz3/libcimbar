@@ -16,12 +16,12 @@ jobs:
 
       - name: Get openCV
         run: |
-          git clone --recurse-submodules --depth 1 --branch 4.11.0 https://github.com/opencv/opencv.git opencv4
+          git clone --recurse-submodules --depth 1 --branch 4.12.0 https://github.com/opencv/opencv.git opencv4
 
       - name: Run the build process with Docker
         uses: addnab/docker-run-action@v3
         with:
-          image: emscripten/emsdk:3.1.69
+          image: emscripten/emsdk:5.0.0
           options: -v ${{ github.workspace }}:/usr/src/app
           shell: bash
           run: |
