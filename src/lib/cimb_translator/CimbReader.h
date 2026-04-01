@@ -7,6 +7,7 @@
 
 #include "bit_file/bitbuffer.h"
 #include "fountain/FountainMetadata.h"
+#include "util/compiler_constants.h"
 #include <opencv2/opencv.hpp>
 
 class CimbReader
@@ -15,8 +16,8 @@ public:
 	CimbReader(const cv::Mat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen=false, int color_correction=2);
 	CimbReader(const cv::UMat& img, CimbDecoder& decoder, unsigned color_mode, bool needs_sharpen=false, int color_correction=2);
 
-	unsigned read(PositionData& pos);
-	unsigned read_color(const PositionData& pos) const;
+	CIMBAR_ALWAYS_INLINE unsigned read(PositionData& pos);
+	CIMBAR_ALWAYS_INLINE unsigned read_color(const PositionData& pos) const;
 	bool done() const;
 
 	void init_ccm(unsigned color_bits, unsigned interleave_blocks, unsigned interleave_partitions, unsigned fountain_blocks);

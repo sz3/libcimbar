@@ -33,13 +33,13 @@ public:
 	{}
 
 	template<typename... T>
-	uint64_t extract()
+	constexpr uint64_t extract()
 	{
 		return 0;
 	}
 
 	template<typename... T>
-	uint64_t extract(unsigned bit_offset, const T&... t)
+	constexpr uint64_t extract(unsigned bit_offset, const T&... t)
 	{
 		constexpr auto byte_offset = sizeof...(T);
 
