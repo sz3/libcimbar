@@ -31,6 +31,7 @@ public:
 			return;
 		}
 
+		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 		_w = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 		if (!_w)
 		{
@@ -102,7 +103,7 @@ public:
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(xOffset, yOffset, viewportWidth, viewportHeight);
 		};
-		glfwSetWindowSizeCallback(_w, fun);
+		glfwSetFramebufferSizeCallback(_w, fun);
 	}
 
 	void resize(unsigned width, unsigned height)
