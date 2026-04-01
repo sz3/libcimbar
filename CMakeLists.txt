@@ -7,6 +7,8 @@ if (MSVC)
     add_compile_options(/FI "iso646.h")
 endif()
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${libcimbar_SOURCE_DIR}/dist" CACHE PATH "..." FORCE)
 endif()

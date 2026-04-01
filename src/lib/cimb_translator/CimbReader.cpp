@@ -130,13 +130,13 @@ CimbReader::CimbReader(const cv::UMat& img, CimbDecoder& decoder, unsigned color
 {
 }
 
-unsigned CimbReader::read_color(const PositionData& pos) const
+CIMBAR_ALWAYS_INLINE unsigned CimbReader::read_color(const PositionData& pos) const
 {
 	Cell color_cell(_image, pos.x, pos.y, Config::cell_size(), Config::cell_size());
 	return _decoder.decode_color(color_cell, _colorMode);
 }
 
-unsigned CimbReader::read(PositionData& pos)
+CIMBAR_ALWAYS_INLINE unsigned CimbReader::read(PositionData& pos)
 {
 	if (done())
 		return 0;

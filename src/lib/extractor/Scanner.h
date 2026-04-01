@@ -5,6 +5,7 @@
 #include "Corners.h"
 #include "Point.h"
 #include "ScanState.h"
+#include "util/compiler_constants.h"
 
 #include <opencv2/opencv.hpp>
 #include <functional>
@@ -47,16 +48,16 @@ public: // other interesting methods
 	static bool sort_top_to_bottom(std::vector<Anchor>& anchors);
 
 	template <typename SCANTYPE>
-	void t1_scan_rows(std::function<void(const Anchor&)> fun, int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
+	CIMBAR_FLATTEN void t1_scan_rows(std::function<void(const Anchor&)> fun, int skip=-1, int y=-1, int yend=-1, int xstart=-1, int xend=-1) const;
 
 	template <typename SCANTYPE>
-	void t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
+	CIMBAR_FLATTEN void t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const;
 
 	template <typename SCANTYPE>
-	void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> funs) const;
+	CIMBAR_FLATTEN void t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> funs) const;
 
 	template <typename SCANTYPE>
-	void t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const;
+	CIMBAR_FLATTEN void t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const;
 
 	unsigned scan_primary(std::vector<Anchor>& candidates);
 	bool add_bottom_right_corner(std::vector<Anchor>& anchors, unsigned cutoff);
@@ -274,7 +275,7 @@ inline bool Scanner::scan_diagonal(std::vector<Anchor>& points, int xstart, int 
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun, int skip, int y, int yend, int xstart, int xend) const
+CIMBAR_FLATTEN inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun, int skip, int y, int yend, int xstart, int xend) const
 {
 	if (skip <= 0)
 		skip = _skip;
@@ -292,7 +293,7 @@ inline void Scanner::t1_scan_rows(std::function<void(const Anchor&)> fun, int sk
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+CIMBAR_FLATTEN inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const Anchor&)> fun) const
 {
 	std::vector<Anchor> points;
 	int ystart = hint.y() - (3 * hint.xrange());
@@ -304,7 +305,7 @@ inline void Scanner::t2_scan_column(const Anchor& hint, std::function<void(const
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const
+CIMBAR_FLATTEN inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(const Anchor&)> fun) const
 {
 	std::vector<Anchor> confirms;
 	int xstart = hint.xavg() - (2 * hint.yrange());
@@ -329,7 +330,7 @@ inline void Scanner::t3_scan_diagonal(const Anchor& hint, std::function<void(con
 }
 
 template <typename SCANTYPE>
-inline void Scanner::t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const
+CIMBAR_FLATTEN inline void Scanner::t4_confirm_scan(Anchor hint, bool merge_confirms, std::function<void(const Anchor&)> fun) const
 {
 	// because we have a lot of weird crap going on in the center of the image,
 	// do one more scan of our (theoretical) anchor points.
