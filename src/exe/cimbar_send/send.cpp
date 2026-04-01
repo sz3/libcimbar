@@ -80,6 +80,9 @@ int main(int argc, char** argv)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
 
+	// GLFW high DPI hack
+	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+
 	int window_size_x = cimbar::Config::image_size_x();
 	int window_size_y = cimbar::Config::image_size_y();
 	if (cimbare_init_window(window_size_x, window_size_y) < 0)

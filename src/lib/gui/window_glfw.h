@@ -31,7 +31,6 @@ public:
 			return;
 		}
 
-		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 		_w = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 		if (!_w)
 		{
