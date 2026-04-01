@@ -6,6 +6,7 @@
 #include "util/File.h"
 
 #include "cxxopts/cxxopts.hpp"
+#include <GLFW/glfw3.h>
 
 #include <chrono>
 #include <iostream>
