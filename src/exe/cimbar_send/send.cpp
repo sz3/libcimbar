@@ -6,6 +6,7 @@
 #include "util/File.h"
 
 #include "cxxopts/cxxopts.hpp"
+#include <GLFW/glfw3.h>
 
 #include <chrono>
 #include <iostream>
@@ -79,6 +80,9 @@ int main(int argc, char** argv)
 	if (fps == 0)
 		fps = defaultFps;
 	unsigned delay = 1000 / fps;
+
+	// GLFW high DPI hack
+	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
 	int window_size_x = cimbar::Config::image_size_x();
 	int window_size_y = cimbar::Config::image_size_y();

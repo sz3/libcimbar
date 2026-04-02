@@ -102,7 +102,7 @@ public:
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(xOffset, yOffset, viewportWidth, viewportHeight);
 		};
-		glfwSetWindowSizeCallback(_w, fun);
+		glfwSetFramebufferSizeCallback(_w, fun);
 	}
 
 	void resize(unsigned width, unsigned height)
