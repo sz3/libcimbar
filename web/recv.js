@@ -4,6 +4,13 @@ var Sink = function () {
   var _errBuff = undefined;
   var _errBuffSize = 1024;
 
+  function fountain_buff() {
+    if (_fountainBuff.buffer !== Module.HEAPU8.buffer) {
+      _fountainBuff = new Uint8Array(Module.HEAPU8.buffer, _fountainBuff.byteOffset, _fountainBuff.byteLength);
+    }
+    return _fountainBuff;
+  }
+
   // public interface
   return {
     allocate: function () {
@@ -22,10 +29,11 @@ var Sink = function () {
       if (buff.length == 0) { // sanity check
         return;
       }
-      _fountainBuff.set(buff);
+      const fountBuff = fountain_buff();
+      fountBuff.set(buff);
 
-      console.log('sink decode ' + _fountainBuff); //TODO: base64?
-      var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
+      console.log('sink decode ' + fountBuff); //TODO: base64?
+      var res = Module._cimbard_fountain_decode(fountBuff.byteOffset, buff.length);
       console.log("on decode got res " + res);
 
       const report = Sink.get_report();

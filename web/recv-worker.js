@@ -99,11 +99,21 @@ var RecvWorker = function () {
     },
 
     imgBuff: function () {
-      return _buffs['img'];
+      let buff = _buffs['img'];
+      if (buff.buffer !== Module.HEAPU8.buffer) {
+        _buffs['img'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
+        buff = _buffs['img'];
+      }
+      return buff;
     },
 
     fountainBuff: function () {
-      return _buffs['fountain'];
+      let buff = _buffs['fountain'];
+      if (buff.buffer !== Module.HEAPU8.buffer) {
+        _buffs['img'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
+        buff = _buffs['fountain'];
+      }
+      return buff;
     }
   };
 }();
