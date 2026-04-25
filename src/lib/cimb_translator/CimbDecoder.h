@@ -6,6 +6,7 @@
 #include "chromatic_adaptation/color_correction.h"
 #include "image_hash/ahash_result.h"
 #include "image_hash/average_hash.h"
+#include "util/compiler_constants.h"
 #include <opencv2/opencv.hpp>
 #include <cstdint>
 #include <string>
@@ -20,12 +21,12 @@ public:
 
 	unsigned get_best_symbol(image_hash::ahash_result<cimbar::Config::cell_size()>& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 	unsigned decode_symbol(const cv::Mat& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
-	unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
+	CIMBAR_FLATTEN unsigned decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown=0xFF) const;
 
 	std::tuple<uchar,uchar,uchar> get_color(int i, unsigned color_mode) const;
 	std::tuple<uchar,uchar,uchar> avg_color(const Cell& color_cell) const;
 	unsigned get_best_color(float r, float g, float b, unsigned color_mode) const;
-	unsigned decode_color(const Cell& cell, unsigned color_mode) const;
+	CIMBAR_FLATTEN unsigned decode_color(const Cell& cell, unsigned color_mode) const;
 
 	bool expects_binary_threshold() const;
 	unsigned symbol_bits() const;

@@ -5,6 +5,7 @@
 #include "bit_extractor.h"
 #include "bit_file/bitmatrix.h"
 #include "cimb_translator/Cell.h"
+#include "util/compiler_constants.h"
 
 #include "intx/intx.hpp"
 #include <opencv2/opencv.hpp>
@@ -60,7 +61,7 @@ namespace image_hash
 	}
 
 	template <unsigned CELLSIZE>
-	inline ahash_result<CELLSIZE> fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result<CELLSIZE>::ALL)
+	CIMBAR_ALWAYS_INLINE inline ahash_result<CELLSIZE> fuzzy_ahash(const bitmatrix& img, unsigned mode=ahash_result<CELLSIZE>::ALL)
 	{
 		const unsigned readlen = CELLSIZE+2;
 		intx::uint128 res(0);

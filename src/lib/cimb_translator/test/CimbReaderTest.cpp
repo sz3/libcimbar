@@ -25,6 +25,11 @@ namespace {
 	public:
 		using CimbDecoder::CimbDecoder;
 		using CimbDecoder::internal_ccm;
+
+		~TestableCimbDecoder()
+		{
+			internal_ccm() = color_correction();
+		}
 	};
 }
 #include "serialize/str_join.h"

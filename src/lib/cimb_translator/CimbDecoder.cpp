@@ -6,6 +6,7 @@
 #include "Config.h"
 #include "image_hash/hamming_distance.h"
 #include "serialize/format.h"
+#include "util/compiler_constants.h"
 
 #include <algorithm>
 #include <iostream>
@@ -138,7 +139,7 @@ unsigned CimbDecoder::decode_symbol(const cv::Mat& cell, unsigned& drift_offset,
 	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
-unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
+CIMBAR_FLATTEN unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
 	int checkRule = cooldown == 0xFE? image_hash::ahash_result<cimbar::Config::cell_size()>::ALL : image_hash::ahash_result<cimbar::Config::cell_size()>::FAST;
 	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(cell, checkRule);
@@ -207,7 +208,7 @@ std::tuple<uchar,uchar,uchar> CimbDecoder::avg_color(const Cell& color_cell) con
 	return center.mean_rgb();
 }
 
-unsigned CimbDecoder::decode_color(const Cell& color_cell, unsigned color_mode) const
+CIMBAR_FLATTEN unsigned CimbDecoder::decode_color(const Cell& color_cell, unsigned color_mode) const
 {
 	if (_numColors <= 1)
 		return 0;
