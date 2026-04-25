@@ -2,16 +2,6 @@ var Zstd = function () {
 
   var _decompBuff = undefined;
 
-  function _downloadHelper(name, bloburl) {
-    var aaa = document.createElement('a');
-    aaa.href = bloburl;
-    aaa.download = name;
-    document.body.appendChild(aaa);
-    aaa.style = 'display: none';
-    aaa.click();
-    aaa.remove();
-  }
-
   function getDecompressReader(id) {
     // allocate buffer once. We'll reuse it,
     // and slice() to copy to the local (non-wasm) heap
@@ -39,6 +29,7 @@ var Zstd = function () {
     });
     return readstream;
   }
+
 
   async function saveViaStreaming(readstream, filename) {
     // afaik there's no way to get the save file picker to activate
@@ -84,8 +75,15 @@ var Zstd = function () {
     // helper
     download_blob: function (name, blob) {
       var bloburl = window.URL.createObjectURL(blob);
-      _downloadHelper(name, bloburl);
+      var aaa = document.createElement('a');
+      aaa.href = bloburl;
+      aaa.download = name;
+      document.body.appendChild(aaa);
+      aaa.style = 'display: none';
+      aaa.click();
+
       setTimeout(function () {
+        aaa.remove();
         return window.URL.revokeObjectURL(bloburl);
       }, 1000);
     },

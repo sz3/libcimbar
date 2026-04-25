@@ -4,6 +4,13 @@ var Sink = function () {
   var _errBuff = undefined;
   var _errBuffSize = 1024;
 
+  function fountain_buff() {
+    if (_fountainBuff.buffer !== Module.HEAPU8.buffer) {
+      _fountainBuff = new Uint8Array(Module.HEAPU8.buffer, _fountainBuff.byteOffset, _fountainBuff.byteLength);
+    }
+    return _fountainBuff;
+  }
+
   // public interface
   return {
     allocate: function () {
@@ -22,10 +29,11 @@ var Sink = function () {
       if (buff.length == 0) { // sanity check
         return;
       }
-      _fountainBuff.set(buff);
+      const fountBuff = fountain_buff();
+      fountBuff.set(buff);
 
-      console.log('sink decode ' + _fountainBuff); //TODO: base64?
-      var res = Module._cimbard_fountain_decode(_fountainBuff.byteOffset, buff.length);
+      console.log('sink decode ' + fountBuff); //TODO: base64?
+      var res = Module._cimbard_fountain_decode(fountBuff.byteOffset, buff.length);
       console.log("on decode got res " + res);
 
       const report = Sink.get_report();
@@ -119,6 +127,57 @@ var Recv = function () {
     return isIOS || (isAppleDevice && isTouchScreen);
   }
 
+  function _getModeAspectRatio(mode) {
+    // (image_size_x + 16) / (image_size_y + 16)
+    switch (mode) {
+      case 66: return 1.1516; // Bu
+      case 67: return 1.413;  // Bm
+      default: return 1.0;    // B, 4C, auto
+    }
+  }
+
+  function _updateCrosshairPositions() {
+    if (!_video || !_video.videoWidth || !_video.videoHeight)
+      return;
+
+    var modeAspect = _getModeAspectRatio(_mode);
+
+    var windowW = window.innerWidth;
+    var windowH = window.innerHeight;
+    var camAspect = _video.videoWidth / _video.videoHeight;
+    var windowAspect = windowW / windowH;
+
+    var vidW = windowW;
+    var vidH = windowH;
+    if (camAspect > windowAspect)  // black bars top/bottom
+      vidH = vidW / camAspect;
+    else  // black bars left/right
+      vidW = vidH * camAspect;
+
+    var offsetY;
+    var offsetX;
+    if (windowH > windowW) {
+      // portrait
+      offsetY = (windowH - (vidW * modeAspect)) / 2;
+      offsetX = (windowW - vidW) / 2;
+    }
+    else {
+      offsetY = (windowH - vidH) / 2;
+      offsetX = (windowW - (vidH * modeAspect)) / 2;
+    }
+
+    var logme = "crosshair offsets now " + offsetX + ", " + offsetY;
+    //Recv.set_error(logme);
+    console.log(logme);
+
+    var xh1 = document.getElementById("crosshair1");
+    var xh2 = document.getElementById("crosshair2");
+    xh1.style.top = offsetY + "px";
+    xh1.style.right = offsetX + "px";
+    xh2.style.bottom = offsetY + "px";
+    xh2.style.left = offsetX + "px";
+  }
+
   // public interface
   return {
     init: function (video, num_workers) {
@@ -163,6 +222,7 @@ var Recv = function () {
 
     init_video: function (video) {
       _video = video;
+      window.addEventListener('resize', _updateCrosshairPositions);
 
       var constraints = {
         audio: false,
@@ -340,6 +400,8 @@ var Recv = function () {
     },
 
     update_visual_state: function () {
+      _updateCrosshairPositions();
+
       // check counters
       var xh1 = document.getElementById("crosshair1");
       var xh2 = document.getElementById("crosshair2");
