@@ -44,7 +44,7 @@ target_link_libraries(cimbar_js
 
 # asm.js vs wasm
 if(USE_WASM EQUAL "2")
-	set (LINK_WASM_OPT "-s SINGLE_FILE=1")
+	set (LINK_WASM_OPT "-s SINGLE_FILE=1 -s MALLOC='emmalloc' --closure 1")
 else()
 	set (LINK_WASM_OPT "-s WASM=1")
 endif()
