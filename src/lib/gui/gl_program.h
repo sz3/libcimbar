@@ -10,9 +10,10 @@ namespace cimbar {
 class gl_program
 {
 public:
-	gl_program(GLuint vertexShader, GLuint fragmentShader, const std::string& vertextVarName)
+	template<typename... StringList>
+	gl_program(GLuint vertexShader, GLuint fragmentShader, StringList... vertextVarName)
 	{
-		_p = build(vertexShader, fragmentShader, vertextVarName);
+		_p = build(vertexShader, fragmentShader, vertextVarName...);
 	}
 
 	~gl_program()
@@ -27,12 +28,20 @@ public:
 	}
 
 protected:
-	GLuint build(GLuint vertexShader, GLuint fragmentShader, const std::string& vertextVarName)
+	template<typename... StringList>
+	GLuint build(GLuint vertexShader, GLuint fragmentShader, StringList... vertextVarName)
 	{
 		GLuint prog = glCreateProgram();
 		glAttachShader(prog, vertexShader);
 		glAttachShader(prog, fragmentShader);
-		glBindAttribLocation(prog, 0, vertextVarName.c_str());
+
+		int varI = 0;
+		(
+			[prog, &varI](const std::string& varname) {
+				glBindAttribLocation(prog, varI++, varname.c_str());
+			}
+			(vertextVarName), ...
+		);
 		glLinkProgram(prog);
 
 		GLint res;
