@@ -3,6 +3,7 @@
 
 #include "gl_program.h"
 #include "gl_shader.h"
+#include "mat_to_gl.h"
 #include "util/loop_iterator.h"
 
 #include <GLES3/gl3.h>
@@ -50,8 +51,15 @@ public:
 	    , _shake(_shakePos)
 	    , _rotation(ROTATIONS)
 	{
+		glGenTextures(1, &_texid);
 		glGenBuffers(3, _vbo.data());
 		glGenVertexArrays(1, &_vao);
+	}
+
+	~gl_2d_display()
+	{
+		if (_texid)
+			glDeleteTextures(1, &_texid);
 	}
 
 	void clear()
@@ -60,7 +68,13 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void draw(GLuint texture)
+	bool load(const cv::Mat& img)
+	{
+		cimbar::mat_to_gl::load_gl_texture(_texid, img);
+		return true;
+	}
+
+	void draw()
 	{
 		GLuint prog = program();
 		glUseProgram(prog);
@@ -78,7 +92,7 @@ public:
 		// Bind to texture
 		GLuint textureUniform = glGetUniformLocation(prog, "tex");
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, _texid);
 		glUniform1i(textureUniform, 0);
 
 		// pass in rotation matrix
@@ -163,6 +177,7 @@ protected:
 	}
 
 protected:
+	GLuint _texid;
 	std::shared_ptr<cimbar::gl_program> _p;
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
