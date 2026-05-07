@@ -8,7 +8,8 @@
 class CimbWriter
 {
 public:
-	CimbWriter(unsigned symbol_bits, unsigned color_bits, bool dark=true, unsigned color_mode=1, cimbar::vec_xy size={});
+	CimbWriter(unsigned symbol_bits=0, int color_bits=-1, bool dark=true, unsigned color_mode=1, cimbar::vec_xy size={});
+	void set_color_mode(unsigned color_mode);
 
 	bool write(unsigned bits);
 	bool done() const;

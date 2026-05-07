@@ -92,7 +92,7 @@ int main(int argc, char** argv)
 		return 70;
 	}
 	cimbare_auto_scale_window(padding);
-	cimbare_configure(config_mode, compressionLevel);
+	cimbare_configure(config_mode, compressionLevel, false);
 
 	std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 	while (true)

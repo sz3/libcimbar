@@ -35,13 +35,16 @@ protected:
 		glAttachShader(prog, vertexShader);
 		glAttachShader(prog, fragmentShader);
 
-		int varI = 0;
-		(
-			[prog, &varI](const std::string& varname) {
-				glBindAttribLocation(prog, varI++, varname.c_str());
-			}
-			(vertextVarName), ...
-		);
+		{
+			int i = 0;
+			(
+				[prog, &i](const std::string& varname) {
+					glBindAttribLocation(prog, i++, varname.c_str());
+				}
+				(vertextVarName), ...
+			);
+		}
+
 		glLinkProgram(prog);
 
 		GLint res;

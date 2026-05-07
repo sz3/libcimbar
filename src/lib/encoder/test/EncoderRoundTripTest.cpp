@@ -115,6 +115,8 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	assertTrue( fes );
 	assertTrue( fes->good() );
 
+	CimbWriter writer;
+
 	// create decoder
 	Decoder dec;
 	fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path()));
@@ -122,10 +124,12 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	// encode frames, then pass to decoder
 	for (int i = 0; i < 100; ++i)
 	{
-		std::optional<cv::Mat> frame = enc.encode_next(*fes);
-		assertTrue( frame );
+		assertTrue( enc.encode_next(*fes, writer) );
+		cv::Mat frame = writer.image();
+		assertEquals( 1024, frame.cols );
+		assertEquals( 1024, frame.rows );
 
-		unsigned bytesDecoded = dec.decode_fountain(*frame, fds);
+		unsigned bytesDecoded = dec.decode_fountain(frame, fds);
 		assertEquals( 7500, bytesDecoded );
 
 		if (fds.num_done())
