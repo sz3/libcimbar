@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(wirehair)
 
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION FALSE)
 set(CMAKE_CXX_STANDARD 11)
 
 set(LIB_SOURCE_FILES
