@@ -76,12 +76,20 @@ bool cimbare_auto_scale_window(unsigned padding)
 	return true;
 }
 
-// we may change the api to accept an buff to next_frame()
-// rather than generating a fresh cv::Mat alloc each time
-// but for now, for non-JS purposes we expose this function
 int cimbare_get_frame_buff(unsigned char* buff, unsigned size)
 {
-	return -1;
+	if (!_gridWriter)
+		return -1;
+
+	cv::Mat img = _gridWriter->image();
+	int actualsize = img.cols * img.rows * img.channels();
+	if (size <= 0)
+		return -2;
+	if (size < actualsize)
+		return -3;
+
+	std::memcpy(buff, img.data, actualsize);
+	return actualsize;
 }
 
 // render() and next_frame() could be put in the same function,
@@ -124,7 +132,10 @@ int cimbare_next_frame()
 
 	// let's move CimbWriter out so its tiles are cached. How much will that help perf??? :thinking:
 	// prob not as much as GPU, but it's a necessary step anyway...
-	enc.encode_next(*_fes, *_gridWriter);
+	auto im = enc.encode_next(*_fes);
+	if (im and _gridWriter)
+		_gridWriter->write(*im);
+	// TODO: im to cv::Mat... probably give CimbWriter an extra method that takes a vector
 	return ++_frameCount;
 }
 
@@ -184,8 +195,13 @@ int cimbare_encode(const unsigned char* buffer, unsigned size)
 		_comp->pad(fountainChunkSize - compressedSize + 1);
 
 	// prepare writer
-	// TODO: prob use Encoder helpers for both these constructors?
-	_gridWriter = std::make_shared<CimbWriter>(cimbar::Config::symbol_bits(), cimbar::Config::color_bits());
+	if (!_gridWriter)
+	{
+		_gridWriter = std::make_shared<CimbWriter>(
+				cimbar::Config::symbol_bits(), cimbar::Config::color_bits(),
+				true, cimbar::Config::color_mode(),
+				_window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{});
+	}
 
 	// create the encoder stream
 	_fes = fountain_encoder_stream::create(*_comp, fountainChunkSize, _encodeId);

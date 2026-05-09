@@ -25,13 +25,16 @@ public:
 inline unsigned EncoderPlus::encode(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
-	CimbWriter writer;
 
 	unsigned i = 0;
 	while (true)
 	{
-		if (!encode_next(f, writer))
+		auto grid = encode_next(f);
+		if (!grid)
 			break;
+
+		CimbWriter writer(_bitsPerSymbol, _bitsPerColor, cimbar::Config::dark(), cimbar::Config::color_mode());
+		writer.write(*grid);
 
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
 		// imwrite expects BGR
@@ -50,8 +53,6 @@ inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const 
 	if (!fes)
 		return 0;
 
-	CimbWriter writer;
-
 	// ex: with ecc = 30 and 155 byte blocks, we have 60 rs blocks * 125 bytes per block == 7500 bytes to work with.
 	// if fountain_chunks_per_frame() is 10, the fountain_chunk_size will be 750.
 	// we calculate requiredFrames based only on symbol bits, to avoid the situation where the color decode is failing while we're
@@ -64,8 +65,12 @@ inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const 
 	unsigned consecutiveScansFailed = 0;
 	while (i < requiredFrames)
 	{
-		if (!encode_next(*fes, writer))
+		auto grid = encode_next(*fes);
+		if (!grid)
 			break;
+
+		CimbWriter writer(_bitsPerSymbol, _bitsPerColor, cimbar::Config::dark(), cimbar::Config::color_mode());
+		writer.write(*grid);
 
 		// some % of generated frames (for the current 8x8 impl)
 		// will produce random patterns that falsely match as

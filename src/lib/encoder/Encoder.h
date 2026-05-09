@@ -7,6 +7,7 @@
 #include "cimb_translator/CimbWriter.h"
 #include "cimb_translator/Config.h"
 #include "compression/zstd_compressor.h"
+#include "encoder/IconMatrix.h"
 #include "fountain/fountain_encoder_stream.h"
 
 #include <opencv2/opencv.hpp>
@@ -19,22 +20,21 @@ public:
 	Encoder(unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
 
-	template <typename STREAM, typename GRID>
-	bool encode_next(STREAM& stream, GRID& grid);
+	template <typename STREAM>
+	std::optional<IconMatrix> encode_next(STREAM& stream);
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, const std::string_view& filename, int compression_level=16);
 
 protected:
-	template <typename STREAM, typename GRID>
-	bool encode_next_coupled(STREAM& stream, GRID& grid);
+	template <typename STREAM>
+	std::optional<IconMatrix> encode_next_coupled(STREAM& stream);
 
 protected:
 	unsigned _eccBytes;
 	unsigned _eccBlockSize;
 	unsigned _bitsPerSymbol;
 	unsigned _bitsPerColor;
-	bool _dark;
 	bool _coupled;
 	uint8_t _encodeId = 0;
 };
@@ -44,7 +44,6 @@ inline Encoder::Encoder(unsigned bits_per_symbol, int bits_per_color)
 	, _eccBlockSize(cimbar::Config::ecc_block_size())
 	, _bitsPerSymbol(bits_per_symbol? bits_per_symbol : cimbar::Config::symbol_bits())
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
-	, _dark(cimbar::Config::dark())
 	, _coupled(cimbar::Config::legacy_mode())
 {
 }
@@ -57,17 +56,17 @@ inline void Encoder::set_encode_id(uint8_t encode_id)
 	_encodeId = encode_id;
 }
 
-template <typename STREAM, typename GRID>
-inline bool Encoder::encode_next(STREAM& stream, GRID& grid)
+template <typename STREAM>
+inline std::optional<IconMatrix> Encoder::encode_next(STREAM& stream)
 {
 	if (_coupled)
-		return encode_next_coupled(stream, grid);
+		return encode_next_coupled(stream);
 
 	if (!stream.good())
-		return false;
+		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	unsigned numCells = grid.num_cells();
+	unsigned numCells = cimbar::Config::total_cells();
 	bitbuffer bb(cimbar::Config::capacity(bits_per_op));
 
 	unsigned bitPos = 0;
@@ -107,17 +106,18 @@ inline bool Encoder::encode_next(STREAM& stream, GRID& grid)
 		}
 	}
 
+	IconMatrix im;
 	// dump whatever we have to image
 	for (bitPos = 0; bitPos < endBitPos; bitPos+=bits_per_op)
 	{
 		unsigned bits = bb.read(bitPos, bits_per_op);
-		grid.write(bits);
+		im.push_back(bits);
 	}
-	return true;
+	return im;
 }
 
-template <typename STREAM, typename GRID>
-inline bool Encoder::encode_next_coupled(STREAM& stream, GRID& grid)
+template <typename STREAM>
+inline std::optional<IconMatrix> Encoder::encode_next_coupled(STREAM& stream)
 {
 	// the old way. Symbol and color bits are mixed together, limiting the color correction possibilities
 	// but potentially allowing a lack of errors in one channel to correct errors in the other.
@@ -125,10 +125,12 @@ inline bool Encoder::encode_next_coupled(STREAM& stream, GRID& grid)
 	// the net result is that best case performance *can* be better this way, but average and worst case
 	// will be worse.
 	if (!stream.good())
-		return false;
+		return std::nullopt;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
+	unsigned numCells = cimbar::Config::total_cells();
 
+	IconMatrix im;
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
 	while (rss.good())
@@ -141,12 +143,12 @@ inline bool Encoder::encode_next_coupled(STREAM& stream, GRID& grid)
 		{
 			unsigned bits = br.read(bits_per_op);
 			if (!br.partial())
-				grid.write(bits);
+				im.push_back(bits);
 		}
-		if (grid.done())
-			return true;
+		if (im.size() == numCells)
+			return im;
 	}
-	return true;
+	return im;
 }
 
 template <typename STREAM>
@@ -175,5 +177,4 @@ inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& str
 	return fountain_encoder_stream::create(ss, chunk_size, _encodeId);
 }
 
-// prob a create_grid_writer<CimbWriter>() ?
 
