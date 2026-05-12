@@ -70,7 +70,10 @@ public:
 
 	bool load(const cv::Mat& img)
 	{
-		cimbar::mat_to_gl::load_gl_texture(_texid, img);
+		if (img.cols <= 0 or img.rows <= 0)
+			return false;
+		cimbar::mat_to_gl::load_gl_texture(_texid, img, _texdims);
+		_texdims = {static_cast<unsigned>(img.cols), static_cast<unsigned>(img.rows)};
 		return true;
 	}
 
@@ -178,6 +181,7 @@ protected:
 
 protected:
 	GLuint _texid;
+	vec_xy _texdims;
 	std::shared_ptr<cimbar::gl_program> _p;
 	std::array<GLuint, 3> _vbo;
 	GLuint _vao;
