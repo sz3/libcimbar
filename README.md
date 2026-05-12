@@ -111,7 +111,7 @@ You can also encode a file using [cimbar.org](https://cimbar.org), or the latest
 
 ## Community Tools
 
-* [cimbar-bigfile](https://github.com/xPeiPeix/cimbar-bigfile) — A pure-frontend wrapper that splits larger files into parallel `encode_id` streams with a `manifest.json` for reassembly, lifting the 33MB single-file cap without any protocol changes.
+* [cimbar-bigfile](https://github.com/xPeiPeix/cimbar-bigfile) — A pure-frontend wrapper that splits files into multiple parallel `encode_id` streams (10–15 MB chunks per stream, well below the single-stream wirehair capacity ceiling) and ships a `manifest.json` for SHA256-verified reassembly. No changes to libcimbar or cfc required.
 
 ## Inspiration
 
