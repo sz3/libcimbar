@@ -96,6 +96,7 @@ bool CimbWriter::write(unsigned bits)
 
 bool CimbWriter::write(const std::vector<unsigned>& many_bits)
 {
+	_positions.reset();
 	for (unsigned bits : many_bits)
 		if (!write(bits))
 			return done();

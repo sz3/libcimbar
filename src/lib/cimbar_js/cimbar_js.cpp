@@ -218,6 +218,11 @@ int cimbare_configure(int mode_val, int compression, bool color_balance)
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
 
+	// TODO: maybe assert _window, so this is update-only?
+	int initRes = cimbare_init_window(0, 0);
+	if (initRes < 0)
+		return initRes;
+
 	// check if we need to refresh the stream
 	bool refresh = (mode_val != _modeVal or compression != _compressionLevel);
 	if (refresh)
