@@ -5,6 +5,7 @@ set(SOURCES
 	DecoderPlus.h
 	Encoder.h
 	EncoderPlus.h
+	IconMatrix.h
 	ReedSolomon.h
 	aligned_stream.h
 	escrow_buffer_writer.h

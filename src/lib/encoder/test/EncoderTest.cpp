@@ -126,8 +126,13 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis, "LICENSE.txt");
 	assertTrue( fes );
 
+	auto grid = enc.encode_next(*fes);
+	assertTrue(	grid );
+	assertEquals( 12400, grid->size() );
+	assertEquals( 1, (*grid)[4] );
+
 	CimbWriter writer;
-	assertTrue( enc.encode_next(*fes, writer) );
+	assertTrue( writer.write(*grid) );
 
 	uint64_t hash = 0xef84e600f45efa9;
 	assertEquals( hash, image_hash::average_hash(writer.image()) );

@@ -124,7 +124,10 @@ TEST_CASE( "EncoderRoundTripTest/testStreaming", "[unit]" )
 	// encode frames, then pass to decoder
 	for (int i = 0; i < 100; ++i)
 	{
-		assertTrue( enc.encode_next(*fes, writer) );
+		auto grid = enc.encode_next(*fes);
+		assertTrue( grid );
+		assertTrue( writer.write(*grid) );
+
 		cv::Mat frame = writer.image();
 		assertEquals( 1024, frame.cols );
 		assertEquals( 1024, frame.rows );

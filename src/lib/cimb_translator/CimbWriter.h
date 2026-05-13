@@ -12,6 +12,7 @@ public:
 	void set_color_mode(unsigned color_mode);
 
 	bool write(unsigned bits);
+	bool write(const std::vector<unsigned>& many_bits);
 	bool done() const;
 
 	cv::Mat image() const;
