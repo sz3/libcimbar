@@ -30,7 +30,12 @@ extern "C" {
 
 int cimbare_init_window(int width, int height)
 {
-	// must be divisible by 4???
+	if (width <= 0)
+		width = cimbar::Config::image_size_x() + 16;
+	if (height <= 0)
+		height = cimbar::Config::image_size_y() + 16;
+
+	// GL says must be divisible by 4???
 	if (width % 4 != 0)
 		width += (4 - width % 4);
 	if (height % 4 != 0)
@@ -194,16 +199,8 @@ int cimbare_encode(const unsigned char* buffer, unsigned size)
 
 int cimbare_configure(int mode_val, int compression)
 {
-	cimbar::Config::update(mode_val);
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
-
-	// make sure we've initialized
-	int window_size_x = cimbar::Config::image_size_x() + 16;
-	int window_size_y = cimbar::Config::image_size_y() + 16;
-	int initRes = cimbare_init_window(window_size_x, window_size_y);
-	if (initRes < 0)
-		return initRes;
 
 	// check if we need to refresh the stream
 	bool refresh = (mode_val != _modeVal or compression != _compressionLevel);
@@ -214,19 +211,29 @@ int cimbare_configure(int mode_val, int compression)
 		_compressionLevel = compression;
 		cimbar::Config::update(_modeVal);
 
+		// make sure the window is sized to the correct dimensions
+		if (_window)
+		{
+			int initRes = cimbare_init_window(0, 0);
+			if (initRes < 0)
+				return initRes;
+		}
+
 		// try to refresh the stream
-		if (_window and _fes)
+		if (_fes)
 		{
 			unsigned buff_size_new = cimbar::Config::fountain_chunk_size();
 			if (!_fes->restart_and_resize_buffer(buff_size_new))
 			{
 				// if the data is too small, we should throw out _fes -- and clear the canvas.
 				_fes = nullptr;
-				_window->clear();
+				if (_window)
+					_window->clear();
 				_next.reset();
 			}
 			_frameCount = 0;
-			_window->shake(0);
+			if (_window)
+				_window->shake(0);
 		}
 	}
 	return 0;

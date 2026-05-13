@@ -89,6 +89,7 @@ var Main = function () {
     init: function (canvas) {
       Main.setMode('B');
       Main.check_GL_enabled(canvas);
+      Module._initialize_GL(0, 0);
     },
 
     check_GL_enabled: function (canvas) {

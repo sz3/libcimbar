@@ -52,13 +52,14 @@ endif()
 set (LINK_WASM_EXPORTED_FUNCTIONS
 	"_malloc"
 	, "_free"
+	, "_cimbare_init_window"
+	, "_cimbare_rotate_window"
 	, "_cimbare_render"
 	, "_cimbare_next_frame"
 	, "_cimbare_init_encode"
 	, "_cimbare_encode"
 	, "_cimbare_encode_bufsize"
 	, "_cimbare_configure"
-	, "_cimbare_rotate_window"
 	, "_cimbare_get_aspect_ratio"
 )
 
