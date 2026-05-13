@@ -126,11 +126,11 @@ TEST_CASE( "EncoderTest/testPiecemealFountainEncoder", "[unit]" )
 	fountain_encoder_stream::ptr fes = enc.create_fountain_encoder(bis, "LICENSE.txt");
 	assertTrue( fes );
 
-	std::optional<cv::Mat> frame = enc.encode_next(*fes);
-	assertTrue( frame );
+	CimbWriter writer;
+	assertTrue( enc.encode_next(*fes, writer) );
 
 	uint64_t hash = 0xef84e600f45efa9;
-	assertEquals( hash, image_hash::average_hash(*frame) );
+	assertEquals( hash, image_hash::average_hash(writer.image()) );
 }
 
 TEST_CASE( "EncoderTest/testFountain.Size", "[unit]" )

@@ -38,11 +38,12 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 
 	assertEquals( 1, cimbare_next_frame() );
 
-	unsigned char* imgbuff;
-	int imgsize = cimbare_get_frame_buff(&imgbuff);
+	std::vector<unsigned char> imgbuff;
+	imgbuff.resize(1024*1024*3);
+	int imgsize = cimbare_get_frame_buff(imgbuff.data(), imgbuff.size());
 	assertEquals( 1024*1024*3, imgsize );
 
-	int bytes = cimbard_scan_extract_decode(imgbuff, 1024, 1024, 3, decbuff.data(), decbuff.size());
+	int bytes = cimbard_scan_extract_decode(imgbuff.data(), 1024, 1024, 3, decbuff.data(), decbuff.size());
 	assertEquals(bytes, 7500);
 
 	unsigned chunkSize = cimbar::Config::fountain_chunk_size();

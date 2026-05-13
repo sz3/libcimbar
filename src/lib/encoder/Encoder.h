@@ -18,17 +18,16 @@ class Encoder
 public:
 	Encoder(unsigned bits_per_symbol=0, int bits_per_color=-1);
 	void set_encode_id(uint8_t encode_id); // [0-127] -- the high bit is ignored.
-	void set_color_mode(unsigned color_mode);
 
-	template <typename STREAM>
-	std::optional<cv::Mat> encode_next(STREAM& stream, cimbar::vec_xy canvas_size={});
+	template <typename STREAM, typename GRID>
+	bool encode_next(STREAM& stream, GRID& grid);
 
 	template <typename STREAM>
 	fountain_encoder_stream::ptr create_fountain_encoder(STREAM& stream, const std::string_view& filename, int compression_level=16);
 
 protected:
-	template <typename STREAM>
-	std::optional<cv::Mat> encode_next_coupled(STREAM& stream, cimbar::vec_xy canvas_size={});
+	template <typename STREAM, typename GRID>
+	bool encode_next_coupled(STREAM& stream, GRID& grid);
 
 protected:
 	unsigned _eccBytes;
@@ -37,7 +36,6 @@ protected:
 	unsigned _bitsPerColor;
 	bool _dark;
 	bool _coupled;
-	unsigned _colorMode;
 	uint8_t _encodeId = 0;
 };
 
@@ -48,7 +46,6 @@ inline Encoder::Encoder(unsigned bits_per_symbol, int bits_per_color)
 	, _bitsPerColor(bits_per_color >= 0? bits_per_color : cimbar::Config::color_bits())
 	, _dark(cimbar::Config::dark())
 	, _coupled(cimbar::Config::legacy_mode())
-	, _colorMode(cimbar::Config::color_mode())
 {
 }
 
@@ -60,24 +57,17 @@ inline void Encoder::set_encode_id(uint8_t encode_id)
 	_encodeId = encode_id;
 }
 
-inline void Encoder::set_color_mode(unsigned color_mode)
-{
-	_colorMode = color_mode;
-}
-
-template <typename STREAM>
-inline std::optional<cv::Mat> Encoder::encode_next(STREAM& stream, cimbar::vec_xy canvas_size)
+template <typename STREAM, typename GRID>
+inline bool Encoder::encode_next(STREAM& stream, GRID& grid)
 {
 	if (_coupled)
-		return encode_next_coupled(stream, canvas_size);
+		return encode_next_coupled(stream, grid);
 
 	if (!stream.good())
-		return std::nullopt;
+		return false;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
-
-	unsigned numCells = writer.num_cells();
+	unsigned numCells = grid.num_cells();
 	bitbuffer bb(cimbar::Config::capacity(bits_per_op));
 
 	unsigned bitPos = 0;
@@ -121,15 +111,13 @@ inline std::optional<cv::Mat> Encoder::encode_next(STREAM& stream, cimbar::vec_x
 	for (bitPos = 0; bitPos < endBitPos; bitPos+=bits_per_op)
 	{
 		unsigned bits = bb.read(bitPos, bits_per_op);
-		writer.write(bits);
+		grid.write(bits);
 	}
-
-	// return what we've got
-	return writer.image();
+	return true;
 }
 
-template <typename STREAM>
-inline std::optional<cv::Mat> Encoder::encode_next_coupled(STREAM& stream, cimbar::vec_xy canvas_size)
+template <typename STREAM, typename GRID>
+inline bool Encoder::encode_next_coupled(STREAM& stream, GRID& grid)
 {
 	// the old way. Symbol and color bits are mixed together, limiting the color correction possibilities
 	// but potentially allowing a lack of errors in one channel to correct errors in the other.
@@ -137,10 +125,9 @@ inline std::optional<cv::Mat> Encoder::encode_next_coupled(STREAM& stream, cimba
 	// the net result is that best case performance *can* be better this way, but average and worst case
 	// will be worse.
 	if (!stream.good())
-		return std::nullopt;
+		return false;
 
 	unsigned bits_per_op = _bitsPerColor + _bitsPerSymbol;
-	CimbWriter writer(_bitsPerSymbol, _bitsPerColor, _dark, _colorMode, canvas_size);
 
 	reed_solomon_stream rss(stream, _eccBytes, _eccBlockSize);
 	bitreader br;
@@ -154,13 +141,12 @@ inline std::optional<cv::Mat> Encoder::encode_next_coupled(STREAM& stream, cimba
 		{
 			unsigned bits = br.read(bits_per_op);
 			if (!br.partial())
-				writer.write(bits);
+				grid.write(bits);
 		}
-		if (writer.done())
-			return writer.image();
+		if (grid.done())
+			return true;
 	}
-	// we don't have a full frame, but return what we've got
-	return writer.image();
+	return true;
 }
 
 template <typename STREAM>
@@ -188,4 +174,6 @@ inline fountain_encoder_stream::ptr Encoder::create_fountain_encoder(STREAM& str
 
 	return fountain_encoder_stream::create(ss, chunk_size, _encodeId);
 }
+
+// prob a create_grid_writer<CimbWriter>() ?
 

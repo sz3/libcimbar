@@ -25,18 +25,19 @@ public:
 inline unsigned EncoderPlus::encode(const std::string& filename, std::string output_prefix)
 {
 	std::ifstream f(filename);
+	CimbWriter writer;
 
 	unsigned i = 0;
 	while (true)
 	{
-		auto frame = encode_next(f);
-		if (!frame)
+		if (!encode_next(f, writer))
 			break;
 
 		std::string output = fmt::format("{}_{}.png", output_prefix, i);
 		// imwrite expects BGR
-		cv::cvtColor(*frame, *frame, cv::COLOR_RGB2BGR);
-		cv::imwrite(output, *frame);
+		cv::Mat frame = writer.image();
+		cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+		cv::imwrite(output, frame);
 		++i;
 	}
 	return i;
@@ -48,6 +49,8 @@ inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const 
 	fountain_encoder_stream::ptr fes = create_fountain_encoder(infile, File::basename(filename), compression_level);
 	if (!fes)
 		return 0;
+
+	CimbWriter writer;
 
 	// ex: with ecc = 30 and 155 byte blocks, we have 60 rs blocks * 125 bytes per block == 7500 bytes to work with.
 	// if fountain_chunks_per_frame() is 10, the fountain_chunk_size will be 750.
@@ -61,15 +64,15 @@ inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const 
 	unsigned consecutiveScansFailed = 0;
 	while (i < requiredFrames)
 	{
-		auto frame = encode_next(*fes);
-		if (!frame)
+		if (!encode_next(*fes, writer))
 			break;
 
 		// some % of generated frames (for the current 8x8 impl)
 		// will produce random patterns that falsely match as
 		// corner "anchors" and fail to extract. So:
 		// if frame fails the scan, skip it.
-		if (!Scanner::will_it_scan(*frame))
+		cv::Mat frame = writer.image();
+		if (!Scanner::will_it_scan(frame))
 		{
 			if (++consecutiveScansFailed < 5)
 				continue;
@@ -79,7 +82,7 @@ inline unsigned EncoderPlus::encode_fountain(const std::string& filename, const 
 		}
 
 		consecutiveScansFailed = 0;
-		if (!on_frame(*frame, i))
+		if (!on_frame(frame, i))
 			break;
 		++i;
 	}

@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "cimbar_js.h"
 
+#include "cimb_translator/CimbWriter.h"
 #include "cimb_translator/Config.h"
 #include "compression/zstd_compressor.h"
 #include "encoder/Encoder.h"
@@ -11,7 +12,7 @@
 namespace {
 	std::shared_ptr<cimbar::window_glfw> _window;
 	std::shared_ptr<fountain_encoder_stream> _fes;
-	std::optional<cv::Mat> _next;
+	std::shared_ptr<CimbWriter> _gridWriter;
 
 	// compressing the file
 	std::unique_ptr<cimbar::zstd_compressor<std::stringstream>> _comp;
@@ -78,15 +79,9 @@ bool cimbare_auto_scale_window(unsigned padding)
 // we may change the api to accept an buff to next_frame()
 // rather than generating a fresh cv::Mat alloc each time
 // but for now, for non-JS purposes we expose this function
-int cimbare_get_frame_buff(unsigned char** buff)
+int cimbare_get_frame_buff(unsigned char* buff, unsigned size)
 {
-	if (!_next)
-		return -2;
-	if (_next->cols == 0 or _next->rows == 0)
-		return -1;
-
-	*buff = _next->data;
-	return _next->cols * _next->rows * _next->channels();
+	return -1;
 }
 
 // render() and next_frame() could be put in the same function,
@@ -97,19 +92,21 @@ int cimbare_render()
 	if (!_window or !_fes or _window->should_close())
 		return -1;
 
-	if (_next)
+	if (_gridWriter)
 	{
-		_window->show(*_next, 0);
+		_window->show(_gridWriter->image(), 0);
 		_window->shake();
 		return 1;
 	}
 	return 0;
 }
 
-int cimbare_next_frame(bool color_balance)
+int cimbare_next_frame()
 {
 	if (!_fes)
 		return -1;
+	if (!_gridWriter)
+		return -2;
 
 	// we generate 8x the amount of required symbol blocks.
 	// this number is somewhat arbitrary, but needs to not be
@@ -125,10 +122,8 @@ int cimbare_next_frame(bool color_balance)
 	}
 
 	Encoder enc;
-	if (color_balance) // default is: disabled
-		enc.set_color_mode(cimbar::Config::color_mode() + 0x100);
 	enc.set_encode_id(_encodeId);
-	_next = enc.encode_next(*_fes, _window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{});
+	enc.encode_next(*_fes, *_gridWriter);
 	return ++_frameCount;
 }
 
@@ -187,17 +182,20 @@ int cimbare_encode(const unsigned char* buffer, unsigned size)
 	if (compressedSize < fountainChunkSize)
 		_comp->pad(fountainChunkSize - compressedSize + 1);
 
+	// prepare writer
+	// TODO: prob use Encoder helpers for both these constructors?
+	_gridWriter = std::make_shared<CimbWriter>(cimbar::Config::symbol_bits(), cimbar::Config::color_bits());
+
 	// create the encoder stream
 	_fes = fountain_encoder_stream::create(*_comp, fountainChunkSize, _encodeId);
 	_comp.reset();
 	if (!_fes)
 		return -3;
 
-	_next.reset();
 	return 0;
 }
 
-int cimbare_configure(int mode_val, int compression)
+int cimbare_configure(int mode_val, int compression, bool color_balance)
 {
 	if (compression < 0 or compression > 22)
 		compression = cimbar::Config::compression_level();
@@ -218,6 +216,12 @@ int cimbare_configure(int mode_val, int compression)
 			if (initRes < 0)
 				return initRes;
 		}
+		// reset writer
+		_gridWriter = std::make_shared<CimbWriter>(
+			cimbar::Config::symbol_bits(), cimbar::Config::color_bits(),
+			true, cimbar::Config::color_mode() + (color_balance? 0x100 : 0),
+			_window? cimbar::vec_xy{_window->width(), _window->height()} : cimbar::vec_xy{}
+		);
 
 		// try to refresh the stream
 		if (_fes)
