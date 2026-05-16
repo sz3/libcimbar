@@ -12,11 +12,6 @@ namespace mat_to_gl {
 	{
 		glBindTexture(GL_TEXTURE_2D, texid);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 		GLenum format = GL_RGB;
 		switch (mat.channels())
 		{
@@ -30,12 +25,18 @@ namespace mat_to_gl {
 				;
 		}
 
-		if (mat.cols == texdims.x and mat.rows == texdims.y)
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mat.cols, mat.rows, format, GL_UNSIGNED_BYTE, mat.data);
-		else
+		if (mat.cols != texdims.x or mat.rows != texdims.y) // need init
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, mat.cols, mat.rows, 0, format, GL_UNSIGNED_BYTE, mat.data);
+		}
+		else // reuse existing memory
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mat.cols, mat.rows, format, GL_UNSIGNED_BYTE, mat.data);
 
-		glBindTexture(GL_TEXTURE_2D, 0); // clean up
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 }
