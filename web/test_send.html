@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<title>cimbar send js test</title>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.24.1.css">
+
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <div class="hidden">
+    <div id="status"></div>
+    <div id="dragdrop" class="dragdrop" title="Drag and drop a file" style="display: none">
+      <canvas id="canvas" class="canvas"></canvas>
+    </div>
+
+    <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
+
+    <a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
+
+    <div id="nav-container" class="mode-b">
+      <div class="bg" onclick="Main.blurNav();"></div>
+      <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <div id="nav-content" tabindex="-1">
+        <span id="current-file">No file selected</span>
+        <ul>
+          <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)"
+              onclick="Main.clickFileInput()">Find
+              File</a></li>
+          <hr>
+          <li class="modesel">
+            <h4>Mode</h4>
+            <a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">B</a>
+            <a class="mode-bm" href="javascript:void(0)" onclick="Main.setMode('Bm')">Bm</a>
+            <a class="mode-bu" href="javascript:void(0)" onclick="Main.setMode('Bu')">Bu</a>
+            <a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var canvas = document.getElementById('canvas');
+    canvas.getContext('webgl2', { preserveDrawingBuffer: true }); // force this immediately
+
+    let IS_READY;
+    const WAIT_UNTIL_READY = new Promise(resolve => {
+      IS_READY = resolve;
+    });
+
+    var Module = {};
+    Module.canvas = canvas;
+    Module.onRuntimeInitialized = () => {
+      Main.init(canvas);
+      Main.nextFrame();
+      IS_READY();
+    };
+  </script>
+
+  <script src="cimbar_js.js"></script>
+  <script src="main.js"></script>
+
+  <script src="https://code.jquery.com/qunit/qunit-2.24.1.js"></script>
+  <script src="test/test_send.js"></script>
+</body>
+
+</html>
