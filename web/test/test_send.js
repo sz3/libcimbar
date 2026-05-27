@@ -11,16 +11,8 @@ QUnit.test("encode+render", async function (assert) {
   const testData = new TextEncoder().encode(
     "testing test testing test, unfortunately this will compress well and probably isn't the best test string\n".repeat(54)
   );
-  const ptr = Module._malloc(testData.length);
-  const wasmBuff = new Uint8Array(Module.HEAPU8.buffer, ptr, testData.length);
-  wasmBuff.set(testData);
-
-  Main.encode_init("test.txt");
-  Main.encode_bytes(wasmBuff);
-
-  // flush
-  Main.encode_bytes(new Uint8Array(Module.HEAPU8.buffer, ptr, 0));
-  Module._free(ptr);
+  const fakefile = new File([testData], "testfile.bin", { type: "application/octet-stream" });
+  Main.importFile(fakefile);
 
   // wait for render
   await new Promise(resolve => setTimeout(resolve, 500));
