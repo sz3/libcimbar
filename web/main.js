@@ -1,3 +1,29 @@
+var Report = function () {
+
+  return {
+    prevent_sleep: function () {
+      setTimeout(Main.prevent_sleep, 0);
+    },
+
+    setAspectRatio: function (idealRatio) {
+      Main.setAspectRatio(idealRatio);
+    },
+
+    setActive: function (active) {
+      Main.setActive(active);
+    },
+
+    setHTML: function (id, msg) {
+      Main.setHTML(id, msg);
+    },
+
+    setTitle: function (msg) {
+      Main.setTitle(msg);
+    }
+  };
+}();
+
+
 var Main = function () {
 
   // configurable
@@ -5,17 +31,11 @@ var Main = function () {
   var _colorBalance = false;
 
   // internal
-  var _pause = 0;
   var _showStats = false;
-  var _counter = 0;
-  var _renderTime = 0;
-
-  var _lastFrame = 0; // used with _interval
   var _wakeLock = undefined;
 
   // cached
   var _idealRatio = 1;
-  var _compressBuff = undefined;
 
   function toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -26,70 +46,13 @@ var Main = function () {
     }
   }
 
-  function compress_buff(chunkSize) {
-    if (_compressBuff === undefined) {
-      const dataPtr = Module._malloc(chunkSize);
-      _compressBuff = new Uint8Array(Module.HEAPU8.buffer, dataPtr, chunkSize);
-    }
-    else if (_compressBuff.buffer !== Module.HEAPU8.buffer) {
-      _compressBuff = new Uint8Array(Module.HEAPU8.buffer, _compressBuff.byteOffset, _compressBuff.byteLength);
-    }
-    return _compressBuff;
-  }
-
-  function importFile(file) {
-    let chunkSize = Module._cimbare_encode_bufsize();
-    let compBuff = compress_buff(chunkSize);
-
-    let offset = 0;
-    let reader = new FileReader();
-
-    Main.encode_init(file.name);
-
-    reader.onload = function (event) {
-      const datalen = event.target.result.byteLength;
-      if (datalen > 0) {
-        // copy to wasm buff and write
-        const uint8View = new Uint8Array(event.target.result);
-        compBuff = compress_buff(chunkSize);
-        compBuff.set(uint8View);
-        const buffView = new Uint8Array(Module.HEAPU8.buffer, compBuff.byteOffset, datalen);
-        Main.encode_bytes(buffView);
-
-        offset += chunkSize;
-        readNext();
-      } else {
-        // Done reading file
-        console.log("Finished reading file.");
-
-        // this null call is functionally a flush()
-        // so a no-op, unless it isn't
-        const nullBuff = new Uint8Array(Module.HEAPU8.buffer, compBuff.byteOffset, 0);
-        Main.encode_bytes(nullBuff);
-      }
-    };
-
-    function readNext() {
-      let slice = file.slice(offset, offset + chunkSize);
-      reader.readAsArrayBuffer(slice);
-    }
-
-    readNext();
-  }
-
-  function copyToWasmHeap(abuff) {
-    const dataPtr = Module._malloc(abuff.length);
-    const wasmData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, abuff.length);
-    wasmData.set(abuff);
-    return wasmData;
-  }
-
   // public interface
   return {
     init: function (canvas) {
-      Module._cimbare_init_window(0, 0);
+      Send.init_window(canvas);
       Main.setMode('B');
       Main.check_GL_enabled(canvas);
+      Send.nextFrame();
     },
 
     check_GL_enabled: function (canvas) {
@@ -115,22 +78,14 @@ var Main = function () {
     },
 
     togglePause: function (pause) {
-      // pause is a cooldown. We pause to help autofocus, but we don't want to do it forever...
-      if (pause === undefined) {
-        pause = !Main.isPaused();
-      }
-      _pause = pause ? 15 : 0;
-    },
-
-    isPaused: function () {
-      return _pause > 0;
+      Send.togglePause(pause);
     },
 
     scaleCanvas: function (canvas, width, height) {
       // using ratio from current config,
       // determine optimal dimensions and rotation
       var needRotate = _idealRatio > 1 && height > width;
-      Module._cimbare_rotate_window(needRotate);
+      Send.rotate_window(needRotate);
 
       var ourRatio = needRotate ? height / width : width / height;
 
@@ -165,20 +120,6 @@ var Main = function () {
       invisible_click.style.zoom = canvas.style.zoom;
     },
 
-    encode_init: function (filename) {
-      console.log("encoding " + filename);
-      const wasmFn = copyToWasmHeap(new TextEncoder("utf-8").encode(filename));
-      try {
-        var res = Module._cimbare_init_encode(wasmFn.byteOffset, wasmFn.length, -1);
-        console.log("init_encode returned " + res);
-      } finally {
-        Module._free(wasmFn.byteOffset);
-      }
-
-      Main.setTitle(filename);
-      Main.setHTML("current-file", filename);
-    },
-
     prevent_sleep: async function () {
       if (_wakeLock) {
         return;
@@ -195,13 +136,8 @@ var Main = function () {
       requestWakeLock();
     },
 
-    encode_bytes: function (wasmData) {
-      var res = Module._cimbare_encode(wasmData.byteOffset, wasmData.length);
-      console.log("encode returned " + res);
-
-      if (res == 0) {
-        Main.setActive();
-      }
+    importFile: function (fblob) {
+      Send.importFile(fblob);
     },
 
     dragDrop: function (event) {
@@ -209,7 +145,7 @@ var Main = function () {
       console.log(event);
       const files = event.dataTransfer.files;
       if (files && files.length === 1) {
-        importFile(files[0]);
+        Main.importFile(files[0]);
       }
     },
 
@@ -247,36 +183,14 @@ var Main = function () {
       console.log("file input: " + ev);
       var file = document.getElementById('file_input').files[0];
       if (file) {
-        importFile(file);
+        Main.importFile(file);
       }
       Main.blurNav(false);
     },
 
-    nextFrame: function (timestamp) {
-      requestAnimationFrame(Main.nextFrame);
-      let elapsed = timestamp - _lastFrame;
-      if (!timestamp || elapsed < _interval) {
-        return;
-      }
-      _lastFrame = timestamp;
-
-      _counter += 1;
-      if (_pause > 0) {
-        _pause -= 1;
-      }
-      if (!Main.isPaused()) {
-        Module._cimbare_render();
-        var frameCount = Module._cimbare_next_frame(_colorBalance);
-      }
-
-      if (_showStats && frameCount) {
-        _renderTime += elapsed;
-        Main.setHTML("status", elapsed + " : " + frameCount + " : " + Math.ceil(_renderTime / frameCount));
-      }
-
-      if (!Main.isPaused() && _counter % 16 == 0) {
-        setTimeout(Main.prevent_sleep, 0);
-      }
+    setAspectRatio: function (idealRatio) {
+      _idealRatio = idealRatio;
+      Main.resize();
     },
 
     setActive: function (active) {
@@ -297,9 +211,9 @@ var Main = function () {
       else if (mode_str == "Bm") {
         modeVal = 67;
       }
-      Module._cimbare_configure(modeVal, -1);
-      _idealRatio = Module._cimbare_get_aspect_ratio();
-      Main.resize();
+
+      // will trigger setAspectRatio callback
+      Send.setMode(modeVal);
 
       var nav = document.getElementById("nav-container");
       if (modeVal == 4) {
@@ -335,8 +249,7 @@ var Main = function () {
       if (!val) {
         return;
       }
-      _interval = Math.floor(1000 / val);
-      console.log("new frame delay interval is " + _interval);
+      Send.setFPS(val);
     },
 
     setHTML: function (id, msg) {

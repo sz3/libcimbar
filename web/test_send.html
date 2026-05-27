@@ -57,12 +57,12 @@
     Module.canvas = canvas;
     Module.onRuntimeInitialized = () => {
       Main.init(canvas);
-      Main.nextFrame();
       IS_READY();
     };
   </script>
 
   <script src="cimbar_js.js"></script>
+  <script src="send.js"></script>
   <script src="main.js"></script>
 
   <script src="https://code.jquery.com/qunit/qunit-2.24.1.js"></script>
