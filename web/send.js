@@ -1,6 +1,7 @@
 
 var Send = function () {
   // the canvas
+  var _ctx = undefined;
   var _canvas = undefined; // set by init
 
   // configurable
@@ -129,7 +130,8 @@ var Send = function () {
     },
 
     nextFrame: function (timestamp) {
-      requestAnimationFrame(Send.nextFrame);
+      console.log("in nextFrame, is it happening?");
+      window.requestAnimationFrame(Send.nextFrame);
       let elapsed = timestamp - _lastFrame;
       if (!timestamp || elapsed < _interval) {
         return;
