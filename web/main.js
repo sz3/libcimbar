@@ -78,12 +78,20 @@ var Main = function () {
       }
     },
 
-    check_GL_enabled: function () {
-      var testCanvas = document.createElement('canvas');
-      if (!testCanvas.getContext("webgl2") && !testCanvas.getContext("webgl")) {
-        var elem = document.getElementById('dragdrop');
-        elem.classList.add("error");
+    init_ww: function (canvas) {
+      let noww = (window.location.hash == "#noww");
+      if (noww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
+        return false;
       }
+      console.log("ww impl");
+      var offscreen = canvas.transferControlToOffscreen();
+      _ww = new Worker('send-worker.js');
+      _ww.onmessage = Report.handleWorkerMessage;
+      _ww.onerror = function (err) {
+        console.error('[send] Worker error: ', err);
+      };
+      _ww.postMessage({ fun: 'init_window', args: [offscreen] }, [offscreen]);
+      return true;
     },
 
     on_ww_init: function (force_local) {
@@ -91,6 +99,7 @@ var Main = function () {
 
       if (force_local) {
         _ww = undefined;
+        // force refresh in main thread mode
         window.location.hash = "#noww";
         window.location.reload();
         return;
@@ -100,21 +109,13 @@ var Main = function () {
       _ww.postMessage({ fun: 'nextFrame', args: [] });
     },
 
-    init_ww: function (canvas) {
-      let noww = (window.location.hash == "#noww");
-      if (noww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
-        return false;
+
+    check_GL_enabled: function () {
+      var testCanvas = document.createElement('canvas');
+      if (!testCanvas.getContext("webgl2") && !testCanvas.getContext("webgl")) {
+        var elem = document.getElementById('dragdrop');
+        elem.classList.add("error");
       }
-      console.log("ww impl");
-      // TODO: clone canvas maybe?
-      var offscreen = canvas.transferControlToOffscreen();
-      _ww = new Worker('send-worker.js');
-      _ww.onmessage = Report.handleWorkerMessage;
-      _ww.onerror = function (err) {
-        console.error('[send] Worker error: ', err);
-      };
-      _ww.postMessage({ fun: 'init_window', args: [offscreen] }, [offscreen]);
-      return true;
     },
 
     resize: function () {
