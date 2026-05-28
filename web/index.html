@@ -375,20 +375,19 @@
   <script src="main.js"></script>
 
   <script type="text/javascript">
-    var canvas = document.getElementById('canvas');
-    Main.init_ww(canvas);
-
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
 
-    var Module = {};
-    Module.canvas = canvas;
-    Module.onRuntimeInitialized = () => {
-      Main.init(canvas);
-    };
+    var canvas = document.getElementById('canvas');
+    if (!Main.init_ww(canvas)) {
+      var Module = {};
+      Module.canvas = canvas;
+      Module.onRuntimeInitialized = () => {
+        Main.init(canvas);
+      };
+    }
   </script>
-
   <script src="cimbar_js.js"></script>
 
 </body>
