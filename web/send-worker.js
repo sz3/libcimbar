@@ -38,7 +38,14 @@ var Module = {
   onRuntimeInitialized: function load_done_callback() {
     console.info("The Module is loaded and is accessible here", Module);
     _wasmInitialized = true;
-    self.postMessage({ fun: 'startWasm', args: [true] });
+    try {
+      Send.init_window(Module.canvas);
+      self.postMessage({ fun: 'startWasm', args: [true] });
+    } catch (ex) {
+      console.log("unexpected init error: " + ex);
+      self.postMessage({ fun: 'startWasm', args: [false] });
+    }
+
   }
 };
 
@@ -72,17 +79,9 @@ var Report = function () {
   };
 }();
 
-importScripts('cimbar_js.js');
 importScripts('send.js');
 
 self.onmessage = async (event) => {
-
-  console.log("hello?");
-  if (!_wasmInitialized) {
-    console.log('we got no wasm :(');
-    self.postMessage({ fun: 'startWasm', args: [false] });
-    return;
-  }
 
   const { fun, args } = event.data;
   if (typeof Send[fun] !== 'function') {
@@ -91,6 +90,18 @@ self.onmessage = async (event) => {
   }
 
   console.log('got a message ' + fun);
+
+  if (fun === 'init_window') {
+    Module.canvas = args[0];
+    importScripts('cimbar_js.js');
+    return;
+  }
+
+  if (!_wasmInitialized) {
+    console.log('we got no wasm yet :(');
+    self.postMessage({ fun: 'startWasm', args: [false] });
+    return;
+  }
 
   try {
     Send[fun](...args);
