@@ -70,13 +70,12 @@ var Main = function () {
   return {
     init: function (canvas) {
       if (!_ww) { // no webworker, use main thread
+        console.log("main thread impl");
         Send.init_window(canvas);
         Main.setMode('B');
         Send.nextFrame();
         return;
       }
-
-      console.log("attempting ww init");
     },
 
     check_GL_enabled: function () {
@@ -89,29 +88,32 @@ var Main = function () {
 
     on_ww_init: function (force_local) {
       console.log('on ww init ' + force_local);
-      var canvas = document.getElementById('canvas');
+
       if (force_local) {
         _ww = undefined;
-        Main.init(canvas);
+        window.location.hash = "#noww";
+        window.location.reload();
         return;
       }
 
-      var offscreen = canvas.transferControlToOffscreen();
-      _ww.postMessage({ fun: 'init_window', args: [offscreen] }, [offscreen]);
       Main.setMode('B');
       _ww.postMessage({ fun: 'nextFrame', args: [] });
     },
 
-    init_ww: function () {
-      if (typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
+    init_ww: function (canvas) {
+      let noww = (window.location.hash == "#noww");
+      if (noww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
         return false;
       }
-      console.log("starting ww");
+      console.log("ww impl");
+      // TODO: clone canvas maybe?
+      var offscreen = canvas.transferControlToOffscreen();
       _ww = new Worker('send-worker.js');
       _ww.onmessage = Report.handleWorkerMessage;
       _ww.onerror = function (err) {
         console.error('[send] Worker error: ', err);
       };
+      _ww.postMessage({ fun: 'init_window', args: [offscreen] }, [offscreen]);
       return true;
     },
 
