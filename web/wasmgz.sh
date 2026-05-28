@@ -2,7 +2,7 @@
 # run from within web dir
 # does various renames for cache busting
 
-RENAME_FILES=$(ls cimbar_js.js cimbar_js.wasm main.js recv.js recv-worker.js zstd.js pwa*.json)
+RENAME_FILES=$(ls cimbar_js.js cimbar_js.wasm main.js send.js send-worker.js recv.js recv-worker.js zstd.js pwa*.json)
 GSUB_FILES="index.html recv.html sw.js recv-sw.js $(echo $RENAME_FILES | sed 's/cimbar_js\.wasm//g')"
 
 VERSION=${VERSION:-$(date --utc '+%Y-%m-%dT%H%M')}
