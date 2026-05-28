@@ -371,11 +371,16 @@
     </div>
   </div>
 
+  <script src="send.js"></script>
+  <script src="main.js"></script>
+
   <script type="text/javascript">
+    var canvas = document.getElementById('canvas');
+    Main.init_ww(canvas);
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
-    var canvas = document.getElementById('canvas');
 
     var Module = {};
     Module.canvas = canvas;
@@ -385,8 +390,6 @@
   </script>
 
   <script src="cimbar_js.js"></script>
-  <script src="send.js"></script>
-  <script src="main.js"></script>
 
 </body>
 

@@ -19,6 +19,24 @@ var Report = function () {
 
     setTitle: function (msg) {
       Main.setTitle(msg);
+    },
+
+    startWasm: function (result) {
+      Main.on_ww_init(!result);
+    },
+
+    handleWorkerMessage: function (event) {
+      if (event.error) {
+        console.error('[report] error ' + event.message);
+        return;
+      }
+      const { fun, args } = event.data;
+      console.log(event.data);
+      if (typeof Report[fun] !== 'function') {
+        console.warn('[report] Unknown worker message type: ' + fun);
+        return;
+      }
+      Report[fun](...args);
     }
   };
 }();
@@ -31,6 +49,8 @@ var Main = function () {
   var _colorBalance = false;
 
   // internal
+  var _ww = undefined;
+
   var _showStats = false;
   var _wakeLock = undefined;
 
@@ -49,17 +69,42 @@ var Main = function () {
   // public interface
   return {
     init: function (canvas) {
-      Send.init_window(canvas);
-      Main.setMode('B');
-      Main.check_GL_enabled(canvas);
-      Send.nextFrame();
+      if (!_ww) { // no webworker, use main thread
+        Send.init_window(canvas);
+        Main.setMode('B');
+        Send.nextFrame();
+        return;
+      }
+
+      console.log("attempting ww init");
     },
 
-    check_GL_enabled: function (canvas) {
-      if (canvas.getContext("2d")) {
-        var elem = document.getElementById('dragdrop');
-        elem.classList.add("error");
+    on_ww_init: function (force_local) {
+      console.log('on ww init ' + force_local);
+      var canvas = document.getElementById('canvas');
+      if (force_local) {
+        _ww = undefined;
+        Main.init(canvas);
+        return;
       }
+
+      var offscreen = canvas.transferControlToOffscreen();
+      _ww.postMessage({ fun: 'init_window', args: [offscreen] }, [offscreen]);
+      Main.setMode('B');
+      _ww.postMessage({ fun: 'nextFrame', args: [] });
+    },
+
+    init_ww: function () {
+      if (typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
+        return false;
+      }
+      console.log("starting ww");
+      _ww = new Worker('send-worker.js');
+      _ww.onmessage = Report.handleWorkerMessage;
+      _ww.onerror = function (err) {
+        console.error('[send] Worker error: ', err);
+      };
+      return true;
     },
 
     resize: function () {
@@ -137,7 +182,12 @@ var Main = function () {
     },
 
     importFile: function (fblob) {
-      Send.importFile(fblob);
+      if (!_ww) {
+        Send.importFile(fblob);
+        return;
+      }
+
+      _ww.postMessage({ fun: 'importFile', args: [fblob] });
     },
 
     dragDrop: function (event) {
