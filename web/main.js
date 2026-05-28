@@ -79,6 +79,14 @@ var Main = function () {
       console.log("attempting ww init");
     },
 
+    check_GL_enabled: function () {
+      var testCanvas = document.createElement('canvas');
+      if (!testCanvas.getContext("webgl2") && !testCanvas.getContext("webgl")) {
+        var elem = document.getElementById('dragdrop');
+        elem.classList.add("error");
+      }
+    },
+
     on_ww_init: function (force_local) {
       console.log('on ww init ' + force_local);
       var canvas = document.getElementById('canvas');
@@ -123,14 +131,24 @@ var Main = function () {
     },
 
     togglePause: function (pause) {
-      Send.togglePause(pause);
+      if (_ww) {
+        _ww.postMessage({ fun: 'togglePause', args: [pause] });
+      }
+      else {
+        Send.togglePause(pause);
+      }
     },
 
     scaleCanvas: function (canvas, width, height) {
       // using ratio from current config,
       // determine optimal dimensions and rotation
       var needRotate = _idealRatio > 1 && height > width;
-      Send.rotate_window(needRotate);
+      if (_ww) {
+        _ww.postMessage({ fun: 'rotate_window', args: [needRotate] });
+      }
+      else {
+        Send.rotate_window(needRotate);
+      }
 
       var ourRatio = needRotate ? height / width : width / height;
 
@@ -263,7 +281,12 @@ var Main = function () {
       }
 
       // will trigger setAspectRatio callback
-      Send.setMode(modeVal);
+      if (_ww) {
+        _ww.postMessage({ fun: 'setMode', args: [modeVal] });
+      }
+      else {
+        Send.setMode(modeVal);
+      }
 
       var nav = document.getElementById("nav-container");
       if (modeVal == 4) {
@@ -299,7 +322,12 @@ var Main = function () {
       if (!val) {
         return;
       }
-      Send.setFPS(val);
+      if (_ww) {
+        _ww.postMessage({ fun: 'setFPS', args: [val] });
+      }
+      else {
+        Send.setFPS(val);
+      }
     },
 
     setHTML: function (id, msg) {
