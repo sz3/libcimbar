@@ -79,8 +79,9 @@ var Main = function () {
     },
 
     init_ww: function (canvas) {
-      let noww = (window.location.hash == "#noww");
-      if (noww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const use_ww = urlParams.get('ww');
+      if (!use_ww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
         return false;
       }
       console.log("ww impl");
@@ -100,7 +101,7 @@ var Main = function () {
       if (force_local) {
         _ww = undefined;
         // force refresh in main thread mode
-        window.location.hash = "#noww";
+        window.location.search = "";
         window.location.reload();
         return;
       }
