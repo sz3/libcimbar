@@ -33,11 +33,17 @@ self.addEventListener('fetch', function (e) {
 
 // clean old caches
 self.addEventListener('activate', function (e) {
-  e.waitUntil(function () {
+  e.waitUntil(
     caches.keys().then(function (names) {
-      for (var i in names)
-        if (names[i] != _cacheName)
-          caches.delete(names[i]);
-    });
-  });
+      return Promise.all(
+        names.map(function (cn) {
+          if (cn !== _cacheName) {
+            return caches.delete(cn);
+          }
+        })
+      );
+    }).then(function () {
+      return self.clients.claim(); 
+    })
+  );
 });
