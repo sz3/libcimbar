@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(SOURCES
-	bitreader.h
 	bitbuffer.h
+	bitbuffer2d.h
+	bitmatrix.h
+	bitmatrix_reloaded.h
+	bitreader.h
+
 )
 
 add_library(bit_file INTERFACE)
