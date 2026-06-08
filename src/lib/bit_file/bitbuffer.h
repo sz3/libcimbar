@@ -59,6 +59,11 @@ public:
 		_buffer.resize(size, 0);
 	}
 
+	unsigned size() const
+	{
+		return _buffer.size() * 8;
+	}
+
 	bool write(unsigned data, unsigned index, int length)
 	{
 		resize(index+length);
