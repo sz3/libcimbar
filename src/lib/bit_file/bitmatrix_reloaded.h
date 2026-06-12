@@ -65,7 +65,7 @@ public:
 		// always returns >=1 (forward progress)
 
 		// do the sector lookup, then project x,y into it
-		uint64_t res = 0;
+		uint64_t bits = 0;
 
 		unsigned sectorCol = x / _sectorsX;
 		unsigned sectorRow = y / _sectorsY;
