@@ -2,6 +2,7 @@
 #pragma once
 
 #include "bitbuffer.h"
+#include "intx/intx.hpp"
 
 // wraps/inherits bitbuffer
 // imposes dimensionality
@@ -16,12 +17,40 @@ public:
 	{
 	}
 
-	unsigned get(unsigned x, unsigned y, unsigned bits) const
+	// negative x or y means we backfill -N rows/columns with 0s before placing bits
+	// y+rows or x+cols > bounds means we still shift as if we have everything, but we
+	//  leave 0s as padding.
+	// this also dovetails with the "apron" approach, if we go there...
+	inline intx::uint128 read_sector_mask(int x, int y, uint16_t cols, uint16_t rows)
 	{
-		y += _ystart;
-		x += _xstart;
-		unsigned i = x + (y * _width);
-		return _buff.read(i, bits);
+		cols = std::min<uint16_t>(cols, 10);
+		rows = std::min<uint16_t>(rows, 10);
+
+		intx::uint128 total(0);
+		int endX = x+cols;
+		int endY = y+rows;
+
+		if (endX <= 0 or endY <= 0)
+			return total;
+
+		unsigned bitsLeft = cols*rows;
+		if (y < 0)
+			bitsLeft -= (-y * cols);
+
+		int startX = std::max(0, x);
+		int startY = std::max(0, y);
+		uint16_t readSize = std::min<uint16_t>(cols, endX-startX);
+
+		// get sector. Then read whatever we've got, but *only* within cols+rows
+		for (int yr = startY; yr < endY; ++yr)
+		{
+			unsigned pos = startX + (yr * _width); // TODO: move this into the for
+			intx::uint128 r = read<intx::uint128>(pos, readSize);
+			bitsLeft -= cols;
+			total |= r << bitsLeft;
+		}
+
+		return total;
 	}
 
 	unsigned width() const

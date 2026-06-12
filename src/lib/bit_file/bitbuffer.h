@@ -88,25 +88,28 @@ public:
 		return true;
 	}
 
-	unsigned read(unsigned index, int length) const
+	template <typename UINT=uint64_t>
+	UINT read(unsigned index, int length) const
 	{
+		if (length <= 0)
+			return 0;
+
 		int currentByte = index/8;
 		int currentBit = index%8;
 
-		unsigned res = 0;
-		int nextRead = std::min(length, 8-currentBit); // read this many bits
+		UINT res = 0;
 		while (length > 0)
 		{
+			int rdsz = std::min(length, 8-currentBit);
 			unsigned char bits = static_cast<unsigned char>(_buffer[currentByte]) << currentBit;
-			bits = bits >> (8-nextRead);
-			res |= bits << (length - nextRead);
+			bits = bits >> (8 - rdsz);
 
-			length -= nextRead;
-			currentBit += nextRead;
-			if (currentBit >= 8)
-				currentBit = 0;
-			currentByte += 1;
-			nextRead = std::min(length, 8-currentBit);
+			length -= rdsz;
+			currentBit = 0;
+			++currentByte;
+
+			UINT temp = bits;
+			res |= (temp << length);
 		}
 		return res;
 	}
