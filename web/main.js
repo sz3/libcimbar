@@ -80,7 +80,7 @@ var Main = function () {
 
     init_ww: function (canvas) {
       const urlParams = new URLSearchParams(window.location.search);
-      const use_ww = urlParams.get('ww');
+      const use_ww = urlParams.get('ww') || window.location.hash == "#ww=1";
       if (!use_ww || typeof OffscreenCanvas === 'undefined' || typeof Worker === 'undefined') {
         return false;
       }
@@ -101,6 +101,7 @@ var Main = function () {
       if (force_local) {
         _ww = undefined;
         // force refresh in main thread mode
+        window.location.hash = "";
         window.location.search = "";
         window.location.reload();
         return;
