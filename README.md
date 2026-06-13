@@ -109,6 +109,10 @@ You can also encode a file using [cimbar.org](https://cimbar.org), or the latest
 
 [TODO](TODO.md)
 
+## Community Tools
+
+* [cimbar-bigfile](https://github.com/xPeiPeix/cimbar-bigfile) — A pure-frontend wrapper that splits files into multiple parallel `encode_id` streams (10–15 MB chunks per stream), and ships a `manifest.json` for SHA256-verified reassembly. Supports 100+ MB files. No changes to libcimbar or cfc required.
+
 ## Inspiration
 
 * https://github.com/JohannesBuchner/imagehash/
