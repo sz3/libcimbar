@@ -212,6 +212,9 @@ polynomial_t polynomial_init_from_roots(field_t field, unsigned int nroots, fiel
 
 polynomial_t polynomial_create_from_roots(field_t field, unsigned int nroots, field_element_t *roots) {
     polynomial_t poly = polynomial_create(nroots);
+    if (nroots == 0) // SZ3: we do a bit of defensive programming, as a treat
+        return poly;
+
     unsigned int order = nroots;
     polynomial_t l;
     l.order = 1;

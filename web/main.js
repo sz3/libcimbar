@@ -87,6 +87,7 @@ var Main = function () {
   // public interface
   return {
     init: function (canvas) {
+      Module._cimbare_init_window(0, 0);
       Main.setMode('B');
       Main.check_GL_enabled(canvas);
     },

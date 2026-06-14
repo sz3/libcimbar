@@ -2,7 +2,6 @@
 #pragma once
 
 #include "gl_2d_display.h"
-#include "mat_to_gl.h"
 
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -42,7 +41,6 @@ public:
 		glfwSetWindowUserPointer(_w, &_ctx);
 
 		_display = std::make_shared<cimbar::gl_2d_display>(std::max(width, height));
-		glGenTextures(1, &_texid);
 		init_opengl(width, height);
 	}
 
@@ -53,8 +51,6 @@ public:
 			glfwDestroyWindow(_w);
 			_w = nullptr;
 		}
-		if (_texid)
-			glDeleteTextures(1, &_texid);
 		glfwTerminate();
 	}
 
@@ -144,8 +140,8 @@ public:
 
 		if (_display)
 		{
-			cimbar::mat_to_gl::load_gl_texture(_texid, img);
-			_display->draw(_texid);
+			_display->load(img);
+			_display->draw();
 
 			swap();
 			poll();
@@ -187,7 +183,6 @@ protected:
 protected:
 	GLFWwindow* _w = nullptr;
 	runtime_ctx _ctx;
-	GLuint _texid;
 	std::shared_ptr<cimbar::gl_2d_display> _display;
 	bool _good = true;
 };
