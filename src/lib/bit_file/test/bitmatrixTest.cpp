@@ -1,9 +1,9 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #include "unittest.h"
+#include "TestHelpers.h"
 
 #include "bitmatrix.h"
 
-#include "TestHelpers.h"
 #include <opencv2/opencv.hpp>
 
 TEST_CASE( "bitmatrixTest/test_mat_to_bitbuffer", "[unit]" )

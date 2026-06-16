@@ -7,6 +7,7 @@ set (SOURCES
 	bitbufferTest.cpp
 	bitbuffer2dTest.cpp
 	bitmatrixTest.cpp
+	bitmatrix_reloadedTest.cpp
 	bitreaderTest.cpp
 )
 

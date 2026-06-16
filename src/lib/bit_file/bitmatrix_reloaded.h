@@ -2,38 +2,65 @@
 #pragma once
 
 #include "bitbuffer2d.h"
+#include "serialize/format.h"
 #include <opencv2/opencv.hpp>
+
+#include <iostream>
 
 // this will replace bitmatrix, once it works
 
 // need bitbuffer2ds of size 64x64 == 512 bytes
 
+struct bitmatrix_sector_info
+{
+	int32_t sector;
+	int16_t xcoord;
+	int16_t ycoord;
+	unsigned pos;
+
+	bool bad() const
+	{
+		return sector < 0;
+	}
+};
+
 class bitmatrix_reloaded
 {
 protected:
-	constexpr int SECTOR_FACTOR = 6;
-	constexpr int SECTOR_DIM = (1 << SECTOR_FACTOR); // 64
+	static constexpr int SECTOR_FACTOR = 6;
+	static constexpr int SECTOR_DIM = (1 << SECTOR_FACTOR); // 64
 
-public:
-	bitmatrix_reloaded(unsigned width, unsigned height)
-		: _width(width)
-		, _height(height)
-		, _sectorsX(std::ceil(width*1.0 / SECTOR_DIM))
-		, _sectorsY(std::ceil(height*1.0 / SECTOR_DIM))
+	void resize(unsigned width, unsigned height)
 	{
-		std::cerr << fmt::format("bmr sectors: {},{}", _sectorsX, _sectorsY) << std::endl;
-		_sectors.resize(_sectorsX*_sectorsY);
+		std::cerr << fmt::format("bmr sectors: {},{}", width, height) << std::endl;
+		_width = width;
+		_height = height;
+		_numSectorsX = std::ceil(width*1.0 / SECTOR_DIM);
+		_numSectorsY = std::ceil(height*1.0 / SECTOR_DIM);
+
+		unsigned sectorCount = _numSectorsX * _numSectorsY;
+		if (sectorCount != _sectors.size())
+		{
+			_sectors.resize(_numSectorsX*_numSectorsY);
+			for (int i = 0; i < _sectors.size(); ++i)
+				_sectors[i].buffer().resize(SECTOR_DIM*8, 0);
+		}
 	}
 
-	void load(const cv::Mat& img)
+public:
+	bitmatrix_reloaded(unsigned width=0, unsigned height=0)
+	{
+		resize(width, height);
+	}
+
+	// return 0 or success, number of pixels unread on failure
+	unsigned load(const cv::Mat& img)
 	{
 		const uchar* p = img.ptr<uchar>(0);
 		unsigned size = img.cols * img.rows;
+		resize(img.cols, img.rows);
 
-		auto sect = _sectors.begin();
-		sect->buffer().resize(512, 0);
 		size_t pos = 0;
-
 		while (size >= 8)
 		{
 			// we're turning 1 uint64_t into 8 uint8_ts
@@ -47,23 +74,23 @@ public:
 				cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 |
 				cv[6] << 1 | cv[7]
 			);
-			sect->buffer()[pos] = val;
 
+			bitmatrix_sector_info si = get_sector(pos);
+			if (si.bad() or si.sector >= _sectors.size())
+				return size;
+			_sectors[si.sector].write_aligned_byte(val, si.pos);
 			p += 8;
 			size -= 8;
-			++pos;
-			if (pos >= sect->buffer().size())
-			{
-				++sect;
-				pos = 0;
-				if (sect == _sectors.end())
-					return;
-			}
+			pos += 8;
 		}
 
 		// remainder
-		if (size > 0 and pos < sect->buffer().size())
+		if (size > 0)
 		{
+			bitmatrix_sector_info si = get_sector(pos);
+			if (!si.bad() or si.sector >= _sectors.size())
+				return false;
+
 			uint8_t val = 0;
 			while (size > 0)
 			{
@@ -71,51 +98,50 @@ public:
 				++p;
 				--size;
 			}
-			sect->buffer()[pos] = val;
+			_sectors[si.sector].write_aligned_byte(val, si.pos);
 		}
+		return size;
 	}
 
-	inline unsigned read_once(unsigned x, unsigned y, unsigned num_bits, uint64_t& bits)
+	inline bitmatrix_sector_info get_sector(int x, int y) const
+	{
+		if (x < 0 or y < 0)
+			return bitmatrix_sector_info{-1,0,0,0};
+
+		unsigned sectorCol = x / SECTOR_DIM;
+		unsigned sectorRow = y / SECTOR_DIM;
+		x = x % SECTOR_DIM;
+		y = y % SECTOR_DIM;
+
+		return bitmatrix_sector_info{.sector=sectorRow+(sectorCol*_numSectorsY), .xcoord=x, .ycoord=y, .pos=x+(y*SECTOR_DIM)};
+	}
+
+	inline bitmatrix_sector_info get_sector(unsigned pos) const
+	{
+		int x = pos % _width;
+		int y = pos / _width;
+		return get_sector(x, y);
+	}
+
+	inline unsigned read_once(unsigned x, unsigned y, unsigned num_bits, uint64_t& bits) const
 	{
 		// 1 <= num_bits <= 8
 		// always returns >=1 (forward progress)
 
 		// do the sector lookup, then project x,y into it
-		uint64_t bits = 0;
+		bits = 0;
 
-		unsigned sectorCol = x / _sectorsX;
-		unsigned sectorRow = y / _sectorsY;
-		x = x % _sectorsX;
-		y = y % _sectorsY;
-
-		unsigned i = sectorCol + (sectorRow*_sectorsX);
-		if (i >= _sectors.size())
+		bitmatrix_sector_info si = get_sector(x, y);
+		if (si.bad() or si.sector >= _sectors.size())
 			return 0;
 
-		bitbuffer2d& sector = _sectors[i];
+		const bitbuffer2d& sector = _sectors[si.sector];
 
-		unsigned pos = x + (y * SECTOR_DIM);
+		unsigned pos = si.pos;
 		if (pos + num_bits > sector.size())
 			num_bits = sector.size() - pos;
 		bits = sector.read(pos, num_bits);
 		return num_bits;
-	}
-
-	// prob move this into bitbuffer2d
-	// negative x or y means we backfill -N rows/columns with 0s before placing bits
-	// y+rows or x+cols > bounds means we still shift as if we have everything, but we
-	//  leave 0s as padding.
-	// this also dovetails with the "apron" approach, if we go there...
-	inline intx::uint128 read_sector_mask(int x, int y, uint16_t cols, uint16_t rows)
-	{
-		intx::uint128 total(0);
-		// get sector. Then read whatever we've got, but *only* within cols+rows
-		for (uint16_t yr = 0; yr < rows; ++yr)
-		{
-
-		}
-
-		return total;
 	}
 
 	inline uint64_t read_row(unsigned x, unsigned y, unsigned num_bits) const
@@ -128,8 +154,8 @@ public:
 		while (count < num_bits)
 		{
 			// read at most 8 bits
-			unsigned readSize = std::max(8, num_bits - count);
-			unsigned bits = 0;
+			unsigned readSize = std::max<unsigned>(8, num_bits - count);
+			uint64_t bits = 0;
 			unsigned consumed = read_once(x+count, y, readSize, bits);
 			count += consumed;
 
@@ -149,7 +175,7 @@ public:
 		unsigned xcol = 0;
 		for (unsigned i = 0; i < rows and bitsRemaining >=0; ++i, bitsRemaining -= cols)
 		{
-			intx::uint128 res = read_row(xcol, yrow, bits_x);
+			intx::uint128 res = read_row(xcol, yrow, cols);
 			total |= res << bitsRemaining;
 		}
 		return total;
@@ -158,7 +184,7 @@ public:
 	// instead of read_row(), we could maybe do a read_sector_mask(x, y, cols, rows)
 	// with each sector returning a uint128?
 	// then we or them all at the end? prob performs better...
-	intx::uint128 read2(unsigned x, unsigned y, uint16_t cols, uint16_t rows) const
+	intx::uint128 read2(int x, int y, uint16_t cols, uint16_t rows) const
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);
@@ -181,10 +207,15 @@ public:
 		return _height;
 	}
 
+	const std::vector<bitbuffer2d>& sectors() const
+	{
+		return _sectors;
+	}
+
 protected:
 	std::vector<bitbuffer2d> _sectors;
 	unsigned _width;
 	unsigned _height;
-	unsigned _sectorsX;
-	unsigned _sectorsY;
+	unsigned _numSectorsX;
+	unsigned _numSectorsY;
 };

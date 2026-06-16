@@ -10,8 +10,8 @@
 class bitbuffer2d : public bitbuffer
 {
 public:
-	bitbuffer2d(unsigned width, unsigned height)
-		: bitbuffer(width*height)
+	bitbuffer2d(unsigned width=64, unsigned height=64)
+		: bitbuffer(width*height / 8)
 		, _width(width)
 		, _height(height)
 	{

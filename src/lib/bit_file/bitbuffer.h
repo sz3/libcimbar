@@ -1,6 +1,7 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include <iostream>
 #include <vector>
 
 // write bits -> buffer
@@ -41,7 +42,7 @@ public:
 	};
 
 public:
-	bitbuffer(unsigned size_hint=512)
+	bitbuffer(unsigned size_hint=9300)
 		: _sizeHint(size_hint)
 	{
 		clear();
@@ -85,6 +86,18 @@ public:
 			currentByte += 1;
 			nextWrite = std::min(length, 8-currentBit);
 		}
+		return true;
+	}
+
+	bool write_aligned_byte(uint8_t byte, unsigned index)
+	{
+		int byteIndex = index/8;
+		if (byteIndex >= _buffer.size())
+		{
+			std::cerr << "wtf?" << std::endl;
+			return false;
+		}
+		_buffer[byteIndex] = byte;
 		return true;
 	}
 
