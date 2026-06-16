@@ -6,6 +6,7 @@ set (SOURCES
 	test.cpp
 	bitbufferTest.cpp
 	bitbuffer2dTest.cpp
+	bitmatrixTest.cpp
 	bitreaderTest.cpp
 )
 
@@ -22,3 +23,7 @@ add_executable (
 
 add_test(bit_file_test bit_file_test)
 
+target_link_libraries(bit_file_test
+
+	${OPENCV_LIBS}
+)

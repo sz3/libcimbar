@@ -41,8 +41,8 @@ public:
 	};
 
 public:
-	bitbuffer(unsigned size_hint=9300)
-	    : _sizeHint(size_hint)
+	bitbuffer(unsigned size_hint=512)
+		: _sizeHint(size_hint)
 	{
 		clear();
 	}
@@ -126,6 +126,11 @@ public:
 	{
 		_buffer = {0};
 		_buffer.resize(_sizeHint, 0);
+	}
+
+	std::vector<char>& buffer()
+	{
+		return _buffer;
 	}
 
 	const std::vector<char>& buffer() const
