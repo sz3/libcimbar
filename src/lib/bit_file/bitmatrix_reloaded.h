@@ -29,9 +29,15 @@ public:
 	{
 		const uchar* p = img.ptr<uchar>(0);
 		unsigned size = img.cols * img.rows;
+
+		auto sect = _sectors.begin();
+		sect->buffer().resize(512, 0);
+		size_t pos = 0;
+
 		while (size >= 8)
 		{
 			// we're turning 1 uint64_t into 8 uint8_ts
+			// then smashing it into 1 uint8_t
 			uint64_t mval;
 			memcpy(&mval, p, sizeof mval);
 			mval = mval & 0x101010101010101ULL;
@@ -41,21 +47,31 @@ public:
 				cv[0] << 7 | cv[1] << 6 | cv[2] << 5 | cv[3] << 4 | cv[4] << 3 | cv[5] << 2 |
 				cv[6] << 1 | cv[7]
 			);
-			writer << val;
+			sect->buffer()[pos] = val;
+
 			p += 8;
 			size -= 8;
+			++pos;
+			if (pos >= sect->buffer().size())
+			{
+				++sect;
+				pos = 0;
+				if (sect == _sectors.end())
+					return;
+			}
 		}
 
 		// remainder
-		if (size > 0)
+		if (size > 0 and pos < sect->buffer().size())
 		{
 			uint8_t val = 0;
-			while (size > 0) {
+			while (size > 0)
+			{
 				val |= (*p > 0) << size;
 				++p;
 				--size;
 			}
-			writer << val;
+			sect->buffer()[pos] = val;
 		}
 	}
 
