@@ -1,6 +1,8 @@
 /* This code is subject to the terms of the Mozilla Public License, v.2.0. http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include "serialize/format.h"
+
 #include <iostream>
 #include <vector>
 
@@ -109,6 +111,8 @@ public:
 
 		int currentByte = index/8;
 		int currentBit = index%8;
+
+		//std::cerr << fmt::format("read currentByte({}) = {}. bit {}", currentByte, (unsigned)(unsigned char)(_buffer[currentByte]), currentBit) << std::endl;
 
 		UINT res = 0;
 		while (length > 0)

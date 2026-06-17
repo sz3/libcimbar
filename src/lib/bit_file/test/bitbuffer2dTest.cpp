@@ -76,6 +76,45 @@ TEST_CASE( "bitbuffer2dTest/testSectorMask.SpotCheck", "[unit]" )
 	}
 }
 
+TEST_CASE( "bitbuffer2dTest/testSectorMask.Edges", "[unit]" )
+{
+	bitbuffer2d bb(64, 64);
+	bitbuffer::writer bw(bb);
+	for (int i = 0; i < 64; ++i)
+	{
+		bw << 'A';
+		bw << 'B';
+		bw << 'C';
+		bw << 'D';
+		bw << 'E';
+		bw << 'F';
+		bw << 'G';
+		bw << 'H';
+	}
+
+	assertEquals( 65, (int)bb.buffer()[0] );
+	assertEquals( 'A', bb.buffer()[0] );
+
+	// [60, 63]
+	// 1000
+	// (same every row)
+	{
+		// read 1000 in every row, then all 0s
+		uint64_t res = (uint64_t)bb.read_sector_mask(60, 60, 8, 8);
+		assertEquals( 0x8080808000000000ULL, res );
+	}
+
+	// [0, 3]
+	// 0100
+	// (same every row)
+	{
+		// read 0000 in every row (oob), then for the last 4 read
+		// 0000 0100 (first 4 oob, second 4 [0,3] from data
+		uint64_t res = (uint64_t)bb.read_sector_mask(-4, -4, 8, 8);
+		assertEquals( 0x4040404ULL, res );
+	}
+}
+
 TEST_CASE( "bitbuffer2dTest/testSectorMask.Exhaustive1", "[unit]" )
 {
 	bitbuffer2d bb(64, 64);

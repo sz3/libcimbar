@@ -27,19 +27,154 @@ TEST_CASE( "bitmatrix_reloadedTest/testLoad", "[unit]" )
 	for (int row = 0; row < 16; ++row)
 		for (int col = 0; col < 16; ++col)
 		{
-			cv::Rect bounds(row*64, col*64, 64, 64);
+			cv::Rect bounds(col*64, row*64, 64, 64);
 			cv::Mat sector = symbols(bounds).clone();
+
+			//cv::imwrite(fmt::format("/tmp/sector{}-{}.png", row,col), sector);
 
 			bitbuffer bb(sector.rows * sector.cols / 8);
 			bitmatrix::mat_to_bitbuffer(sector, bb.get_writer());
 
 			unsigned si = row*16 + col;
 			const bitbuffer2d& sct = bm.sectors()[si];
-			assertEquals( sct.buffer().size(),  bb.buffer().size() );
+			assertEquals( sct.buffer().size(), bb.buffer().size() );
 			for (int i = 0; i < bb.buffer().size(); ++i)
 				assertMsg( sct.buffer()[i] == bb.buffer()[i], fmt::format("buff check {},{},{}", row, col, i) );
 		}
 
+}
 
+TEST_CASE( "bitmatrix_reloadedTest/testRead", "[unit]" )
+{
+	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
+	assertEquals( 1024, symbols.cols );
+	assertEquals( 1024, symbols.rows );
 
+	cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+	cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 0);
+
+	bitmatrix_reloaded bm;
+	assertEquals( 0, bm.load(symbols) );
+
+	// single sector read
+	{
+		intx::uint128 res = bm.read(26, 89, 8, 1);
+		assertEquals( 0xFF, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read(26, 90, 8, 1);
+		assertEquals( 0xFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read(26, 89, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read(26, 89, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
+
+	// single sector read again
+	{
+		intx::uint128 res = bm.read(80, 8, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read(80, 8, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
+
+	// multi sectors
+	{
+		intx::uint128 res = bm.read(62, 8, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read(62, 8, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
+}
+
+TEST_CASE( "bitmatrix_reloadedTest/testRead.Exhaustive", "[exhaustive]" )
+{
+	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
+	assertEquals( 1024, symbols.cols );
+	assertEquals( 1024, symbols.rows );
+
+	cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+	cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 0);
+
+	bitmatrix_reloaded bm;
+	assertEquals( 0, bm.load(symbols) );
+
+	bitbuffer2d bb(symbols.rows, symbols.cols);
+	bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
+
+	for (int i = 0; i < symbols.rows; ++i)
+		for (int j = 0; j < symbols.cols; ++j)
+		{
+			break;
+		}
+
+}
+
+TEST_CASE( "bitmatrix_reloadedTest/testRead2", "[unit]" )
+{
+	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
+	assertEquals( 1024, symbols.cols );
+	assertEquals( 1024, symbols.rows );
+
+	cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+	cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 0);
+
+	bitmatrix_reloaded bm;
+	assertEquals( 0, bm.load(symbols) );
+
+	// single sector read
+	{
+		intx::uint128 res = bm.read2(26, 89, 8, 1);
+		assertEquals( 0xFF, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read2(26, 90, 8, 1);
+		assertEquals( 0xFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read2(26, 89, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read2(26, 89, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
+
+	// single sector read again
+	{
+		intx::uint128 res = bm.read2(80, 8, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read2(80, 8, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
+
+	// multi sectors
+	{
+		intx::uint128 res = bm.read2(62, 8, 8, 2);
+		assertEquals( 0xFFFE, (uint64_t)res);
+	}
+
+	{
+		intx::uint128 res = bm.read2(62, 8, 8, 8);
+		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
+	}
 }

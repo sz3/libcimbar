@@ -32,7 +32,6 @@ protected:
 
 	void resize(unsigned width, unsigned height)
 	{
-		std::cerr << fmt::format("bmr sectors: {},{}", width, height) << std::endl;
 		_width = width;
 		_height = height;
 		_numSectorsX = std::ceil(width*1.0 / SECTOR_DIM);
@@ -88,8 +87,8 @@ public:
 		if (size > 0)
 		{
 			bitmatrix_sector_info si = get_sector(pos);
-			if (!si.bad() or si.sector >= _sectors.size())
-				return false;
+			if (si.bad() or si.sector >= _sectors.size())
+				return size;
 
 			uint8_t val = 0;
 			while (size > 0)
@@ -113,7 +112,7 @@ public:
 		x = x % SECTOR_DIM;
 		y = y % SECTOR_DIM;
 
-		return bitmatrix_sector_info{.sector=sectorRow+(sectorCol*_numSectorsY), .xcoord=x, .ycoord=y, .pos=x+(y*SECTOR_DIM)};
+		return bitmatrix_sector_info{.sector=sectorCol+(sectorRow*_numSectorsX), .xcoord=x, .ycoord=y, .pos=x+(y*SECTOR_DIM)};
 	}
 
 	inline bitmatrix_sector_info get_sector(unsigned pos) const
@@ -123,7 +122,7 @@ public:
 		return get_sector(x, y);
 	}
 
-	inline unsigned read_once(unsigned x, unsigned y, unsigned num_bits, uint64_t& bits) const
+	inline unsigned read_once(unsigned x, unsigned y, unsigned num_bits, uint16_t& bits) const
 	{
 		// 1 <= num_bits <= 8
 		// always returns >=1 (forward progress)
@@ -138,13 +137,13 @@ public:
 		const bitbuffer2d& sector = _sectors[si.sector];
 
 		unsigned pos = si.pos;
-		if (pos + num_bits > sector.size())
-			num_bits = sector.size() - pos;
+		if (si.xcoord + num_bits > SECTOR_DIM)
+			num_bits = SECTOR_DIM - si.xcoord;
 		bits = sector.read(pos, num_bits);
 		return num_bits;
 	}
 
-	inline uint64_t read_row(unsigned x, unsigned y, unsigned num_bits) const
+	inline uint16_t read_row(unsigned x, unsigned y, unsigned num_bits) const
 	{
 		// 1 <= num_bits <= 64
 		// read N bits from each sector...
@@ -154,8 +153,8 @@ public:
 		while (count < num_bits)
 		{
 			// read at most 8 bits
-			unsigned readSize = std::max<unsigned>(8, num_bits - count);
-			uint64_t bits = 0;
+			unsigned readSize = std::min<unsigned>(8, num_bits - count);
+			uint16_t bits = 0;
 			unsigned consumed = read_once(x+count, y, readSize, bits);
 			count += consumed;
 
@@ -169,13 +168,12 @@ public:
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);
-		int bitsRemaining = cols*rows - 1;
+		int bitsRemaining = cols*rows;
 
-		unsigned yrow = 0;
-		unsigned xcol = 0;
-		for (unsigned i = 0; i < rows and bitsRemaining >=0; ++i, bitsRemaining -= cols)
+		for (unsigned i = 0; i < rows and bitsRemaining >=0; ++i)
 		{
-			intx::uint128 res = read_row(xcol, yrow, cols);
+			bitsRemaining -= cols;
+			intx::uint128 res = read_row(x, y+i, cols);
 			total |= res << bitsRemaining;
 		}
 		return total;
@@ -189,11 +187,27 @@ public:
 		// read N bits from each sector...
 		intx::uint128 total(0);
 
-		// for 1-4 sectors
-		// sectorRes = read_sector_mask()
-		//total |= sectorRes;
-		// ... and then opt to only compute when they're different sectors?
+		bitmatrix_sector_info tl = get_sector(x,y);
+		if (tl.bad() or tl.sector >= _sectors.size())
+			return total;
 
+		total |= _sectors[tl.sector].read_sector_mask(tl.xcoord, tl.ycoord, cols, rows);
+
+		bitmatrix_sector_info br = get_sector(x+cols-1, y+rows-1);
+		if (tl.sector != br.sector)
+		{
+			if (br.sector < _sectors.size() and br.sector != tl.sector)
+			{
+				total |= _sectors[br.sector].read_sector_mask(br.xcoord - cols+1, br.ycoord - rows+1, cols, rows);
+				// TODO:can short circuit below if br.sector logic runs *and* sector index is 1 away...
+			}
+			bitmatrix_sector_info tr = get_sector(x+cols-1, y);
+			bitmatrix_sector_info bl = get_sector(x, y+rows-1);
+			if (tr.sector < _sectors.size() and tr.sector != tl.sector and tr.sector != br.sector)
+				total |= _sectors[tr.sector].read_sector_mask(tr.xcoord - cols+1, tr.ycoord, cols, rows);
+			if (bl.sector < _sectors.size() and bl.sector != tl.sector and tl.sector != bl.sector)
+				total |= _sectors[bl.sector].read_sector_mask(bl.xcoord, bl.ycoord - rows+1, cols, rows);
+		}
 		return total;
 	}
 
