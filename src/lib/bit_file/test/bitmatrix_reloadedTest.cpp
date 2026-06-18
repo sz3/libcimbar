@@ -220,6 +220,55 @@ TEST_CASE( "bitmatrix_reloadedTest/testRead2", "[unit]" )
 	}
 }
 
+TEST_CASE( "bitmatrix_reloadedTest/testRead2.OOB", "[unit]" )
+{
+	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
+	assertEquals( 1024, symbols.cols );
+	assertEquals( 1024, symbols.rows );
+
+	cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+	cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 0);
+
+	bitmatrix_reloaded bm;
+	assertEquals( 0, bm.load(symbols) );
+
+	// oob top left
+	{
+		intx::uint128 res = bm.read2(-4, -4, 8, 8);
+		assertEquals( 0x303, (uint64_t)res);
+	}
+
+	// oob left
+	{
+		intx::uint128 res = bm.read2(-4, 4, 8, 8);
+		assertEquals( 0x303030303030303ULL, (uint64_t)res);
+	}
+
+	// oob top
+	{
+		intx::uint128 res = bm.read2(4, -4, 8, 8);
+		assertEquals( 0xFFFF, (uint64_t)res);
+	}
+
+	// oob bottom right
+	{
+		intx::uint128 res = bm.read2(1020, 1020, 8, 8);
+		assertEquals( 0xC0C0000000000000ULL, (uint64_t)res);
+	}
+
+	// oob bottom
+	{
+		intx::uint128 res = bm.read2(1010, 1020, 8, 8);
+		assertEquals( 0xffff000000000000ULL, (uint64_t)res);
+	}
+
+	// oob right
+	{
+		intx::uint128 res = bm.read2(1020, 1010, 8, 8);
+		assertEquals( 0xC0C0C0C0C0C0C0C0ULL, (uint64_t)res);
+	}
+}
+
 TEST_CASE( "bitmatrix_reloadedTest/testRead2.Exhaustive", "[exhaustive]" )
 {
 	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");

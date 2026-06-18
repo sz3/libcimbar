@@ -214,7 +214,7 @@ public:
 		intx::uint128 total(0);
 
 		bitmatrix_sector_info tl = get_sector(x,y);
-		if (tl.sector >= _sectors.size())
+		if (tl.sector >= (int)_sectors.size())
 			return total;
 		if (!tl.bad())
 			total |= _sectors[tl.sector].read_sector_mask(tl.xcoord, tl.ycoord, cols, rows);
@@ -235,10 +235,11 @@ public:
 
 			// finally, the slow path
 			bitmatrix_sector_info tr = get_sector(x+cols-1, y);
-			bitmatrix_sector_info bl = get_sector(x, y+rows-1);
 			if (!tr.bad() and tr.sector < _sectors.size() and tr.sector != tl.sector and tr.sector != br.sector)
 				total |= _sectors[tr.sector].read_sector_mask(tr.xcoord - cols+1, tr.ycoord, cols, rows);
-			if (!bl.bad() and bl.sector < _sectors.size() and bl.sector != tl.sector and tl.sector != bl.sector)
+
+			bitmatrix_sector_info bl = get_sector(x, y+rows-1);
+			if (!bl.bad() and bl.sector < _sectors.size() and bl.sector != tl.sector and bl.sector != br.sector and bl.sector != tr.sector)
 				total |= _sectors[bl.sector].read_sector_mask(bl.xcoord, bl.ycoord - rows+1, cols, rows);
 		}
 		return total;
