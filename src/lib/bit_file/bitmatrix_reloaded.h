@@ -13,9 +13,9 @@
 
 struct bitmatrix_sector_info
 {
-	int32_t sector;
-	int16_t xcoord;
-	int16_t ycoord;
+	int sector;
+	int xcoord;
+	int ycoord;
 	unsigned pos;
 
 	bool bad() const
@@ -36,7 +36,7 @@ public:
 			, _y(y)
 		{}
 
-		inline intx::uint128 read(uint16_t cols, uint16_t rows) const
+		inline intx::uint128 read(unsigned cols, unsigned rows) const
 		{
 			return _bm.read2(_x, _y, cols, rows);
 		}
@@ -129,12 +129,16 @@ public:
 		if (x < 0 or y < 0)
 			return bitmatrix_sector_info{-1,0,0,0};
 
-		unsigned sectorCol = x / SECTOR_DIM;
-		unsigned sectorRow = y / SECTOR_DIM;
+		int sectorCol = x / SECTOR_DIM;
+		int sectorRow = y / SECTOR_DIM;
 		x = x % SECTOR_DIM;
 		y = y % SECTOR_DIM;
 
-		return bitmatrix_sector_info{.sector=sectorCol+(sectorRow*_numSectorsX), .xcoord=x, .ycoord=y, .pos=x+(y*SECTOR_DIM)};
+		return bitmatrix_sector_info{
+			.sector=static_cast<int>(sectorCol+(sectorRow*_numSectorsX)),
+			.xcoord=x, .ycoord=y,
+			.pos=static_cast<unsigned>(x+(y*SECTOR_DIM))
+		};
 	}
 
 	inline bitmatrix_sector_info get_sector(unsigned pos) const
@@ -204,30 +208,37 @@ public:
 	// instead of read_row(), we could maybe do a read_sector_mask(x, y, cols, rows)
 	// with each sector returning a uint128?
 	// then we or them all at the end? prob performs better...
-	inline intx::uint128 read2(int x, int y, uint16_t cols, uint16_t rows) const
+	inline intx::uint128 read2(int x, int y, unsigned cols, unsigned rows) const
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);
 
 		bitmatrix_sector_info tl = get_sector(x,y);
-		if (tl.bad() or tl.sector >= _sectors.size())
+		if (tl.sector >= _sectors.size())
 			return total;
-
-		total |= _sectors[tl.sector].read_sector_mask(tl.xcoord, tl.ycoord, cols, rows);
+		if (!tl.bad())
+			total |= _sectors[tl.sector].read_sector_mask(tl.xcoord, tl.ycoord, cols, rows);
 
 		bitmatrix_sector_info br = get_sector(x+cols-1, y+rows-1);
+		if (br.bad())
+			return total;
+
 		if (tl.sector != br.sector)
 		{
-			if (br.sector < _sectors.size() and br.sector != tl.sector)
+			if (br.sector < _sectors.size())
 			{
 				total |= _sectors[br.sector].read_sector_mask(br.xcoord - cols+1, br.ycoord - rows+1, cols, rows);
-				// TODO:can short circuit below if br.sector logic runs *and* sector index is 1 away...
+				//short circuit if sector index is 1 away...
+				if (br.sector == tl.sector + 1 or br.sector == tl.sector + _numSectorsX)
+					return total;
 			}
+
+			// finally, the slow path
 			bitmatrix_sector_info tr = get_sector(x+cols-1, y);
 			bitmatrix_sector_info bl = get_sector(x, y+rows-1);
-			if (tr.sector < _sectors.size() and tr.sector != tl.sector and tr.sector != br.sector)
+			if (!tr.bad() and tr.sector < _sectors.size() and tr.sector != tl.sector and tr.sector != br.sector)
 				total |= _sectors[tr.sector].read_sector_mask(tr.xcoord - cols+1, tr.ycoord, cols, rows);
-			if (bl.sector < _sectors.size() and bl.sector != tl.sector and tl.sector != bl.sector)
+			if (!bl.bad() and bl.sector < _sectors.size() and bl.sector != tl.sector and tl.sector != bl.sector)
 				total |= _sectors[bl.sector].read_sector_mask(bl.xcoord, bl.ycoord - rows+1, cols, rows);
 		}
 		return total;

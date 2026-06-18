@@ -23,10 +23,10 @@ public:
 	// y+rows or x+cols > bounds means we still shift as if we have everything, but we
 	//  leave 0s as padding.
 	// this also dovetails with the "apron" approach, if we go there...
-	inline intx::uint128 read_sector_mask(int x, int y, uint16_t cols, uint16_t rows) const
+	inline intx::uint128 read_sector_mask(int x, int y, unsigned cols, unsigned rows) const
 	{
-		cols = std::min<uint16_t>(cols, 10);
-		rows = std::min<uint16_t>(rows, 10);
+		cols = std::min(cols, 10U);
+		rows = std::min(rows, 10U);
 
 		intx::uint128 total(0);
 		int endX = std::min<int>(x+cols, _width);
@@ -62,12 +62,12 @@ public:
 		return total;
 	}
 
-	unsigned width() const
+	inline unsigned width() const
 	{
 		return _width;
 	}
 
-	unsigned height() const
+	inline unsigned height() const
 	{
 		return _height;
 	}
