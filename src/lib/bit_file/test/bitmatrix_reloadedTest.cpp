@@ -10,6 +10,23 @@
 #include <string>
 #include <vector>
 
+namespace {
+
+	// the old "fuzzy_ahash" read logic
+	intx::uint128 read_block(const bitmatrix& img, unsigned readlen)
+	{
+		intx::uint128 res(0);
+		int bitpos = readlen*readlen;
+		for (unsigned i = 0; i < readlen; ++i)
+		{
+			intx::uint128 r = img.get(0, i, readlen);
+			bitpos -= readlen;
+			res |= r << bitpos;
+		}
+		return res;
+	}
+}
+
 TEST_CASE( "bitmatrix_reloadedTest/testLoad", "[unit]" )
 {
 	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
@@ -115,10 +132,34 @@ TEST_CASE( "bitmatrix_reloadedTest/testRead.Exhaustive", "[exhaustive]" )
 	bitbuffer2d bb(symbols.rows, symbols.cols);
 	bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
 
-	for (int i = 0; i < symbols.rows; ++i)
-		for (int j = 0; j < symbols.cols; ++j)
+	// test every 8x8 and 10x10 read
+	for (int i = 0; i < symbols.rows-10; ++i)
+		for (int j = 0; j < symbols.cols-10; ++j)
 		{
-			break;
+			{
+				INFO("t8 at " << fmt::format("row {}, col {}", i, j));
+				intx::uint128 expected = bb.read_sector_mask(j, i, 8, 8);
+				intx::uint128 actual = bm.read(j, i, 8, 8);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
+
+			{
+				INFO("t10 at " << fmt::format("row {}, col {}", i, j));
+				intx::uint128 expected = bb.read_sector_mask(j, i, 10, 10);
+				intx::uint128 actual = bm.read(j, i, 10, 10);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
+
+			{
+				INFO("legacy at " << fmt::format("row {}, col {}", i, j));
+				bitmatrix bbreader(bb, symbols.cols, symbols.rows, j, i);
+				intx::uint128 expected = read_block(bbreader, 10);
+				intx::uint128 actual = bm.read(j, i, 10, 10);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
 		}
 
 }
@@ -177,4 +218,50 @@ TEST_CASE( "bitmatrix_reloadedTest/testRead2", "[unit]" )
 		intx::uint128 res = bm.read2(62, 8, 8, 8);
 		assertEquals( 0xFFFEFCF8F0E0C080, (uint64_t)res);
 	}
+}
+
+TEST_CASE( "bitmatrix_reloadedTest/testRead2.Exhaustive", "[exhaustive]" )
+{
+	cv::Mat symbols = TestCimbar::loadSample("b/tr_0.png");
+	assertEquals( 1024, symbols.cols );
+	assertEquals( 1024, symbols.rows );
+
+	cv::cvtColor(symbols, symbols, cv::COLOR_RGB2GRAY);
+	cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, 7, 0);
+
+	bitmatrix_reloaded bm;
+	assertEquals( 0, bm.load(symbols) );
+
+	bitbuffer2d bb(symbols.rows, symbols.cols);
+	bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
+
+	// test every 8x8 and 10x10 read
+	for (int i = 0; i < symbols.rows-10; ++i)
+		for (int j = 0; j < symbols.cols-10; ++j)
+		{
+			{
+				INFO("t8 at " << fmt::format("row {}, col {}", i, j));
+				intx::uint128 expected = bb.read_sector_mask(j, i, 8, 8);
+				intx::uint128 actual = bm.read2(j, i, 8, 8);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
+
+			{
+				INFO("t10 at " << fmt::format("row {}, col {}", i, j));
+				intx::uint128 expected = bb.read_sector_mask(j, i, 10, 10);
+				intx::uint128 actual = bm.read2(j, i, 10, 10);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
+
+			{
+				INFO("legacy at " << fmt::format("row {}, col {}", i, j));
+				bitmatrix bbreader(bb, symbols.cols, symbols.rows, j, i);
+				intx::uint128 expected = read_block(bbreader, 10);
+				intx::uint128 actual = bm.read(j, i, 10, 10);
+				assertEquals( expected[0], actual[0] );
+				assertEquals( expected[1], actual[1] );
+			}
+		}
 }

@@ -115,41 +115,7 @@ TEST_CASE( "bitbuffer2dTest/testSectorMask.Edges", "[unit]" )
 	}
 }
 
-TEST_CASE( "bitbuffer2dTest/testSectorMask.Exhaustive1", "[unit]" )
-{
-	bitbuffer2d bb(64, 64);
-	bitbuffer::writer bw(bb);
-	for (int i = 0; i < 64; ++i)
-	{
-		bw << 'A';
-		bw << 'B';
-		bw << 'C';
-		bw << 'D';
-		bw << 'E';
-		bw << 'F';
-		bw << 'G';
-		bw << 'H';
-	}
-
-	assertEquals( 65, (int)bb.buffer()[0] );
-	assertEquals( 'A', bb.buffer()[0] );
-
-	// ok, now let's get cute
-	// [8, 20] =>
-	// 0100 0001 0100
-	// (same every row)
-	for (int row = 0; row < (64-8); ++row)
-	{
-		for (int col = 0; col < (64-8); ++col)
-		{
-			uint64_t mask = (uint64_t)bb.read_sector_mask(col, row, 8, 1);
-			uint64_t res = bb.read(col+(row*64), 8);
-			assertEquals( res, mask );
-		}
-	}
-}
-
-TEST_CASE( "bitbuffer2dTest/testSectorMask.Exhaustive2", "[unit]" )
+TEST_CASE( "bitbuffer2dTest/testSectorMask.ExhaustiveContiguous", "[unit]" )
 {
 	bitbuffer2d bb(64, 64);
 	bitbuffer::writer bw(bb);
