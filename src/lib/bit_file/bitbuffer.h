@@ -2,8 +2,7 @@
 #pragma once
 
 #include "serialize/format.h"
-
-#include <iostream>
+#include "util/compiler_constants.h"
 #include <vector>
 
 // write bits -> buffer
@@ -19,20 +18,20 @@ public:
 		{}
 
 		template <typename UINT>
-		bool write_byte(UINT byte)
+		inline bool write_byte(UINT byte)
 		{
 			return write(byte, 8);
 		}
 
 		template <typename UINT>
-		bool write(UINT byte, int length)
+		inline bool write(UINT byte, int length)
 		{
 			size_t pos = _pos;
 			_pos += length;
 			return _bb.write(byte, pos, length);
 		}
 
-		writer& operator<<(uint8_t byte)
+		inline writer& operator<<(uint8_t byte)
 		{
 			write_byte(byte);
 			return *this;
@@ -50,7 +49,7 @@ public:
 		clear();
 	}
 
-	void resize(unsigned length)
+	inline void resize(unsigned length)
 	{
 		size_t requestedSize = length/8;
 		size_t size = _buffer.size();
@@ -62,12 +61,12 @@ public:
 		_buffer.resize(size, 0);
 	}
 
-	unsigned size() const
+	inline unsigned size() const
 	{
 		return _buffer.size() * 8;
 	}
 
-	bool write(unsigned data, unsigned index, int length)
+	inline bool write(unsigned data, unsigned index, int length)
 	{
 		resize(index+length);
 
@@ -91,20 +90,17 @@ public:
 		return true;
 	}
 
-	bool write_aligned_byte(uint8_t byte, unsigned index)
+	CIMBAR_ALWAYS_INLINE inline bool write_aligned_byte(uint8_t byte, unsigned index)
 	{
 		int byteIndex = index/8;
 		if (byteIndex >= _buffer.size())
-		{
-			std::cerr << "wtf?" << std::endl;
 			return false;
-		}
 		_buffer[byteIndex] = byte;
 		return true;
 	}
 
 	template <typename UINT=uint64_t>
-	UINT read(unsigned index, int length) const
+	CIMBAR_ALWAYS_INLINE inline UINT read(unsigned index, int length) const
 	{
 		if (length <= 0)
 			return 0;
@@ -132,14 +128,14 @@ public:
 	}
 
 	template <typename STREAM>
-	long flush(STREAM& f)
+	inline long flush(STREAM& f)
 	{
 		f.write(buffer().data(), buffer().size());
 		clear();
 		return f.tellp();
 	}
 
-	void clear()
+	inline void clear()
 	{
 		_buffer = {0};
 		_buffer.resize(_sizeHint, 0);
@@ -155,13 +151,13 @@ public:
 		return _buffer;
 	}
 
-	void copy_to_buffer(const char* data, unsigned size)
+	inline void copy_to_buffer(const char* data, unsigned size)
 	{
 		_buffer.resize(size, 0);
 		std::copy(data, data+size, _buffer.data());
 	}
 
-	writer get_writer(size_t pos=0)
+	inline writer get_writer(size_t pos=0)
 	{
 		return writer(*this, pos);
 	}

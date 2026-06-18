@@ -3,12 +3,11 @@
 
 #include "bitbuffer2d.h"
 #include "serialize/format.h"
+#include "util/compiler_constants.h"
+
 #include <opencv2/opencv.hpp>
 
-#include <iostream>
-
-// this will replace bitmatrix, once it works
-
+// this (ideally) will replace bitmatrix, once it works
 // need bitbuffer2ds of size 64x64 == 512 bytes
 
 struct bitmatrix_sector_info
@@ -16,7 +15,6 @@ struct bitmatrix_sector_info
 	int sector;
 	int xcoord;
 	int ycoord;
-	unsigned pos;
 
 	bool bad() const
 	{
@@ -30,13 +28,13 @@ public:
 	class view
 	{
 	public:
-		view(const bitmatrix_reloaded& bm, int x, int y)
+		inline view(const bitmatrix_reloaded& bm, int x, int y)
 			: _bm(bm)
 			, _x(x)
 			, _y(y)
 		{}
 
-		inline intx::uint128 read(unsigned cols, unsigned rows) const
+		CIMBAR_ALWAYS_INLINE inline intx::uint128 read(unsigned cols, unsigned rows) const
 		{
 			return _bm.read2(_x, _y, cols, rows);
 		}
@@ -74,8 +72,14 @@ public:
 		resize(width, height);
 	}
 
+	bitmatrix_reloaded(const cv::Mat& img)
+		: bitmatrix_reloaded(img.cols, img.rows)
+	{
+		load(img);
+	}
+
 	// return 0 or success, number of pixels unread on failure
-	inline unsigned load(const cv::Mat& img)
+	CIMBAR_FLATTEN inline unsigned load(const cv::Mat& img)
 	{
 		const uchar* p = img.ptr<uchar>(0);
 		unsigned size = img.cols * img.rows;
@@ -99,7 +103,8 @@ public:
 			bitmatrix_sector_info si = get_sector(pos);
 			if (si.bad() or si.sector >= _sectors.size())
 				return size;
-			_sectors[si.sector].write_aligned_byte(val, si.pos);
+			unsigned internalPos = static_cast<unsigned>(si.xcoord+(si.ycoord*SECTOR_DIM));
+			_sectors[si.sector].write_aligned_byte(val, internalPos);
 			p += 8;
 			size -= 8;
 			pos += 8;
@@ -119,15 +124,16 @@ public:
 				++p;
 				--size;
 			}
-			_sectors[si.sector].write_aligned_byte(val, si.pos);
+			unsigned internalPos = static_cast<unsigned>(si.xcoord+(si.ycoord*SECTOR_DIM));
+			_sectors[si.sector].write_aligned_byte(val, internalPos);
 		}
 		return size;
 	}
 
-	inline bitmatrix_sector_info get_sector(int x, int y) const
+	CIMBAR_ALWAYS_INLINE inline bitmatrix_sector_info get_sector(int x, int y) const
 	{
 		if (x < 0 or y < 0)
-			return bitmatrix_sector_info{-1,0,0,0};
+			return bitmatrix_sector_info{-1,0,0};
 
 		int sectorCol = x / SECTOR_DIM;
 		int sectorRow = y / SECTOR_DIM;
@@ -136,79 +142,21 @@ public:
 
 		return bitmatrix_sector_info{
 			.sector=static_cast<int>(sectorCol+(sectorRow*_numSectorsX)),
-			.xcoord=x, .ycoord=y,
-			.pos=static_cast<unsigned>(x+(y*SECTOR_DIM))
+			.xcoord=x, .ycoord=y
 		};
 	}
 
-	inline bitmatrix_sector_info get_sector(unsigned pos) const
+	CIMBAR_ALWAYS_INLINE inline bitmatrix_sector_info get_sector(unsigned pos) const
 	{
 		int x = pos % _width;
 		int y = pos / _width;
 		return get_sector(x, y);
 	}
 
-	inline unsigned read_once(unsigned x, unsigned y, unsigned num_bits, uint16_t& bits) const
-	{
-		// 1 <= num_bits <= 8
-		// always returns >=1 (forward progress)
-
-		// do the sector lookup, then project x,y into it
-		bits = 0;
-
-		bitmatrix_sector_info si = get_sector(x, y);
-		if (si.bad() or si.sector >= _sectors.size())
-			return 0;
-
-		const bitbuffer2d& sector = _sectors[si.sector];
-
-		unsigned pos = si.pos;
-		if (si.xcoord + num_bits > SECTOR_DIM)
-			num_bits = SECTOR_DIM - si.xcoord;
-		bits = sector.read(pos, num_bits);
-		return num_bits;
-	}
-
-	inline uint16_t read_row(unsigned x, unsigned y, unsigned num_bits) const
-	{
-		// 1 <= num_bits <= 64
-		// read N bits from each sector...
-		uint64_t total = 0;
-
-		unsigned count = 0;
-		while (count < num_bits)
-		{
-			// read at most 8 bits
-			unsigned readSize = std::min<unsigned>(8, num_bits - count);
-			uint16_t bits = 0;
-			unsigned consumed = read_once(x+count, y, readSize, bits);
-			count += consumed;
-
-			// count == 1, num_bits == 8 -> shift 8 - 1 == 7
-			total |= bits << (num_bits - count);
-		}
-		return total;
-	}
-
-	inline intx::uint128 read(unsigned x, unsigned y, uint16_t cols, uint16_t rows) const
-	{
-		// read N bits from each sector...
-		intx::uint128 total(0);
-		int bitsRemaining = cols*rows;
-
-		for (unsigned i = 0; i < rows and bitsRemaining >=0; ++i)
-		{
-			bitsRemaining -= cols;
-			intx::uint128 res = read_row(x, y+i, cols);
-			total |= res << bitsRemaining;
-		}
-		return total;
-	}
-
 	// instead of read_row(), we could maybe do a read_sector_mask(x, y, cols, rows)
 	// with each sector returning a uint128?
 	// then we or them all at the end? prob performs better...
-	inline intx::uint128 read2(int x, int y, unsigned cols, unsigned rows) const
+	CIMBAR_ALWAYS_INLINE inline intx::uint128 read2(int x, int y, unsigned cols, unsigned rows) const
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);

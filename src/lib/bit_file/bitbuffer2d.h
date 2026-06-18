@@ -2,9 +2,10 @@
 #pragma once
 
 #include "bitbuffer.h"
-#include "intx/intx.hpp"
-
 #include "serialize/format.h"
+#include "util/compiler_constants.h"
+
+#include "intx/intx.hpp"
 
 // wraps/inherits bitbuffer
 // imposes dimensionality
@@ -23,7 +24,7 @@ public:
 	// y+rows or x+cols > bounds means we still shift as if we have everything, but we
 	//  leave 0s as padding.
 	// this also dovetails with the "apron" approach, if we go there...
-	inline intx::uint128 read_sector_mask(int x, int y, unsigned cols, unsigned rows) const
+	CIMBAR_ALWAYS_INLINE inline intx::uint128 read_sector_mask(int x, int y, unsigned cols, unsigned rows) const
 	{
 		cols = std::min(cols, 10U);
 		rows = std::min(rows, 10U);

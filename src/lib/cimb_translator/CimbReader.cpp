@@ -39,10 +39,7 @@ namespace {
 			sharpenSymbolGrid(symbols, symbols);
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
-
-		bitmatrix_reloaded bm(symbols.rows, symbols.cols);
-		bm.load(symbols);
-		return bm;
+		return bitmatrix_reloaded(symbols);
 	}
 
 	void updateMaxColor(std::tuple<float, float, float>& max_color, const cv::Scalar& c)
