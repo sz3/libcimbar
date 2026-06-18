@@ -4,6 +4,7 @@
 #include "ahash_result.h"
 #include "bit_extractor.h"
 #include "bit_file/bitmatrix.h"
+#include "bit_file/bitmatrix_reloaded.h"
 #include "cimb_translator/Cell.h"
 #include "util/compiler_constants.h"
 
@@ -71,6 +72,14 @@ namespace image_hash
 			intx::uint128 r = img.get(0, i, readlen);
 			res |= r << bitpos;
 		}
+		return ahash_result<CELLSIZE>(res, mode);
+	}
+
+	template <unsigned CELLSIZE>
+	CIMBAR_ALWAYS_INLINE inline ahash_result<CELLSIZE> fuzzy_ahash(const bitmatrix_reloaded::view& img, unsigned mode=ahash_result<CELLSIZE>::ALL)
+	{
+		const unsigned readlen = CELLSIZE+2;
+		intx::uint128 res = img.read(readlen, readlen);
 		return ahash_result<CELLSIZE>(res, mode);
 	}
 }

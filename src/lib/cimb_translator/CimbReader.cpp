@@ -6,7 +6,7 @@
 #include "Config.h"
 #include "Interleave.h"
 
-#include "bit_file/bitmatrix.h"
+#include "bit_file/bitmatrix_reloaded.h"
 #include "chromatic_adaptation/adaptation_transform.h"
 #include "chromatic_adaptation/color_correction.h"
 #include <opencv2/opencv.hpp>
@@ -27,7 +27,7 @@ namespace {
 	}
 
 	template <typename MAT>
-	bitbuffer preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
+	bitmatrix_reloaded preprocessSymbolGrid(const MAT& img, bool needs_sharpen)
 	{
 		int blockSize = 5; // default: no preprocessing
 
@@ -40,9 +40,9 @@ namespace {
 		}
 		cv::adaptiveThreshold(symbols, symbols, 255, cv::ADAPTIVE_THRESH_MEAN_C, cv::THRESH_BINARY, blockSize, 0);
 
-		bitbuffer bb(symbols.rows * symbols.cols / 8);
-		bitmatrix::mat_to_bitbuffer(symbols, bb.get_writer());
-		return bb;
+		bitmatrix_reloaded bm(symbols.rows, symbols.cols);
+		bm.load(symbols);
+		return bm;
 	}
 
 	void updateMaxColor(std::tuple<float, float, float>& max_color, const cv::Scalar& c)
@@ -145,7 +145,7 @@ CIMBAR_ALWAYS_INLINE unsigned CimbReader::read(PositionData& pos)
 	auto [i, xy, drift, cooldown] = _positions.next();
 	int x = xy.first + drift.x();
 	int y = xy.second + drift.y();
-	bitmatrix cell(_grayscale, _image.cols, _image.rows, x-1, y-1);
+	bitmatrix_reloaded::view cell(_grayscale, x-1, y-1);
 
 	unsigned drift_offset = 0;
 	unsigned error_distance;

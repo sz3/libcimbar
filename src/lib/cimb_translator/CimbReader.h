@@ -5,7 +5,7 @@
 #include "FloodDecodePositions.h"
 #include "PositionData.h"
 
-#include "bit_file/bitbuffer.h"
+#include "bit_file/bitmatrix_reloaded.h"
 #include "fountain/FountainMetadata.h"
 #include "util/compiler_constants.h"
 #include <opencv2/opencv.hpp>
@@ -27,7 +27,7 @@ public:
 
 protected:
 	cv::Mat _image;
-	bitbuffer _grayscale;
+	bitmatrix_reloaded _grayscale;
 	FountainMetadata _fountainColorHeader;
 	unsigned _radioactiveBlockId;
 

@@ -50,12 +50,11 @@ public:
 		//std::cerr << fmt::format("bitsleft:{}", bitsLeft) << std::endl;
 
 		// get sector. Then read whatever we've got, but *only* within cols+rows
-		for (int yr = startY; yr < endY; ++yr)
+		for (int yr = startY; yr < endY; ++yr, bitsLeft -= cols)
 		{
 			unsigned pos = startX + (yr * _width); // TODO: move this into the for
 			intx::uint128 r = read<intx::uint128>(pos, readSize);
 			total |= r << (bitsLeft - readSize - leftPad);
-			bitsLeft -= cols;
 			//std::cerr << fmt::format("leftpad {}, bitsLeft {}, cols {}, readSize {}", leftPad, bitsLeft, cols, readSize) << std::endl;
 			//std::cerr << "read of size " << readSize << " .." << (uint64_t)r << " ..." << bitsLeft << std::endl;
 		}

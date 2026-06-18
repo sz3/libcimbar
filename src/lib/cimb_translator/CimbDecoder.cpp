@@ -146,6 +146,13 @@ CIMBAR_FLATTEN unsigned CimbDecoder::decode_symbol(const bitmatrix& cell, unsign
 	return get_best_symbol(results, drift_offset, best_distance, cooldown);
 }
 
+CIMBAR_FLATTEN unsigned CimbDecoder::decode_symbol(const bitmatrix_reloaded::view& cell, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
+{
+	int checkRule = cooldown == 0xFE? image_hash::ahash_result<cimbar::Config::cell_size()>::ALL : image_hash::ahash_result<cimbar::Config::cell_size()>::FAST;
+	image_hash::ahash_result<cimbar::Config::cell_size()> results = image_hash::fuzzy_ahash<cimbar::Config::cell_size()>(cell, checkRule);
+	return get_best_symbol(results, drift_offset, best_distance, cooldown);
+}
+
 std::tuple<uchar,uchar,uchar> CimbDecoder::fix_color(std::tuple<float,float,float> c, float adjustUp, float down) const
 {
 	return {

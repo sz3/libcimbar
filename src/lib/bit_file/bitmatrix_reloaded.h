@@ -26,11 +26,33 @@ struct bitmatrix_sector_info
 
 class bitmatrix_reloaded
 {
+public:
+	class view
+	{
+	public:
+		view(const bitmatrix_reloaded& bm, int x, int y)
+			: _bm(bm)
+			, _x(x)
+			, _y(y)
+		{}
+
+		inline intx::uint128 read(uint16_t cols, uint16_t rows) const
+		{
+			return _bm.read2(_x, _y, cols, rows);
+		}
+
+	protected:
+
+		const bitmatrix_reloaded& _bm;
+		int _x;
+		int _y;
+	};
+
 protected:
 	static constexpr int SECTOR_FACTOR = 6;
 	static constexpr int SECTOR_DIM = (1 << SECTOR_FACTOR); // 64
 
-	void resize(unsigned width, unsigned height)
+	inline void resize(unsigned width, unsigned height)
 	{
 		_width = width;
 		_height = height;
@@ -53,7 +75,7 @@ public:
 	}
 
 	// return 0 or success, number of pixels unread on failure
-	unsigned load(const cv::Mat& img)
+	inline unsigned load(const cv::Mat& img)
 	{
 		const uchar* p = img.ptr<uchar>(0);
 		unsigned size = img.cols * img.rows;
@@ -164,7 +186,7 @@ public:
 		return total;
 	}
 
-	intx::uint128 read(unsigned x, unsigned y, uint16_t cols, uint16_t rows) const
+	inline intx::uint128 read(unsigned x, unsigned y, uint16_t cols, uint16_t rows) const
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);
@@ -182,7 +204,7 @@ public:
 	// instead of read_row(), we could maybe do a read_sector_mask(x, y, cols, rows)
 	// with each sector returning a uint128?
 	// then we or them all at the end? prob performs better...
-	intx::uint128 read2(int x, int y, uint16_t cols, uint16_t rows) const
+	inline intx::uint128 read2(int x, int y, uint16_t cols, uint16_t rows) const
 	{
 		// read N bits from each sector...
 		intx::uint128 total(0);
@@ -211,17 +233,17 @@ public:
 		return total;
 	}
 
-	unsigned width() const
+	inline unsigned width() const
 	{
 		return _width;
 	}
 
-	unsigned height() const
+	inline unsigned height() const
 	{
 		return _height;
 	}
 
-	const std::vector<bitbuffer2d>& sectors() const
+	inline const std::vector<bitbuffer2d>& sectors() const
 	{
 		return _sectors;
 	}
