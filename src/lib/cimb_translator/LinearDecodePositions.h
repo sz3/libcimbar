@@ -13,12 +13,14 @@ public:
 public:
 	LinearDecodePositions(cimbar::vec_xy spacing, cimbar::vec_xy dimensions, int offset, cimbar::vec_xy marker_size);
 
-	size_t count() const;
+	size_t size() const;
 	void reset();
 
 	bool done() const;
 	iter next();
 	int update(unsigned index, const CellDrift& drift, unsigned error_distance);
+
+	const CellPositions::positions_list& positions() const;
 
 protected:
 	unsigned _index;
@@ -33,9 +35,14 @@ inline LinearDecodePositions::LinearDecodePositions(cimbar::vec_xy spacing, cimb
 	reset();
 }
 
-inline size_t LinearDecodePositions::count() const
+inline size_t LinearDecodePositions::size() const
 {
 	return _positions.size();
+}
+
+inline const CellPositions::positions_list& LinearDecodePositions::positions() const
+{
+	return _positions;
 }
 
 inline void LinearDecodePositions::reset()

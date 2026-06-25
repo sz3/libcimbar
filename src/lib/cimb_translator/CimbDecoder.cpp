@@ -100,9 +100,11 @@ bool CimbDecoder::load_tiles()
 
 unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result<cimbar::Config::cell_size()>& results, unsigned& drift_offset, unsigned& best_distance, unsigned cooldown) const
 {
-	drift_offset = 0;
 	unsigned best_fit = 0;
+	drift_offset = 0;
 	best_distance = 1000;
+	cooldown = (cooldown == 4)? 0xFF : cooldown;  // don't skip the center, obvs
+
 	// ahash_result will give us either 5 or 9 candidate hashes -- depending on whether we want to ignore the corners or not.
 	// Because we're greedy (see the `return`), we will iterate out from the center
 	// 4 == center.
@@ -113,7 +115,7 @@ unsigned CimbDecoder::get_best_symbol(image_hash::ahash_result<cimbar::Config::c
 		// skip over this drift_idx if it matches cooldown
 		// we could be more clever to check for corners, but for now this is fine
 		// ~0U is "unset"
-		if (drift_idx == cooldown and drift_idx != 4) // don't skip the center, obvs
+		if (drift_idx == cooldown)
 			continue;
 		for (unsigned i = 0; i < _tileHashes.size(); ++i)
 		{
