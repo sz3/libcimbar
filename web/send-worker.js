@@ -74,7 +74,7 @@ var Report = function () {
     },
 
     startWasm: function (result) {
-      self.postMessage({ "fun": "setAstartWasmctive", "args": [result] });
+      self.postMessage({ "fun": "startWasm", "args": [result] });
     }
   };
 }();
