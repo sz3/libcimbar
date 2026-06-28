@@ -178,7 +178,7 @@ int cimbare_encode(const unsigned char* buffer, unsigned size)
 		if (!_comp->write(reinterpret_cast<const char*>(buffer), size))
 			return -2;
 	}
-	if (size == cimbare_encode_bufsize())
+	if (size%cimbare_encode_bufsize() == 0 and size != 0)
 		return 1; // more to do
 
 	// otherwise, we're ready
