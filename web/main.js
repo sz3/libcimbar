@@ -31,7 +31,7 @@ var Report = function () {
         return;
       }
       const { fun, args } = event.data;
-      console.log(event.data);
+      //console.log(event.data);
       if (typeof Report[fun] !== 'function') {
         console.warn('[report] Unknown worker message type: ' + fun);
         return;

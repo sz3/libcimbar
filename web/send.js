@@ -130,7 +130,7 @@ var Send = function () {
     },
 
     nextFrame: function (timestamp) {
-      console.log("in nextFrame, is it happening?");
+      //console.log("in nextFrame, is it happening?");
       window.requestAnimationFrame(Send.nextFrame);
       let elapsed = timestamp - _lastFrame;
       if (!timestamp || elapsed < _interval) {
