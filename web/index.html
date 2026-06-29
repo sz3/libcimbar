@@ -371,22 +371,24 @@
     </div>
   </div>
 
+  <script src="send.js"></script>
+  <script src="main.js"></script>
+
   <script type="text/javascript">
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
+
     var canvas = document.getElementById('canvas');
-
-    var Module = {};
-    Module.canvas = canvas;
-    Module.onRuntimeInitialized = () => {
-      Main.init(canvas);
-      Main.nextFrame();
-    };
+    if (!Main.init_ww(canvas)) {
+      var Module = {};
+      Module.canvas = canvas;
+      Module.onRuntimeInitialized = () => {
+        Main.init(canvas);
+      };
+    }
   </script>
-
   <script src="cimbar_js.js"></script>
-  <script src="main.js"></script>
 
 </body>
 

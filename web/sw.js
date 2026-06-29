@@ -25,7 +25,7 @@ self.addEventListener('install', function (e) {
 // serve from cache
 self.addEventListener('fetch', function (e) {
   e.respondWith(
-    caches.match(e.request).then(function (response) {
+    caches.match(e.request, { ignoreSearch: true }).then(function (response) {
       return response || fetch(e.request);
     })
   );
@@ -33,11 +33,17 @@ self.addEventListener('fetch', function (e) {
 
 // clean old caches
 self.addEventListener('activate', function (e) {
-  e.waitUntil(function () {
+  e.waitUntil(
     caches.keys().then(function (names) {
-      for (var i in names)
-        if (names[i] != _cacheName)
-          caches.delete(names[i]);
-    });
-  });
+      return Promise.all(
+        names.map(function (cn) {
+          if (cn !== _cacheName) {
+            return caches.delete(cn);
+          }
+        })
+      );
+    }).then(function () {
+      return self.clients.claim(); 
+    })
+  );
 });

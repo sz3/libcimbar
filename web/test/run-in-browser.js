@@ -6,12 +6,18 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const QUnit = require('qunit');
 
-(async () => {
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-  const page = await browser.newPage();
+const testPages = ['test_recv.html', 'test_send.html'];
 
-  page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
-  page.on('pageerror', err => console.error('PAGE ERROR:', err));
+async function runTestPage(browser, testPagePath) {
+  const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(30000);
+  page.setDefaultTimeout(30000);
+
+  page.on('console', msg => console.log(`[${testPagePath}] BROWSER CONSOLE:`, msg.text()));
+  page.on('pageerror', err => console.error(`[${testPagePath}] PAGE ERROR:`, err));
+
+  let resolveStats;
+  const statsPromise = new Promise(resolve => { resolveStats = resolve; });
 
   await page.exposeFunction('onLogMe', (details) => {
     if (!details.result) {
@@ -21,23 +27,13 @@ const QUnit = require('qunit');
     }
   });
 
-  // Expose a function to capture QUnit results
   await page.exposeFunction('onQUnitDone', (stats) => {
-    if (stats.failed > 0) {
-      console.error(stats);
-      console.error(`QUnit Tests Failed: ${stats.failed} assertions failed.`);
-      process.exit(stats.failed); // nonzero is failure
-    } else {
-      console.log('All QUnit Tests Passed!');
-      process.exit(0);
-    }
+    resolveStats(stats);
   });
 
-  // Navigate to your QUnit test page
-  const testPagePath = '/test_recv.html';
   await page.goto(`http://localhost:8080/${testPagePath}`);
 
-  // Wait for QUnit to finish
+  // Hook QUnit log and done handlers inside the page
   await page.evaluate(() => {
     return new Promise(resolve => {
       QUnit.log(details => {
@@ -51,5 +47,33 @@ const QUnit = require('qunit');
     });
   });
 
+  const stats = await statsPromise;
+  await page.close();
+  return stats;
+}
+
+(async () => {
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+
+  let totalFailed = 0;
+  for (const testPagePath of testPages) {
+    console.log(`Running tests: ${testPagePath}`);
+    const stats = await runTestPage(browser, testPagePath);
+    if (stats.failed > 0) {
+      console.error(`FAILED [${testPagePath}]: ${stats.failed} assertions failed.`);
+      totalFailed += stats.failed;
+    } else {
+      console.log(`PASSED [${testPagePath}]`);
+    }
+  }
+
   await browser.close();
+
+  if (totalFailed > 0) {
+    console.error(`Total QUnit failures: ${totalFailed}`);
+    process.exit(totalFailed);
+  } else {
+    console.log('All QUnit Tests Passed!');
+    process.exit(0);
+  }
 })();
