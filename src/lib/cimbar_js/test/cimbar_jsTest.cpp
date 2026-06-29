@@ -77,9 +77,6 @@ TEST_CASE( "cimbar_jsTest/testRoundtrip", "[unit]" )
 
 TEST_CASE( "cimbar_jsTest/testEncodeFlushNoop", "[unit]" )
 {
-	std::vector<unsigned char> decbuff;
-	decbuff.resize(cimbard_get_bufsize());
-
 	const int size = cimbare_encode_bufsize();
 	std::string contents = random_string(size);
 	std::string filename = "/tmp/foobar-c语言版.txt";
@@ -93,3 +90,19 @@ TEST_CASE( "cimbar_jsTest/testEncodeFlushNoop", "[unit]" )
 	assertEquals( -1, cimbare_encode(nullptr, 0) );
 }
 
+TEST_CASE( "cimbar_jsTest/testEncodeBufsizeMult", "[unit]" )
+{
+	// even multiple of bufsize also requires a "flush"
+	// a.k.a. you can use a multiple as your "chunk" size if you want
+	const int size = cimbare_encode_bufsize() * 8;
+	std::string contents = random_string(size);
+	std::string filename = "/tmp/foobar-c语言版.txt";
+	assertEquals( 0, cimbare_init_encode(filename.data(), filename.size(), 100) );
+	assertEquals( 1, cimbare_encode(reinterpret_cast<unsigned char*>(contents.data()), contents.size()) );
+	assertEquals( -1, cimbare_next_frame() );
+
+	assertEquals( 0, cimbare_encode(nullptr, 0) );
+	assertEquals( 1, cimbare_next_frame() );
+
+	assertEquals( -1, cimbare_encode(nullptr, 0) );
+}
