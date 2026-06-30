@@ -101,9 +101,8 @@ var Main = function () {
       if (force_local) {
         _ww = undefined;
         // force refresh in main thread mode
-        window.location.hash = "";
-        window.location.search = "";
-        window.location.reload();
+        const cleanURL = window.location.origin + window.location.pathname;
+        window.location.replace(cleanURL);
         return;
       }
 
