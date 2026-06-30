@@ -33,7 +33,7 @@ var Send = function () {
   }
 
   function importFile(file) {
-    let chunkSize = Module._cimbare_encode_bufsize();
+    let chunkSize = Module._cimbare_encode_bufsize() * 16;
     let compBuff = compress_buff(chunkSize);
 
     let offset = 0;
