@@ -2,10 +2,10 @@
 	"lang": "en",
 	"dir": "ltr",
 	"name": "cimbar.org Send",
-	"short_name": "cimbar.org",
+	"short_name": "cimbar send",
 	"icons": [{"src":"icon-192x192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512x512.png","sizes":"512x512","type":"image/png"}],
 	"scope": "/",
-	"start_url": "index.html?ww=1",
+	"start_url": "/index.html?ww=1",
 	"display": "fullscreen",
 	"theme_color": "aliceblue",
 	"background_color": "black"
