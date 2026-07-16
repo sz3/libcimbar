@@ -15,27 +15,26 @@ namespace cimbar {
 class gl_2d_display_program
 {
 protected:
-	static constexpr const char* VERTEX_SHADER_SRC = R"(#version 300 es
-	uniform mat2 rot;
-	uniform vec2 tform;
-	in vec4 vert;
-	out vec2 texCoord;
-	void main() {
-	   gl_Position = vec4(vert.x, vert.y, 0.0f, 1.0f);
-	   vec2 ori = vec2(vert.x, vert.y);
-	   ori *= rot;
-	   texCoord = vec2(1.0f - ori.x, 1.0f - ori.y) / 2.0;
-	   texCoord -= tform;
-	})";
+	static constexpr const char* VERTEX_SHADER_SRC = R"(
+		uniform mat2 rot;
+		uniform vec2 tform;
+		attribute vec4 vert;
+		varying vec2 texCoord;
+		void main() {
+		   gl_Position = vec4(vert.x, vert.y, 0.0, 1.0);
+		   vec2 ori = vec2(vert.x, vert.y);
+		   ori *= rot;
+		   texCoord = vec2(1.0 - ori.x, 1.0 - ori.y) / 2.0;
+		   texCoord -= tform;
+		})";
 
-	static constexpr const char* FRAGMENT_SHADER_SRC = R"(#version 300 es
-	precision mediump float;
-	uniform sampler2D tex;
-	in vec2 texCoord;
-	out vec4 finalColor;
-	void main() {
-	   finalColor = texture(tex, texCoord);
-	})";
+	static constexpr const char* FRAGMENT_SHADER_SRC = R"(
+		precision mediump float;
+		uniform sampler2D tex;
+		varying vec2 texCoord;
+		void main() {
+		   gl_FragColor = texture2D(tex, texCoord);
+		})";
 
 public:
 	gl_2d_display_program()
