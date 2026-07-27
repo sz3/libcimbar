@@ -40,18 +40,20 @@
     }
 
     #nav-container:focus-within {
-      z-index: 1;
+      z-index: 3;
     }
 
     #nav-content,
     #nav-container .bg,
     #nav-container:focus-within #nav-button {
-      z-index: 1;
+      z-index: 3;
     }
 
+    /* canvas/dragdrop */
     #canvas {
       display: block;
       position: relative;
+      z-index: 2;
     }
 
     #dragdrop {
@@ -61,35 +63,55 @@
       color: #F0F0F0;
       outline: 6px solid black;
       box-shadow: 0px 0px 12px black, 0px 0px 18px black;
+      position: relative;
+      cursor: pointer;
     }
 
-    .dragdrop::before {
-      content: "⌜ Tap to start! ⌟";
-      font: 1.5em serif;
-      padding-top: 2em;
+    #dragdrop.active,
+    #dragdrop.active * {
+      cursor: none !important;
+    }
+
+    .drop-message {
       position: absolute;
-      left: 0;
+      inset: 0;
+      z-index: 1;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 3em;
+      padding-bottom: 2em;
       text-align: center;
-      width: 100%;
-    }
 
-    .dragdrop.error:before {
-      content: "⌜ Error! WebGL is not enabled :( ⌟";
-    }
-
-    #invisible_click {
-      position: fixed;
-      opacity: 0;
-      pointer-events: auto;
-    }
-
-    #invisible_click.active {
-      cursor: none;
-    }
-
-    #nav-container:focus-within+#invisible_click {
       pointer-events: none;
+    }
+
+    .drop-message p {
+      font: 1.3em serif;
+      margin: 0;
+      padding-bottom: 1em;
+    }
+
+    .drop-message p:first-of-type {
+      font: 1.5em serif;
+    }
+
+    .drop-message .msg-bottom {
+      margin-top: auto;
+    }
+
+    .drop-message .msg-error {
       display: none;
+    }
+
+    .dragdrop.error .drop-message .msg-default {
+      display: none;
+    }
+
+    .dragdrop.error .drop-message .msg-error {
+      display: block;
     }
 
     /* options */
@@ -330,16 +352,20 @@
   </style>
 
   <div id="status"></div>
-  <div id="dragdrop" class="dragdrop" title="Drag and drop a file">
+  <div id="dragdrop" class="dragdrop" title="Drag and drop a file" onclick="Main.clickNav()">
+    <div class="drop-message">
+      <p class="msg-default">⌜ Tap to start! ⌟</p>
+      <p class="msg-error">⌜ Error! WebGL is not enabled :( ⌟</p>
+      <p class="msg-default msg-bottom">⌜ WARNING: epilepsy = seizure risk!</p>
+      <p class="msg-default">Be safe! Have fun! ⌟</p>
+    </div>
     <canvas id="canvas" class="canvas"></canvas>
   </div>
 
   <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
 
-  <a id="invisible_click" href="javascript:;" onclick="Main.clickNav()"></a>
-
   <div id="nav-container" class="mode-b">
-    <div class="bg" onclick="Main.blurNav();"></div>
+    <div class="bg" onpointerdown="Main.blurNav(); event.preventDefault();"></div>
     <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
