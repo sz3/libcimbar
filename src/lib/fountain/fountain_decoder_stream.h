@@ -2,6 +2,7 @@
 #pragma once
 
 #include "FountainDecoder.h"
+#include "FountainMetadata.h"
 #include <optional>
 #include <string>
 
@@ -46,16 +47,13 @@ public:
 	{
 		// if we're full
 		_buffIndex = 0;
-		// we ignore the first 4 bytes. It's the sink's job to make sure we're getting the right stuff.
-		// we may, at some point, sanity check if data_size == [1]+[2]+[3]
-		unsigned blockId = (unsigned)(_buffer[4]) << 8 | _buffer[5];
-		return _decoder.decode(blockId, _buffer.data() + _headerSize, block_size());
+		FountainMetadata md(reinterpret_cast<const char*>(_buffer.data()), 6);
+		if (data_size() != md.file_size())
+			return false; // sanity check
+		return _decoder.decode(md.block_id(), _buffer.data() + _headerSize, block_size());
 	}
 
-	// we need to track either:
-	// 1. all packet header locations + current location in frame buffer to correlate
-	// 2. current location in frame buffer to see if we're at a packet header location
-	// 3. special case of #2, where we just roll forward every _bufferSize bytes?
+	// roll forward every _bufferSize bytes
 	bool write(const char* data, unsigned length)
 	{
 		while (length > 0 and good())
