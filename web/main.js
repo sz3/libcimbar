@@ -125,7 +125,6 @@ var Main = function () {
       var width = window.innerWidth - 10;
       var height = window.innerHeight - 10;
       Main.scaleCanvas(canvas, width, height);
-      Main.alignInvisibleClick(canvas);
       Main.checkNavButtonOverlap();
     },
 
@@ -174,17 +173,6 @@ var Main = function () {
         canvas.style.width = xdim + "px";
         canvas.style.height = ydim + "px";
       }
-    },
-
-    alignInvisibleClick: function (canvas) {
-      canvas = canvas || document.getElementById('canvas');
-      var cpos = canvas.getBoundingClientRect();
-      var invisible_click = document.getElementById("invisible_click");
-      invisible_click.style.width = canvas.style.width;
-      invisible_click.style.height = canvas.style.height;
-      invisible_click.style.top = cpos.top + "px";
-      invisible_click.style.left = cpos.left + "px";
-      invisible_click.style.zoom = canvas.style.zoom;
     },
 
     prevent_sleep: async function () {
@@ -267,9 +255,8 @@ var Main = function () {
 
     setActive: function (active) {
       // hide cursor when there's a barcode active
-      var invisi = document.getElementById("invisible_click");
-      invisi.classList.remove("active");
-      invisi.classList.add("active");
+      var invisi = document.getElementById("dragdrop");
+      dragdrop.classList.add("active");
     },
 
     setMode: function (mode_str) {
