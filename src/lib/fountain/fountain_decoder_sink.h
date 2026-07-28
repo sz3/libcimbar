@@ -54,7 +54,7 @@ class fountain_decoder_sink
 {
 public:
 	fountain_decoder_sink(unsigned chunk_size, const std::function<std::string(const std::string&, const std::vector<uint8_t>&)>& on_store=nullptr)
-		: _chunkSize(chunk_size)
+		: _chunkSize(chunk_size < 50? 50 : chunk_size)
 		, _onStore(on_store)
 	{
 	}
@@ -132,15 +132,18 @@ public:
 
 	int64_t decode_frame(const char* data, unsigned size)
 	{
-		if (size < FountainMetadata::md_size)
+		if ((size%_chunkSize) > 0)
 			return -10;
+
+		if (size < FountainMetadata::md_size)
+			return -11;
 
 		FountainMetadata md(data, size);
 		if (!md.file_size())
 		{
 			/*std::cout << fmt::format("decode frame {} ... {},{},{},{}",
 									 md.file_size(), (unsigned)data[0], (unsigned)data[1], (unsigned)data[2], (unsigned)data[3]) << std::endl;*/
-			return -11;
+			return -12;
 		}
 
 		// check if already done
@@ -151,7 +154,7 @@ public:
 		auto p = _streams.try_emplace(stream_slot(md), md.file_size(), _chunkSize);
 		fountain_decoder_stream& s = p.first->second;
 		if (s.data_size() != md.file_size())
-			return -12;
+			return -13;
 
 		bool finished = s.write(data, size);
 		if (!finished)
