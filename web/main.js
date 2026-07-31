@@ -229,9 +229,9 @@ var Main = function () {
       if (pause === undefined) {
         pause = true;
       }
-      document.getElementById("nav-button").blur();
-      document.getElementById("nav-content").blur();
-      document.getElementById("nav-find-file-link").blur();
+      if (document.activeElement && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
       Main.togglePause(pause);
     },
 
