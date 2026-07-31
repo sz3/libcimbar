@@ -121,18 +121,34 @@
       display: block;
     }
 
+    .bracket-both::before {
+      content: "⌜ ";
+    }
+
+    .bracket-both::after {
+      content: " ⌟";
+    }
+
+    .epilepsy-left::before {
+      content: "⚠️⚡ ";
+    }
+
+    .epilepsy-right::after {
+      content: " ⚠️⚡";
+    }
+
     /* options */
-    #nav-container a.mode-b,
-    #nav-container a.mode-bm,
-    #nav-container a.mode-bu,
-    #nav-container a.mode-4c {
+    #nav-container label.mode-b,
+    #nav-container label.mode-bm,
+    #nav-container label.mode-bu,
+    #nav-container label.mode-4c {
       color: #555;
     }
 
-    #nav-container.mode-b a.mode-b,
-    #nav-container.mode-bm a.mode-bm,
-    #nav-container.mode-bu a.mode-bu,
-    #nav-container.mode-4c a.mode-4c {
+    #nav-container.mode-b label.mode-b,
+    #nav-container.mode-bm label.mode-bm,
+    #nav-container.mode-bu label.mode-bu,
+    #nav-container.mode-4c label.mode-4c {
       color: #9fa6b2;
     }
 
@@ -298,7 +314,47 @@
       border: 1px solid #444;
     }
 
-    #nav-content li a {
+    /* resets */
+    .mode-fieldset {
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .nav-action {
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      width: 100%;
+      text-align: inherit;
+      color: inherit;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .nav-heading {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin: 0 auto;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: inherit;
+    }
+
+    /* nav pt 2 */
+    #nav-content li a,
+    #nav-content li .nav-action {
       display: block;
       padding: 10px 5px;
       color: #9fa6b2;
@@ -306,27 +362,45 @@
       transition: color .1s;
     }
 
-    #nav-content li a.attention {
-      animation: glowing 1.5s infinite alternate;
+    #nav-content li:hover,
+    #nav-content li a:hover,
+    #nav-content li .nav-action:hover {
+      background-color: #2c323c;
     }
 
-    #nav-content li a {
+    #nav-content li a:focus,
+    #nav-content li .nav-action:focus,
+    .mode-radios input[type="radio"]:focus+label {
+      animation: glowing 1.5s infinite alternate;
+      background-color: #2c323c;
+      outline: 0px;
+    }
+
+    #fps-slider:focus {
+      background-color: #2c323c;
+      outline: 2px solid #00ffff;
+      outline-offset: 4px;
+    }
+
+    #nav-content li a,
+    #nav-content li .nav-action,
+    #nav-content li.modesel label {
       font-variant: small-caps;
       font-size: 2em;
     }
 
-    #nav-content h4 {
+    #nav-content h4,
+    #nav-content .nav-heading {
       font-variant: small-caps;
       padding-top: 1em;
     }
 
-    #nav-content li.modesel a {
+    #nav-content li.modesel a,
+    #nav-content li.modesel label {
       display: inline-block;
       width: 2em;
-    }
-
-    #nav-content li:hover {
-      background-color: #2c323c;
+      cursor: pointer;
+      padding: 10px 5px;
     }
 
     #nav-content li:not(.small)+.small {
@@ -338,7 +412,8 @@
       align-self: center;
     }
 
-    #nav-content li.small a {
+    #nav-content li.small a,
+    #nav-content li.small .nav-action {
       font-size: 1em;
     }
 
@@ -361,11 +436,11 @@
   <div id="status"></div>
   <div id="dragdrop" class="dragdrop" title="Drag and drop a file" onclick="Main.clickNav()">
     <div class="drop-message">
-      <p class="msg-default">⌜ Tap to start! ⌟</p>
-      <p class="msg-error">⌜ Error! WebGL is not enabled :( ⌟</p>
-      <p class="msg-default msg-bottom">⚠️⚡ PHOTOSENSITIVITY WARNING!</p>
+      <p class="msg-default bracket-both">Tap to start!</p>
+      <p class="msg-error bracket-both">Error! WebGL is not enabled :(</p>
+      <p class="msg-default msg-bottom epilepsy-left">PHOTOSENSITIVITY WARNING!</p>
       <p class="msg-default msg-long">Photosensitive epilepsy + flickering light = seizure!</p>
-      <p class="msg-default msg-long">Be safe! Have fun! ⚠️⚡</p>
+      <p class="msg-default msg-long epilepsy-right">Be safe! Have fun!</p>
     </div>
     <canvas id="canvas" class="canvas"></canvas>
   </div>
@@ -374,7 +449,7 @@
 
   <div id="nav-container" class="mode-b">
     <div class="bg" onpointerdown="Main.blurNav(); event.preventDefault();"></div>
-    <button id="nav-button" tabindex="0" onclick="Main.clickNav();">
+    <button id="nav-button" tabindex="0" onclick="Main.clickNav();" aria-label="Open Menu">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
@@ -383,22 +458,37 @@
     <div id="nav-content" tabindex="-1">
       <span id="current-file">No file selected</span>
       <ul>
-        <li><a class="attention" id="nav-find-file-link" href="javascript:void(0)" onclick="Main.clickFileInput()">Find
-            File</a></li>
+        <li>
+          <button type="button" class="nav-action" id="nav-find-file-link" onclick="Main.clickFileInput()">Find
+            File</button>
+        </li>
         <hr>
         <li class="modesel">
-          <h4>Mode</h4>
-          <a class="mode-b" href="javascript:void(0)" onclick="Main.setMode('B')">B</a>
-          <a class="mode-bm" href="javascript:void(0)" onclick="Main.setMode('Bm')">Bm</a>
-          <a class="mode-bu" href="javascript:void(0)" onclick="Main.setMode('Bu')">Bu</a>
-          <a class="mode-4c" href="javascript:void(0)" onclick="Main.setMode('4C')">4C</a>
+          <fieldset class="mode-fieldset">
+            <legend class="nav-heading">Mode</legend>
+            <div class="mode-radios">
+              <input type="radio" class="sr-only" name="mode" id="mode-b" value="B" onclick="Main.setMode('B')" checked>
+              <label for="mode-b" class="mode-b">B</label>
+
+              <input type="radio" class="sr-only" name="mode" id="mode-bm" value="Bm" onclick="Main.setMode('Bm')">
+              <label for="mode-bm" class="mode-bm">Bm</label>
+
+              <input type="radio" class="sr-only" name="mode" id="mode-bu" value="Bu" onclick="Main.setMode('Bu')">
+              <label for="mode-bu" class="mode-bu">Bu</label>
+
+              <input type="radio" class="sr-only" name="mode" id="mode-4c" value="4C" onclick="Main.setMode('4C')">
+              <label for="mode-4c" class="mode-4c">4C</label>
+            </div>
+          </fieldset>
         </li>
         <li>
-          <h4>Framerate</h4>
-          <input type="range" class="range" min="5" max="20" step="5" value="15" oninput="Main.setFPS(this.value)"
-            onchange="Main.setFPS(this.value)" />
+          <label for="fps-slider" class="nav-heading">Framerate</label>
+          <input type="range" id="fps-slider" class="range" min="5" max="20" step="5" value="15"
+            oninput="Main.setFPS(this.value)" onchange="Main.setFPS(this.value)" />
         </li>
-        <li class="small"><a href="javascript:void(0)" onclick="Main.toggleFullscreen()">Fullscreen</a></li>
+        <li class="small">
+          <button type="button" class="nav-action" onclick="Main.toggleFullscreen()">Fullscreen</button>
+        </li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
       </ul>
