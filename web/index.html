@@ -39,14 +39,15 @@
       top: 0;
     }
 
-    #nav-container:focus-within {
-      z-index: 3;
+    #nav-container {
+      z-index: 1;
     }
 
     #nav-content,
     #nav-container .bg,
+    #nav-container:focus-within,
     #nav-container:focus-within #nav-button {
-      z-index: 3;
+      z-index: 1;
     }
 
     /* canvas/dragdrop */
@@ -66,6 +67,7 @@
       box-shadow: 0px 0px 12px black, 0px 0px 18px black;
       position: relative;
       cursor: pointer;
+      z-index: 0;
     }
 
     #dragdrop.active,
