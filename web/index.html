@@ -39,14 +39,15 @@
       top: 0;
     }
 
-    #nav-container:focus-within {
-      z-index: 3;
+    #nav-container {
+      z-index: 1;
     }
 
     #nav-content,
     #nav-container .bg,
+    #nav-container:focus-within,
     #nav-container:focus-within #nav-button {
-      z-index: 3;
+      z-index: 1;
     }
 
     /* canvas/dragdrop */
@@ -66,6 +67,7 @@
       box-shadow: 0px 0px 12px black, 0px 0px 18px black;
       position: relative;
       cursor: pointer;
+      z-index: 0;
     }
 
     #dragdrop.active,
@@ -90,7 +92,7 @@
     }
 
     .drop-message p {
-      font: 1.3em serif;
+      font: 1.2em serif;
       margin: 0;
       padding-bottom: 1em;
     }
@@ -100,7 +102,7 @@
     }
 
     .drop-message .msg-long {
-      font: 1.0em serif;
+      font: 0.9em serif;
     }
 
     .drop-message .msg-bottom {
@@ -361,9 +363,9 @@
     <div class="drop-message">
       <p class="msg-default">⌜ Tap to start! ⌟</p>
       <p class="msg-error">⌜ Error! WebGL is not enabled :( ⌟</p>
-      <p class="msg-default msg-bottom">⌜ PHOTOSENSITIVITY WARNING!</p>
-      <p class="msg-default msg-long">Photosensitive epilepsy + flickering lights = seizures!</p>
-      <p class="msg-default msg-long">Be safe! Have fun! ⌟</p>
+      <p class="msg-default msg-bottom">⚠️⚡ PHOTOSENSITIVITY WARNING!</p>
+      <p class="msg-default msg-long">Photosensitive epilepsy + flickering light = seizures!</p>
+      <p class="msg-default msg-long">Be safe! Have fun! ⚠️⚡</p>
     </div>
     <canvas id="canvas" class="canvas"></canvas>
   </div>
