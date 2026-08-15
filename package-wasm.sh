@@ -1,6 +1,8 @@
 #!/bin/bash
-#docker run --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:5.0.0 bash
+#docker run -e SOURCE_DATE_EPOCH --mount type=bind,source="$(pwd)",target="/usr/src/app" -it emscripten/emsdk:5.0.0 bash
+# reproducible build, hopefully
 
+export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(date +%s)}
 SKIP_JS=${SKIP_JS:-}
 CIMBAR_ROOT=${CIMBAR_ROOT:-/usr/src/app}
 cd $CIMBAR_ROOT
