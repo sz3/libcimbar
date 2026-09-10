@@ -371,16 +371,6 @@ window.addEventListener("touchstart", function (e) {
   Main.togglePause(true);
 }, false);
 
-window.addEventListener("touchend", function (e) {
-  e = e || event;
-  Main.togglePause(false);
-}, false);
-
-window.addEventListener("touchcancel", function (e) {
-  e = e || event;
-  Main.togglePause(false);
-}, false);
-
 window.addEventListener("dragover", function (e) {
   e = e || event;
   e.preventDefault();
