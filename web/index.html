@@ -113,11 +113,11 @@
       display: none;
     }
 
-    .dragdrop.error .drop-message .msg-default {
+    #dragdrop.error .drop-message .msg-default {
       display: none;
     }
 
-    .dragdrop.error .drop-message .msg-error {
+    #dragdrop.error .drop-message .msg-error {
       display: block;
     }
 
@@ -138,17 +138,11 @@
     }
 
     /* options */
-    #nav-container label.mode-b,
-    #nav-container label.mode-bm,
-    #nav-container label.mode-bu,
-    #nav-container label.mode-4c {
+    .mode-radios label {
       color: #555;
     }
 
-    #nav-container.mode-b label.mode-b,
-    #nav-container.mode-bm label.mode-bm,
-    #nav-container.mode-bu label.mode-bu,
-    #nav-container.mode-4c label.mode-4c {
+    .mode-radios input[type="radio"]:checked+label {
       color: #9fa6b2;
     }
 
@@ -315,13 +309,13 @@
     }
 
     /* resets */
-    .mode-fieldset {
+    .modesel fieldset {
       border: none;
       padding: 0;
       margin: 0;
     }
 
-    .nav-action {
+    #nav-content button {
       background: none;
       border: none;
       font-family: inherit;
@@ -354,7 +348,7 @@
 
     /* nav pt 2 */
     #nav-content li a,
-    #nav-content li .nav-action {
+    #nav-content li button {
       display: block;
       padding: 10px 5px;
       color: #9fa6b2;
@@ -364,12 +358,12 @@
 
     #nav-content li:hover,
     #nav-content li a:hover,
-    #nav-content li .nav-action:hover {
+    #nav-content li button:hover {
       background-color: #2c323c;
     }
 
     #nav-content li a:focus,
-    #nav-content li .nav-action:focus,
+    #nav-content li button:focus,
     .mode-radios input[type="radio"]:focus+label {
       animation: glowing 1.5s infinite alternate;
       background-color: #2c323c;
@@ -383,7 +377,7 @@
     }
 
     #nav-content li a,
-    #nav-content li .nav-action,
+    #nav-content li button,
     #nav-content li.modesel label {
       font-variant: small-caps;
       font-size: 2em;
@@ -413,7 +407,7 @@
     }
 
     #nav-content li.small a,
-    #nav-content li.small .nav-action {
+    #nav-content li.small button {
       font-size: 1em;
     }
 
@@ -434,7 +428,7 @@
   </style>
 
   <div id="status"></div>
-  <div id="dragdrop" class="dragdrop" title="Drag and drop a file" onclick="Main.clickNav()">
+  <div id="dragdrop" title="Drag and drop a file" onclick="Main.clickNav()">
     <div class="drop-message">
       <p class="msg-default bracket-both">Tap to start!</p>
       <p class="msg-error bracket-both">Error! WebGL is not enabled :(</p>
@@ -442,7 +436,7 @@
       <p class="msg-default msg-long">Photosensitive epilepsy + flickering light = seizure!</p>
       <p class="msg-default msg-long epilepsy-right">Be safe! Have fun!</p>
     </div>
-    <canvas id="canvas" class="canvas"></canvas>
+    <canvas id="canvas"></canvas>
   </div>
 
   <input style="display:none;" type="file" name="file_input" id="file_input" onchange="Main.fileInput(this);" />
@@ -459,12 +453,13 @@
       <span id="current-file">No file selected</span>
       <ul>
         <li>
-          <button type="button" class="nav-action" id="nav-find-file-link" onclick="Main.clickFileInput()">Find
-            File</button>
+          <button type="button" id="nav-find-file-link" onclick="Main.clickFileInput()">Find File</button>
         </li>
-        <hr>
+        <li aria-hidden="true">
+          <hr>
+        </li>
         <li class="modesel">
-          <fieldset class="mode-fieldset">
+          <fieldset>
             <legend class="nav-heading">Mode</legend>
             <div class="mode-radios">
               <input type="radio" class="sr-only" name="mode" id="mode-b" value="B" onclick="Main.setMode('B')" checked>
@@ -487,7 +482,7 @@
             oninput="Main.setFPS(this.value)" onchange="Main.setFPS(this.value)" />
         </li>
         <li class="small">
-          <button type="button" class="nav-action" onclick="Main.toggleFullscreen()">Fullscreen</button>
+          <button type="button" onclick="Main.toggleFullscreen()">Fullscreen</button>
         </li>
         <li class="small"><a href="https://github.com/sz3/libcimbar">github</a></li>
         <li class="small"><a href="https://github.com/sz3/cfc/releases/latest">android app</a></li>
