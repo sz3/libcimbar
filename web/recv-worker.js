@@ -110,7 +110,7 @@ var RecvWorker = function () {
     fountainBuff: function () {
       let buff = _buffs['fountain'];
       if (buff.buffer !== Module.HEAPU8.buffer) {
-        _buffs['img'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
+        _buffs['fountain'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
         buff = _buffs['fountain'];
       }
       return buff;

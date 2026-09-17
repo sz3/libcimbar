@@ -74,9 +74,8 @@ var Sink = function () {
         var name = id + "." + size;
         const fnsize = Module._cimbard_get_filename(id, _errBuff, _errBuffSize);
         if (fnsize < 0) {
-          alert("reassemble_file failed :(" + res);
-          console.log("we biffed it. :( " + res);
-          Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
+          console.log("reassemble_file failed. :( " + fnsize);
+          Recv.set_HTML("errorbox", "reassemble_file failed :( " + fnsize);
         }
         else if (fnsize > 0) {
           const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
@@ -391,7 +390,7 @@ var Recv = function () {
 
     captureFrame: function () {
       _captureNextFrame = 1;
-      alert("about to capture!");
+      console.log("capturing next frame");
     },
 
     download_bytes: function (buff, name) {
