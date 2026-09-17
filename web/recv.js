@@ -98,7 +98,7 @@ var Recv = function () {
   var _renderTime = 0;
   var _captureNextFrame = 0;
 
-  var _watchmanEnabled = 0;
+  var _watchmanTimer = undefined;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
   var _video = 0;
@@ -109,6 +109,16 @@ var Recv = function () {
   var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
   var _mode = 0;
+
+  function _requestVideoFrame(callback) {
+    if ('requestVideoFrameCallback' in _video) {
+      _video.requestVideoFrameCallback(callback);
+    } else {
+      requestAnimationFrame(function (now) {
+        return callback(now, {});
+      });
+    }
+  }
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -226,13 +236,19 @@ var Recv = function () {
     },
 
     init_video: function (video) {
+      if (typeof VideoFrame === 'undefined') {
+        Recv.set_error('WebCodecs (VideoFrame) is not supported by this browser');
+        Recv.set_HTML("crosshair1", "VideoFrame not supported :(");
+        return;
+      }
+
       _video = video;
       window.addEventListener('resize', _updateCrosshairPositions);
 
       var constraints = {
         audio: false,
         video: {
-          width: { min: 720, ideal: 1920 }, // Request HD but allow flexibility
+          width: { min: 720, ideal: 1920 },
           height: { min: 720, ideal: 1080 },
           aspectRatio: matchMedia('all and (orientation:landscape)').matches ? 16 / 9 : 9 / 16,
           facingMode: 'environment',
@@ -246,6 +262,12 @@ var Recv = function () {
         return Recv.set_error('mediaDevices not supported? :(');
       }
 
+      // cleanup if a previous mediastream is active
+      if (_video && _video.srcObject) {
+        _video.srcObject.getTracks().forEach(track => track.stop());
+        _video.srcObject = null;
+      }
+
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
           //console.log(localMediaStream);
@@ -255,8 +277,18 @@ var Recv = function () {
           } else {
             video.src = URL.createObjectURL(localMediaStream); //deprecated
           }
-          video.play();
-          video.requestVideoFrameCallback(Recv.on_frame);
+
+          video.play().catch(err => {
+            if (err.name === 'NotAllowedError') {
+              console.log("Autoplay blocked...");
+              // TODO: getPermissionSomehow();
+              throw err;
+            } else {
+              throw err;
+            }
+          });
+
+          _requestVideoFrame(Recv.on_frame);
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
@@ -267,18 +299,18 @@ var Recv = function () {
 
     watch_for_camera_pause: function () {
       // only call this after our first success
-      if (_watchmanEnabled) {
+      if (_watchmanTimer) {
         return;
       }
-      _watchmanEnabled = true;
 
       // ios only for now, since desktop behavior is weird
       if (!isIOS()) {
+        _watchmanTimer = -1; // lol
         return;
       }
 
       // periodically make sure the camera capture is running
-      setInterval(Recv.restart_paused_camera, 1000);
+      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1000);
     },
 
     restart_paused_camera: function () {
@@ -401,15 +433,15 @@ var Recv = function () {
             throw e; // rethrow
           }
         } catch (e) {
-          console.log(e);
+          console.error(e);
         } finally {
           vf.close();
         }
         _nextWorker += 1;
       }
 
-      // schedule the next one
-      _video.requestVideoFrameCallback(Recv.on_frame);
+      _requestVideoFrame(Recv.on_frame);
+
     },
 
     captureFrame: function () {
