@@ -204,8 +204,14 @@ var Recv = function () {
     },
 
     init_ww: function (num_workers) {
-      // clean up _workers if exists?
+      // clean up _workers if exists
+      for (const wkr of _workers) {
+        try {
+          wkr.terminate();
+        } catch (e) { }
+      }
       _workers = [];
+
       for (let i = 0; i < num_workers; i++) {
         _workers.push(new Worker('recv-worker.js'));
 
