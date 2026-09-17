@@ -45,7 +45,7 @@ var Sink = function () {
       }
 
       if (res > 0) {
-        const res32t = Number(res & 0xFFFFFFFFn);; // truncate BigInt res (int64_t) to a uint32_t
+        const res32t = Number(res & 0xFFFFFFFFn); // truncate BigInt res (int64_t) to a uint32_t
         Sink.reassemble_file(res32t);
       }
     },
@@ -327,7 +327,7 @@ var Recv = function () {
       Sink.on_decode(buff);
     },
 
-    on_frame: function (now, metadata) {
+    on_frame: async function (now, metadata) {
       //console.log("on frame");
       // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
 
@@ -352,6 +352,13 @@ var Recv = function () {
         Recv.frames_in_flight_incr();
         try {
           vf = new VideoFrame(_video, { timestamp: now });
+        } catch (e) {
+          console.log("no VideoFrame!");
+          _video.requestVideoFrameCallback(Recv.on_frame);
+          return;
+        }
+
+        try {
           const width = vf.displayWidth;
           const height = vf.displayHeight;
           Recv.set_HTML("errorbox", vf.format, true);
@@ -363,7 +370,7 @@ var Recv = function () {
           }
           const size = vf.allocationSize(vfparams);
           const buff = new Uint8Array(size);
-          vf.copyTo(buff, vfparams);
+          await vf.copyTo(buff, vfparams);
 
           let format = vfparams.format || vf.format;
           if (format == "RGBA" && size != width * height * 4) {
@@ -378,11 +385,11 @@ var Recv = function () {
           _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
         } catch (e) {
           console.log(e);
+        } finally {
+          vf.close();
         }
         _nextWorker += 1;
       }
-      if (vf)
-        vf.close();
 
       // schedule the next one
       _video.requestVideoFrameCallback(Recv.on_frame);
