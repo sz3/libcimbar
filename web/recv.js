@@ -297,8 +297,18 @@ var Recv = function () {
 
     on_decode: function (wid, data) {
       //console.log('Main thread received message from worker' + wid + ':', data);
+      if (data.type == 'startWasm') {
+        if (data.ready && _workerReady) {
+          _workerReady();
+        }
+        if (data.error) {
+          console.log(data.error);
+        }
+        return;
+      }
+
       Recv.frames_in_flight_decr();
-      // if extract but no bytes, log extract counte
+      // if extract but no bytes, log extract counter
       if (data.nodata) {
         _recentExtract = _counter;
         return;
@@ -308,11 +318,6 @@ var Recv = function () {
       }
       if (data.res) {
         Recv.set_HTML("t" + wid, "msg is " + data.res);
-        return;
-      }
-      if (data.ready) {
-        if (_workerReady)
-          _workerReady();
         return;
       }
 
@@ -349,7 +354,6 @@ var Recv = function () {
         console.log("stalling, worker queues are full");
       }
       else {
-        Recv.frames_in_flight_incr();
         try {
           vf = new VideoFrame(_video, { timestamp: now });
         } catch (e) {
@@ -382,7 +386,14 @@ var Recv = function () {
           }
 
           let mode = _mode || modeVals[_counter % modeVals.length];
-          _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
+          Recv.frames_in_flight_incr();
+          try {
+            _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
+          }
+          catch (e) {
+            Recv.frames_in_flight_decr();
+            throw e; // rethrow
+          }
         } catch (e) {
           console.log(e);
         } finally {
