@@ -325,6 +325,8 @@ var Recv = function () {
       }
 
       // if not, we're stuck?
+      clearInterval(_watchmanTimer); // our work is done, for now
+      _watchmanTimer = 0;
       Recv.init_video(_video);
     },
 
