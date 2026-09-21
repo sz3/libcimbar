@@ -243,7 +243,7 @@ var Recv = function () {
       }
 
       _video = video;
-      window.addEventListener('resize', _updateCrosshairPositions);
+      window.addEventListener('resize', _updateCrosshairPositions); //idempotent, I think
 
       var constraints = {
         audio: false,
@@ -262,11 +262,7 @@ var Recv = function () {
         return Recv.set_error('mediaDevices not supported? :(');
       }
 
-      // cleanup if a previous mediastream is active
-      if (_video && _video.srcObject) {
-        _video.srcObject.getTracks().forEach(track => track.stop());
-        _video.srcObject = null;
-      }
+      Recv.stop_camera(); // no-op, unless...
 
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
@@ -295,6 +291,18 @@ var Recv = function () {
           Recv.set_error("Failed to initialize camera. " + err);
           Recv.set_HTML("crosshair1", "Failed to initialize camera. " + err);
         });
+    },
+
+    stop_camera: function () {
+      if (_video && _video.srcObject) {
+        _video.srcObject.getTracks().forEach(track => track.stop());
+        _video.srcObject = null;
+      }
+
+      if (_watchmanTimer > 0) {
+        clearInterval(_watchmanTimer);
+      }
+      _watchmanTimer = 0;
     },
 
     watch_for_camera_pause: function () {
