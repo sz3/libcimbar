@@ -102,6 +102,8 @@ var Recv = function () {
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
   var _video = 0;
+  var _useVideoFrame = true;
+
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
@@ -380,6 +382,59 @@ var Recv = function () {
       Sink.on_decode(buff);
     },
 
+    on_frame_vf: async function (now) {
+      // the normal path
+      let vf = undefined;
+      try {
+        vf = new VideoFrame(_video, { timestamp: now });
+      } catch (e) {
+        console.log("no VideoFrame!");
+        return undefined;
+      }
+
+      try {
+        const width = vf.displayWidth;
+        const height = vf.displayHeight;
+        Recv.set_HTML("errorbox", vf.format, true);
+
+        // try to use the default format, but only if we can decode it...
+        let vfparams = {};
+        if (!_supportedFormats.includes(vf.format)) {
+          vfparams.format = "RGBA";
+        }
+        const size = vf.allocationSize(vfparams);
+        const buff = new Uint8Array(size);
+        await vf.copyTo(buff, vfparams);
+
+        let format = vfparams.format || vf.format;
+        if (format == "RGBA" && size != width * height * 4) {
+          format = vf.format; //fallback
+        }
+
+        // debugging only
+        if (_captureNextFrame == 1) {
+          _captureNextFrame = 0;
+          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
+        }
+
+        let workerMsg = {
+          type: 'proc',
+          pixels: buff,
+          format: format,
+          width: width,
+          height: height,
+        };
+        return workerMsg;
+      } catch (e) {
+        console.error(e);
+        return {
+          type: 'fail'
+        };
+      } finally {
+        vf.close();
+      }
+    },
+
     on_frame: async function (now, metadata) {
       //console.log("on frame");
       // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
@@ -397,61 +452,67 @@ var Recv = function () {
 
       const modeVals = [66, 68, 67, 4];
 
-      var vf = undefined;
       if (_framesInFlight > 20) {
         console.log("stalling, worker queues are full");
+        _requestVideoFrame(Recv.on_frame);
+        return;
+      }
+
+      let mode = _mode || modeVals[_counter % modeVals.length];
+      let bitmap = undefined;
+
+      let workerMsg = undefined;
+      if (_useVideoFrame) {
+        workerMsg = await Recv.on_frame_vf(now);
+        if (!workerMsg) {
+          _useVideoFrame = false;
+        }
+        else if (workerMsg.type == "fail") {
+          workerMsg = undefined;
+        }
+        else {
+          workerMsg.mode = mode;
+        }
       }
       else {
-        try {
-          vf = new VideoFrame(_video, { timestamp: now });
-        } catch (e) {
-          console.log("no VideoFrame!");
-          _video.requestVideoFrameCallback(Recv.on_frame);
-          return;
+        // TODO: if videowidth/height not set, bail?
+        const width = _video.videoWidth;
+        const height = _video.videoHeight;
+        bitmap = await createImageBitmap(_video);
+        workerMsg = {
+          type: 'proc',
+          bitmap: bitmap,
+          format: "RGBA",
+          width: width,
+          height: height,
+          mode: mode
+        };
+      }
+
+      if (!workerMsg) {
+        _requestVideoFrame(Recv.on_frame);
+        return;
+      }
+
+      Recv.frames_in_flight_incr();
+      try {
+        if (workerMsg.pixels) {
+          _workers[_nextWorker].postMessage(workerMsg, [workerMsg.pixels.buffer]);
         }
-
-        try {
-          const width = vf.displayWidth;
-          const height = vf.displayHeight;
-          Recv.set_HTML("errorbox", vf.format, true);
-
-          // try to use the default format, but only if we can decode it...
-          let vfparams = {};
-          if (!_supportedFormats.includes(vf.format)) {
-            vfparams.format = "RGBA";
-          }
-          const size = vf.allocationSize(vfparams);
-          const buff = new Uint8Array(size);
-          await vf.copyTo(buff, vfparams);
-
-          let format = vfparams.format || vf.format;
-          if (format == "RGBA" && size != width * height * 4) {
-            format = vf.format; //fallback
-          }
-          if (_captureNextFrame == 1) {
-            _captureNextFrame = 0;
-            Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
-          }
-
-          let mode = _mode || modeVals[_counter % modeVals.length];
-          Recv.frames_in_flight_incr();
-          try {
-            _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
-          }
-          catch (e) {
-            Recv.frames_in_flight_decr();
-            throw e; // rethrow
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          vf.close();
+        else {
+          _workers[_nextWorker].postMessage(workerMsg, [bitmap]);
         }
         _nextWorker += 1;
       }
+      catch (e) {
+        Recv.frames_in_flight_decr();
+        if (bitmap) {
+          bitmap.close();
+        }
+        throw e; // rethrow
+      }
 
       _requestVideoFrame(Recv.on_frame);
-
     },
 
     captureFrame: function () {
