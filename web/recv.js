@@ -32,7 +32,7 @@ var Sink = function () {
       const fountBuff = fountain_buff();
       fountBuff.set(buff);
 
-      console.log('sink decode ' + fountBuff); //TODO: base64?
+      //console.log('sink decode ' + fountBuff); //TODO: base64?
       var res = Module._cimbard_fountain_decode(fountBuff.byteOffset, buff.length);
       console.log("on decode got res " + res);
 
@@ -177,9 +177,9 @@ var Recv = function () {
       offsetX = (windowW - (vidH * modeAspect)) / 2;
     }
 
-    var logme = "crosshair offsets now " + offsetX + ", " + offsetY;
+    //var logme = "crosshair offsets now " + offsetX + ", " + offsetY;
     //Recv.set_error(logme);
-    console.log(logme);
+    //console.log(logme);
 
     var xh1 = document.getElementById("crosshair1");
     var xh2 = document.getElementById("crosshair2");
@@ -207,15 +207,16 @@ var Recv = function () {
 
     frames_in_flight_incr: function () {
       _framesInFlight += 1;
-      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight + "  " + _useVideoFrame;
     },
 
     frames_in_flight_decr: function () {
       _framesInFlight -= 1;
-      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight + "  " + _useVideoFrame;
     },
 
     init_ww: function (num_workers) {
+      //num_workers = 1;
       // clean up _workers if exists
       for (const wkr of _workers) {
         try {
@@ -238,12 +239,6 @@ var Recv = function () {
     },
 
     init_video: function (video) {
-      if (typeof VideoFrame === 'undefined') {
-        Recv.set_error('WebCodecs (VideoFrame) is not supported by this browser');
-        Recv.set_HTML("crosshair1", "VideoFrame not supported :(");
-        return;
-      }
-
       _video = video;
       window.addEventListener('resize', _updateCrosshairPositions); //idempotent, I think
 

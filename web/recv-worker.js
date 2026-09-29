@@ -87,6 +87,8 @@ var RecvWorker = function () {
         _offscreenCtx.drawImage(bitmap, 0, 0);
         const imageData = _offscreenCtx.getImageData(0, 0, width, height);
 
+        //console.log("got image data");
+        //console.log(imageData);
         data.pixels = imageData.data;
         delete data.bitmap;
         return data;
@@ -159,7 +161,7 @@ self.onmessage = async (event) => {
 
   try {
     let data = event.data;
-    if (!data.pixels && data.canvas) {
+    if (!data.pixels && data.bitmap) {
       data = RecvWorker.convert_bitmap(data);
     }
     RecvWorker.on_frame(data);
