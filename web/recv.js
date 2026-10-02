@@ -346,9 +346,6 @@ var Recv = function () {
         if (data.ready && _workerReady) {
           _workerReady();
         }
-        if (data.error) {
-          console.log(data.error);
-        }
         return;
       }
 
@@ -363,6 +360,11 @@ var Recv = function () {
       }
       if (data.res) {
         Recv.set_HTML("t" + wid, "msg is " + data.res);
+        return;
+      }
+      if (data.error) {
+        // other error cases
+        console.log("on_decode error? " + data.error);
         return;
       }
 
@@ -530,7 +532,7 @@ var Recv = function () {
         xh1.classList.add("active_xhairs");
         xh1.classList.remove("scanning_xhairs");
         xh2.classList.add("active_xhairs");
-        xh1.classList.remove("scanning_xhairs");
+        xh2.classList.remove("scanning_xhairs");
       }
       else if (_recentExtract > 0 && _recentExtract + 30 > _counter) {
         xh1.classList.add("scanning_xhairs");

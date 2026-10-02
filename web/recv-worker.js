@@ -155,7 +155,7 @@ self.onmessage = async (event) => {
 
   if (!_wasmInitialized) {
     console.log('we got no wasm :(');
-    self.postMessage({ type: 'startWasm', error: "no wasm" });
+    self.postMessage({ error: "no wasm" });
     return;
   }
 
