@@ -5,6 +5,7 @@
 
 #include "zstd/zstd.h"
 #include <array>
+#include <cstdint>
 #include <sstream>
 #include <vector>
 
@@ -44,7 +45,9 @@ public:
 					_inBuff = std::string_view(_inBuff.data() + input.pos, _inBuff.size() - input.pos);
 
 					_dstByteCount += output.pos;
-					_srcByteCount += input.size;
+					_srcByteCount += input.pos;
+
+					//std::cerr << "src bytes " << _srcByteCount << ", dst bytes " << _dstByteCount << std::endl;
 					// if _byteCount too large, fail?
 					if (_dstByteCount > 50'000'000 and (_srcByteCount << 8) < _dstByteCount) // *256
 					{

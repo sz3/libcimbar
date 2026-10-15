@@ -3,6 +3,7 @@
 
 #include "zstd_decompressor.h"
 
+#include "zstd_compressor.h"
 #include "serialize/format.h"
 #include "util/File.h"
 #include "util/MakeTempDirectory.h"
@@ -15,6 +16,16 @@
 using std::string;
 using namespace cimbar;
 using namespace std;
+\
+namespace {
+	string big_repeated(size_t size, std::string tokens="aaaaa")
+	{
+		std::string data;
+		while (data.size() < size)
+			data += tokens;
+		return data;
+	}
+}
 
 TEST_CASE( "zstd_decompressorTest/testDecompress.Small", "[unit]" )
 {
@@ -114,5 +125,49 @@ TEST_CASE( "zstd_decompressorTest/testDecompress.Pad", "[unit]" )
 
 	assertEquals( 1000, output.str().size() );
 	assertEquals( expectedOutput.str(), output.str() );
+}
+
+TEST_CASE( "zstd_decompressorTest/testDecompress.SmallBomb", "[unit]" )
+{
+	// it's sub 50 MB, so it's chill
+	string rawBytes = big_repeated(48'000'000);
+	zstd_compressor<std::stringstream> cpr;
+	cpr.set_compression_level(22);
+	assertTrue( cpr.write(rawBytes.data(), rawBytes.size()) );
+	assertEquals( 52740, cpr.str().size() );
+
+	zstd_decompressor<std::stringstream> dec;
+	assertEquals( 52740, dec.decompress(cpr) );
+
+	std::stringstream output;
+	output << dec.rdbuf();
+
+	assertEquals( rawBytes.size(), output.str().size() );
+	//assertEquals( rawBytes.str(), output.str() );
+
+	assertFalse( dec.good() );
+	assertEquals( "suspicious compression ratio", dec.last_error() );
+}
+
+TEST_CASE( "zstd_decompressorTest/testDecompress.BigBomb", "[unit]" )
+{
+	// it's over 50 MB, we complain if the compression ratio is suspiciously high
+	string rawBytes = big_repeated(53'000'000);
+	zstd_compressor<std::stringstream> cpr;
+	cpr.set_compression_level(22);
+	assertTrue( cpr.write(rawBytes.data(), rawBytes.size()) );
+	assertEquals( 58230, cpr.str().size() );
+
+	zstd_decompressor<std::stringstream> dec;
+	assertEquals( 58230, dec.decompress(cpr) );
+
+	std::stringstream output;
+	output << dec.rdbuf();
+
+	assertEquals( 50003968, output.str().size() );
+	//assertEquals( rawBytes.str(), output.str() );
+
+	assertFalse( dec.good() );
+	assertEquals( " detected suspicious compression ratio. Is someone up to no good?", dec.last_error() );
 }
 
