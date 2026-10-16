@@ -103,6 +103,7 @@ var Recv = function () {
 
   var _video = 0;
   var _useVideoFrame = true;
+  var _vfcId = undefined;
 
   var _workers = [];
   var _nextWorker = 0;
@@ -114,11 +115,22 @@ var Recv = function () {
 
   function _requestVideoFrame(callback) {
     if ('requestVideoFrameCallback' in _video) {
-      _video.requestVideoFrameCallback(callback);
+      _vfcId = _video.requestVideoFrameCallback(callback);
     } else {
-      requestAnimationFrame(function (now) {
+      _vfcId = requestAnimationFrame(function (now) {
         return callback(now, {});
       });
+    }
+  }
+
+  function _cancelVideoFrameCallback() {
+    if (_video && _vfcId !== undefined) {
+      if ('cancelVideoFrameCallback' in _video) {
+        _video.cancelVideoFrameCallback(_vfcId);
+      } else {
+        cancelAnimationFrame(_vfcId);
+      }
+      _vfcId = undefined;
     }
   }
 
@@ -291,6 +303,7 @@ var Recv = function () {
     },
 
     stop_camera: function () {
+	_cancelVideoFrameCallback();
       if (_video && _video.srcObject) {
         _video.srcObject.getTracks().forEach(track => track.stop());
         _video.srcObject = null;
