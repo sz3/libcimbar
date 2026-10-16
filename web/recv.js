@@ -300,14 +300,18 @@ var Recv = function () {
           _video.srcObject = vidSource;
         }
         else {
-          _video.src = URL.createObjectURL(vidSource); // deprecated?
+          _video.src = URL.createObjectURL(vidSource); // fallback?
+          _video.load();
         }
       }
       else {
         // file or object url (for e.g. mp4)
         _video.srcObject = null;
         _video.src = typeof vidSource === 'string' ? vidSource : URL.createObjectURL(vidSource);
+        _video.load();
       }
+
+      _video.muted = true;
 
       _video.play().then(() => {
         _requestVideoFrame(Recv.on_frame);
