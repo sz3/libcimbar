@@ -228,7 +228,11 @@ var Recv = function () {
     },
 
     init_ww: function (num_workers) {
-      //num_workers = 1;
+      if (!num_workers) {
+        const desiredWorkers = (navigator.hardwareConcurrency / 2) + 1;
+        num_workers = Math.max(3, Math.min(desiredWorkers, 7)); // clamp[3,7]
+      }
+
       // clean up _workers if exists
       for (const wkr of _workers) {
         try {

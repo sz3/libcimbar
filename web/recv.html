@@ -435,7 +435,7 @@
   <script src="zstd.js"></script>
 
   <script type="text/javascript">
-    Recv.init_ww(7);
+    Recv.init_ww();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./recv-sw.js', { scope: '/recv.html' });
     }
