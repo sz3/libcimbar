@@ -193,7 +193,7 @@ var Recv = function () {
   return {
     init: function (video, num_workers) {
       Recv.init_ww(num_workers);
-      Recv.init_video(video);
+      Recv.init_camera(video);
     },
 
     set_error: function (msg) {
@@ -238,7 +238,7 @@ var Recv = function () {
       }
     },
 
-    init_video: function (video) {
+    init_camera: function (video) {
       _video = video;
       window.addEventListener('resize', _updateCrosshairPositions); //idempotent, I think
 
@@ -259,29 +259,11 @@ var Recv = function () {
         return Recv.set_error('mediaDevices not supported? :(');
       }
 
-      Recv.stop_camera(); // no-op, unless...
-
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
           //console.log(localMediaStream);
           //console.dir(video);
-          if ('srcObject' in video) {
-            video.srcObject = localMediaStream;
-          } else {
-            video.src = URL.createObjectURL(localMediaStream); //deprecated
-          }
-
-          video.play().catch(err => {
-            if (err.name === 'NotAllowedError') {
-              console.log("Autoplay blocked...");
-              // TODO: getPermissionSomehow();
-              throw err;
-            } else {
-              throw err;
-            }
-          });
-
-          _requestVideoFrame(Recv.on_frame);
+          Recv.start_video(localMediaStream);
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
@@ -290,10 +272,48 @@ var Recv = function () {
         });
     },
 
-    stop_camera: function () {
+    start_video: function (vidSource) {
+      if (!_video) {
+        return;
+      }
+
+      Recv.stop_video(); // clean up
+
+      if (vidSource instanceof MediaStream) {
+        if ('srcObject' in _video) {
+          _video.srcObject = vidSource;
+        }
+        else {
+          _video.src = URL.createObjectURL(vidSource); // deprecated?
+        }
+      }
+      else {
+        // file or object url (for e.g. mp4)
+        _video.srcObject = null;
+        _video.src = typeof vidSource === 'string' ? vidSource : URL.createObjectURL(vidSource);
+      }
+
+      _video.play().then(() => {
+        _requestVideoFrame(Recv.on_frame);
+      }).catch(err => {
+        if (err.name === 'NotAllowedError') {
+          console.log("Autoplay blocked...");
+          // TODO: getPermissionSomehow();
+          // then call _requestVideoFrame in callback
+        }
+        console.error("Video play blocked or failed:", err);
+        Recv.set_error("Playback failed: " + err);
+      });
+    },
+
+    stop_video: function () {
       if (_video && _video.srcObject) {
         _video.srcObject.getTracks().forEach(track => track.stop());
         _video.srcObject = null;
+      }
+      if (_video && _video.src) {
+        URL.revokeObjectURL(_video.src);
+        _video.src = "";
       }
 
       if (_watchmanTimer > 0) {
@@ -596,6 +616,19 @@ var Recv = function () {
       }
       document.getElementById("nav-button").blur();
       document.getElementById("nav-content").blur();
+    },
+
+    clickFileInput: function () {
+      document.getElementById("video_input").click();
+    },
+
+    fileInput: function (ev) {
+      console.log("video input: " + ev);
+      var file = document.getElementById('video_input').files[0];
+      if (file) {
+        Recv.start_video(file);
+      }
+      Recv.blurNav(false);
     },
 
     setMode: function (modeVal) {

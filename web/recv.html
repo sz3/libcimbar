@@ -383,6 +383,9 @@
   <div id="crosshair1" class="crosshairs"></div>
   <div id="crosshair2" class="crosshairs"></div>
 
+  <input style="display:none;" type="file" name="video_input" id="video_input" accept="video/*"
+    onchange="Recv.fileInput(this);" />
+
   <div id="nav-container" class="mode-auto">
     <div class="bg" onclick="Recv.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
@@ -393,6 +396,7 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
+        <li><a href="javascript:void(0)" onclick="Recv.clickFileInput()">Import Video</a></li>
         <li class="modesel">
           <h4>Mode</h4>
           <a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Auto</a>
@@ -436,7 +440,7 @@
 
     var Module = {};
     Module.onRuntimeInitialized = () => {
-      Recv.init_video(video);
+      Recv.init_camera(video);
     };
   </script>
 
