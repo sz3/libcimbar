@@ -103,6 +103,7 @@ var Recv = function () {
 
   var _video = 0;
   var _useVideoFrame = true;
+  var _vfcId = undefined;
 
   var _workers = [];
   var _nextWorker = 0;
@@ -114,11 +115,22 @@ var Recv = function () {
 
   function _requestVideoFrame(callback) {
     if ('requestVideoFrameCallback' in _video) {
-      _video.requestVideoFrameCallback(callback);
+      _vfcId = _video.requestVideoFrameCallback(callback);
     } else {
-      requestAnimationFrame(function (now) {
+      _vfcId = requestAnimationFrame(function (now) {
         return callback(now, {});
       });
+    }
+  }
+
+  function _cancelVideoFrameCallback() {
+    if (_video && _vfcId !== undefined) {
+      if ('cancelVideoFrameCallback' in _video) {
+        _video.cancelVideoFrameCallback(_vfcId);
+      } else {
+        cancelAnimationFrame(_vfcId);
+      }
+      _vfcId = undefined;
     }
   }
 
@@ -307,6 +319,7 @@ var Recv = function () {
     },
 
     stop_video: function () {
+      _cancelVideoFrameCallback();
       if (_video && _video.srcObject) {
         _video.srcObject.getTracks().forEach(track => track.stop());
         _video.srcObject = null;
@@ -328,14 +341,8 @@ var Recv = function () {
         return;
       }
 
-      // ios only for now, since desktop behavior is weird
-      if (!isIOS()) {
-        _watchmanTimer = -1; // lol
-        return;
-      }
-
       // periodically make sure the camera capture is running
-      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1000);
+      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1500);
     },
 
     restart_paused_camera: function () {
@@ -352,7 +359,7 @@ var Recv = function () {
       // if not, we're stuck?
       clearInterval(_watchmanTimer); // our work is done, for now
       _watchmanTimer = 0;
-      Recv.init_video(_video);
+      Recv.init_camera(_video);
     },
 
     download_bytes: function (buff, name) {
@@ -469,7 +476,7 @@ var Recv = function () {
 
       const modeVals = [66, 68, 67, 4];
 
-      if (_framesInFlight > 20) {
+      if (_framesInFlight > 30) {
         console.log("stalling, worker queues are full");
         _requestVideoFrame(Recv.on_frame);
         return;

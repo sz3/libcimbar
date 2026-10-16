@@ -419,6 +419,9 @@
       <div class="statusbox" id="t1">hi1</div>
       <div class="statusbox" id="t2">hi2</div>
       <div class="statusbox" id="t3">hi3</div>
+      <div class="statusbox" id="t4">hi4</div>
+      <div class="statusbox" id="t5">hi5</div>
+      <div class="statusbox" id="t6">hi6</div>
       <div class="statusbox" id="framesInFlight"></div>
       <div class="statusbox" id="tdec">%VERSION%</div>
     </div>
@@ -432,7 +435,7 @@
   <script src="zstd.js"></script>
 
   <script type="text/javascript">
-    Recv.init_ww(4);
+    Recv.init_ww(7);
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./recv-sw.js', { scope: '/recv.html' });
     }
