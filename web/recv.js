@@ -32,7 +32,7 @@ var Sink = function () {
       const fountBuff = fountain_buff();
       fountBuff.set(buff);
 
-      console.log('sink decode ' + fountBuff); //TODO: base64?
+      //console.log('sink decode ' + fountBuff); //TODO: base64?
       var res = Module._cimbard_fountain_decode(fountBuff.byteOffset, buff.length);
       console.log("on decode got res " + res);
 
@@ -45,7 +45,7 @@ var Sink = function () {
       }
 
       if (res > 0) {
-        const res32t = Number(res & 0xFFFFFFFFn);; // truncate BigInt res (int64_t) to a uint32_t
+        const res32t = Number(res & 0xFFFFFFFFn); // truncate BigInt res (int64_t) to a uint32_t
         Sink.reassemble_file(res32t);
       }
     },
@@ -74,9 +74,8 @@ var Sink = function () {
         var name = id + "." + size;
         const fnsize = Module._cimbard_get_filename(id, _errBuff, _errBuffSize);
         if (fnsize < 0) {
-          alert("reassemble_file failed :(" + res);
-          console.log("we biffed it. :( " + res);
-          Recv.set_HTML("errorbox", "reassemble_file failed :( " + res);
+          console.log("reassemble_file failed. :( " + fnsize);
+          Recv.set_HTML("errorbox", "reassemble_file failed :( " + fnsize);
         }
         else if (fnsize > 0) {
           const temparr = new Uint8Array(Module.HEAPU8.buffer, _errBuff, fnsize);
@@ -99,10 +98,13 @@ var Recv = function () {
   var _renderTime = 0;
   var _captureNextFrame = 0;
 
-  var _watchmanEnabled = 0;
+  var _watchmanTimer = undefined;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
   var _video = 0;
+  var _useVideoFrame = true;
+  var _vfcId = undefined;
+
   var _workers = [];
   var _nextWorker = 0;
   var _workerReady;
@@ -110,6 +112,27 @@ var Recv = function () {
   var _supportedFormats = ["NV12", "I420"]; // have cimbard_* return this somehow?
 
   var _mode = 0;
+
+  function _requestVideoFrame(callback) {
+    if ('requestVideoFrameCallback' in _video) {
+      _vfcId = _video.requestVideoFrameCallback(callback);
+    } else {
+      _vfcId = requestAnimationFrame(function (now) {
+        return callback(now, {});
+      });
+    }
+  }
+
+  function _cancelVideoFrameCallback() {
+    if (_video && _vfcId !== undefined) {
+      if ('cancelVideoFrameCallback' in _video) {
+        _video.cancelVideoFrameCallback(_vfcId);
+      } else {
+        cancelAnimationFrame(_vfcId);
+      }
+      _vfcId = undefined;
+    }
+  }
 
   function _toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -166,9 +189,9 @@ var Recv = function () {
       offsetX = (windowW - (vidH * modeAspect)) / 2;
     }
 
-    var logme = "crosshair offsets now " + offsetX + ", " + offsetY;
+    //var logme = "crosshair offsets now " + offsetX + ", " + offsetY;
     //Recv.set_error(logme);
-    console.log(logme);
+    //console.log(logme);
 
     var xh1 = document.getElementById("crosshair1");
     var xh2 = document.getElementById("crosshair2");
@@ -196,17 +219,24 @@ var Recv = function () {
 
     frames_in_flight_incr: function () {
       _framesInFlight += 1;
-      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight + "  " + _useVideoFrame;
     },
 
     frames_in_flight_decr: function () {
       _framesInFlight -= 1;
-      document.getElementById('framesInFlight').innerHTML = _framesInFlight;
+      document.getElementById('framesInFlight').innerHTML = _framesInFlight + "  " + _useVideoFrame;
     },
 
     init_ww: function (num_workers) {
-      // clean up _workers if exists?
+      //num_workers = 1;
+      // clean up _workers if exists
+      for (const wkr of _workers) {
+        try {
+          wkr.terminate();
+        } catch (e) { }
+      }
       _workers = [];
+
       for (let i = 0; i < num_workers; i++) {
         _workers.push(new Worker('recv-worker.js'));
 
@@ -222,12 +252,12 @@ var Recv = function () {
 
     init_video: function (video) {
       _video = video;
-      window.addEventListener('resize', _updateCrosshairPositions);
+      window.addEventListener('resize', _updateCrosshairPositions); //idempotent, I think
 
       var constraints = {
         audio: false,
         video: {
-          width: { min: 720, ideal: 1920 }, // Request HD but allow flexibility
+          width: { min: 720, ideal: 1920 },
           height: { min: 720, ideal: 1080 },
           aspectRatio: matchMedia('all and (orientation:landscape)').matches ? 16 / 9 : 9 / 16,
           facingMode: 'environment',
@@ -241,6 +271,8 @@ var Recv = function () {
         return Recv.set_error('mediaDevices not supported? :(');
       }
 
+      Recv.stop_camera(); // no-op, unless...
+
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
           //console.log(localMediaStream);
@@ -250,8 +282,18 @@ var Recv = function () {
           } else {
             video.src = URL.createObjectURL(localMediaStream); //deprecated
           }
-          video.play();
-          video.requestVideoFrameCallback(Recv.on_frame);
+
+          video.play().catch(err => {
+            if (err.name === 'NotAllowedError') {
+              console.log("Autoplay blocked...");
+              // TODO: getPermissionSomehow();
+              throw err;
+            } else {
+              throw err;
+            }
+          });
+
+          _requestVideoFrame(Recv.on_frame);
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
@@ -260,20 +302,33 @@ var Recv = function () {
         });
     },
 
+    stop_camera: function () {
+	_cancelVideoFrameCallback();
+      if (_video && _video.srcObject) {
+        _video.srcObject.getTracks().forEach(track => track.stop());
+        _video.srcObject = null;
+      }
+
+      if (_watchmanTimer > 0) {
+        clearInterval(_watchmanTimer);
+      }
+      _watchmanTimer = 0;
+    },
+
     watch_for_camera_pause: function () {
       // only call this after our first success
-      if (_watchmanEnabled) {
+      if (_watchmanTimer) {
         return;
       }
-      _watchmanEnabled = true;
 
       // ios only for now, since desktop behavior is weird
       if (!isIOS()) {
+        _watchmanTimer = -1; // lol
         return;
       }
 
       // periodically make sure the camera capture is running
-      setInterval(Recv.restart_paused_camera, 1000);
+      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1000);
     },
 
     restart_paused_camera: function () {
@@ -288,6 +343,8 @@ var Recv = function () {
       }
 
       // if not, we're stuck?
+      clearInterval(_watchmanTimer); // our work is done, for now
+      _watchmanTimer = 0;
       Recv.init_video(_video);
     },
 
@@ -298,8 +355,15 @@ var Recv = function () {
 
     on_decode: function (wid, data) {
       //console.log('Main thread received message from worker' + wid + ':', data);
+      if (data.type == 'startWasm') {
+        if (data.ready && _workerReady) {
+          _workerReady();
+        }
+        return;
+      }
+
       Recv.frames_in_flight_decr();
-      // if extract but no bytes, log extract counte
+      // if extract but no bytes, log extract counter
       if (data.nodata) {
         _recentExtract = _counter;
         return;
@@ -311,9 +375,9 @@ var Recv = function () {
         Recv.set_HTML("t" + wid, "msg is " + data.res);
         return;
       }
-      if (data.ready) {
-        if (_workerReady)
-          _workerReady();
+      if (data.error) {
+        // other error cases
+        console.log("on_decode error? " + data.error);
         return;
       }
 
@@ -328,7 +392,60 @@ var Recv = function () {
       Sink.on_decode(buff);
     },
 
-    on_frame: function (now, metadata) {
+    on_frame_vf: async function (now) {
+      // the normal path
+      let vf = undefined;
+      try {
+        vf = new VideoFrame(_video, { timestamp: now });
+      } catch (e) {
+        console.log("no VideoFrame!");
+        return undefined;
+      }
+
+      try {
+        const width = vf.displayWidth;
+        const height = vf.displayHeight;
+        Recv.set_HTML("errorbox", vf.format, true);
+
+        // try to use the default format, but only if we can decode it...
+        let vfparams = {};
+        if (!_supportedFormats.includes(vf.format)) {
+          vfparams.format = "RGBA";
+        }
+        const size = vf.allocationSize(vfparams);
+        const buff = new Uint8Array(size);
+        await vf.copyTo(buff, vfparams);
+
+        let format = vfparams.format || vf.format;
+        if (format == "RGBA" && size != width * height * 4) {
+          format = vf.format; //fallback
+        }
+
+        // debugging only
+        if (_captureNextFrame == 1) {
+          _captureNextFrame = 0;
+          Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
+        }
+
+        let workerMsg = {
+          type: 'proc',
+          pixels: buff,
+          format: format,
+          width: width,
+          height: height,
+        };
+        return workerMsg;
+      } catch (e) {
+        console.error(e);
+        return {
+          type: 'fail'
+        };
+      } finally {
+        vf.close();
+      }
+    },
+
+    on_frame: async function (now, metadata) {
       //console.log("on frame");
       // https://developer.mozilla.org/en-US/docs/Web/API/VideoFrame
 
@@ -345,53 +462,72 @@ var Recv = function () {
 
       const modeVals = [66, 68, 67, 4];
 
-      var vf = undefined;
       if (_framesInFlight > 20) {
         console.log("stalling, worker queues are full");
+        _requestVideoFrame(Recv.on_frame);
+        return;
+      }
+
+      let mode = _mode || modeVals[_counter % modeVals.length];
+      let bitmap = undefined;
+
+      let workerMsg = undefined;
+      if (_useVideoFrame) {
+        workerMsg = await Recv.on_frame_vf(now);
+        if (!workerMsg) {
+          _useVideoFrame = false;
+        }
+        else if (workerMsg.type == "fail") {
+          workerMsg = undefined;
+        }
+        else {
+          workerMsg.mode = mode;
+        }
       }
       else {
-        Recv.frames_in_flight_incr();
-        try {
-          vf = new VideoFrame(_video, { timestamp: now });
-          const width = vf.displayWidth;
-          const height = vf.displayHeight;
-          Recv.set_HTML("errorbox", vf.format, true);
+        // TODO: if videowidth/height not set, bail?
+        const width = _video.videoWidth;
+        const height = _video.videoHeight;
+        bitmap = await createImageBitmap(_video);
+        workerMsg = {
+          type: 'proc',
+          bitmap: bitmap,
+          format: "RGBA",
+          width: width,
+          height: height,
+          mode: mode
+        };
+      }
 
-          // try to use the default format, but only if we can decode it...
-          let vfparams = {};
-          if (!_supportedFormats.includes(vf.format)) {
-            vfparams.format = "RGBA";
-          }
-          const size = vf.allocationSize(vfparams);
-          const buff = new Uint8Array(size);
-          vf.copyTo(buff, vfparams);
+      if (!workerMsg) {
+        _requestVideoFrame(Recv.on_frame);
+        return;
+      }
 
-          let format = vfparams.format || vf.format;
-          if (format == "RGBA" && size != width * height * 4) {
-            format = vf.format; //fallback
-          }
-          if (_captureNextFrame == 1) {
-            _captureNextFrame = 0;
-            Recv.download_bytes(buff, width + "x" + height + "x" + _counter + "." + format);
-          }
-
-          let mode = _mode || modeVals[_counter % modeVals.length];
-          _workers[_nextWorker].postMessage({ type: 'proc', pixels: buff, format: format, width: width, height: height, mode: mode }, [buff.buffer]);
-        } catch (e) {
-          console.log(e);
+      Recv.frames_in_flight_incr();
+      try {
+        if (workerMsg.pixels) {
+          _workers[_nextWorker].postMessage(workerMsg, [workerMsg.pixels.buffer]);
+        }
+        else {
+          _workers[_nextWorker].postMessage(workerMsg, [bitmap]);
         }
         _nextWorker += 1;
       }
-      if (vf)
-        vf.close();
+      catch (e) {
+        Recv.frames_in_flight_decr();
+        if (bitmap) {
+          bitmap.close();
+        }
+        throw e; // rethrow
+      }
 
-      // schedule the next one
-      _video.requestVideoFrameCallback(Recv.on_frame);
+      _requestVideoFrame(Recv.on_frame);
     },
 
     captureFrame: function () {
       _captureNextFrame = 1;
-      alert("about to capture!");
+      console.log("capturing next frame");
     },
 
     download_bytes: function (buff, name) {
@@ -409,7 +545,7 @@ var Recv = function () {
         xh1.classList.add("active_xhairs");
         xh1.classList.remove("scanning_xhairs");
         xh2.classList.add("active_xhairs");
-        xh1.classList.remove("scanning_xhairs");
+        xh2.classList.remove("scanning_xhairs");
       }
       else if (_recentExtract > 0 && _recentExtract + 30 > _counter) {
         xh1.classList.add("scanning_xhairs");

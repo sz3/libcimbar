@@ -1,6 +1,10 @@
 let _wasmInitialized = false;
 let _buffs = {};
 
+// only if no VideoFrame support...
+let _offscreen = undefined;
+let _offscreenCtx = undefined;
+
 var Module = {
   preRun: [],
   onRuntimeInitialized: function load_done_callback() {
@@ -66,6 +70,33 @@ var RecvWorker = function () {
       // in main, const receivedArray = event.data.buff;
     },
 
+    convert_bitmap: function (data) {
+      const bitmap = data.bitmap;
+      const width = data.width;
+      const height = data.height;
+
+      try {
+        if (!_offscreen) {
+          _offscreen = new OffscreenCanvas(width, height);
+          _offscreenCtx = _offscreen.getContext('2d', { willReadFrequently: true });
+        }
+        else if (_offscreen.width !== width || _offscreen.height !== height) {
+          _offscreen.width = width;
+          _offscreen.height = height;
+        }
+        _offscreenCtx.drawImage(bitmap, 0, 0);
+        const imageData = _offscreenCtx.getImageData(0, 0, width, height);
+
+        //console.log("got image data");
+        //console.log(imageData);
+        data.pixels = imageData.data;
+        delete data.bitmap;
+        return data;
+      } finally {
+        bitmap.close();
+      }
+    },
+
     get_error: function () {
       const errbuff = RecvWorker.mallocPlease("error", 256);
       const errlen = Module._cimbard_get_report(errbuff.byteOffset, errbuff.length);
@@ -110,7 +141,7 @@ var RecvWorker = function () {
     fountainBuff: function () {
       let buff = _buffs['fountain'];
       if (buff.buffer !== Module.HEAPU8.buffer) {
-        _buffs['img'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
+        _buffs['fountain'] = new Uint8Array(Module.HEAPU8.buffer, buff.byteOffset, buff.byteLength);
         buff = _buffs['fountain'];
       }
       return buff;
@@ -124,13 +155,16 @@ self.onmessage = async (event) => {
 
   if (!_wasmInitialized) {
     console.log('we got no wasm :(');
-    self.postMessage({ type: 'startWasm', error: "no wasm" });
+    self.postMessage({ error: "no wasm" });
     return;
   }
 
   try {
-    // assert 'vf' in data?
-    RecvWorker.on_frame(event.data);
+    let data = event.data;
+    if (!data.pixels && data.bitmap) {
+      data = RecvWorker.convert_bitmap(data);
+    }
+    RecvWorker.on_frame(data);
   } catch (ex) {
     console.log("unexpected error: " + ex);
     self.postMessage({ error: true, res: ex });
