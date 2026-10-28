@@ -81,7 +81,7 @@ public:
 		if (len < 9)
 			len = 9;
 
-		std::string temp(len-8, '\0');
+		std::string temp(len-8, '\x1b');
 		size_t writ = ZSTD_writeSkippableFrame(_compBuff.data(), _compBuff.size(), temp.data(), temp.size(), 0);
 
 		STREAM::write(_compBuff.data(), writ);
