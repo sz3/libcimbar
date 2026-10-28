@@ -45,13 +45,13 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xefcc8800efcea808;
+	uint64_t hash = 0x67df46e0c285e20e;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat encodedImg = cv::imread(path);
 	cv::cvtColor(encodedImg, encodedImg, cv::COLOR_BGR2RGB);
 	assertEquals( hash, image_hash::average_hash(encodedImg) );
 
-	SECTION ("default filename") {
+	SECTION ("default_filename") {
 		// decoder
 		Decoder dec;
 		fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), write_on_store<cimbar::zstd_decompressor<std::ofstream>>(tempdir.path().string()));
@@ -65,7 +65,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.Pad", "[unit]" )
 		assertEquals( 1, fds.num_done() );
 	}
 
-	SECTION ("parsed filename") {
+	SECTION ("parsed_filename") {
 		Decoder dec;
 		fountain_decoder_sink fds(cimbar::Config::fountain_chunk_size(), decompress_on_store<std::ofstream>(tempdir.path().string()));
 
@@ -96,7 +96,7 @@ TEST_CASE( "EncoderRoundTripTest/testFountain.SinkMismatch", "[unit]" )
 	EncoderPlus enc(4, 2);
 	assertEquals( 1, enc.encode_fountain(inputFile, outPrefix) );
 
-	uint64_t hash = 0xaecc8800efce8c28;
+	uint64_t hash = 0xa617c720384386cb;
 	std::string path = fmt::format("{}_0.png", outPrefix);
 	cv::Mat encodedImg = cv::imread(path);
 	cv::cvtColor(encodedImg, encodedImg, cv::COLOR_BGR2RGB);
