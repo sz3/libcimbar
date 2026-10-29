@@ -101,7 +101,7 @@ var Recv = function () {
   var _watchmanTimer = undefined;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
 
-  var _video = 0;
+  var _video = undefined;
   var _useVideoFrame = true;
   var _vfcId = undefined;
 
@@ -114,7 +114,7 @@ var Recv = function () {
   var _mode = 0;
 
   function _requestVideoFrame(callback) {
-    if ('requestVideoFrameCallback' in _video) {
+    if (_video && 'requestVideoFrameCallback' in _video) {
       _vfcId = _video.requestVideoFrameCallback(callback);
     } else {
       _vfcId = requestAnimationFrame(function (now) {
