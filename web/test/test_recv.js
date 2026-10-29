@@ -40,7 +40,7 @@ async function load_image(num) {
   imageBitmap.requestVideoFrameCallback = function () { };
 
   try {
-    Recv.init_video(imageBitmap);
+    Recv.init_camera(imageBitmap);
   } catch (ex) { }
 }
 
