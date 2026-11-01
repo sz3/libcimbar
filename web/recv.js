@@ -100,6 +100,7 @@ var Recv = function () {
 
   var _watchmanTimer = undefined;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
+  var _activeOverlay = undefined;
 
   var _video = undefined;
   var _useVideoFrame = true;
@@ -288,42 +289,102 @@ var Recv = function () {
         });
     },
 
+    show_play_overlay: function (label, onPlay, onCancel) {
+      Recv.hide_play_overlay();
+
+      // create modal here. Maybe we'll move it into the html at some point.
+      const overlay = document.createElement('div');
+      overlay.id = 'overlay-modal';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.innerHTML = `
+    <button type="button" class="om-card" aria-label="Decode video">
+      <span class="om-info"></span>
+      <span class="om-play"></span>
+      <span class="om-label">DECODE</span>
+    </button>
+  `;
+      overlay.querySelector('.om-info').textContent = label || '';
+
+      // for ios safari... which is why we're doing all this anyway
+      const card = overlay.querySelector('.om-card');
+      card.addEventListener('touchstart', function () { }, { passive: true });
+
+      _activeOverlay = overlay;
+
+      // inside -> play, anywhere else (backdrop) -> cancel
+      overlay.addEventListener('click', (e) => {
+        if (_activeOverlay !== overlay) {
+          return; // already done
+        }
+        const fn = card.contains(e.target) ? onPlay : onCancel;
+        Recv.hide_play_overlay();
+        if (typeof fn === 'function') {
+          fn();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      overlay.classList.add('om-active');
+      try {
+        card.focus();
+      } catch (err) { }
+    },
+
+    hide_play_overlay: function () {
+      const ol = _activeOverlay || document.getElementById('overlay-modal');
+      _activeOverlay = null;
+      if (ol) {
+        ol.remove();
+      }
+    },
+
     start_video: function (vidSource) {
       if (!_video) {
         return;
       }
 
+      Recv.hide_play_overlay();
       Recv.stop_video(); // clean up
 
-      if (vidSource instanceof MediaStream) {
-        if ('srcObject' in _video) {
-          _video.srcObject = vidSource;
-        }
-        else {
-          _video.src = URL.createObjectURL(vidSource); // fallback?
-          _video.load();
-        }
-      }
-      else {
+      const isCamera = (typeof MediaStream !== 'undefined') && (vidSource instanceof MediaStream);
+      let label = "loading camera...";
+      if (isCamera && 'srcObject' in _video) {
+        _video.srcObject = vidSource;
+      } else {
         // file or object url (for e.g. mp4)
         _video.srcObject = null;
         _video.src = typeof vidSource === 'string' ? vidSource : URL.createObjectURL(vidSource);
         _video.load();
+
+        label = "loading video...";
+        if ('name' in vidSource) {
+          label = vidSource.name;
+        }
       }
 
       _video.muted = true;
+      _video.playsInline = true;
+      _video.setAttribute("playsinline", "");
 
-      _video.play().then(() => {
-        _requestVideoFrame(Recv.on_frame);
-      }).catch(err => {
-        if (err.name === 'NotAllowedError') {
-          console.log("Autoplay blocked...");
-          // TODO: getPermissionSomehow();
-          // then call _requestVideoFrame in callback
-        }
-        console.error("Video play blocked or failed:", err);
-        Recv.set_error("Playback failed: " + err);
-      });
+      const tryPlay = () => {
+        _video.play().then(() => {
+          _requestVideoFrame(Recv.on_frame);
+        }).catch(err => {
+          console.error("Video play blocked or failed:", err);
+          Recv.set_error("Playback failed: " + err);
+
+          Recv.show_play_overlay(label, tryPlay, () => {
+            // abort
+            Recv.stop_video();
+            if (!isCamera) {
+              Recv.init_camera(_video); // back to the live camera
+            }
+          });
+        });
+      };
+
+      tryPlay();
     },
 
     stop_video: function () {

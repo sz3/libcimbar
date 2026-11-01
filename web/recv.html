@@ -368,6 +368,143 @@
       display: none;
     }
 
+    /* modal */
+    #overlay-modal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      background: transparent;
+      /* box-shadow will be bg */
+      color: #e6e9ef;
+
+      opacity: 0;
+      transition: opacity 0.18s ease;
+
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      /* no highlight */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #overlay-modal.om-active {
+      opacity: 1;
+    }
+
+    #overlay-modal .om-card {
+      min-width: 220px;
+      padding: 32px 48px;
+      text-align: center;
+
+      background: rgba(28, 31, 38, 0.35);
+      box-shadow: 0 0 0 100vmax rgba(10, 12, 16, 0.94);
+
+      border: 1px solid #2c313a;
+      border-radius: 16px;
+
+      /* button reset */
+      font: inherit;
+      color: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+
+      cursor: pointer;
+      outline: none;
+    }
+
+    #overlay-modal .om-card::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    #overlay-modal .om-info,
+    #overlay-modal .om-label {
+      display: block;
+
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    #overlay-modal .om-info {
+      margin-bottom: 16px;
+
+      font-size: 12px;
+      color: #8b93a1;
+      text-transform: uppercase;
+    }
+
+    #overlay-modal .om-info:empty {
+      display: none;
+    }
+
+    #overlay-modal .om-play {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      /* circle */
+      margin: 0 auto;
+      display: flex;
+      /* for ::after */
+      justify-content: center;
+      align-items: center;
+
+      border: 3px solid #00ffff;
+      background: #14161b;
+      color: #9fa6b2;
+    }
+
+    #overlay-modal .om-play::after {
+      /* it's a triangle */
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 25px solid transparent;
+      border-bottom: 25px solid transparent;
+      border-left: 38px solid currentColor;
+      margin-left: 6px;
+
+      animation: glowing 1.5s infinite alternate;
+    }
+
+    #overlay-modal .om-label {
+      margin-top: 16px;
+
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+    }
+
+    #overlay-modal .om-card:hover,
+    #overlay-modal .om-card:focus {
+      border-color: #00ffff;
+    }
+
+    #overlay-modal .om-card:focus:not(:focus-visible):not(:hover) {
+      border-color: #2c313a;
+    }
+
+    /* order matters here */
+    #overlay-modal .om-card:hover .om-play {
+      background: rgba(0, 255, 255, 0.12);
+    }
+
+    #overlay-modal .om-card:active .om-play {
+      background: #00ffff;
+      color: #14161b;
+    }
+
+    #overlay-modal .om-card:active .om-play::after {
+      animation: none;
+    }
+
     @keyframes glowing {
       0% {
         color: #00ffff;
