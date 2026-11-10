@@ -127,7 +127,7 @@ TEST_CASE( "zstd_compressorTest/testPad", "[unit]" )
 
 	assertEquals( 20, output.str().size() );
 
-	char expected[] = "\x50\x2A\x4D\x18\x0c\x00\x00\x00" "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+	char expected[] = "\x50\x2A\x4D\x18\x0c\x00\x00\x00" "\x1b\x1b\x1b\x1b\x1b\x1b\x1b\x1b\x1b\x1b\x1b\x1b";
 	assertEquals( 21, sizeof(expected) );
 	assertEquals( std::string(expected, 20), output.str() );
 }
