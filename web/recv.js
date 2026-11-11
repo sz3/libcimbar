@@ -690,8 +690,9 @@ var Recv = function () {
       if (pause === undefined) {
         pause = true;
       }
-      document.getElementById("nav-button").blur();
-      document.getElementById("nav-content").blur();
+      if (document.activeElement && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
     },
 
     clickFileInput: function () {
