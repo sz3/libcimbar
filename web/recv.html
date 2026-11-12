@@ -368,6 +368,144 @@
       display: none;
     }
 
+    /* modal */
+    #overlay-modal {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      background: transparent;
+      /* box-shadow will be bg */
+      color: #9fa6b2;
+
+      opacity: 0;
+      transition: opacity 0.18s ease;
+
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      /* no highlight */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #overlay-modal.om-active {
+      opacity: 1;
+    }
+
+    #overlay-modal .om-card {
+      min-width: 220px;
+      padding: 32px 48px;
+      text-align: center;
+
+      background: rgba(28, 31, 38, 0.35);
+      box-shadow: 0 0 0 100vmax rgba(10, 12, 16, 0.94);
+
+      border: 1px solid #2c323c;
+      border-radius: 16px;
+
+      /* button reset */
+      font: inherit;
+      color: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+
+      cursor: pointer;
+      outline: none;
+    }
+
+    #overlay-modal .om-card::-moz-focus-inner {
+      border: 0;
+      padding: 0;
+    }
+
+    #overlay-modal .om-info,
+    #overlay-modal .om-label {
+      display: block;
+
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    #overlay-modal .om-info {
+      margin-bottom: 16px;
+
+      font-size: 12px;
+      color: #9fa6b2;
+      text-transform: uppercase;
+    }
+
+    #overlay-modal .om-info:empty {
+      display: none;
+    }
+
+    #overlay-modal .om-play {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      /* circle */
+      margin: 0 auto;
+      display: flex;
+      /* for ::after */
+      justify-content: center;
+      align-items: center;
+
+      border: 3px solid #00ffff;
+      background: #282C34;
+      color: #9fa6b2;
+    }
+
+    #overlay-modal .om-play::after {
+      /* it's a triangle */
+      content: "";
+      width: 0;
+      height: 0;
+      border-top: 25px solid transparent;
+      border-bottom: 25px solid transparent;
+      border-left: 38px solid currentColor;
+      margin-left: 6px;
+
+      animation: glowing 1.5s infinite alternate;
+    }
+
+    #overlay-modal .om-label {
+      margin-top: 16px;
+
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: white;
+    }
+
+    #overlay-modal .om-card:hover,
+    #overlay-modal .om-card:focus {
+      border-color: #00ffff;
+    }
+
+    #overlay-modal .om-card:focus:not(:focus-visible):not(:hover) {
+      border-color: #2c323c;
+    }
+
+    /* order matters here */
+    #overlay-modal .om-card:hover .om-play {
+      background: rgba(0, 255, 255, 0.12);
+    }
+
+    #overlay-modal .om-card:active .om-play {
+      background: #00ffff;
+      color: #282C34;
+    }
+
+    #overlay-modal .om-card:active .om-play::after {
+      animation: none;
+    }
+
     @keyframes glowing {
       0% {
         color: #00ffff;
@@ -383,6 +521,9 @@
   <div id="crosshair1" class="crosshairs"></div>
   <div id="crosshair2" class="crosshairs"></div>
 
+  <input style="display:none;" type="file" name="video_input" id="video_input" accept="video/*"
+    onchange="Recv.fileInput(this);" />
+
   <div id="nav-container" class="mode-auto">
     <div class="bg" onclick="Recv.blurNav();"></div>
     <button id="nav-button" tabindex="0" onclick="Recv.clickNav();">
@@ -393,6 +534,7 @@
     </button>
     <div id="nav-content" tabindex="-1">
       <ul>
+        <li><a href="javascript:void(0)" onclick="Recv.clickFileInput()">Import Video</a></li>
         <li class="modesel">
           <h4>Mode</h4>
           <a class="mode-auto" href="javascript:void(0)" onclick="Recv.setMode('Auto')">Auto</a>
@@ -415,6 +557,9 @@
       <div class="statusbox" id="t1">hi1</div>
       <div class="statusbox" id="t2">hi2</div>
       <div class="statusbox" id="t3">hi3</div>
+      <div class="statusbox" id="t4">hi4</div>
+      <div class="statusbox" id="t5">hi5</div>
+      <div class="statusbox" id="t6">hi6</div>
       <div class="statusbox" id="framesInFlight"></div>
       <div class="statusbox" id="tdec">%VERSION%</div>
     </div>
@@ -428,7 +573,7 @@
   <script src="zstd.js"></script>
 
   <script type="text/javascript">
-    Recv.init_ww(4);
+    Recv.init_ww();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./recv-sw.js', { scope: '/recv.html' });
     }
@@ -436,7 +581,7 @@
 
     var Module = {};
     Module.onRuntimeInitialized = () => {
-      Recv.init_video(video);
+      Recv.init_camera(video);
     };
   </script>
 

@@ -4,7 +4,7 @@ on: push
 
 jobs:
   test-cimbarjs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Get the code
         uses: actions/checkout@v4

@@ -45,7 +45,8 @@ var Sink = function () {
       }
 
       if (res > 0) {
-        const res32t = Number(res & 0xFFFFFFFFn); // truncate BigInt res (int64_t) to a uint32_t
+        // truncate BigInt res (int64_t) to a uint32_t
+        const res32t = (typeof res === 'bigint') ? Number(res & BigInt(0xFFFFFFFF)) : (res >>> 0);
         Sink.reassemble_file(res32t);
       }
     },
@@ -100,8 +101,9 @@ var Recv = function () {
 
   var _watchmanTimer = undefined;
   var _watchmanLastSeen = 1; // start at 1, can't restart if we never started
+  var _activeOverlay = undefined;
 
-  var _video = 0;
+  var _video = undefined;
   var _useVideoFrame = true;
   var _vfcId = undefined;
 
@@ -114,7 +116,7 @@ var Recv = function () {
   var _mode = 0;
 
   function _requestVideoFrame(callback) {
-    if ('requestVideoFrameCallback' in _video) {
+    if (_video && 'requestVideoFrameCallback' in _video) {
       _vfcId = _video.requestVideoFrameCallback(callback);
     } else {
       _vfcId = requestAnimationFrame(function (now) {
@@ -205,7 +207,7 @@ var Recv = function () {
   return {
     init: function (video, num_workers) {
       Recv.init_ww(num_workers);
-      Recv.init_video(video);
+      Recv.init_camera(video);
     },
 
     set_error: function (msg) {
@@ -228,7 +230,13 @@ var Recv = function () {
     },
 
     init_ww: function (num_workers) {
-      //num_workers = 1;
+      if (!num_workers) {
+        const hcon = (typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number')
+          ? navigator.hardwareConcurrency : 0;
+        const desiredWorkers = (hcon / 2) + 1;
+        num_workers = Math.max(3, Math.min(desiredWorkers, 6)); // clamp[3,6]
+      }
+
       // clean up _workers if exists
       for (const wkr of _workers) {
         try {
@@ -250,7 +258,7 @@ var Recv = function () {
       }
     },
 
-    init_video: function (video) {
+    init_camera: function (video) {
       _video = video;
       window.addEventListener('resize', _updateCrosshairPositions); //idempotent, I think
 
@@ -271,29 +279,11 @@ var Recv = function () {
         return Recv.set_error('mediaDevices not supported? :(');
       }
 
-      Recv.stop_camera(); // no-op, unless...
-
       navigator.mediaDevices.getUserMedia(constraints)
         .then(localMediaStream => {
           //console.log(localMediaStream);
           //console.dir(video);
-          if ('srcObject' in video) {
-            video.srcObject = localMediaStream;
-          } else {
-            video.src = URL.createObjectURL(localMediaStream); //deprecated
-          }
-
-          video.play().catch(err => {
-            if (err.name === 'NotAllowedError') {
-              console.log("Autoplay blocked...");
-              // TODO: getPermissionSomehow();
-              throw err;
-            } else {
-              throw err;
-            }
-          });
-
-          _requestVideoFrame(Recv.on_frame);
+          Recv.start_video(localMediaStream);
         })
         .catch(err => {
           console.error(`OH NO!!!!`, err);
@@ -302,11 +292,113 @@ var Recv = function () {
         });
     },
 
-    stop_camera: function () {
-	_cancelVideoFrameCallback();
+    show_play_overlay: function (label, onPlay, onCancel) {
+      Recv.hide_play_overlay();
+
+      // create modal here. Maybe we'll move it into the html at some point.
+      const overlay = document.createElement('div');
+      overlay.id = 'overlay-modal';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.innerHTML = `
+    <button type="button" class="om-card" aria-label="Decode video">
+      <span class="om-info"></span>
+      <span class="om-play"></span>
+      <span class="om-label">DECODE</span>
+    </button>
+  `;
+      overlay.querySelector('.om-info').textContent = label || '';
+
+      // for ios safari... which is why we're doing all this anyway
+      const card = overlay.querySelector('.om-card');
+      card.addEventListener('touchstart', function () { }, { passive: true });
+
+      _activeOverlay = overlay;
+
+      // inside -> play, anywhere else (backdrop) -> cancel
+      overlay.addEventListener('click', (e) => {
+        if (_activeOverlay !== overlay) {
+          return; // already done
+        }
+        const fn = card.contains(e.target) ? onPlay : onCancel;
+        Recv.hide_play_overlay();
+        if (typeof fn === 'function') {
+          fn();
+        }
+      });
+
+      document.body.appendChild(overlay);
+      overlay.classList.add('om-active');
+      try {
+        card.focus();
+      } catch (err) { }
+    },
+
+    hide_play_overlay: function () {
+      const ol = _activeOverlay || document.getElementById('overlay-modal');
+      _activeOverlay = null;
+      if (ol) {
+        ol.remove();
+      }
+    },
+
+    start_video: function (vidSource) {
+      if (!_video) {
+        return;
+      }
+
+      Recv.hide_play_overlay();
+      Recv.stop_video(); // clean up
+
+      const isCamera = (typeof MediaStream !== 'undefined') && (vidSource instanceof MediaStream);
+      let label = "loading camera...";
+      if (isCamera && 'srcObject' in _video) {
+        _video.srcObject = vidSource;
+      } else {
+        // file or object url (for e.g. mp4)
+        _video.srcObject = null;
+        _video.src = typeof vidSource === 'string' ? vidSource : URL.createObjectURL(vidSource);
+        _video.load();
+
+        label = "loading video...";
+        if ('name' in vidSource) {
+          label = vidSource.name;
+        }
+      }
+
+      _video.muted = true;
+      _video.playsInline = true;
+      _video.setAttribute("playsinline", "");
+
+      const tryPlay = () => {
+        _video.play().then(() => {
+          _requestVideoFrame(Recv.on_frame);
+        }).catch(err => {
+          console.error("Video play blocked or failed:", err);
+          Recv.set_error("Playback failed: " + err);
+
+          Recv.show_play_overlay(label, tryPlay, () => {
+            // abort
+            Recv.stop_video();
+            if (!isCamera) {
+              Recv.init_camera(_video); // back to the live camera
+            }
+          });
+        });
+      };
+
+      tryPlay();
+    },
+
+    stop_video: function () {
+      _cancelVideoFrameCallback();
       if (_video && _video.srcObject) {
         _video.srcObject.getTracks().forEach(track => track.stop());
         _video.srcObject = null;
+      }
+      if (_video && _video.src) {
+        URL.revokeObjectURL(_video.src);
+        _video.src = "";
       }
 
       if (_watchmanTimer > 0) {
@@ -321,14 +413,8 @@ var Recv = function () {
         return;
       }
 
-      // ios only for now, since desktop behavior is weird
-      if (!isIOS()) {
-        _watchmanTimer = -1; // lol
-        return;
-      }
-
       // periodically make sure the camera capture is running
-      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1000);
+      _watchmanTimer = setInterval(Recv.restart_paused_camera, 1500);
     },
 
     restart_paused_camera: function () {
@@ -345,7 +431,7 @@ var Recv = function () {
       // if not, we're stuck?
       clearInterval(_watchmanTimer); // our work is done, for now
       _watchmanTimer = 0;
-      Recv.init_video(_video);
+      Recv.init_camera(_video);
     },
 
     download_bytes: function (buff, name) {
@@ -462,7 +548,7 @@ var Recv = function () {
 
       const modeVals = [66, 68, 67, 4];
 
-      if (_framesInFlight > 20) {
+      if (_framesInFlight > 30) {
         console.log("stalling, worker queues are full");
         _requestVideoFrame(Recv.on_frame);
         return;
@@ -607,8 +693,22 @@ var Recv = function () {
       if (pause === undefined) {
         pause = true;
       }
-      document.getElementById("nav-button").blur();
-      document.getElementById("nav-content").blur();
+      if (document.activeElement && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+    },
+
+    clickFileInput: function () {
+      document.getElementById("video_input").click();
+    },
+
+    fileInput: function (ev) {
+      console.log("video input: " + ev);
+      var file = document.getElementById('video_input').files[0];
+      if (file) {
+        Recv.start_video(file);
+      }
+      Recv.blurNav(false);
     },
 
     setMode: function (modeVal) {
