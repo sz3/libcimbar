@@ -45,7 +45,8 @@ var Sink = function () {
       }
 
       if (res > 0) {
-        const res32t = Number(res & 0xFFFFFFFFn); // truncate BigInt res (int64_t) to a uint32_t
+        // truncate BigInt res (int64_t) to a uint32_t
+        const res32t = (typeof res === 'bigint') ? Number(res & BigInt(0xFFFFFFFF)) : (res >>> 0);
         Sink.reassemble_file(res32t);
       }
     },
@@ -230,8 +231,10 @@ var Recv = function () {
 
     init_ww: function (num_workers) {
       if (!num_workers) {
-        const desiredWorkers = (navigator.hardwareConcurrency / 2) + 1;
-        num_workers = Math.max(3, Math.min(desiredWorkers, 7)); // clamp[3,7]
+        const hcon = (typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number')
+          ? navigator.hardwareConcurrency : 0;
+        const desiredWorkers = (hcon / 2) + 1;
+        num_workers = Math.max(3, Math.min(desiredWorkers, 6)); // clamp[3,6]
       }
 
       // clean up _workers if exists
