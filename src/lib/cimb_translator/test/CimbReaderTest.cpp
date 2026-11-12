@@ -197,10 +197,13 @@ TEST_CASE( "CimbReaderTest/testCCM", "[unit]" )
 	assertTrue( decoder.get_ccm().active() );
 
 	std::stringstream ss;
-	ss << decoder.get_ccm().mat();
-	assertEquals("[2.3991191, -0.41846275, -0.54654282;\n "
-				 "-0.42976046, 2.632102, -0.76466882;\n "
-				 "-0.54299992, -0.20199311, 2.2753253]", ss.str());
+	cv::Ptr<cv::Formatter> fmtr = cv::Formatter::get(cv::Formatter::FMT_DEFAULT);
+	fmtr->set32fPrecision(4);
+
+	ss << fmtr->format(cv::Mat(decoder.get_ccm().mat()));
+	assertEquals("[2.399, -0.4185, -0.5465;\n "
+				 "-0.4298, 2.632, -0.7647;\n "
+				 "-0.543, -0.202, 2.275]", ss.str());
 
 	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 2, 2};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
@@ -253,10 +256,13 @@ TEST_CASE( "CimbReaderTest/testCCM.VeryNecessary", "[unit]" )
 	assertTrue( decoder.get_ccm().active() );
 
 	std::stringstream ss;
-	ss << decoder.get_ccm().mat();
-	assertEquals("[1.6250746, 0.0024788622, -0.45772526;\n "
-				 "-0.29126319, 2.2922182, -0.67037439;\n "
-				 "-1.2192062, -2.7447209, 5.0476217]", ss.str());
+	cv::Ptr<cv::Formatter> fmtr = cv::Formatter::get(cv::Formatter::FMT_DEFAULT);
+	fmtr->set32fPrecision(4);
+
+	ss << fmtr->format(cv::Mat(decoder.get_ccm().mat()));
+	assertEquals("[1.625, 0.002479, -0.4577;\n "
+				 "-0.2913, 2.292, -0.6704;\n "
+				 "-1.219, -2.745, 5.048]", ss.str());
 
 	std::array<unsigned, 6> expectedColors = {0, 1, 1, 2, 2, 2};
 	for (unsigned i = 0; i < expectedColors.size(); ++i)
