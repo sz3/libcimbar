@@ -5,6 +5,7 @@
 
 #include "zstd/zstd.h"
 #include <array>
+#include <cstdint>
 #include <sstream>
 #include <vector>
 
@@ -42,6 +43,18 @@ public:
 				{
 					STREAM::write(_outBuff.data(), output.pos);
 					_inBuff = std::string_view(_inBuff.data() + input.pos, _inBuff.size() - input.pos);
+
+					_dstByteCount += output.pos;
+					_srcByteCount += input.pos;
+
+					//std::cerr << "src bytes " << _srcByteCount << ", dst bytes " << _dstByteCount << std::endl;
+					// if _byteCount too large, fail?
+					if (_dstByteCount > 50'000'000 and (_srcByteCount << 8) < _dstByteCount) // *256
+					{
+						_lastError << " detected suspicious compression ratio. Is someone up to no good?";
+						_isError = true;
+						return false;
+					}
 					return true;
 				}
 			}
@@ -111,6 +124,9 @@ protected:
 
 	bool _isError = false;
 	std::stringstream _lastError;
+
+	uint64_t _srcByteCount = 0;
+	uint64_t _dstByteCount = 0;
 };
 
 }

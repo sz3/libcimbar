@@ -27,9 +27,6 @@ jobs:
           env: CXX="clang++" CC="clang"
           extra-packages: "clang"
 
-        - name: "windows msvc"
-          os: windows-latest
-
     steps:
     - uses: actions/checkout@v4
       with:

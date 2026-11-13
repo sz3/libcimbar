@@ -17,9 +17,12 @@ TEST_CASE( "color_correctionTest/testTransform", "[unit]" )
 
 	{
 		std::stringstream ss;
-		ss << mat;
-		assertEquals( "[1.0655777, 0.2109226, -0.013239831;\n"
-					  " 0.023168325, 0.98723376, -0.0046780901;\n"
+		cv::Ptr<cv::Formatter> fmtr = cv::Formatter::get(cv::Formatter::FMT_DEFAULT);
+		fmtr->set32fPrecision(5);
+
+		ss << fmtr->format(cv::Mat(mat));
+		assertEquals( "[1.0656, 0.21092, -0.01324;\n"
+					  " 0.023168, 0.98723, -0.0046781;\n"
 					  " 0, 0, 1]", ss.str() );
 	}
 
@@ -48,10 +51,13 @@ TEST_CASE( "color_correctionTest/testComputeMoorePenrose", "[unit]" )
 	cv::Matx<float, 3, 3> mat = color_correction::get_moore_penrose_lsm(actual, desired);
 	{
 		std::stringstream ss;
-		ss << mat;
-		assertEquals( "[1.5223049, -0.10023587, -0.19198087;\n"
-					  " -0.20533442, 1.6441474, -0.20533434;\n"
-					  " -0.19198078, -0.10023584, 1.5223049]", ss.str() );
+		cv::Ptr<cv::Formatter> fmtr = cv::Formatter::get(cv::Formatter::FMT_DEFAULT);
+		fmtr->set32fPrecision(5);
+
+		ss << fmtr->format(cv::Mat(mat));
+		assertEquals( "[1.5223, -0.10024, -0.19198;\n"
+					  " -0.20533, 1.6441, -0.20533;\n"
+					  " -0.19198, -0.10024, 1.5223]", ss.str() );
 	}
 }
 
@@ -74,9 +80,12 @@ TEST_CASE( "color_correctionTest/testComputeMoorePenrose.2", "[unit]" )
 	cv::Matx<float, 3, 3> mat = color_correction::get_moore_penrose_lsm(actual, desired);
 	{
 		std::stringstream ss;
-		ss << mat;
-		assertEquals( "[2.0261116, -0.21691091, -0.19806443;\n"
-					  " -0.43822661, 2.4562523, -0.41700464;\n"
-					  " -0.55769891, -1.1443435, 3.4819376]", ss.str() );
+		cv::Ptr<cv::Formatter> fmtr = cv::Formatter::get(cv::Formatter::FMT_DEFAULT);
+		fmtr->set32fPrecision(5);
+
+		ss << fmtr->format(cv::Mat(mat));
+		assertEquals( "[2.0261, -0.21691, -0.19806;\n"
+					  " -0.43823, 2.4563, -0.417;\n"
+					  " -0.5577, -1.1443, 3.4819]", ss.str() );
 	}
 }
